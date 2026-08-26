@@ -129,9 +129,14 @@ worktree at `87da5be` proves the three cleanups moved no digest value.
 Verdict: `PHASE_1_FINAL_CLOSURE_WRITER_STATUS: COMPLETE`. See
 `PHASE_1_FINAL_CLOSURE_IMPLEMENTATION_REPORT_2026-08-26.md`.
 
-**Independent Codex review per
-`PHASE_1_CODEX_FINAL_CLOSURE_REVIEW_PLAN_2026-08-26.md` remains mandatory;
-only a `PHASE_1_CLOSED` verdict ends Phase 1.**
+**Independent Codex final closure review completed** at reviewed HEAD
+`20a1c66` per `PHASE_1_CODEX_FINAL_CLOSURE_REVIEW_PLAN_2026-08-26.md`:
+verdict **`PHASE_1_CLOSED`**, no MAJOR or BLOCKER finding remaining, one
+MINOR documentation note (AT-H baseline prediction-summary inconsistency,
+disclosed by the writer). See
+`SPARK_PHASE_1_CODEX_FINAL_CLOSURE_REVIEW_2026-08-26.md`.
+
+**Phase 1 is CLOSED.**
 
 Re-foundation v2 writer: Claude Code (Opus, HIGH effort).
 Architecture/process review: Fable.
@@ -141,5 +146,25 @@ Overnight closure architecture: Fable.
 Final closure implementation writer: Claude Code (Opus, HIGH effort).
 
 ## Phase 2
+
+**ARCHITECTURE FROZEN; IMPLEMENTATION NOT AUTHORIZED.**
+
+The operator-directed Phase-2 architecture-only gate completed on the
+closed Phase-1 lineage: the readiness blueprint was reconciled against the
+actual tree seam-by-seam with no discrepancy, all seven open architecture
+questions are resolved, and every mandated Phase-2 semantics —
+stable-snapshot evaluation, declarative operation semantics, EffectBatch
+identity/ordering/conflict/atomicity, delayed-obligation identity and
+artifact binding, occurrence addressing, cycle/fan-out/depth/backpressure,
+decay/recovery, aggregation/threshold emission, and the retained-store
+commitment law with mandatory AT-G-style falsification — is frozen. No
+production Rust was written and no frozen Phase-0/Phase-1 contract was
+reopened. See
+`phase2/SPARK_PHASE_2_FABLE_ARCHITECTURE_FREEZE_2026-08-26.md` and
+`phase2/SPARK_PHASE_2_ACCEPTANCE_TEST_MATRIX_2026-08-26.md`.
+
+Phase-2 *implementation* remains a separate operator authorization.
+
+## Phase 3
 
 **NOT AUTHORIZED.**
