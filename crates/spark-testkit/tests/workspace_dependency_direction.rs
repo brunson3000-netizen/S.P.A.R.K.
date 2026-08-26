@@ -1,35 +1,37 @@
 //! Phase-1 test corpus item 20: an automated check of ADR-0001's
 //! workspace dependency direction policy.
 //!
-//! ADR-0001 requires the dependency graph to be "enforced mechanically
-//! in CI rather than inferred from a diagram." This test parses every
-//! workspace member's `Cargo.toml`, extracts the path-dependency crate
-//! names listed under `[dependencies]` (deliberately ignoring
-//! `[dev-dependencies]`, since a dev-only cycle such as `spark-core`'s
-//! dev-dependency on `spark-testkit` for its own tests is explicitly
-//! allowed and does not affect the crate's normal build dependency
-//! direction), and asserts each crate's normal dependencies are a subset
-//! of what ADR-0001 authorizes for it.
-//!
-//! This intentionally does not pull in a TOML-parsing crate: the
-//! workspace's `Cargo.toml` files are simple enough that a small,
-//! explicit line scan is more legible here than a new dependency, and it
-//! keeps this check exercisable with zero additional crates.
+//! Corrected per the Phase-1 correction brief (m-01): the writer pass's
+//! version of this test parsed only literal `[dependencies]` entries in
+//! each crate's `Cargo.toml`, so it could not see `spark-core`'s unused
+//! `dev-dependency` on `spark-testkit` — a real edge `cargo metadata`
+//! reports but a hand-written TOML line-scanner, deliberately restricted
+//! to one section, cannot. That unused edge has since been removed from
+//! `crates/spark-core/Cargo.toml`; this test now invokes and parses
+//! `cargo metadata --format-version 1` (the same command the correction
+//! brief's completion gate runs) so it inspects the actual resolved
+//! dependency graph — normal, dev, build, and target-specific edges alike
+//! — instead of one hand-scanned section, and would catch a regression of
+//! that edge (or any other unauthorized cross-crate edge, of any kind)
+//! immediately.
 
+use serde_json::Value;
 use std::collections::{BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
+use std::process::Command;
 
-/// The ADR-0001-authorized set of normal (non-dev) path-dependencies for
-/// each Phase-1 crate. Adding a new workspace member requires adding its
-/// policy here, which is the point: an unrecognized crate fails loudly
-/// instead of silently passing.
-fn allowed_normal_dependencies() -> HashMap<&'static str, BTreeSet<&'static str>> {
+/// The ADR-0001-authorized set of path-dependencies for each Phase-1
+/// crate, covering every dependency kind (normal, dev, build,
+/// target-specific) alike. Adding a new workspace member requires adding
+/// its policy here, which is the point: an unrecognized crate fails
+/// loudly instead of silently passing.
+fn allowed_dependencies() -> HashMap<&'static str, BTreeSet<&'static str>> {
     let mut allowed = HashMap::new();
     // spark-core: canonical kernel. May not depend on any other
-    // S.P.A.R.K. product-layer crate (ADR-0001 invariant 1).
+    // S.P.A.R.K. product-layer crate, in any dependency kind
+    // (ADR-0001 invariant 1).
     allowed.insert("spark-core", BTreeSet::new());
-    // spark-profile: may depend on spark-core only (ADR-0001 "spark-profile
-    // may depend on spark-core").
+    // spark-profile: may depend on spark-core only.
     allowed.insert("spark-profile", BTreeSet::from(["spark-core"]));
     // spark-testkit: fixtures/scenario harness; consumes spark-core and
     // spark-profile canonical types.
@@ -50,106 +52,108 @@ fn workspace_root() -> PathBuf {
         .to_path_buf()
 }
 
-/// Extracts `(crate_name -> path_dependency_crate_names)` for the
-/// `[dependencies]` section only.
-fn parse_normal_path_dependencies(cargo_toml: &str) -> BTreeSet<String> {
-    let mut deps = BTreeSet::new();
-    let mut in_dependencies_section = false;
-
-    for raw_line in cargo_toml.lines() {
-        let line = raw_line.trim();
-        if line.starts_with('[') {
-            in_dependencies_section = line == "[dependencies]";
-            continue;
-        }
-        if !in_dependencies_section || line.is_empty() || line.starts_with('#') {
-            continue;
-        }
-        // Lines look like: `spark-core = { path = "../spark-core" }`
-        if let Some((name, rest)) = line.split_once('=') {
-            if rest.contains("path") && rest.contains("../") {
-                deps.insert(name.trim().to_string());
-            }
-        }
-    }
-
-    deps
+/// Runs `cargo metadata --format-version 1` and parses it as JSON.
+fn cargo_metadata() -> Value {
+    let output = Command::new("cargo")
+        .args(["metadata", "--format-version", "1"])
+        .current_dir(workspace_root())
+        .output()
+        .expect("failed to invoke `cargo metadata`");
+    assert!(
+        output.status.success(),
+        "cargo metadata failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    serde_json::from_slice(&output.stdout).expect("cargo metadata did not produce valid JSON")
 }
 
-fn crate_name_from_cargo_toml(cargo_toml: &str) -> String {
-    let mut in_package_section = false;
-    for raw_line in cargo_toml.lines() {
-        let line = raw_line.trim();
-        if line.starts_with('[') {
-            in_package_section = line == "[package]";
+/// `(workspace-member-crate-name -> the set of spark-* crate names it
+/// depends on, across every dependency kind)`, derived from
+/// `resolve.nodes`, which reports the actual resolved dependency graph
+/// (not merely what one `[dependencies]`-style section declares).
+fn resolved_spark_dependencies(metadata: &Value) -> HashMap<String, BTreeSet<String>> {
+    let packages = metadata["packages"]
+        .as_array()
+        .expect("metadata.packages is an array");
+    let workspace_members: BTreeSet<&str> = metadata["workspace_members"]
+        .as_array()
+        .expect("metadata.workspace_members is an array")
+        .iter()
+        .map(|v| v.as_str().expect("workspace_members entries are strings"))
+        .collect();
+
+    let mut id_to_name: HashMap<&str, &str> = HashMap::new();
+    for package in packages {
+        let id = package["id"].as_str().expect("package.id is a string");
+        let name = package["name"].as_str().expect("package.name is a string");
+        id_to_name.insert(id, name);
+    }
+
+    let known_spark_crates: BTreeSet<&str> = allowed_dependencies().keys().copied().collect();
+
+    let nodes = metadata["resolve"]["nodes"]
+        .as_array()
+        .expect("metadata.resolve.nodes is an array");
+
+    let mut result: HashMap<String, BTreeSet<String>> = HashMap::new();
+    for node in nodes {
+        let node_id = node["id"].as_str().expect("node.id is a string");
+        if !workspace_members.contains(node_id) {
             continue;
         }
-        if in_package_section {
-            if let Some(rest) = line.strip_prefix("name") {
-                let rest = rest.trim_start();
-                if let Some(rest) = rest.strip_prefix('=') {
-                    return rest.trim().trim_matches('"').to_string();
-                }
+        let node_name = id_to_name[node_id].to_string();
+
+        let deps = node["deps"].as_array().expect("node.deps is an array");
+        let mut spark_deps = BTreeSet::new();
+        for dep in deps {
+            let dep_name = dep["name"].as_str().expect("dep.name is a string");
+            if known_spark_crates.contains(dep_name) && dep_name != node_name {
+                spark_deps.insert(dep_name.to_string());
             }
         }
+        result.insert(node_name, spark_deps);
     }
-    panic!("could not find [package] name in Cargo.toml:\n{cargo_toml}");
+    result
 }
 
 #[test]
-fn every_crate_normal_dependencies_respect_adr_0001_direction() {
-    let root = workspace_root();
-    let crates_dir = root.join("crates");
-    let allowed = allowed_normal_dependencies();
+fn every_crate_resolved_dependencies_respect_adr_0001_direction() {
+    let metadata = cargo_metadata();
+    let resolved = resolved_spark_dependencies(&metadata);
+    let allowed = allowed_dependencies();
 
-    let mut checked = 0usize;
-    let entries = std::fs::read_dir(&crates_dir)
-        .unwrap_or_else(|e| panic!("reading {}: {e}", crates_dir.display()));
-
-    for entry in entries {
-        let entry = entry.expect("dir entry");
-        let cargo_toml_path = entry.path().join("Cargo.toml");
-        if !cargo_toml_path.is_file() {
-            continue;
-        }
-        let content = std::fs::read_to_string(&cargo_toml_path)
-            .unwrap_or_else(|e| panic!("reading {}: {e}", cargo_toml_path.display()));
-
-        let crate_name = crate_name_from_cargo_toml(&content);
-        let normal_deps = parse_normal_path_dependencies(&content);
-
-        let allowed_for_crate = allowed.get(crate_name.as_str()).unwrap_or_else(|| {
-            panic!(
-                "crate '{crate_name}' has no ADR-0001 dependency-direction policy recorded in \
-                 this test; add one in `allowed_normal_dependencies` before merging"
-            )
+    for (crate_name, allowed_for_crate) in &allowed {
+        let actual = resolved.get(*crate_name).unwrap_or_else(|| {
+            panic!("workspace crate '{crate_name}' was not found in `cargo metadata` output")
         });
-
-        for dep in &normal_deps {
+        for dep in actual {
             assert!(
                 allowed_for_crate.contains(dep.as_str()),
-                "crate '{crate_name}' declares a normal dependency on '{dep}', which ADR-0001 \
-                 does not authorize (allowed: {allowed_for_crate:?})"
+                "crate '{crate_name}' resolves a dependency on '{dep}' (of some kind: normal, \
+                 dev, build, or target-specific), which ADR-0001 does not authorize \
+                 (allowed: {allowed_for_crate:?}, actual: {actual:?})"
             );
         }
-        checked += 1;
     }
 
     assert_eq!(
-        checked, 3,
+        resolved.len(),
+        3,
         "expected to check exactly the 3 Phase-1 workspace crates (spark-core, spark-profile, \
          spark-testkit); this count should be updated deliberately if the workspace grows"
     );
 }
 
 #[test]
-fn spark_core_declares_no_normal_dependency_on_any_product_layer_crate() {
-    let root = workspace_root();
-    let content = std::fs::read_to_string(root.join("crates/spark-core/Cargo.toml")).unwrap();
-    let normal_deps = parse_normal_path_dependencies(&content);
+fn spark_core_resolves_zero_dependencies_on_any_product_layer_crate() {
+    let metadata = cargo_metadata();
+    let resolved = resolved_spark_dependencies(&metadata);
+    let spark_core_deps = resolved
+        .get("spark-core")
+        .expect("spark-core present in resolved graph");
     assert!(
-        normal_deps.is_empty(),
-        "spark-core must have zero normal path-dependencies on other S.P.A.R.K. crates \
-         (ADR-0001 invariant 1); found: {normal_deps:?}"
+        spark_core_deps.is_empty(),
+        "spark-core must resolve zero dependencies (of any kind) on other S.P.A.R.K. crates \
+         (ADR-0001 invariant 1); found: {spark_core_deps:?}"
     );
 }

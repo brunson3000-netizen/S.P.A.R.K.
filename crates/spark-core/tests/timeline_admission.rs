@@ -1,14 +1,16 @@
 //! Phase-1 minimum test corpus items 1-10
-//! (`engineering/phase1/PHASE_1_IMPLEMENTATION_BRIEF.md` §5), falsifying
-//! the canonical timeline ingress against ADR-0003's reversed-delivery,
-//! stale-token, idempotency/poisoning, and fence-validation invariants.
+//! (`engineering/phase1/PHASE_1_IMPLEMENTATION_BRIEF.md` §5), plus the
+//! full-envelope-identity, source-sequence, and epoch-authorization
+//! falsification tests required by `PHASE_1_CORRECTION_BRIEF_v0.1.md` §2
+//! (B-01).
 
 use spark_core::clock::LogicalTime;
 use spark_core::hash::{hash_bytes, Digest};
 use spark_core::id::{CommandId, FenceId, ProfileId, SourceId};
 use spark_core::timeline::{
-    compute_ordered_stream_digest, CommandEnvelope, FenceError, Ordinal, SlotStatus, StageError,
-    StageOutcome, TimelineEpoch, TimelineFence, TimelineIngress,
+    compute_ordered_stream_digest, semantic_envelope_hash, CommandEnvelope, EpochResetError,
+    FenceError, Ordinal, SlotStatus, StageError, StageOutcome, TimelineEpoch, TimelineFence,
+    TimelineIngress,
 };
 
 fn profile() -> ProfileId {
@@ -34,6 +36,9 @@ fn payload_hash(tag: &str) -> Digest {
 /// Builds an envelope for `ordinal` using `ingress`'s *current* admission
 /// window (i.e. a freshly-valid token), tagging the command/payload
 /// identity so distinct calls can be made to collide deliberately.
+/// `source_id`/`source_sequence` default to the primary sequencer identity
+/// and the ordinal; callers that need to vary them build a
+/// [`CommandEnvelope`] directly.
 fn envelope_now(
     ingress: &TimelineIngress,
     ordinal: u64,
@@ -64,9 +69,13 @@ fn fence_for(
     start: u64,
     end: u64,
     fence_tag: &str,
-    ordered: &[(Ordinal, CommandId, Digest)],
+    ordered_envelopes: &[CommandEnvelope],
 ) -> TimelineFence {
     let window = ingress.current_admission_window();
+    let ordered: Vec<(Ordinal, Digest)> = ordered_envelopes
+        .iter()
+        .map(|e| (e.input_ordinal, semantic_envelope_hash(e)))
+        .collect();
     TimelineFence {
         profile_id: window.profile_id,
         timeline_epoch: window.timeline_epoch,
@@ -74,7 +83,7 @@ fn fence_for(
         start_ordinal: Ordinal(start),
         end_ordinal: Ordinal(end),
         previous_fence_hash: window.last_finalized_fence_hash,
-        ordered_stream_digest: compute_ordered_stream_digest(ordered),
+        ordered_stream_digest: compute_ordered_stream_digest(&ordered),
     }
 }
 
@@ -121,27 +130,27 @@ fn reversed_delivery_within_capacity_two_window_is_order_independent() {
     assert_eq!(out_n1_second, out_n1_first);
     assert_eq!(out_n2_second, out_n2_first);
 
-    // The same fence through n+1 must succeed identically in both.
-    let ordered = vec![
-        (
-            Ordinal(0),
-            e_n_first.command_id.clone(),
-            e_n_first.canonical_payload_hash.clone(),
-        ),
-        (
-            Ordinal(1),
-            e_n1_first.command_id.clone(),
-            e_n1_first.canonical_payload_hash.clone(),
-        ),
-    ];
-    let fence_a = fence_for(&reversed, 0, 1, "fence.a", &ordered);
-    let fence_b = fence_for(&forward, 0, 1, "fence.b", &ordered);
+    // The same fence (same fence_id — an arbitrary submitter-chosen label,
+    // not derived from staged content) through n+1 must succeed
+    // identically in both, producing byte-identical canonical state.
+    let fence_a = fence_for(
+        &reversed,
+        0,
+        1,
+        "fence.shared",
+        &[e_n_first.clone(), e_n1_first.clone()],
+    );
+    let fence_b = fence_for(&forward, 0, 1, "fence.shared", &[e_n_first, e_n1_first]);
 
     reversed.submit_fence(&sequencer(), &fence_a).unwrap();
     forward.submit_fence(&sequencer(), &fence_b).unwrap();
 
     assert_eq!(reversed.frontier_ordinal(), forward.frontier_ordinal());
     assert_eq!(reversed.finalized_commands(), forward.finalized_commands());
+    assert_eq!(
+        reversed.canonical_state_digest(),
+        forward.canonical_state_digest()
+    );
 }
 
 /// Item 2: a stale (pre-frontier-advance) token for `n+2` is rejected
@@ -159,19 +168,7 @@ fn stale_token_after_frontier_advance_is_rejected_then_succeeds_with_fresh_token
     // Capture the (soon to be stale) window token before finalizing.
     let stale_window = ingress.current_admission_window();
 
-    let ordered = vec![
-        (
-            Ordinal(0),
-            e0.command_id.clone(),
-            e0.canonical_payload_hash.clone(),
-        ),
-        (
-            Ordinal(1),
-            e1.command_id.clone(),
-            e1.canonical_payload_hash.clone(),
-        ),
-    ];
-    let fence = fence_for(&ingress, 0, 1, "fence.1", &ordered);
+    let fence = fence_for(&ingress, 0, 1, "fence.1", &[e0.clone(), e1.clone()]);
     ingress.submit_fence(&sequencer(), &fence).unwrap();
     assert_eq!(ingress.frontier_ordinal(), Ordinal(2));
 
@@ -199,8 +196,8 @@ fn stale_token_after_frontier_advance_is_rejected_then_succeeds_with_fresh_token
     assert_eq!(retry_outcome, StageOutcome::Staged);
 }
 
-/// Item 3: an exact duplicate `(command_id, payload)` for an already
-/// staged ordinal is idempotent.
+/// Item 3: an exact duplicate (byte-identical semantic envelope) for an
+/// already staged ordinal is idempotent.
 #[test]
 fn exact_duplicate_is_idempotent() {
     let mut ingress = fresh_ingress(2);
@@ -249,12 +246,7 @@ fn missing_ordinal_blocks_fence_atomically() {
     ingress.stage(&sequencer(), &e0).unwrap();
     // Ordinal 1 is deliberately left unstaged.
 
-    let ordered = vec![(
-        Ordinal(0),
-        e0.command_id.clone(),
-        e0.canonical_payload_hash.clone(),
-    )];
-    let fence = fence_for(&ingress, 0, 1, "fence.missing", &ordered);
+    let fence = fence_for(&ingress, 0, 1, "fence.missing", std::slice::from_ref(&e0));
     let result = ingress.submit_fence(&sequencer(), &fence);
 
     assert_eq!(result, Err(FenceError::RangeNotFullyStaged));
@@ -297,18 +289,10 @@ fn wrong_previous_fence_hash_rejects() {
     let e1 = envelope_now(&ingress, 1, "cmd.1", "payload.1");
     ingress.stage(&sequencer(), &e1).unwrap();
 
-    let ordered = vec![
-        (
-            Ordinal(0),
-            e0.command_id.clone(),
-            e0.canonical_payload_hash.clone(),
-        ),
-        (
-            Ordinal(1),
-            e1.command_id.clone(),
-            e1.canonical_payload_hash.clone(),
-        ),
-    ];
+    let ordered: Vec<(Ordinal, Digest)> = [&e0, &e1]
+        .iter()
+        .map(|e| (e.input_ordinal, semantic_envelope_hash(e)))
+        .collect();
     let window = ingress.current_admission_window();
     let fence = TimelineFence {
         profile_id: window.profile_id,
@@ -336,32 +320,22 @@ fn non_sequencer_stage_and_fence_are_rejected() {
     let e1 = envelope_now(&ingress, 1, "cmd.1", "payload.1");
     ingress.stage(&sequencer(), &e1).unwrap();
 
-    let ordered = vec![
-        (
-            Ordinal(0),
-            e0.command_id.clone(),
-            e0.canonical_payload_hash.clone(),
-        ),
-        (
-            Ordinal(1),
-            e1.command_id.clone(),
-            e1.canonical_payload_hash.clone(),
-        ),
-    ];
-    let fence = fence_for(&ingress, 0, 1, "fence.impostor", &ordered);
+    let fence = fence_for(&ingress, 0, 1, "fence.impostor", &[e0, e1]);
     let fence_result = ingress.submit_fence(&impostor_sequencer(), &fence);
     assert_eq!(fence_result, Err(FenceError::NotActiveSequencer));
 }
 
-/// Item 9: after an explicit epoch handoff, the old epoch's sequencer can
-/// no longer stage or fence.
+/// Item 9: after an explicit, authorized epoch handoff, the old epoch's
+/// sequencer can no longer stage or fence.
 #[test]
 fn old_epoch_sequencer_rejects_after_handoff() {
     let mut ingress = fresh_ingress(2);
     let old_sequencer = sequencer();
     let new_sequencer = SourceId::new("sequencer.successor").unwrap();
 
-    ingress.reset_epoch(TimelineEpoch(2), new_sequencer.clone());
+    ingress
+        .reset_epoch(&old_sequencer, TimelineEpoch(2), new_sequencer.clone())
+        .unwrap();
 
     // An envelope built under the old epoch (old sequencer, old epoch
     // value) is rejected: the epoch no longer matches.
@@ -381,6 +355,8 @@ fn old_epoch_sequencer_rejects_after_handoff() {
     assert_eq!(result, Err(StageError::WrongTimelineEpoch));
 
     // The new sequencer, under the new epoch, works normally.
+    // `envelope_now` reads the *current* admission window, which already
+    // reflects the post-reset epoch/token.
     let fresh = envelope_now(&ingress, 0, "cmd.fresh", "payload.fresh");
     assert_eq!(
         ingress.stage(&new_sequencer, &fresh).unwrap(),
@@ -405,19 +381,7 @@ fn partial_prefix_fence_slides_window_and_preserves_staged_tail() {
 
     // Finalize only the prefix [0,1]; ordinal 2 remains staged and
     // un-finalized.
-    let ordered = vec![
-        (
-            Ordinal(0),
-            e0.command_id.clone(),
-            e0.canonical_payload_hash.clone(),
-        ),
-        (
-            Ordinal(1),
-            e1.command_id.clone(),
-            e1.canonical_payload_hash.clone(),
-        ),
-    ];
-    let fence = fence_for(&ingress, 0, 1, "fence.prefix", &ordered);
+    let fence = fence_for(&ingress, 0, 1, "fence.prefix", &[e0.clone(), e1.clone()]);
     ingress.submit_fence(&sequencer(), &fence).unwrap();
 
     assert_eq!(ingress.frontier_ordinal(), Ordinal(2));
@@ -433,12 +397,237 @@ fn partial_prefix_fence_slides_window_and_preserves_staged_tail() {
     );
 
     // The retained ordinal-2 staging can still be finalized.
-    let ordered_tail = vec![(
-        Ordinal(2),
-        e2.command_id.clone(),
-        e2.canonical_payload_hash.clone(),
-    )];
-    let fence2 = fence_for(&ingress, 2, 2, "fence.tail", &ordered_tail);
+    let fence2 = fence_for(&ingress, 2, 2, "fence.tail", std::slice::from_ref(&e2));
     ingress.submit_fence(&sequencer(), &fence2).unwrap();
     assert_eq!(ingress.frontier_ordinal(), Ordinal(3));
+}
+
+// ---------------------------------------------------------------------
+// B-01 correction: full semantic-envelope identity falsification tests.
+// ---------------------------------------------------------------------
+
+/// A same-ordinal restage that changes `effective_time` (holding
+/// command/payload fixed) must poison, not idempotently match.
+#[test]
+fn changed_effective_time_is_not_idempotent() {
+    let mut ingress = fresh_ingress(2);
+    let e0 = envelope_now(&ingress, 0, "cmd.a", "payload.a");
+    ingress.stage(&sequencer(), &e0).unwrap();
+
+    let mut e0_retimed = envelope_now(&ingress, 0, "cmd.a", "payload.a");
+    e0_retimed.effective_time = LogicalTime(999);
+    let outcome = ingress.stage(&sequencer(), &e0_retimed).unwrap();
+    assert_eq!(outcome, StageOutcome::Poisoned);
+}
+
+/// A same-ordinal restage that changes `source_id` must poison.
+#[test]
+fn changed_source_id_is_not_idempotent() {
+    let mut ingress = fresh_ingress(2);
+    let e0 = envelope_now(&ingress, 0, "cmd.a", "payload.a");
+    ingress.stage(&sequencer(), &e0).unwrap();
+
+    let mut e0_diff_source = envelope_now(&ingress, 0, "cmd.a", "payload.a");
+    e0_diff_source.source_id = SourceId::new("source.beta").unwrap();
+    let outcome = ingress.stage(&sequencer(), &e0_diff_source).unwrap();
+    assert_eq!(outcome, StageOutcome::Poisoned);
+}
+
+/// A same-ordinal restage that changes `source_sequence` must poison.
+#[test]
+fn changed_source_sequence_is_not_idempotent() {
+    let mut ingress = fresh_ingress(2);
+    let e0 = envelope_now(&ingress, 0, "cmd.a", "payload.a");
+    ingress.stage(&sequencer(), &e0).unwrap();
+
+    let mut e0_diff_seq = envelope_now(&ingress, 0, "cmd.a", "payload.a");
+    e0_diff_seq.source_sequence = 999;
+    let outcome = ingress.stage(&sequencer(), &e0_diff_seq).unwrap();
+    assert_eq!(outcome, StageOutcome::Poisoned);
+}
+
+/// A same-ordinal restage that changes `command_kind` must poison.
+#[test]
+fn changed_command_kind_is_not_idempotent() {
+    let mut ingress = fresh_ingress(2);
+    let e0 = envelope_now(&ingress, 0, "cmd.a", "payload.a");
+    ingress.stage(&sequencer(), &e0).unwrap();
+
+    let mut e0_diff_kind = envelope_now(&ingress, 0, "cmd.a", "payload.a");
+    e0_diff_kind.command_kind = "different.kind".to_string();
+    let outcome = ingress.stage(&sequencer(), &e0_diff_kind).unwrap();
+    assert_eq!(outcome, StageOutcome::Poisoned);
+}
+
+/// Reusing a `command_id` for a semantically different envelope at a
+/// different (fresh) ordinal is a rejected conflict, not a fresh stage.
+#[test]
+fn reused_command_id_for_different_envelope_at_different_ordinal_conflicts() {
+    let mut ingress = fresh_ingress(3);
+    let e0 = envelope_now(&ingress, 0, "cmd.shared", "payload.first");
+    ingress.stage(&sequencer(), &e0).unwrap();
+
+    let mut e1 = envelope_now(&ingress, 1, "cmd.shared", "payload.second");
+    e1.command_id = CommandId::new("cmd.shared").unwrap();
+    let result = ingress.stage(&sequencer(), &e1);
+    assert_eq!(
+        result,
+        Err(StageError::CommandIdentityConflict {
+            command_id: CommandId::new("cmd.shared").unwrap()
+        })
+    );
+    // The conflicting attempt touched no slot.
+    assert_eq!(ingress.slot_status(Ordinal(1)), SlotStatus::Empty);
+}
+
+/// Reusing `(source_id, source_sequence)` for a different command at a
+/// different (fresh) ordinal is a rejected conflict.
+#[test]
+fn reused_source_sequence_for_different_command_conflicts() {
+    let mut ingress = fresh_ingress(3);
+    let mut e0 = envelope_now(&ingress, 0, "cmd.a", "payload.a");
+    e0.source_id = SourceId::new("source.shared").unwrap();
+    e0.source_sequence = 42;
+    ingress.stage(&sequencer(), &e0).unwrap();
+
+    let mut e1 = envelope_now(&ingress, 1, "cmd.b", "payload.b");
+    e1.source_id = SourceId::new("source.shared").unwrap();
+    e1.source_sequence = 42;
+    let result = ingress.stage(&sequencer(), &e1);
+    assert_eq!(
+        result,
+        Err(StageError::SourceSequenceConflict {
+            source_id: SourceId::new("source.shared").unwrap(),
+            source_sequence: 42,
+        })
+    );
+    assert_eq!(ingress.slot_status(Ordinal(1)), SlotStatus::Empty);
+}
+
+/// A fence whose finalized range would make one source's sequence go
+/// backward (a later ordinal carrying an earlier sequence number for the
+/// same source) is rejected atomically.
+#[test]
+fn source_sequence_finalizing_in_descending_order_rejects() {
+    let mut ingress = fresh_ingress(2);
+    let shared_source = SourceId::new("source.shared").unwrap();
+
+    let mut e0 = envelope_now(&ingress, 0, "cmd.0", "payload.0");
+    e0.source_id = shared_source.clone();
+    e0.source_sequence = 5;
+    ingress.stage(&sequencer(), &e0).unwrap();
+
+    let mut e1 = envelope_now(&ingress, 1, "cmd.1", "payload.1");
+    e1.source_id = shared_source.clone();
+    e1.source_sequence = 3; // Regresses relative to ordinal 0's sequence 5.
+    ingress.stage(&sequencer(), &e1).unwrap();
+
+    let fence = fence_for(&ingress, 0, 1, "fence.regress", &[e0, e1]);
+    let result = ingress.submit_fence(&sequencer(), &fence);
+    assert_eq!(
+        result,
+        Err(FenceError::SourceSequenceNotIncreasing {
+            source_id: shared_source,
+            previously_finalized: 5,
+            attempted: 3,
+        })
+    );
+    assert_eq!(ingress.frontier_ordinal(), Ordinal(0));
+}
+
+/// Two different sources may legitimately interleave arbitrary sequence
+/// numbers; only same-source regression is rejected.
+#[test]
+fn different_sources_may_legitimately_interleave() {
+    let mut ingress = fresh_ingress(2);
+    let source_a = SourceId::new("source.a").unwrap();
+    let source_b = SourceId::new("source.b").unwrap();
+
+    let mut e0 = envelope_now(&ingress, 0, "cmd.0", "payload.0");
+    e0.source_id = source_a;
+    e0.source_sequence = 100;
+    ingress.stage(&sequencer(), &e0).unwrap();
+
+    let mut e1 = envelope_now(&ingress, 1, "cmd.1", "payload.1");
+    e1.source_id = source_b;
+    e1.source_sequence = 1;
+    ingress.stage(&sequencer(), &e1).unwrap();
+
+    let fence = fence_for(&ingress, 0, 1, "fence.interleave", &[e0, e1]);
+    assert!(ingress.submit_fence(&sequencer(), &fence).is_ok());
+}
+
+/// Only the currently active sequencer may request an epoch reset.
+#[test]
+fn unauthorized_epoch_reset_rejects() {
+    let mut ingress = fresh_ingress(2);
+    let result = ingress.reset_epoch(
+        &impostor_sequencer(),
+        TimelineEpoch(2),
+        SourceId::new("sequencer.successor").unwrap(),
+    );
+    assert_eq!(result, Err(EpochResetError::NotActiveSequencer));
+    // Original epoch/sequencer remain in force.
+    let e0 = envelope_now(&ingress, 0, "cmd.0", "payload.0");
+    assert_eq!(
+        ingress.stage(&sequencer(), &e0).unwrap(),
+        StageOutcome::Staged
+    );
+}
+
+/// An epoch reset to the current epoch or an earlier one is rejected;
+/// only a strictly later epoch is a valid transition.
+#[test]
+fn arbitrary_epoch_rollback_or_reuse_rejects() {
+    let mut ingress = fresh_ingress(2);
+    let same_epoch_result = ingress.reset_epoch(
+        &sequencer(),
+        TimelineEpoch(1),
+        SourceId::new("sequencer.successor").unwrap(),
+    );
+    assert_eq!(
+        same_epoch_result,
+        Err(EpochResetError::EpochNotIncreasing {
+            current: TimelineEpoch(1),
+            attempted: TimelineEpoch(1),
+        })
+    );
+
+    let rollback_result = ingress.reset_epoch(
+        &sequencer(),
+        TimelineEpoch(0),
+        SourceId::new("sequencer.successor").unwrap(),
+    );
+    assert_eq!(
+        rollback_result,
+        Err(EpochResetError::EpochNotIncreasing {
+            current: TimelineEpoch(1),
+            attempted: TimelineEpoch(0),
+        })
+    );
+}
+
+/// The finalized full-history digest differs for behaviorally distinct
+/// envelopes, even when the ordinal/command-ID/payload-hash coincide is
+/// avoided by varying `source_sequence` alone.
+#[test]
+fn finalized_history_digest_differs_for_behaviorally_distinct_envelopes() {
+    let mut ingress_a = fresh_ingress(2);
+    let mut e0_a = envelope_now(&ingress_a, 0, "cmd.0", "payload.0");
+    e0_a.source_sequence = 1;
+    ingress_a.stage(&sequencer(), &e0_a).unwrap();
+    let fence_a = fence_for(&ingress_a, 0, 0, "fence.a", &[e0_a]);
+    ingress_a.submit_fence(&sequencer(), &fence_a).unwrap();
+
+    let mut ingress_b = fresh_ingress(2);
+    let mut e0_b = envelope_now(&ingress_b, 0, "cmd.0", "payload.0");
+    e0_b.source_sequence = 2;
+    ingress_b.stage(&sequencer(), &e0_b).unwrap();
+    let fence_b = fence_for(&ingress_b, 0, 0, "fence.b", &[e0_b]);
+    ingress_b.submit_fence(&sequencer(), &fence_b).unwrap();
+
+    assert_ne!(
+        ingress_a.canonical_state_digest(),
+        ingress_b.canonical_state_digest()
+    );
 }

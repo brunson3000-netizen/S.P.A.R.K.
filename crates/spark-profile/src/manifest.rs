@@ -54,17 +54,22 @@ mod tests {
     use spark_core::authority::Authority;
     use spark_core::id::DefinitionId;
     use spark_core::scope::ScopeKind;
-    use spark_core::value::ValueType;
+    use spark_core::value::{FixedPoint, ValueConstraint};
+    use std::collections::BTreeSet;
 
     fn base_definition(description: &str) -> DefinitionSpec {
         DefinitionSpec {
+            profile_id: ProfileId::new("game-world").unwrap(),
             id: DefinitionId::new("trait.curiosity").unwrap(),
             kind: DefinitionKind::Trait,
             domain: None,
             layer: Some("actor_attribute".to_string()),
-            value_type: ValueType::Fixed,
+            value_constraint: ValueConstraint::Fixed {
+                min: FixedPoint::ZERO,
+                max: FixedPoint::from_integer(1).unwrap(),
+            },
             authority: Authority::SparkOwned,
-            valid_scopes: vec![ScopeKind::Actor],
+            valid_scopes: BTreeSet::from([ScopeKind::Actor]),
             enabled: true,
             version: 1,
             description: description.to_string(),

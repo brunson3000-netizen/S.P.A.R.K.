@@ -10,5 +10,16 @@ description = "Deterministic fixtures and scenario replay harness for S.P.A.R.K.
 spark-core = { path = "../spark-core" }
 spark-profile = { path = "../spark-profile" }
 
+[dev-dependencies]
+# Dev-only, used solely by the workspace dependency-direction test to
+# robustly parse `cargo metadata --format-version 1` JSON output across
+# normal/dev/build/target-specific dependency kinds instead of hand-
+# scanning Cargo.toml text. Small, mature, permissively licensed
+# (MIT OR Apache-2.0), and does not affect the shipped crate graph.
+# `default-features = false` + explicit `std` avoids pulling in
+# `serde`'s derive-macro chain (`serde_derive`/`syn`/`quote`/`proc-macro2`),
+# which this test has no use for since it only reads `serde_json::Value`.
+serde_json = { version = "1", default-features = false, features = ["std"] }
+
 [lints.rust]
 unsafe_code = "forbid"

@@ -12,8 +12,5 @@ description = "S.P.A.R.K. canonical deterministic core: IDs, scopes, authority, 
 # cross-checks) - see the dependency rationale in the Phase-1 report.
 blake3 = { version = "1", default-features = false, features = ["std", "pure"] }
 
-[dev-dependencies]
-spark-testkit = { path = "../spark-testkit" }
-
 [lints.rust]
 unsafe_code = "forbid"

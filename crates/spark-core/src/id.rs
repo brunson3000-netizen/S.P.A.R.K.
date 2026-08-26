@@ -12,10 +12,18 @@
 use crate::hash::CanonicalEncoder;
 use std::fmt;
 
+/// Maximum byte length of one [`StableId`], consistent with the Phase-0
+/// bounded-identifier budget (`CONTROLLING_BLUEPRINT_v0.2.md` §10 internal
+/// bound discipline). This keeps namespaced identifiers from becoming an
+/// unbounded canonical-hashing/storage vector (Phase-1 correction brief
+/// M-03).
+pub const MAX_STABLE_ID_LEN: usize = 256;
+
 /// Errors constructing a [`StableId`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StableIdError {
     Empty,
+    TooLong { len: usize, max: usize },
     InvalidCharacter(char),
     LeadingOrTrailingSeparator,
     EmptySegment,
@@ -25,6 +33,9 @@ impl fmt::Display for StableIdError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             StableIdError::Empty => write!(f, "stable id must not be empty"),
+            StableIdError::TooLong { len, max } => {
+                write!(f, "stable id length {len} exceeds maximum {max}")
+            }
             StableIdError::InvalidCharacter(c) => {
                 write!(f, "stable id contains invalid character '{c}'")
             }
@@ -53,6 +64,12 @@ impl StableId {
         let value = value.into();
         if value.is_empty() {
             return Err(StableIdError::Empty);
+        }
+        if value.len() > MAX_STABLE_ID_LEN {
+            return Err(StableIdError::TooLong {
+                len: value.len(),
+                max: MAX_STABLE_ID_LEN,
+            });
         }
         if value.starts_with('.') || value.ends_with('.') {
             return Err(StableIdError::LeadingOrTrailingSeparator);
@@ -165,6 +182,19 @@ mod tests {
             Err(StableIdError::InvalidCharacter('T'))
         );
         assert!(StableId::new("trigger weather").is_err());
+    }
+
+    #[test]
+    fn rejects_id_longer_than_max_length() {
+        let too_long = "a".repeat(MAX_STABLE_ID_LEN + 1);
+        assert_eq!(
+            StableId::new(too_long.clone()),
+            Err(StableIdError::TooLong {
+                len: too_long.len(),
+                max: MAX_STABLE_ID_LEN
+            })
+        );
+        assert!(StableId::new("a".repeat(MAX_STABLE_ID_LEN)).is_ok());
     }
 
     #[test]

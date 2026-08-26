@@ -4,16 +4,23 @@
 //! stream: independent random addresses must be derived from `root seed +
 //! profile/behavior epoch + rule or trigger ID + scope/actor ID + logical
 //! occurrence/index`, so that "concurrency, batching, and iteration order
-//! must not alter unrelated outcomes." This module derives every random
-//! value as a pure function of an explicit [`RandomAddress`] - there is no
-//! global generator, no counter, and no mutable state to thread through
-//! call order, so isolation between unrelated addresses and call-order
-//! independence both fall out of the design rather than needing to be
-//! separately guarded.
+//! must not alter unrelated outcomes." The Phase-1 correction brief (M-04)
+//! further requires the address to carry *profile-qualified* behavior
+//! context: the same private IDs and epoch number reused across two
+//! different profiles (or two different accepted behavior artifacts within
+//! one profile) must resolve to different addresses, so this module also
+//! hashes an explicit [`ProfileId`] and a `behavior_artifact_hash` — a
+//! deterministic digest identifying the active manifest/config behavior
+//! context (e.g. `ProfileManifest::manifest_content_hash`) — into every
+//! address. This module derives every random value as a pure function of
+//! an explicit [`RandomAddress`] — there is no global generator, no
+//! counter, and no mutable state to thread through call order, so
+//! isolation between unrelated addresses and call-order independence both
+//! fall out of the design rather than needing to be separately guarded.
 
 use crate::clock::LogicalTime;
-use crate::hash::CanonicalEncoder;
-use crate::id::DefinitionId;
+use crate::hash::{CanonicalEncoder, Digest};
+use crate::id::{DefinitionId, ProfileId};
 
 // `RandomAddress` needs a scope-or-actor identity; reuse `ScopeId` since
 // an actor is itself represented as an `Actor`-kind scope
@@ -26,7 +33,13 @@ pub use crate::scope::ScopeId as AddressScope;
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RandomAddress {
     pub root_seed: u64,
+    pub profile_id: ProfileId,
     pub behavior_epoch: u64,
+    /// A deterministic digest of the active behavior artifact (e.g. the
+    /// accepted profile manifest/config content hash) the draw was made
+    /// under. Two behavior epochs that happen to share a numeric value in
+    /// different manifests/configs must not collide.
+    pub behavior_artifact_hash: Digest,
     pub rule_or_trigger_id: DefinitionId,
     pub scope_id: AddressScope,
     pub occurrence_index: u64,
@@ -35,7 +48,9 @@ pub struct RandomAddress {
 impl RandomAddress {
     fn canonicalize(&self, enc: &mut CanonicalEncoder) {
         enc.push_u64(self.root_seed);
+        self.profile_id.canonicalize(enc);
         enc.push_u64(self.behavior_epoch);
+        enc.push_digest(&self.behavior_artifact_hash);
         self.rule_or_trigger_id.canonicalize(enc);
         self.scope_id.canonicalize(enc);
         enc.push_u64(self.occurrence_index);
@@ -75,9 +90,12 @@ impl RandomAddressService {
 /// occurrence index already captures scheduling order deterministically),
 /// but this keeps call sites honest that a random draw always happens at
 /// some due-work evaluation point rather than ad hoc.
+#[allow(clippy::too_many_arguments)]
 pub fn address_at(
     root_seed: u64,
+    profile_id: ProfileId,
     behavior_epoch: u64,
+    behavior_artifact_hash: Digest,
     rule_or_trigger_id: DefinitionId,
     scope_id: AddressScope,
     occurrence_index: u64,
@@ -85,7 +103,9 @@ pub fn address_at(
 ) -> RandomAddress {
     RandomAddress {
         root_seed,
+        profile_id,
         behavior_epoch,
+        behavior_artifact_hash,
         rule_or_trigger_id,
         scope_id,
         occurrence_index,
@@ -95,12 +115,19 @@ pub fn address_at(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::hash::hash_bytes;
     use crate::scope::{ScopeId, ScopeKind};
+
+    fn artifact(tag: &str) -> Digest {
+        hash_bytes(tag.as_bytes())
+    }
 
     fn addr(occurrence_index: u64) -> RandomAddress {
         RandomAddress {
             root_seed: 42,
+            profile_id: ProfileId::new("game-world").unwrap(),
             behavior_epoch: 1,
+            behavior_artifact_hash: artifact("manifest.v1"),
             rule_or_trigger_id: DefinitionId::new("trigger.weather.drought").unwrap(),
             scope_id: ScopeId::new(ScopeKind::Region, "northwood").unwrap(),
             occurrence_index,
@@ -144,5 +171,30 @@ mod tests {
         let service = RandomAddressService::new();
         let f = service.derive_fixed_fraction(&addr(3));
         assert!((0..crate::value::FIXED_SCALE).contains(&f));
+    }
+
+    /// M-04: identical private IDs/epoch in two different profiles must
+    /// resolve to different addresses.
+    #[test]
+    fn same_ids_and_epoch_in_different_profiles_are_independent() {
+        let service = RandomAddressService::new();
+        let mut a = addr(1);
+        let mut b = addr(1);
+        a.profile_id = ProfileId::new("game-world").unwrap();
+        b.profile_id = ProfileId::new("mci-social").unwrap();
+        assert_ne!(service.derive_u64(&a), service.derive_u64(&b));
+    }
+
+    /// M-04: same profile but a different accepted behavior-artifact hash
+    /// (e.g. a different manifest/config revision under the same numeric
+    /// epoch) must resolve to a different address.
+    #[test]
+    fn same_profile_different_behavior_artifact_hash_is_independent() {
+        let service = RandomAddressService::new();
+        let mut a = addr(1);
+        let mut b = addr(1);
+        a.behavior_artifact_hash = artifact("manifest.v1");
+        b.behavior_artifact_hash = artifact("manifest.v2");
+        assert_ne!(service.derive_u64(&a), service.derive_u64(&b));
     }
 }
