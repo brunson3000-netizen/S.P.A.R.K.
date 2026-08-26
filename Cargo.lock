@@ -150,7 +150,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "spark-profile"
+name = "spark-engine"
 version = "0.1.0"
 dependencies = [
  "spark-core",
@@ -162,7 +162,7 @@ version = "0.1.0"
 dependencies = [
  "serde_json",
  "spark-core",
- "spark-profile",
+ "spark-engine",
 ]
 
 [[package]]

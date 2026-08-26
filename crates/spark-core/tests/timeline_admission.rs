@@ -1,3 +1,14 @@
+//! Test targets scope the canonical crates' strict panic/arithmetic gate
+//! locally: a fixture that must panic on an unexpected `Err` is exactly
+//! how a test reports a regression.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects
+)]
+
 //! Phase-1 minimum test corpus items 1-10
 //! (`engineering/phase1/PHASE_1_IMPLEMENTATION_BRIEF.md` §5), plus the
 //! full-semantic-envelope-identity, source-sequence, and

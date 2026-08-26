@@ -4,21 +4,28 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
-description = "Deterministic fixtures and scenario replay harness for S.P.A.R.K. Phase-1 canonical behaviors."
+description = "Deterministic fixtures, scenario replay harness, and the adversarial acceptance corpus for S.P.A.R.K. Phase-1 canonical behaviors."
 
 [dependencies]
 spark-core = { path = "../spark-core" }
-spark-profile = { path = "../spark-profile" }
+spark-engine = { path = "../spark-engine" }
 
 [dev-dependencies]
-# Dev-only, used solely by the workspace dependency-direction test to
-# robustly parse `cargo metadata --format-version 1` JSON output across
-# normal/dev/build/target-specific dependency kinds instead of hand-
-# scanning Cargo.toml text. Small, mature, permissively licensed
+# The same two crates again, this time with the sanctioned `test-support`
+# seams enabled. Declaring the feature on the *dev* edge only is what
+# keeps it out of any production resolution: a consumer that depends on
+# `spark-testkit` normally never enables it. The workspace feature-hygiene
+# test asserts exactly that.
+spark-core = { path = "../spark-core", features = ["test-support"] }
+spark-engine = { path = "../spark-engine", features = ["test-support"] }
+# Dev-only, used solely by the workspace dependency-direction/feature
+# policy test to robustly parse `cargo metadata --format-version 1` JSON
+# across normal/dev/build/target-specific dependency kinds instead of
+# hand-scanning Cargo.toml text. Small, mature, permissively licensed
 # (MIT OR Apache-2.0), and does not affect the shipped crate graph.
-# `default-features = false` + explicit `std` avoids pulling in
-# `serde`'s derive-macro chain (`serde_derive`/`syn`/`quote`/`proc-macro2`),
-# which this test has no use for since it only reads `serde_json::Value`.
+# `default-features = false` + explicit `std` avoids pulling in `serde`'s
+# derive-macro chain (`serde_derive`/`syn`/`quote`/`proc-macro2`), which
+# this test has no use for since it only reads `serde_json::Value`.
 serde_json = { version = "1", default-features = false, features = ["std"] }
 
 [lints.rust]

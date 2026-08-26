@@ -1,0 +1,28 @@
+[package]
+name = "spark-engine"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "S.P.A.R.K. engine crate: the Phase-1 trust boundary. Profile manifest logical types, the single public activation door, unforgeable activated profile artifacts, and the activation-bound canonical state store."
+
+[dependencies]
+spark-core = { path = "../spark-core" }
+
+[features]
+# Sanctioned test-only write seams over the crate-internal state-write
+# paths. Off by default; see `spark-core`'s note on the feature-hygiene
+# test.
+test-support = ["spark-core/test-support"]
+
+[lints.rust]
+unsafe_code = "forbid"
+
+# See `spark-core/Cargo.toml`: the same mechanical panic/arithmetic gate
+# applies to every canonical crate.
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+indexing_slicing = "deny"
+arithmetic_side_effects = "deny"

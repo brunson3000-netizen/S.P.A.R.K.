@@ -10,8 +10,8 @@
 //! include `version_label` — a manifest that reuses a human version string
 //! but changes real content always produces a different hash.
 
-use crate::definition::DefinitionSpec;
-use crate::text::BoundedText;
+use crate::profile::definition::DefinitionSpec;
+use crate::profile::text::BoundedText;
 use spark_core::hash::{CanonicalEncoder, Digest};
 use spark_core::id::ProfileId;
 
@@ -20,9 +20,11 @@ use spark_core::id::ProfileId;
 ///
 /// Fields are private with accessors, so the human `version_label` cannot
 /// be mistaken for a mutable identity handle: identity is
-/// [`manifest_content_hash`](Self::manifest_content_hash), and a manifest
-/// that has been validated is represented by
-/// [`crate::validate::ValidatedManifest`].
+/// [`manifest_content_hash`](Self::manifest_content_hash). A manifest is
+/// untrusted authoring input; a manifest that has *passed* the activation
+/// ceremony is represented by
+/// [`crate::activation::ActivatedProfile`], which carries this hash
+/// forward as its exact-artifact binding.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ProfileManifest {
     profile_id: ProfileId,
@@ -78,9 +80,16 @@ impl ProfileManifest {
 }
 
 #[cfg(test)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects
+)]
 mod tests {
     use super::*;
-    use crate::definition::{BehavioralLeverage, DefinitionKind};
+    use crate::profile::definition::{BehavioralLeverage, DefinitionKind};
     use spark_core::authority::Authority;
     use spark_core::id::{CanonicalTag, DefinitionId};
     use spark_core::scope::ScopeKind;

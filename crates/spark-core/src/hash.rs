@@ -33,7 +33,9 @@ impl fmt::Display for Digest {
 }
 
 fn hex(bytes: &[u8]) -> String {
-    let mut s = String::with_capacity(bytes.len() * 2);
+    // Two hex characters per byte; saturating so the capacity hint
+    // contains no unchecked arithmetic (it is only a hint either way).
+    let mut s = String::with_capacity(bytes.len().saturating_mul(2));
     for b in bytes {
         s.push_str(&format!("{:02x}", b));
     }
@@ -120,6 +122,13 @@ impl CanonicalEncoder {
 }
 
 #[cfg(test)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects
+)]
 mod tests {
     use super::*;
 

@@ -109,13 +109,12 @@ fn validate_canonical_syntax(
     if value.starts_with('.') || value.ends_with('.') {
         return Err(StableIdError::LeadingOrTrailingSeparator);
     }
-    let mut segments = 0usize;
-    for segment in value.split('.') {
-        if segment.is_empty() {
-            return Err(StableIdError::EmptySegment);
-        }
-        segments += 1;
+    if value.split('.').any(str::is_empty) {
+        return Err(StableIdError::EmptySegment);
     }
+    // `count()` performs its own arithmetic internally; doing it here
+    // would be an unchecked `+` under this crate's arithmetic gate.
+    let segments = value.split('.').count();
     for c in value.chars() {
         let ok = c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_' || c == '-' || c == '.';
         if !ok {
@@ -207,30 +206,176 @@ impl fmt::Display for StableId {
 #[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct CanonicalTag(Cow<'static, str>);
 
+/// Rejects a compile-time or runtime `&'static str` that is not valid
+/// canonical tag syntax.
+///
+/// This is a separate, `Copy`, allocation-free error type from
+/// [`StableIdError`] because it is produced inside a `const fn`: it must
+/// be constructible during const evaluation, which rules out anything
+/// that allocates.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum StaticTagError {
+    Empty,
+    TooLong {
+        len: usize,
+        max: usize,
+    },
+    /// The offending byte. A `char` is not used because the const
+    /// validator scans bytes; every rejected byte is by definition not a
+    /// valid canonical character.
+    InvalidByte {
+        byte: u8,
+    },
+    LeadingOrTrailingSeparator,
+    EmptySegment,
+    /// The scan index would overflow `usize`. Unreachable for any real
+    /// `&str` (its length is bounded by `isize::MAX`), but reported rather
+    /// than assumed so the validator contains no unchecked arithmetic at
+    /// all.
+    ScanOverflow,
+}
+
+impl fmt::Display for StaticTagError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            StaticTagError::Empty => write!(f, "canonical tag must not be empty"),
+            StaticTagError::TooLong { len, max } => {
+                write!(f, "canonical tag length {len} exceeds maximum {max}")
+            }
+            StaticTagError::InvalidByte { byte } => {
+                write!(f, "canonical tag contains invalid byte 0x{byte:02x}")
+            }
+            StaticTagError::LeadingOrTrailingSeparator => {
+                write!(f, "canonical tag must not start or end with '.'")
+            }
+            StaticTagError::EmptySegment => write!(f, "canonical tag must not contain '..'"),
+            StaticTagError::ScanOverflow => write!(f, "canonical tag scan index overflowed"),
+        }
+    }
+}
+
+impl std::error::Error for StaticTagError {}
+
 /// The same language [`validate_canonical_syntax`] accepts for a
 /// single-segment tag, expressed as a `const fn` so a compile-time
-/// constant tag can be validated by the compiler.
-const fn is_valid_canonical_tag(bytes: &[u8]) -> bool {
-    if bytes.is_empty() || bytes.len() > MAX_CANONICAL_TAG_LEN {
-        return false;
+/// constant tag can be validated by the compiler — and, crucially, so the
+/// *same* function is total when called at runtime.
+///
+/// The scan indexes `bytes` directly because a `const fn` cannot use
+/// iterators or `slice::first`/`last`. Every index is guarded immediately
+/// above its use (`i < bytes.len()`, and the empty case returns before the
+/// first/last accesses), so the crate's `indexing_slicing` gate is allowed
+/// exactly here and nowhere else.
+#[allow(clippy::indexing_slicing)]
+const fn validate_canonical_tag_bytes(bytes: &[u8]) -> Result<(), StaticTagError> {
+    if bytes.is_empty() {
+        return Err(StaticTagError::Empty);
     }
-    if bytes[0] == b'.' || bytes[bytes.len() - 1] == b'.' {
-        return false;
+    if bytes.len() > MAX_CANONICAL_TAG_LEN {
+        return Err(StaticTagError::TooLong {
+            len: bytes.len(),
+            max: MAX_CANONICAL_TAG_LEN,
+        });
     }
-    let mut i = 0;
+    // `bytes` is non-empty here, so index 0 and `len - 1` are both in
+    // bounds; `len - 1` is computed with `checked_sub` so the function
+    // contains no unchecked arithmetic.
+    let last_index = match bytes.len().checked_sub(1) {
+        Some(index) => index,
+        None => return Err(StaticTagError::ScanOverflow),
+    };
+    if bytes[0] == b'.' || bytes[last_index] == b'.' {
+        return Err(StaticTagError::LeadingOrTrailingSeparator);
+    }
+    let mut i = 0usize;
     while i < bytes.len() {
         let c = bytes[i];
         let ok =
             c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'_' || c == b'-' || c == b'.';
         if !ok {
-            return false;
+            return Err(StaticTagError::InvalidByte { byte: c });
         }
-        if c == b'.' && i + 1 < bytes.len() && bytes[i + 1] == b'.' {
-            return false;
+        let next = match i.checked_add(1) {
+            Some(next) => next,
+            None => return Err(StaticTagError::ScanOverflow),
+        };
+        if c == b'.' && next < bytes.len() && bytes[next] == b'.' {
+            return Err(StaticTagError::EmptySegment);
         }
-        i += 1;
+        i = next;
     }
-    true
+    Ok(())
+}
+
+/// A `&'static str` that has passed canonical-tag validation.
+///
+/// Its field is private and [`CanonicalTag::validate_static`] is its only
+/// producer, so possession is proof of validation — which is what lets
+/// [`CanonicalTag::from_validated`] be public, `const`, **and** total.
+///
+/// It is `Copy` and holds no owned allocation on purpose: a value with a
+/// destructor cannot be dropped during const evaluation, so a
+/// `Result<CanonicalTag, _>` is not const-usable while a
+/// `Result<ValidatedStaticTag, _>` is. That is what makes
+/// [`canonical_tag!`](crate::canonical_tag) able to force compile-time
+/// validation without any function that panics at run time.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ValidatedStaticTag(&'static str);
+
+impl ValidatedStaticTag {
+    pub const fn as_str(&self) -> &'static str {
+        self.0
+    }
+}
+
+/// Builds a [`CanonicalTag`] from a literal, validated by **const
+/// evaluation**.
+///
+/// This replaces the panic-capable `CanonicalTag::from_static`. That
+/// function conflated two roles: compile-time literal validation (where an
+/// invalid tag should be a build failure) and runtime construction from a
+/// `&'static str` (where an invalid tag must be a typed error). Because a
+/// `const fn` only evaluates at compile time when it is *called* in a
+/// const context, an ordinary call site such as
+/// `CanonicalTag::from_static("INVALID TAG")` compiled fine and panicked
+/// at run time — an executed production panic path, and the one an
+/// independent reviewer falsified.
+///
+/// The two roles are now separate and neither can panic at run time:
+///
+/// - [`CanonicalTag::try_from_static`] is total in every context;
+/// - this macro forces const evaluation by binding a `const` item, so an
+///   invalid literal is **always** a compile error and the `panic!` in the
+///   expansion is unreachable at run time by construction. That single
+///   const-evaluated panic is the one sanctioned exception to the crate's
+///   `clippy::panic` gate, and the `allow` is scoped to the macro's own
+///   `const` item rather than to any call site.
+///
+/// ```
+/// use spark_core::{canonical_tag, id::CanonicalTag};
+/// const TRIGGER: CanonicalTag = canonical_tag!("trigger");
+/// assert_eq!(TRIGGER, CanonicalTag::new("trigger").unwrap());
+/// ```
+///
+/// ```compile_fail
+/// use spark_core::canonical_tag;
+/// // Rejected during const evaluation: uppercase is not canonical syntax.
+/// let bad = canonical_tag!("Trigger");
+/// ```
+#[macro_export]
+macro_rules! canonical_tag {
+    ($lit:literal) => {{
+        // Binding a `const` item forces const evaluation, so an invalid
+        // literal is a compile error in every context. `ValidatedStaticTag`
+        // is `Copy`, so this `Result` has no destructor and is const-usable.
+        #[allow(clippy::panic)]
+        const VALIDATED: $crate::id::ValidatedStaticTag =
+            match $crate::id::CanonicalTag::validate_static($lit) {
+                Ok(validated) => validated,
+                Err(_) => panic!("canonical_tag! literal is not valid canonical tag syntax"),
+            };
+        $crate::id::CanonicalTag::from_validated(VALIDATED)
+    }};
 }
 
 impl CanonicalTag {
@@ -240,41 +385,53 @@ impl CanonicalTag {
         Ok(CanonicalTag(Cow::Owned(value)))
     }
 
-    /// Builds a tag from a compile-time constant, validated by the
-    /// compiler.
+    /// Builds a tag from a `&'static str`, **totally**: an invalid value
+    /// returns a typed error in every context, const or otherwise.
     ///
-    /// In a `const` context an invalid literal is a **compile error**, not
-    /// a runtime panic — which is what lets the engine's own baseline
-    /// vocabulary (command kinds, work kinds, definition kinds) be
-    /// expressed as constants without introducing a fallible or panicking
-    /// path at every use site.
-    ///
-    /// This is the standard compile-time-assertion idiom, and it carries
-    /// the standard caveat: the `assert!` is evaluated at compile time
-    /// only when the call appears in a `const` context. Calling it from a
-    /// non-`const` context with an invalid string (which requires
-    /// deliberately manufacturing a `&'static str` at runtime, e.g. by
-    /// leaking a `String`) would panic instead. Use [`CanonicalTag::new`]
-    /// for any value that is not a literal; it validates and returns a
-    /// typed error.
+    /// For a literal, prefer [`canonical_tag!`](crate::canonical_tag),
+    /// which forces const evaluation so an invalid literal is a compile
+    /// error. For any value that is not a literal, this and
+    /// [`CanonicalTag::new`] both validate and return a typed error;
+    /// neither panics.
     ///
     /// ```
-    /// use spark_core::id::CanonicalTag;
-    /// const TRIGGER: CanonicalTag = CanonicalTag::from_static("trigger");
-    /// assert_eq!(TRIGGER.as_str(), "trigger");
+    /// use spark_core::id::{CanonicalTag, StaticTagError};
+    /// assert!(CanonicalTag::try_from_static("trigger").is_ok());
+    /// // The case an independent reviewer executed as a runtime panic:
+    /// assert_eq!(
+    ///     CanonicalTag::try_from_static("INVALID TAG"),
+    ///     Err(StaticTagError::InvalidByte { byte: b'I' })
+    /// );
     /// ```
+    pub const fn try_from_static(value: &'static str) -> Result<Self, StaticTagError> {
+        match Self::validate_static(value) {
+            Ok(validated) => Ok(Self::from_validated(validated)),
+            Err(e) => Err(e),
+        }
+    }
+
+    /// Validates a `&'static str` as canonical tag syntax, yielding a
+    /// [`ValidatedStaticTag`] proof on success.
     ///
-    /// ```compile_fail
-    /// use spark_core::id::CanonicalTag;
-    /// // Rejected at compile time: uppercase is not canonical syntax.
-    /// const BAD: CanonicalTag = CanonicalTag::from_static("Trigger");
-    /// ```
-    pub const fn from_static(value: &'static str) -> Self {
-        assert!(
-            is_valid_canonical_tag(value.as_bytes()),
-            "canonical tag literal is not valid canonical syntax"
-        );
-        CanonicalTag(Cow::Borrowed(value))
+    /// This is the const-evaluable half of the literal path: its result
+    /// type is `Copy`, so it can be bound to a `const` item, which is what
+    /// [`canonical_tag!`](crate::canonical_tag) does to turn an invalid
+    /// literal into a compile error.
+    pub const fn validate_static(
+        value: &'static str,
+    ) -> Result<ValidatedStaticTag, StaticTagError> {
+        match validate_canonical_tag_bytes(value.as_bytes()) {
+            Ok(()) => Ok(ValidatedStaticTag(value)),
+            Err(e) => Err(e),
+        }
+    }
+
+    /// Builds a tag from a validation proof. Total and infallible: a
+    /// [`ValidatedStaticTag`] cannot exist unless it passed
+    /// [`CanonicalTag::validate_static`], so there is no input for which
+    /// this could fail — and therefore none for which it could panic.
+    pub const fn from_validated(validated: ValidatedStaticTag) -> Self {
+        CanonicalTag(Cow::Borrowed(validated.as_str()))
     }
 
     pub fn as_str(&self) -> &str {
@@ -376,6 +533,13 @@ stable_id_newtype!(
 );
 
 #[cfg(test)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects
+)]
 mod tests {
     use super::*;
 
@@ -478,21 +642,61 @@ mod tests {
         ];
         for case in cases {
             assert_eq!(
-                is_valid_canonical_tag(case.as_bytes()),
+                validate_canonical_tag_bytes(case.as_bytes()).is_ok(),
                 CanonicalTag::new(case).is_ok(),
                 "const and runtime validation disagree on {case:?}"
             );
         }
         let at_limit = "k".repeat(MAX_CANONICAL_TAG_LEN);
         let over_limit = "k".repeat(MAX_CANONICAL_TAG_LEN + 1);
-        assert!(is_valid_canonical_tag(at_limit.as_bytes()));
-        assert!(!is_valid_canonical_tag(over_limit.as_bytes()));
+        assert!(validate_canonical_tag_bytes(at_limit.as_bytes()).is_ok());
+        assert!(validate_canonical_tag_bytes(over_limit.as_bytes()).is_err());
     }
 
     #[test]
     fn const_tag_and_runtime_tag_are_equal_values() {
-        const TRIGGER: CanonicalTag = CanonicalTag::from_static("trigger");
+        const TRIGGER: CanonicalTag = crate::canonical_tag!("trigger");
         assert_eq!(TRIGGER, CanonicalTag::new("trigger").unwrap());
+        assert_eq!(TRIGGER, CanonicalTag::try_from_static("trigger").unwrap());
+    }
+
+    /// AT-C1, the executed panic this replaces: an invalid `&'static str`
+    /// reaching the static constructor outside a const context returns a
+    /// typed error. There is no longer any input, static or otherwise,
+    /// for which a public canonical tag constructor panics.
+    #[test]
+    fn try_from_static_is_total_at_runtime() {
+        assert_eq!(
+            CanonicalTag::try_from_static("INVALID TAG"),
+            Err(StaticTagError::InvalidByte { byte: b'I' })
+        );
+        assert_eq!(
+            CanonicalTag::try_from_static(""),
+            Err(StaticTagError::Empty)
+        );
+        assert_eq!(
+            CanonicalTag::try_from_static(".trigger"),
+            Err(StaticTagError::LeadingOrTrailingSeparator)
+        );
+        assert_eq!(
+            CanonicalTag::try_from_static("trigger."),
+            Err(StaticTagError::LeadingOrTrailingSeparator)
+        );
+        assert_eq!(
+            CanonicalTag::try_from_static("trigger..evaluate"),
+            Err(StaticTagError::EmptySegment)
+        );
+        // A `&'static str` longer than the bound is reachable at runtime
+        // (e.g. by leaking a `String`); it must report, not panic.
+        let oversized: &'static str =
+            Box::leak("k".repeat(MAX_CANONICAL_TAG_LEN + 1).into_boxed_str());
+        assert_eq!(
+            CanonicalTag::try_from_static(oversized),
+            Err(StaticTagError::TooLong {
+                len: MAX_CANONICAL_TAG_LEN + 1,
+                max: MAX_CANONICAL_TAG_LEN
+            })
+        );
     }
 
     #[test]

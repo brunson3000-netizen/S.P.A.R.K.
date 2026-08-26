@@ -76,7 +76,7 @@
 use crate::clock::LogicalTime;
 use crate::hash::{CanonicalEncoder, Digest};
 use crate::id::{CanonicalTag, CommandId, FenceId, ProfileId, SourceId};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 
 /// A position in the canonical command sequence for one profile timeline
@@ -750,15 +750,114 @@ impl FinalizationResult {
     }
 }
 
+/// The maximum number of distinct competing semantic-envelope hashes a
+/// poisoned slot retains as exposed evidence, and the cap on how many
+/// distinct claims it tracks in order to report an exact omitted count.
+///
+/// These mirror the scheduler's conflict-evidence discipline
+/// ([`crate::scheduler::MAX_CONFLICT_EVIDENCE`]) so the two poisoned-state
+/// representations in the kernel behave identically: retain the smallest
+/// hashes of the whole claim set, report how many distinct claims were
+/// omitted, and flag saturation. All three are functions of the claim set,
+/// never of arrival order.
+pub const MAX_POISON_EVIDENCE: usize = 16;
+pub const MAX_POISON_TRACKED_CLAIMS: usize = 256;
+
+/// Order-independent, bounded evidence about which envelopes contested one
+/// ordinal's slot.
+///
+/// Codex counterexample #12: with an evidence-free `Poisoned` unit
+/// variant, two slots poisoned by *entirely different* competing envelope
+/// pairs produced the same canonical ingress state digest, erasing a real
+/// difference from canonical state. Retaining a sorted set restores the
+/// distinction without reintroducing arrival-order sensitivity, and
+/// changes only the *state* representation: every closed B-01
+/// hash/acknowledgement/fence property is untouched, and the per-call
+/// [`SlotPoisonRecord`] keeps its per-call fields, because call *results*
+/// may legitimately differ per call while canonical *state* may not.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SlotPoisonEvidence {
+    competing: BTreeSet<Digest>,
+    truncated: bool,
+}
+
+impl SlotPoisonEvidence {
+    fn from_pair(a: Digest, b: Digest) -> Self {
+        let mut evidence = SlotPoisonEvidence {
+            competing: BTreeSet::new(),
+            truncated: false,
+        };
+        evidence.insert(a);
+        evidence.insert(b);
+        evidence
+    }
+
+    /// Idempotent, commutative insert retaining the smallest hashes, so
+    /// the resulting value is a function of the claim set.
+    fn insert(&mut self, hash: Digest) {
+        if self.competing.contains(&hash) {
+            return;
+        }
+        if self.competing.len() < MAX_POISON_TRACKED_CLAIMS {
+            self.competing.insert(hash);
+            return;
+        }
+        self.truncated = true;
+        let largest = match self.competing.iter().next_back() {
+            Some(largest) => largest.clone(),
+            // Unreachable: the branch above proved the set is at its
+            // non-zero cap. Reported rather than asserted so this
+            // function has no panic path.
+            None => return,
+        };
+        if hash < largest {
+            self.competing.remove(&largest);
+            self.competing.insert(hash);
+        }
+    }
+
+    /// The retained competing semantic-envelope hashes, ascending.
+    pub fn competing_semantic_hashes(&self) -> BTreeSet<Digest> {
+        self.competing
+            .iter()
+            .take(MAX_POISON_EVIDENCE)
+            .cloned()
+            .collect()
+    }
+
+    /// How many further distinct claims contested the slot without being
+    /// retained as evidence.
+    pub fn omitted_distinct(&self) -> u64 {
+        self.competing.len().saturating_sub(MAX_POISON_EVIDENCE) as u64
+    }
+
+    /// Whether the claim set exceeded [`MAX_POISON_TRACKED_CLAIMS`], in
+    /// which case [`omitted_distinct`](Self::omitted_distinct) is a
+    /// saturated lower bound.
+    pub fn evidence_truncated(&self) -> bool {
+        self.truncated
+    }
+
+    fn canonicalize(&self, enc: &mut CanonicalEncoder) {
+        let retained = self.competing_semantic_hashes();
+        enc.push_u64(retained.len() as u64);
+        for hash in &retained {
+            enc.push_digest(hash);
+        }
+        enc.push_u64(self.omitted_distinct());
+        enc.push_bool(self.truncated);
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum SlotState {
-    // Boxed so `Poisoned`'s zero-sized variant doesn't force every slot
-    // entry to reserve the full envelope size inline.
+    // Boxed so the `Poisoned` variant doesn't force every slot entry to
+    // reserve the full envelope size inline.
     Staged {
         envelope: Box<SemanticCommandEnvelope>,
         semantic_hash: Digest,
     },
-    Poisoned,
+    Poisoned(SlotPoisonEvidence),
 }
 
 /// The externally observable status of one ordinal's staging slot.
@@ -897,13 +996,18 @@ fn compute_fence_hash(fence: &TimelineFence) -> Digest {
 impl TimelineIngress {
     /// Creates a fresh ingress with an initial sequencer grant, starting
     /// at ordinal 0 with a deterministic genesis fence hash.
+    ///
+    /// This is the **only** production constructor. There is deliberately
+    /// no public way to place the finalized frontier anywhere but the
+    /// beginning: see [`TimelineIngress::resume_at_frontier`], which is
+    /// feature-gated to test builds.
     pub fn new(
         profile_id: ProfileId,
         timeline_epoch: TimelineEpoch,
         active_sequencer: SourceId,
         window_width: u32,
     ) -> Result<Self, TimelineConfigError> {
-        Self::resume_at_frontier(
+        Self::at_frontier(
             profile_id,
             timeline_epoch,
             active_sequencer,
@@ -913,17 +1017,71 @@ impl TimelineIngress {
     }
 
     /// Creates an ingress whose finalized frontier already sits at
-    /// `starting_frontier`, as a save continuation would
-    /// (ADR-0006 "logical simulation time and last committed canonical
-    /// input ordinal"). No persistence backend is implied — this is only
-    /// the canonical constructor that makes a non-zero starting frontier
-    /// expressible.
+    /// `starting_frontier`.
     ///
-    /// A starting frontier near `u64::MAX` is accepted deliberately: the
-    /// resulting ordinal-space exhaustion must be a *reportable* condition
-    /// rather than an unreachable panic, and making it constructible is
-    /// what allows that property to be tested at all.
+    /// # This is not a reconstruction constructor
+    ///
+    /// It exists **only** so that ordinal-space-exhaustion properties near
+    /// `u64::MAX` are falsifiable at all, and it is gated behind
+    /// `#[cfg(any(test, feature = "test-support"))]` so it does not exist
+    /// on the production surface. The workspace feature-hygiene test
+    /// asserts that no production dependency edge enables `test-support`.
+    ///
+    /// The restriction is not cosmetic. As a public API this function was
+    /// an *authority* surface that [`TimelineIngress::new`] never exposed:
+    /// any caller could name an arbitrary frontier and receive an ingress
+    /// with empty finalized history plus a freshly **synthesized** genesis
+    /// anchor derived from that arbitrary frontier — no prior fence hash,
+    /// no finalized history, no snapshot identity, no artifact binding, no
+    /// reconstruction evidence of any kind. That is arbitrary canonical
+    /// timeline injection.
+    ///
+    /// # The Phase-3 constructor this does *not* implement
+    ///
+    /// A genuine resume constructor belongs to `spark-persistence` in
+    /// Phase 3 and consumes *evidence*, not parameters. Its contract is
+    /// specified now so the seam is unambiguous, and implementing it is
+    /// explicitly out of Phase-1 scope:
+    ///
+    /// ```text
+    /// pub struct TimelineResumeEvidence {
+    ///     profile_id: ProfileId,
+    ///     timeline_epoch: TimelineEpoch,
+    ///     finalized_frontier: Ordinal,
+    ///     last_finalized_fence_hash: Digest,  // real chain anchor, never synthesized
+    ///     canonical_history_digest: Digest,   // re-verified against restored history
+    ///     manifest_content_hash: Digest,      // ADR-0006 exact-artifact binding
+    ///     config_revision_hash: Digest,
+    ///     behavior_epoch: u64,
+    ///     sequencer_grant: SourceId,
+    ///     epoch_reset_chain: Vec<EpochResetRecord>,
+    /// }
+    /// ```
+    ///
+    /// That constructor validates internal consistency — the fence hash
+    /// must match the restored history digest, and the artifact hashes
+    /// must resolve within ADR-0006's compatibility envelope — and fails
+    /// explicitly otherwise. Crucially it must never *invent* a genesis
+    /// hash for a nonzero frontier, which is exactly what makes the
+    /// function below unfit to be a production API.
+    #[cfg(any(test, feature = "test-support"))]
     pub fn resume_at_frontier(
+        profile_id: ProfileId,
+        timeline_epoch: TimelineEpoch,
+        active_sequencer: SourceId,
+        window_width: u32,
+        starting_frontier: Ordinal,
+    ) -> Result<Self, TimelineConfigError> {
+        Self::at_frontier(
+            profile_id,
+            timeline_epoch,
+            active_sequencer,
+            window_width,
+            starting_frontier,
+        )
+    }
+
+    fn at_frontier(
         profile_id: ProfileId,
         timeline_epoch: TimelineEpoch,
         active_sequencer: SourceId,
@@ -958,9 +1116,14 @@ impl TimelineIngress {
     /// space that cannot accommodate the configured window is reported,
     /// never panicked on and never wrapped.
     fn window_end(&self) -> Result<Ordinal, TimelineOrdinalSpaceExhausted> {
+        // `window_width >= 1` is validated at construction, so the
+        // saturating subtraction is exact and its saturating branch is
+        // unreachable; it is written this way so the function contains no
+        // unchecked arithmetic at all.
+        let span = u64::from(self.window_width).saturating_sub(1);
         self.frontier_ordinal
             .0
-            .checked_add(u64::from(self.window_width) - 1)
+            .checked_add(span)
             .map(Ordinal)
             .ok_or(TimelineOrdinalSpaceExhausted {
                 frontier_ordinal: self.frontier_ordinal,
@@ -1140,12 +1303,23 @@ impl TimelineIngress {
                     AcknowledgedSlotState::NewlyStaged,
                 )))
             }
-            Some(SlotState::Poisoned) => Ok(StageDisposition::Poisoned(SlotPoisonRecord {
-                profile_id: self.profile_id.clone(),
-                timeline_epoch: self.timeline_epoch,
-                input_ordinal: ordinal,
-                rejected_semantic_hash: semantic_hash,
-            })),
+            Some(SlotState::Poisoned(_)) => {
+                // A further claim on an already-poisoned slot is still
+                // refused, but it is *recorded*: the evidence set is what
+                // makes two differently-contested slots distinguishable in
+                // canonical state, and a set insert is idempotent and
+                // commutative, so this cannot make state arrival-order
+                // sensitive.
+                if let Some(SlotState::Poisoned(evidence)) = self.slots.get_mut(&ordinal.0) {
+                    evidence.insert(semantic_hash.clone());
+                }
+                Ok(StageDisposition::Poisoned(SlotPoisonRecord {
+                    profile_id: self.profile_id.clone(),
+                    timeline_epoch: self.timeline_epoch,
+                    input_ordinal: ordinal,
+                    rejected_semantic_hash: semantic_hash,
+                }))
+            }
             Some(SlotState::Staged {
                 semantic_hash: existing,
                 ..
@@ -1160,7 +1334,9 @@ impl TimelineIngress {
                         AcknowledgedSlotState::AlreadyStagedIdempotent,
                     )))
                 } else {
-                    self.slots.insert(ordinal.0, SlotState::Poisoned);
+                    let evidence =
+                        SlotPoisonEvidence::from_pair(existing.clone(), semantic_hash.clone());
+                    self.slots.insert(ordinal.0, SlotState::Poisoned(evidence));
                     Ok(StageDisposition::Poisoned(SlotPoisonRecord {
                         profile_id: self.profile_id.clone(),
                         timeline_epoch: self.timeline_epoch,
@@ -1177,7 +1353,7 @@ impl TimelineIngress {
         match self.slots.get(&ordinal.0) {
             None => SlotStatus::Empty,
             Some(SlotState::Staged { .. }) => SlotStatus::Staged,
-            Some(SlotState::Poisoned) => SlotStatus::Poisoned,
+            Some(SlotState::Poisoned(_)) => SlotStatus::Poisoned,
         }
     }
 
@@ -1249,7 +1425,7 @@ impl TimelineIngress {
                 }) => {
                     ordered.push((Ordinal(raw), (**envelope).clone(), semantic_hash.clone()));
                 }
-                Some(SlotState::Poisoned) => {
+                Some(SlotState::Poisoned(_)) => {
                     return Err(FenceError::RangeContainsPoisoned {
                         ordinal: Ordinal(raw),
                     })
@@ -1326,7 +1502,7 @@ impl TimelineIngress {
         // (within the new window) survives. If the new window cannot be
         // computed at all, the ordinal space is exhausted and no slot can
         // remain eligible, so retaining nothing is the correct behavior.
-        let new_window_end = self.window_end().map(|o| o.0).unwrap_or(u64::MAX);
+        let new_window_end = self.window_end().map_or(u64::MAX, |o| o.0);
         self.slots
             .retain(|ord, _| *ord >= new_frontier && *ord <= new_window_end);
 
@@ -1474,8 +1650,9 @@ impl TimelineIngress {
                     envelope.canonicalize(&mut inner);
                     inner.push_digest(semantic_hash);
                 }
-                SlotState::Poisoned => {
+                SlotState::Poisoned(evidence) => {
                     inner.push_str("poisoned");
+                    evidence.canonicalize(&mut inner);
                 }
             }
             enc.push_block(&inner);

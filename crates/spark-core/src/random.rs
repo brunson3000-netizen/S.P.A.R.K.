@@ -86,7 +86,13 @@ impl RandomAddressService {
     /// gates over canonical fixed-point rates.
     pub fn derive_fixed_fraction(&self, address: &RandomAddress) -> i64 {
         let raw = self.derive_u64(address);
-        (raw % crate::value::FIXED_SCALE as u64) as i64
+        // `FIXED_SCALE` is a non-zero compile-time constant, so the
+        // remainder is always defined; `checked_rem` is used anyway so
+        // this function contains no unchecked arithmetic and therefore no
+        // division-by-zero panic path, even if the constant were ever
+        // changed.
+        let modulus = crate::value::FIXED_SCALE as u64;
+        raw.checked_rem(modulus).unwrap_or(0) as i64
     }
 }
 
@@ -118,6 +124,13 @@ pub fn address_at(
 }
 
 #[cfg(test)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects
+)]
 mod tests {
     use super::*;
     use crate::hash::hash_bytes;

@@ -24,6 +24,41 @@
 //!    [`CategoricalValue`] enforces a length bound and rejects control
 //!    characters at construction. `CanonicalValue::Categorical` therefore
 //!    carries a validated value, not a raw `String`.
+//!
+//! # Re-Foundation v2: the panic-free construction policy
+//!
+//! > No public function this project defines in a canonical crate may
+//! > panic, wrap, or saturate on any caller input. Fallibility is a
+//! > `Result` with a typed error; infallibility is *earned* by validated
+//! > domain types.
+//!
+//! [`FixedPoint`] is the worked example. Its previous `clamp` delegated to
+//! `i64::clamp` and panicked on reversed bounds — a production panic path
+//! an independent reviewer executed. It is replaced by two operations that
+//! split the two jobs it conflated:
+//!
+//! - [`FixedRange`] is a coherent-by-construction domain, and
+//!   [`FixedPoint::clamp`]/[`FixedPoint::clamp_to`] over it are **total**;
+//! - [`FixedPoint::checked_clamp`] takes ad-hoc bounds and returns a typed
+//!   [`IncoherentClampBounds`] error.
+//!
+//! Note the subtlety that made the first attempt insufficient: `FixedPoint`
+//! implements `Ord`, and `Ord` supplies a *provided* `clamp` method that
+//! panics on reversed bounds. Deleting the inherent method alone would
+//! have handed the panic to the standard library. The inherent
+//! [`FixedPoint::clamp`] therefore deliberately **shadows** it with a
+//! validated-domain signature, so the reversed-bounds call is now rejected
+//! at compile time.
+//!
+//! The policy's scope is exactly "functions this project defines".
+//! `core::cmp::Ord::clamp` remains reachable through fully-qualified
+//! syntax on *every* `Ord` type in Rust — `u64`, `String`, and every
+//! canonical newtype whose `Ord` implementation ADR-0003's stable total
+//! ordering depends on. Forbidding it would mean forbidding `Ord`, which
+//! would forbid the `BTreeMap`/`BTreeSet` determinism the whole kernel is
+//! built on; and it is already reachable on the public `u64` fields of
+//! types like `Ordinal`. Clamping is a meaningful domain operation on
+//! exactly one canonical type, `FixedPoint`, and that one is closed.
 
 use crate::hash::CanonicalEncoder;
 use crate::id::DefinitionId;
@@ -91,8 +126,183 @@ impl FixedPoint {
             })
     }
 
-    pub fn clamp(self, min: FixedPoint, max: FixedPoint) -> FixedPoint {
-        FixedPoint(self.0.clamp(min.0, max.0))
+    /// Clamps into a **validated** range, shadowing the standard
+    /// library's panicking `Ord::clamp`.
+    ///
+    /// `FixedPoint` implements `Ord`, and `Ord` carries a *provided*
+    /// `clamp` method that panics when `min > max`. Simply deleting this
+    /// type's own panicking `clamp` therefore would **not** have removed
+    /// the reversed-bounds panic an independent reviewer executed: the
+    /// standard-library method would have taken over silently. This
+    /// inherent method shadows it, and because it takes a validated
+    /// [`FixedRange`] rather than two loose bounds, the reversed-bounds
+    /// call that used to panic at run time is now a *compile* error. Use
+    /// [`FixedPoint::checked_clamp`] when the bounds genuinely are ad hoc.
+    ///
+    /// Total: a `FixedRange` cannot be incoherent, so there is no input
+    /// for which this can fail and none for which it could panic.
+    pub fn clamp(self, range: &FixedRange) -> FixedPoint {
+        self.clamp_to(range)
+    }
+
+    /// Clamps into a validated range. This is the name the Re-Foundation
+    /// v2 brief §6 gives the operation; [`FixedPoint::clamp`] is the same
+    /// operation under the name that shadows `Ord::clamp`.
+    ///
+    /// This is the "validated domain earns a total operation" half of the
+    /// project's panic-free policy; the ad-hoc half is
+    /// [`FixedPoint::checked_clamp`].
+    pub fn clamp_to(self, range: &FixedRange) -> FixedPoint {
+        if self.0 < range.min.0 {
+            range.min
+        } else if self.0 > range.max.0 {
+            range.max
+        } else {
+            self
+        }
+    }
+
+    /// Clamps between ad-hoc bounds, reporting incoherent bounds as a
+    /// typed error.
+    ///
+    /// This replaces the previous `FixedPoint::clamp`, which delegated to
+    /// `i64::clamp` and therefore **panicked** whenever a caller passed
+    /// `min > max` — an executed production panic path found by
+    /// independent review.
+    ///
+    /// ```
+    /// use spark_core::value::{FixedPoint, IncoherentClampBounds};
+    /// let min = FixedPoint::from_integer(1).unwrap();
+    /// let max = FixedPoint::ZERO;
+    /// assert_eq!(
+    ///     FixedPoint::from_raw(500_000).checked_clamp(min, max),
+    ///     Err(IncoherentClampBounds { min: 1_000_000, max: 0 })
+    /// );
+    /// ```
+    pub fn checked_clamp(
+        self,
+        min: FixedPoint,
+        max: FixedPoint,
+    ) -> Result<FixedPoint, IncoherentClampBounds> {
+        let range = FixedRange::new(min, max)?;
+        Ok(self.clamp_to(&range))
+    }
+
+    /// Adds two fixed-point values, rejecting overflow instead of
+    /// panicking or wrapping.
+    pub fn checked_add(self, other: FixedPoint) -> Result<FixedPoint, FixedPointArithmeticError> {
+        self.0.checked_add(other.0).map(FixedPoint).ok_or(
+            FixedPointArithmeticError::AdditionOverflow {
+                lhs: self.0,
+                rhs: other.0,
+            },
+        )
+    }
+
+    /// Subtracts two fixed-point values, rejecting overflow instead of
+    /// panicking or wrapping.
+    pub fn checked_sub(self, other: FixedPoint) -> Result<FixedPoint, FixedPointArithmeticError> {
+        self.0.checked_sub(other.0).map(FixedPoint).ok_or(
+            FixedPointArithmeticError::SubtractionOverflow {
+                lhs: self.0,
+                rhs: other.0,
+            },
+        )
+    }
+}
+
+/// Rejects fixed-point arithmetic that would leave `i64`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FixedPointArithmeticError {
+    AdditionOverflow { lhs: i64, rhs: i64 },
+    SubtractionOverflow { lhs: i64, rhs: i64 },
+}
+
+impl fmt::Display for FixedPointArithmeticError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            FixedPointArithmeticError::AdditionOverflow { lhs, rhs } => write!(
+                f,
+                "fixed-point addition of raw {lhs} and {rhs} overflows i64"
+            ),
+            FixedPointArithmeticError::SubtractionOverflow { lhs, rhs } => write!(
+                f,
+                "fixed-point subtraction of raw {rhs} from {lhs} overflows i64"
+            ),
+        }
+    }
+}
+
+impl std::error::Error for FixedPointArithmeticError {}
+
+/// Rejects an ad-hoc clamp whose bounds accept no value.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct IncoherentClampBounds {
+    pub min: i64,
+    pub max: i64,
+}
+
+impl fmt::Display for IncoherentClampBounds {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "clamp bounds are incoherent: raw min {} exceeds raw max {}, so they accept no value",
+            self.min, self.max
+        )
+    }
+}
+
+impl std::error::Error for IncoherentClampBounds {}
+
+/// A coherent-by-construction fixed-point range (`min <= max`).
+///
+/// This is the validated domain that makes [`FixedPoint::clamp_to`]
+/// total. Its fields are private and [`FixedRange::new`] is the only
+/// constructor, so an incoherent range — one that accepts no value at all
+/// — is not expressible anywhere in the system, exactly as
+/// [`ValueConstraint`] is for declared bounds. `ValueConstraint::fixed`
+/// reuses this type, so there is one definition of fixed-point range
+/// coherence rather than two that could drift.
+///
+/// ```
+/// use spark_core::value::{FixedPoint, FixedRange};
+/// let zero = FixedPoint::ZERO;
+/// let one = FixedPoint::from_integer(1).unwrap();
+/// assert!(FixedRange::new(zero, one).is_ok());
+/// assert!(FixedRange::new(one, zero).is_err());
+/// ```
+///
+/// ```compile_fail
+/// use spark_core::value::{FixedPoint, FixedRange};
+/// let forged = FixedRange { min: FixedPoint::ZERO, max: FixedPoint::ZERO };
+/// ```
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FixedRange {
+    min: FixedPoint,
+    max: FixedPoint,
+}
+
+impl FixedRange {
+    pub fn new(min: FixedPoint, max: FixedPoint) -> Result<Self, IncoherentClampBounds> {
+        if min.0 > max.0 {
+            return Err(IncoherentClampBounds {
+                min: min.0,
+                max: max.0,
+            });
+        }
+        Ok(FixedRange { min, max })
+    }
+
+    pub fn min(&self) -> FixedPoint {
+        self.min
+    }
+
+    pub fn max(&self) -> FixedPoint {
+        self.max
+    }
+
+    pub fn contains(&self, value: FixedPoint) -> bool {
+        value.0 >= self.min.0 && value.0 <= self.max.0
     }
 }
 
@@ -310,7 +520,7 @@ impl std::error::Error for ValueConstraintError {}
 enum ConstraintRepr {
     Bool,
     Int { min: i64, max: i64 },
-    Fixed { min: FixedPoint, max: FixedPoint },
+    Fixed { range: FixedRange },
     Categorical { max_len: usize },
     Reference,
 }
@@ -357,14 +567,17 @@ impl ValueConstraint {
     }
 
     /// A closed fixed-point range. Rejects `min > max`.
+    ///
+    /// Coherence is decided by [`FixedRange::new`], so a declared
+    /// constraint and a runtime clamp can never disagree about what a
+    /// coherent fixed-point range is.
     pub fn fixed(min: FixedPoint, max: FixedPoint) -> Result<Self, ValueConstraintError> {
-        if min > max {
-            return Err(ValueConstraintError::IncoherentFixedRange {
-                min: min.raw(),
-                max: max.raw(),
-            });
-        }
-        Ok(ValueConstraint(ConstraintRepr::Fixed { min, max }))
+        let range =
+            FixedRange::new(min, max).map_err(|e| ValueConstraintError::IncoherentFixedRange {
+                min: e.min,
+                max: e.max,
+            })?;
+        Ok(ValueConstraint(ConstraintRepr::Fixed { range }))
     }
 
     /// A categorical value bounded to at most `max_len` characters.
@@ -400,7 +613,7 @@ impl ValueConstraint {
         match (&self.0, value) {
             (ConstraintRepr::Bool, CanonicalValue::Bool(_)) => true,
             (ConstraintRepr::Int { min, max }, CanonicalValue::Int(v)) => v >= min && v <= max,
-            (ConstraintRepr::Fixed { min, max }, CanonicalValue::Fixed(v)) => v >= min && v <= max,
+            (ConstraintRepr::Fixed { range }, CanonicalValue::Fixed(v)) => range.contains(*v),
             (ConstraintRepr::Categorical { max_len }, CanonicalValue::Categorical(s)) => {
                 s.char_len() <= *max_len
             }
@@ -419,10 +632,10 @@ impl ValueConstraint {
                 enc.push_i64(*min);
                 enc.push_i64(*max);
             }
-            ConstraintRepr::Fixed { min, max } => {
+            ConstraintRepr::Fixed { range } => {
                 enc.push_str("constraint.fixed");
-                enc.push_i64(min.raw());
-                enc.push_i64(max.raw());
+                enc.push_i64(range.min().raw());
+                enc.push_i64(range.max().raw());
             }
             ConstraintRepr::Categorical { max_len } => {
                 enc.push_str("constraint.categorical");
@@ -436,6 +649,13 @@ impl ValueConstraint {
 }
 
 #[cfg(test)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects
+)]
 mod tests {
     use super::*;
 
@@ -541,6 +761,92 @@ mod tests {
             CategoricalValue::new("bad\u{0}value"),
             Err(CategoricalValueError::ControlCharacter)
         );
+    }
+
+    /// AT-C3, the executed panic this replaces: reversed clamp bounds are
+    /// a typed error, and the validated-range form is total.
+    #[test]
+    fn clamp_is_total_or_fallible_never_panicking() {
+        let zero = FixedPoint::ZERO;
+        let one = FixedPoint::from_integer(1).unwrap();
+        let half = FixedPoint::from_raw(500_000);
+
+        assert_eq!(
+            half.checked_clamp(one, zero),
+            Err(IncoherentClampBounds {
+                min: FIXED_SCALE,
+                max: 0
+            })
+        );
+        assert_eq!(
+            FixedRange::new(one, zero),
+            Err(IncoherentClampBounds {
+                min: FIXED_SCALE,
+                max: 0
+            })
+        );
+
+        let range = FixedRange::new(zero, one).unwrap();
+        assert_eq!(FixedPoint::from_raw(-5).clamp_to(&range), zero);
+        assert_eq!(FixedPoint::from_raw(2 * FIXED_SCALE).clamp_to(&range), one);
+        assert_eq!(half.clamp_to(&range), half);
+        assert_eq!(half.checked_clamp(zero, one), Ok(half));
+        // The inherent `clamp` shadows `Ord::clamp`, so ordinary method
+        // syntax reaches the validated-domain form. The reversed-bounds
+        // call that used to panic no longer type-checks at all; the
+        // external compile probe proves that from outside the crate.
+        assert_eq!(half.clamp(&range), half);
+    }
+
+    /// AT-C5: fixed-point arithmetic overflow is reported, never wrapped
+    /// or panicked on.
+    #[test]
+    fn checked_fixed_point_arithmetic_reports_overflow() {
+        let max = FixedPoint::from_raw(i64::MAX);
+        let min = FixedPoint::from_raw(i64::MIN);
+        let one = FixedPoint::from_raw(1);
+
+        assert_eq!(
+            max.checked_add(one),
+            Err(FixedPointArithmeticError::AdditionOverflow {
+                lhs: i64::MAX,
+                rhs: 1
+            })
+        );
+        assert_eq!(
+            min.checked_sub(one),
+            Err(FixedPointArithmeticError::SubtractionOverflow {
+                lhs: i64::MIN,
+                rhs: 1
+            })
+        );
+        assert_eq!(
+            FixedPoint::from_raw(2).checked_add(FixedPoint::from_raw(3)),
+            Ok(FixedPoint::from_raw(5))
+        );
+        assert_eq!(
+            FixedPoint::from_raw(3).checked_sub(FixedPoint::from_raw(2)),
+            Ok(FixedPoint::from_raw(1))
+        );
+    }
+
+    /// AT-C6 (Codex counterexample #14): the canonical text contract is
+    /// deliberate **byte distinction**, not Unicode normalization. A
+    /// composed and a decomposed spelling of the same glyph are different
+    /// canonical values with different hashes.
+    #[test]
+    fn unicode_categorical_values_are_byte_distinct() {
+        // U+00E9 vs U+0065 U+0301 — canonically equivalent under NFC/NFD,
+        // deliberately distinct here.
+        let composed = CategoricalValue::new("caf\u{e9}").unwrap();
+        let decomposed = CategoricalValue::new("cafe\u{301}").unwrap();
+        assert_ne!(composed, decomposed);
+
+        let mut a = CanonicalEncoder::new();
+        CanonicalValue::Categorical(composed).canonicalize(&mut a);
+        let mut b = CanonicalEncoder::new();
+        CanonicalValue::Categorical(decomposed).canonicalize(&mut b);
+        assert_ne!(a.finish(), b.finish());
     }
 
     #[test]

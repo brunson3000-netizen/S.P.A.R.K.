@@ -4,7 +4,7 @@
 //! canonical vocabulary, so unlike [`spark_core::id::CanonicalTag`] they
 //! permit ordinary Unicode. They are still bounded and
 //! control-character-free at construction, because a profile description
-//! reaches [`crate::manifest::ProfileManifest::manifest_content_hash`] and
+//! reaches [`crate::profile::manifest::ProfileManifest::manifest_content_hash`] and
 //! an unbounded canonical hash input is a storage/hashing vector
 //! (`PHASE_1_REFOUNDATION_BRIEF_v0.1.md` "Canonical construction/bounds").
 
@@ -42,7 +42,7 @@ impl std::error::Error for BoundedTextError {}
 /// constructed:
 ///
 /// ```compile_fail
-/// use spark_profile::text::BoundedText;
+/// use spark_engine::profile::text::BoundedText;
 /// let forged = BoundedText("x".repeat(100_000));
 /// ```
 #[derive(Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -82,6 +82,13 @@ impl fmt::Display for BoundedText {
 }
 
 #[cfg(test)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects
+)]
 mod tests {
     use super::*;
 

@@ -1,17 +1,19 @@
 //! Authority modes and their implied write classes.
 //!
 //! ADR-0002 requires that every state definition declare exactly one
-//! authority mode and that the mode imply a fixed write class. Immutable
-//! *identity* enforcement (that a definition ID's authority can never
-//! change once declared) is owned by the profile-qualified definition
-//! identity registry in `spark-profile` (which hashes authority as part of
-//! the full definition fingerprint) and, at the state layer, by the
-//! immutable schema [`crate::state::StateStore`] is built from. This
-//! module intentionally owns only the two small fixed vocabularies
-//! (`Authority`, `WriteClass`); a single overlapping "authority catalog"
+//! authority mode and that the mode imply a fixed write class. This module
+//! owns the two small fixed vocabularies (`Authority`, `WriteClass`) and
+//! **nothing else** — deliberately, because it sits below the trust
+//! boundary.
+//!
+//! Enforcement lives in exactly one place, one level up: `spark-engine`'s
+//! activation door hashes authority *and* its implied write class into
+//! every definition fingerprint (so a definition ID's authority can never
+//! change once activated), and `spark-engine`'s state store hard-codes one
+//! authority per write path. A single overlapping "authority catalog"
 //! duplicating identity enforcement in two places was exactly the kind of
-//! structural confusion the Phase-1 independent review flagged, so Phase 1
-//! keeps exactly one enforcement point per invariant instead.
+//! structural confusion the Phase-1 independent reviews flagged, so there
+//! is one enforcement point per invariant and the kernel keeps none.
 
 use crate::hash::CanonicalEncoder;
 
@@ -72,6 +74,13 @@ impl WriteClass {
 }
 
 #[cfg(test)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects
+)]
 mod tests {
     use super::*;
 

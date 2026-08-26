@@ -35,7 +35,7 @@
 //! keys are sorted, so the same malformed input is rejected identically
 //! regardless of the order it arrived in.
 
-use crate::text::BoundedText;
+use crate::profile::text::BoundedText;
 use spark_core::hash::{CanonicalEncoder, Digest};
 use spark_core::id::{DefinitionId, ProfileId};
 use spark_core::value::CanonicalValue;
@@ -86,7 +86,7 @@ impl std::error::Error for ConfigRevisionError {}
 /// constructor, so an ambiguous or unbounded revision does not exist:
 ///
 /// ```compile_fail
-/// use spark_profile::config::ConfigRevision;
+/// use spark_engine::profile::config::ConfigRevision;
 /// use spark_core::id::ProfileId;
 /// let forged = ConfigRevision {
 ///     profile_id: ProfileId::new("game-world").unwrap(),
@@ -185,6 +185,13 @@ impl ConfigRevision {
 }
 
 #[cfg(test)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects
+)]
 mod tests {
     use super::*;
     use spark_core::value::{CategoricalValue, FixedPoint, MAX_CATEGORICAL_VALUE_LEN};

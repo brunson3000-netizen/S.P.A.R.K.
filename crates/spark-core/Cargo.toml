@@ -4,7 +4,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
-description = "S.P.A.R.K. canonical deterministic core: bounded IDs/tags, scopes, authority, definition-identity activation, StateCell, logical clock, semantic-key scheduler, random addresses, canonical timeline ingress."
+description = "S.P.A.R.K. canonical deterministic kernel: bounded IDs/tags, scopes, authority vocabulary, canonical values, logical clock, semantic-key scheduler with order-independent conflict poisoning, random addresses, and canonical timeline ingress."
 
 [dependencies]
 # "pure" disables blake3's optional C/assembly SIMD backends so the build
@@ -12,5 +12,25 @@ description = "S.P.A.R.K. canonical deterministic core: bounded IDs/tags, scopes
 # cross-checks) - see the dependency rationale in the Phase-1 report.
 blake3 = { version = "1", default-features = false, features = ["std", "pure"] }
 
+[features]
+# Sanctioned test-only seams (currently: the nonzero-frontier timeline
+# constructor). Off by default; enabled only by `#[cfg(test)]` builds of
+# this crate and by `spark-testkit`'s dev-dependency edge. The workspace
+# feature-hygiene test asserts that no production dependency edge enables
+# it (`PHASE_1_REFOUNDATION_V2_IMPLEMENTATION_BRIEF.md` §7).
+test-support = []
+
 [lints.rust]
 unsafe_code = "forbid"
+
+# The mechanical panic/arithmetic gate required by the v2 brief §6. A
+# panic-freedom policy audited by grep keeps leaking; these lints make
+# every unchecked `unwrap`/`expect`/`panic!`, every unchecked slice index,
+# and every unchecked `+`/`-`/`*`/`%` in canonical code a build failure.
+# Test modules scope a local `allow`; there is no crate-wide exemption.
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+indexing_slicing = "deny"
+arithmetic_side_effects = "deny"

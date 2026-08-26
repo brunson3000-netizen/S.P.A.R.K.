@@ -1,27 +1,40 @@
-//! Phase-1 re-foundation permanent adversarial corpus.
+//! Test targets scope the canonical crates' strict panic/arithmetic gate
+//! locally.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects
+)]
+//! Phase-1 re-foundation permanent adversarial corpus (v1 line, ported to
+//! the Re-Foundation v2 crate boundary).
 //!
 //! Every test here encodes one counterexample from
 //! `engineering/phase1/PHASE_1_REFOUNDATION_BRIEF_v0.1.md` that survived
 //! the bounded correction pass. They live in `spark-testkit` — a crate
-//! separate from `spark-core` and `spark-profile` — deliberately: this is
+//! separate from `spark-core` and `spark-engine` — deliberately: this is
 //! the vantage point an integrator or a Phase-2 crate has, so anything
 //! reachable from here is genuinely part of the public boundary.
 //!
-//! Every one of these failed against the inherited implementation; the
-//! recorded baseline is
+//! Every one of these failed against the pre-re-foundation implementation;
+//! the recorded baseline is
 //! `engineering/phase1/refoundation-baseline/BASELINE_ADVERSARIAL_FAILURES.txt`.
+//! They are **ported, not rewritten**: no assertion here was weakened by
+//! the v2 crate reshape. The two that independent review found materially
+//! insufficient — `definition_spec_cannot_self_activate` (which used an
+//! *invalid* spec, so it never exercised the bypass) and
+//! `payload_conflict_rejects_in_either_order` (which compared only error
+//! shape and length) — are replaced by strictly stronger assertions in
+//! `refoundation_v2_adversarial.rs`, and the weak forms are gone.
 //!
 //! Requirements whose violation is a *type* error rather than a runtime
-//! one — forging an `ActivatedSchema`, canonicalizing an
+//! one — forging an `ActivatedProfile`, canonicalizing an
 //! `AdmissionTicket`, building a `ValueConstraint` with `min > max`,
-//! constructing a `StateStore` from raw schema — are encoded as
-//! `compile_fail` doc-tests on the affected types, which `cargo test`
-//! runs as part of the doc-test suite.
+//! constructing a `StateStore` without an activation — are encoded as
+//! `compile_fail` doc-tests on the affected types plus the external
+//! compile probes in `external_compile_probes.rs`.
 
-use spark_core::activation::{
-    definition_fingerprint, DefinitionDeclaration, DefinitionIdentityRegistry, DefinitionKindTag,
-    SchemaActivationError,
-};
 use spark_core::authority::Authority;
 use spark_core::clock::LogicalTime;
 use spark_core::hash::{hash_bytes, Digest};
@@ -29,10 +42,10 @@ use spark_core::id::{
     CanonicalTag, CommandId, DefinitionId, FenceId, ProfileId, SourceId, StableIdError,
 };
 use spark_core::scheduler::{
-    DueWorkItem, OccurrenceIndex, Scheduler, WorkKey, WorkKind, WorkPayload,
+    DueWorkItem, OccurrenceIndex, ScheduleDisposition, Scheduler, WorkKey, WorkKind, WorkPayload,
+    WorkSlotStatus,
 };
 use spark_core::scope::{ScopeId, ScopeKind};
-use spark_core::state::StateStore;
 use spark_core::timeline::{
     compute_ordered_stream_digest, AcknowledgedSlotState, CommandKind, FenceError, Ordinal,
     SemanticCommandEnvelope, StageDisposition, TimelineEpoch, TimelineFence, TimelineIngress,
@@ -41,11 +54,12 @@ use spark_core::value::{
     CanonicalValue, CategoricalValue, ValueConstraint, ValueConstraintError,
     MAX_CATEGORICAL_VALUE_LEN,
 };
-use spark_profile::config::{ConfigEntry, ConfigRevision, ConfigRevisionError};
-use spark_profile::definition::{DefinitionKind, DefinitionSpec};
-use spark_profile::manifest::ProfileManifest;
-use spark_profile::text::BoundedText;
-use spark_profile::validate::{validate, ValidationError};
+use spark_engine::activation::{definition_fingerprint, ActivationRegistry, ValidationError};
+use spark_engine::profile::config::{ConfigEntry, ConfigRevision, ConfigRevisionError};
+use spark_engine::profile::definition::{DefinitionKind, DefinitionSpec};
+use spark_engine::profile::manifest::ProfileManifest;
+use spark_engine::profile::text::BoundedText;
+use spark_engine::state::StateStore;
 use std::collections::BTreeSet;
 
 fn profile() -> ProfileId {
@@ -379,78 +393,98 @@ fn epoch_handoff_is_authenticated_monotonic_and_history_preserving() {
 // Schema provenance / authority
 // =====================================================================
 
-fn declaration(id: &str, authority: Authority) -> DefinitionDeclaration {
-    DefinitionDeclaration {
+/// A definition spec offered to the activation door. Note the shape: a
+/// caller may author these fields freely, but the *only* thing it can do
+/// with them is offer a whole manifest to the one public door.
+fn spec(id: &str, authority: Authority) -> DefinitionSpec {
+    DefinitionSpec {
         profile_id: profile(),
-        definition_id: DefinitionId::new(id).unwrap(),
-        kind: DefinitionKindTag::builtin(CanonicalTag::new("state_definition").unwrap()),
-        authority,
+        id: DefinitionId::new(id).unwrap(),
+        kind: DefinitionKind::StateDefinition,
+        domain: None,
+        layer: None,
         value_constraint: ValueConstraint::boolean(),
+        authority,
         valid_scopes: BTreeSet::from([ScopeKind::Actor]),
+        enabled: true,
+        version: 1,
+        description: BoundedText::new("state definition").unwrap(),
+        behavioral_leverage: None,
     }
 }
 
+fn manifest_of(specs: Vec<DefinitionSpec>) -> ProfileManifest {
+    ProfileManifest::new(profile(), BoundedText::new("1.0.0").unwrap(), specs)
+}
+
+fn store_of(specs: Vec<DefinitionSpec>) -> StateStore {
+    let mut registry = ActivationRegistry::new();
+    registry
+        .activate(&manifest_of(specs))
+        .unwrap()
+        .into_state_store()
+}
+
 /// Schema test 1/2/3: external code cannot install authority into a
-/// `StateStore` except by passing through the activation ceremony, and
-/// the identity it gets is the one the registry computed.
+/// `StateStore` except by passing through the complete activation
+/// ceremony, and the identity it gets is the one the door computed.
 ///
 /// The stronger, compile-time half of this requirement — that
-/// `ActivatedSchema`, `ActivatedDefinition`, and the old raw-schema
-/// `StateStore::new` are not constructible at all from outside — is
-/// encoded as `compile_fail` doc-tests on those items.
+/// `ActivatedProfile`, `ActivatedDefinition`, the raw declaration type,
+/// and every `StateStore` constructor are not nameable at all from
+/// outside — is encoded as `compile_fail` doc-tests on those items and as
+/// external compile probes in `external_compile_probes.rs`.
 #[test]
-fn state_store_authority_derives_only_from_a_validated_activation() {
-    let mut registry = DefinitionIdentityRegistry::new();
-    let decl = declaration("state.forged", Authority::Derived);
-    let schema = registry
-        .activate(&profile(), std::slice::from_ref(&decl))
-        .unwrap();
-    let store = StateStore::from_activated_schema(schema);
+fn state_store_authority_derives_only_from_the_activation_door() {
+    let declared = spec("state.forged", Authority::Derived);
+    let store = store_of(vec![declared.clone()]);
 
     let activated = store
         .schema_of(&profile(), &DefinitionId::new("state.forged").unwrap())
-        .expect("the sanctioned path installs the definition");
+        .expect("the one sanctioned path installs the definition");
 
-    // The fingerprint is the registry's, never a caller's: a caller has
+    // The fingerprint is the door's, never a caller's: a caller has
     // nowhere to put one, and `Digest::ZERO` is not reachable.
-    assert_eq!(activated.fingerprint(), &definition_fingerprint(&decl));
+    assert_eq!(activated.fingerprint(), &definition_fingerprint(&declared));
     assert_ne!(activated.fingerprint(), &Digest::ZERO);
-    assert_eq!(
-        store.activation_hash(),
-        store.activated_schema().activation_hash()
-    );
+    assert_ne!(store.activation_hash(), &Digest::ZERO);
+    assert_ne!(store.manifest_content_hash(), &Digest::ZERO);
 }
 
-/// Schema test 4: duplicate schema keys reject, in either order, and
+/// Schema test 4: duplicate definition keys reject, in either order, and
 /// commit nothing.
 #[test]
 fn duplicate_schema_keys_reject_and_commit_nothing() {
-    let host = declaration("state.contested", Authority::HostOwned);
-    let spark = declaration("state.contested", Authority::SparkOwned);
+    let host = spec("state.contested", Authority::HostOwned);
+    let spark = spec("state.contested", Authority::SparkOwned);
 
-    for pair in [[host.clone(), spark.clone()], [spark.clone(), host.clone()]] {
-        let mut registry = DefinitionIdentityRegistry::new();
-        let errors = registry.activate(&profile(), &pair).unwrap_err();
+    for pair in [
+        vec![host.clone(), spark.clone()],
+        vec![spark.clone(), host.clone()],
+    ] {
+        let mut registry = ActivationRegistry::new();
+        let errors = registry.activate(&manifest_of(pair)).unwrap_err();
         assert!(matches!(
             errors[0],
-            SchemaActivationError::DuplicateDefinitionKey { .. }
+            ValidationError::DuplicateDefinitionId { .. }
         ));
         assert!(registry.is_empty());
+        assert_eq!(registry.lineage_len(), 0);
     }
 }
 
 /// Schema test 5: fingerprint, profile, type, scope, and bounds are all
-/// carried from the validated activation, and every one of them is part of
-/// the identity the registry will enforce on reload.
+/// carried from the ceremony, and every one of them is part of the
+/// identity the registry enforces on reload.
 #[test]
-fn activated_identity_is_carried_from_validation_not_from_the_caller() {
-    let mut registry = DefinitionIdentityRegistry::new();
-    let original = declaration("state.tracked", Authority::HostOwned);
-    let schema = registry
-        .activate(&profile(), std::slice::from_ref(&original))
+fn activated_identity_is_carried_from_the_ceremony_not_from_the_caller() {
+    let mut registry = ActivationRegistry::new();
+    let original = spec("state.tracked", Authority::HostOwned);
+    let activated_profile = registry
+        .activate(&manifest_of(vec![original.clone()]))
         .unwrap();
-    let activated = schema
-        .get(&DefinitionId::new("state.tracked").unwrap())
+    let activated = activated_profile
+        .definition(&DefinitionId::new("state.tracked").unwrap())
         .unwrap();
 
     assert_eq!(activated.profile_id(), &profile());
@@ -461,6 +495,7 @@ fn activated_identity_is_carried_from_validation_not_from_the_caller() {
         &BTreeSet::from([ScopeKind::Actor])
     );
     assert_eq!(activated.kind().tag().as_str(), "state_definition");
+    assert!(!activated.kind().is_custom());
 
     // Any change to any of those is an identity change on reload.
     for mutated in [
@@ -481,80 +516,66 @@ fn activated_identity_is_carried_from_validation_not_from_the_caller() {
         },
         {
             let mut d = original.clone();
-            d.kind = DefinitionKindTag::custom(CanonicalTag::new("state_definition").unwrap());
+            d.kind = DefinitionKind::custom("state_definition").unwrap();
             d
         },
     ] {
-        let errors = registry.activate(&profile(), &[mutated]).unwrap_err();
+        let errors = registry.activate(&manifest_of(vec![mutated])).unwrap_err();
         assert!(matches!(
             errors[0],
-            SchemaActivationError::IdentityConflict { .. }
+            ValidationError::IdentityConflict { .. }
         ));
     }
 }
 
 /// Schema test 6: post-activation schema mutation is structurally
 /// unavailable. A `StateStore` exposes only shared references to its
-/// activated schema, and its activation hash is stable across any amount
-/// of state writing.
+/// activated definitions, and its artifact hashes are stable across any
+/// amount of state reading.
 #[test]
 fn post_activation_schema_mutation_is_unavailable() {
-    let mut registry = DefinitionIdentityRegistry::new();
-    let schema = registry
-        .activate(
-            &profile(),
-            &[declaration("state.stable", Authority::SparkOwned)],
-        )
+    let mut registry = ActivationRegistry::new();
+    let activated = registry
+        .activate(&manifest_of(vec![spec(
+            "state.stable",
+            Authority::SparkOwned,
+        )]))
         .unwrap();
-    let expected_activation = schema.activation_hash().clone();
-    let store = StateStore::from_activated_schema(schema);
+    let expected_activation = activated.activation_hash().clone();
+    let expected_manifest = activated.manifest_content_hash().clone();
+    let store = activated.into_state_store();
 
     assert_eq!(store.activation_hash(), &expected_activation);
-    let definitions: Vec<_> = store.activated_schema().definitions().collect();
+    assert_eq!(store.manifest_content_hash(), &expected_manifest);
+    let definitions: Vec<_> = store.definitions().collect();
     assert_eq!(definitions.len(), 1);
-    // Reading the schema cannot alter it: `definitions()` and
+    // Reading the definitions cannot alter them: `definitions()` and
     // `schema_of()` both yield shared references, and there is no
     // `insert`/`remove`/`set_authority` anywhere on the type.
     assert_eq!(store.activation_hash(), &expected_activation);
+    assert_eq!(
+        store.canonical_state_digest(),
+        store.canonical_state_digest()
+    );
 }
 
-/// A `DefinitionSpec` cannot promote itself into activated authority; it
-/// can only produce an untrusted declaration that still has to be
-/// validated.
+/// A manifest containing an invalid definition is rejected atomically.
+/// (The far stronger property — that a *valid* spec still has no
+/// self-activation path — is AT-A3 in `refoundation_v2_adversarial.rs`;
+/// this test deliberately no longer claims to prove it.)
 #[test]
-fn definition_spec_cannot_self_activate() {
-    let spec = DefinitionSpec {
-        profile_id: profile(),
-        id: DefinitionId::new("state.unvalidated").unwrap(),
-        kind: DefinitionKind::StateDefinition,
-        domain: None,
-        layer: None,
-        value_constraint: ValueConstraint::boolean(),
-        authority: Authority::HostOwned,
-        valid_scopes: BTreeSet::new(), // invalid: no valid scope
-        enabled: true,
-        version: 1,
-        description: BoundedText::new("never validated").unwrap(),
-        behavioral_leverage: None,
-    };
-    let manifest = ProfileManifest::new(
-        profile(),
-        BoundedText::new("1.0.0").unwrap(),
-        vec![spec.clone()],
-    );
-    let mut registry = DefinitionIdentityRegistry::new();
-    let errors = validate(&manifest, &mut registry).unwrap_err();
-    assert!(matches!(
-        errors[0],
-        ValidationError::Activation(SchemaActivationError::NoValidScope { .. })
-    ));
-    assert!(registry.is_empty());
+fn invalid_definition_rejects_the_whole_manifest_atomically() {
+    let mut invalid = spec("state.unvalidated", Authority::HostOwned);
+    invalid.valid_scopes = BTreeSet::new();
+    let good = spec("state.fine", Authority::HostOwned);
 
-    // The declaration it can produce is inert on its own: it grants no
-    // authority and carries no fingerprint field.
-    let declaration = spec.to_declaration();
-    assert_eq!(declaration.authority, Authority::HostOwned);
-    assert!(registry.activate(&profile(), &[declaration]).is_err());
+    let mut registry = ActivationRegistry::new();
+    let errors = registry
+        .activate(&manifest_of(vec![good.clone(), invalid]))
+        .unwrap_err();
+    assert!(matches!(errors[0], ValidationError::NoValidScope { .. }));
+    assert!(registry.is_empty());
+    assert!(registry.fingerprint_of(&profile(), &good.id).is_none());
 }
 
 // =====================================================================
@@ -584,8 +605,14 @@ fn work(due: u64, producer: &str, scope: &str, occurrence: u64) -> DueWorkItem {
 #[test]
 fn independent_producers_may_schedule_the_same_occurrence_index() {
     let mut sched = Scheduler::new();
-    sched.schedule(work(5, "trigger.a", "bron", 0)).unwrap();
-    sched.schedule(work(5, "trigger.b", "bron", 0)).unwrap();
+    assert_eq!(
+        sched.schedule(work(5, "trigger.a", "bron", 0)),
+        ScheduleDisposition::Scheduled
+    );
+    assert_eq!(
+        sched.schedule(work(5, "trigger.b", "bron", 0)),
+        ScheduleDisposition::Scheduled
+    );
     assert_eq!(sched.len(), 2);
 }
 
@@ -594,12 +621,12 @@ fn independent_producers_may_schedule_the_same_occurrence_index() {
 #[test]
 fn reversed_insertion_drains_identically() {
     let mut forward = Scheduler::new();
-    forward.schedule(work(5, "trigger.a", "bron", 0)).unwrap();
-    forward.schedule(work(5, "trigger.b", "bron", 0)).unwrap();
+    forward.schedule(work(5, "trigger.a", "bron", 0));
+    forward.schedule(work(5, "trigger.b", "bron", 0));
 
     let mut reversed = Scheduler::new();
-    reversed.schedule(work(5, "trigger.b", "bron", 0)).unwrap();
-    reversed.schedule(work(5, "trigger.a", "bron", 0)).unwrap();
+    reversed.schedule(work(5, "trigger.b", "bron", 0));
+    reversed.schedule(work(5, "trigger.a", "bron", 0));
 
     assert_eq!(
         forward.canonical_state_digest(),
@@ -611,21 +638,43 @@ fn reversed_insertion_drains_identically() {
     );
 }
 
-/// Scheduler test 3/4: the same semantic key with the same payload is
-/// idempotent; with a different payload it is a deterministic conflict
-/// that installs nothing new.
+/// Scheduler test 3/4 (strengthened): the same semantic key with the same
+/// payload is idempotent; with a *different* payload the key is poisoned,
+/// and — unlike the first-arrival-wins rule this replaces — neither
+/// payload survives.
 #[test]
-fn same_key_is_idempotent_or_conflicts_deterministically() {
+fn same_key_is_idempotent_or_poisons_deterministically() {
     let mut sched = Scheduler::new();
     let original = work(5, "trigger.a", "bron", 0);
-    sched.schedule(original.clone()).unwrap();
-    sched.schedule(original.clone()).unwrap();
+    assert_eq!(
+        sched.schedule(original.clone()),
+        ScheduleDisposition::Scheduled
+    );
+    assert_eq!(
+        sched.schedule(original.clone()),
+        ScheduleDisposition::AlreadyScheduledIdempotent
+    );
     assert_eq!(sched.len(), 1);
+    assert_eq!(sched.slot_status(&original.key), WorkSlotStatus::Scheduled);
 
     let mut conflicting = original.clone();
     conflicting.payload = WorkPayload::new(hash_bytes(b"other"));
-    assert!(sched.schedule(conflicting).is_err());
-    assert_eq!(sched.drain_due(LogicalTime(5)), vec![original]);
+    assert!(matches!(
+        sched.schedule(conflicting.clone()),
+        ScheduleDisposition::Conflicted(_)
+    ));
+    assert_eq!(sched.slot_status(&original.key), WorkSlotStatus::Conflicted);
+
+    let outcome = sched.drain_due(LogicalTime(5));
+    assert!(
+        outcome.due.is_empty(),
+        "first arrival must not keep the key: {:?}",
+        outcome.due
+    );
+    assert_eq!(outcome.conflicted.len(), 1);
+    let evidence = outcome.conflicted[0].competing_payload_hashes();
+    assert!(evidence.contains(&original.payload.canonical_payload_hash));
+    assert!(evidence.contains(&conflicting.payload.canonical_payload_hash));
 }
 
 /// Scheduler test 5: ordering does not depend on call order.
@@ -640,13 +689,17 @@ fn drain_order_is_independent_of_call_order() {
 
     let mut forward = Scheduler::new();
     for item in items.iter() {
-        forward.schedule(item.clone()).unwrap();
+        forward.schedule(item.clone());
     }
     let mut reversed = Scheduler::new();
     for item in items.iter().rev() {
-        reversed.schedule(item.clone()).unwrap();
+        reversed.schedule(item.clone());
     }
 
+    assert_eq!(
+        forward.canonical_state_digest(),
+        reversed.canonical_state_digest()
+    );
     assert_eq!(
         forward.drain_due(LogicalTime(5)),
         reversed.drain_due(LogicalTime(5))
@@ -659,10 +712,10 @@ fn drain_order_is_independent_of_call_order() {
 fn occurrence_identity_is_producer_and_scope_local() {
     let mut sched = Scheduler::new();
     // Same producer, different scopes, both occurrence 0.
-    sched.schedule(work(5, "trigger.a", "bron", 0)).unwrap();
-    sched.schedule(work(5, "trigger.a", "mira", 0)).unwrap();
+    sched.schedule(work(5, "trigger.a", "bron", 0));
+    sched.schedule(work(5, "trigger.a", "mira", 0));
     // Same producer and scope, its own monotone sequence.
-    sched.schedule(work(5, "trigger.a", "bron", 1)).unwrap();
+    sched.schedule(work(5, "trigger.a", "bron", 1));
     assert_eq!(sched.len(), 3);
 
     // The key digest is a stable identity a persisted obligation can bind

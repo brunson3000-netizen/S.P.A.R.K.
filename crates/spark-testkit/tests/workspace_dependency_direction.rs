@@ -1,3 +1,13 @@
+//! Test targets scope the canonical crates' strict panic/arithmetic
+//! gate locally.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects
+)]
+
 //! Phase-1 test corpus item 20: an automated check of ADR-0001's
 //! workspace dependency direction policy.
 //!
@@ -14,6 +24,13 @@
 //! — instead of one hand-scanned section, and would catch a regression of
 //! that edge (or any other unauthorized cross-crate edge, of any kind)
 //! immediately.
+//!
+//! Re-Foundation v2 extends it with **feature hygiene** (AT-D2): the
+//! sanctioned `test-support` seams must never be reachable from a
+//! production dependency edge. `cargo metadata` reports the features each
+//! dependency declaration enables and each package's feature table, so
+//! that is checkable mechanically rather than by reading Cargo.toml by
+//! eye.
 
 use serde_json::Value;
 use std::collections::{BTreeSet, HashMap};
@@ -31,13 +48,14 @@ fn allowed_dependencies() -> HashMap<&'static str, BTreeSet<&'static str>> {
     // S.P.A.R.K. product-layer crate, in any dependency kind
     // (ADR-0001 invariant 1).
     allowed.insert("spark-core", BTreeSet::new());
-    // spark-profile: may depend on spark-core only.
-    allowed.insert("spark-profile", BTreeSet::from(["spark-core"]));
-    // spark-testkit: fixtures/scenario harness; consumes spark-core and
-    // spark-profile canonical types.
+    // spark-engine: the Phase-1 trust boundary. May depend on spark-core
+    // only (ADR-0001; Fable architecture review section 3.2).
+    allowed.insert("spark-engine", BTreeSet::from(["spark-core"]));
+    // spark-testkit: fixtures/scenario harness/adversarial corpus;
+    // consumes spark-core and spark-engine canonical types.
     allowed.insert(
         "spark-testkit",
-        BTreeSet::from(["spark-core", "spark-profile"]),
+        BTreeSet::from(["spark-core", "spark-engine"]),
     );
     allowed
 }
@@ -139,7 +157,7 @@ fn every_crate_resolved_dependencies_respect_adr_0001_direction() {
     assert_eq!(
         resolved.len(),
         3,
-        "expected to check exactly the 3 Phase-1 workspace crates (spark-core, spark-profile, \
+        "expected to check exactly the 3 Phase-1 workspace crates (spark-core, spark-engine, \
          spark-testkit); this count should be updated deliberately if the workspace grows"
     );
 }
@@ -155,5 +173,96 @@ fn spark_core_resolves_zero_dependencies_on_any_product_layer_crate() {
         spark_core_deps.is_empty(),
         "spark-core must resolve zero dependencies (of any kind) on other S.P.A.R.K. crates \
          (ADR-0001 invariant 1); found: {spark_core_deps:?}"
+    );
+}
+
+/// The crates that define a `test-support` feature. Anything the feature
+/// gates (`spark_engine::fixture`, `TimelineIngress::resume_at_frontier`)
+/// must be unreachable without it.
+fn feature_gated_crates() -> BTreeSet<&'static str> {
+    BTreeSet::from(["spark-core", "spark-engine"])
+}
+
+/// AT-D2: the `test-support` feature must be off by default and must not
+/// be enabled by any **production** (normal or build) dependency edge in
+/// the workspace. Only `dev-dependencies` may enable it, which is what
+/// keeps the sanctioned seams out of every production resolution.
+#[test]
+fn test_support_feature_is_never_enabled_through_a_production_edge() {
+    let metadata = cargo_metadata();
+    let packages = metadata["packages"]
+        .as_array()
+        .expect("metadata.packages is an array");
+    let gated = feature_gated_crates();
+
+    let mut checked_declarations = 0usize;
+    let mut saw_dev_enablement = false;
+
+    for package in packages {
+        let package_name = package["name"].as_str().expect("package.name is a string");
+
+        // 1. The feature must not be in any crate's `default` feature set,
+        //    otherwise every consumer would get it implicitly.
+        if gated.contains(package_name) {
+            let features = &package["features"];
+            assert!(
+                features.get("test-support").is_some(),
+                "crate '{package_name}' is expected to define a `test-support` feature"
+            );
+            if let Some(default) = features.get("default").and_then(|d| d.as_array()) {
+                for entry in default {
+                    assert_ne!(
+                        entry.as_str(),
+                        Some("test-support"),
+                        "crate '{package_name}' must not enable `test-support` by default"
+                    );
+                }
+            }
+        }
+
+        // 2. No normal/build dependency declaration anywhere in the
+        //    workspace may request it.
+        for dependency in package["dependencies"]
+            .as_array()
+            .expect("package.dependencies is an array")
+        {
+            let dep_name = dependency["name"].as_str().expect("dep.name is a string");
+            if !gated.contains(dep_name) {
+                continue;
+            }
+            let kind = dependency["kind"].as_str();
+            let enables_test_support = dependency["features"]
+                .as_array()
+                .map(|features| features.iter().any(|f| f.as_str() == Some("test-support")))
+                .unwrap_or(false);
+            checked_declarations += 1;
+
+            match kind {
+                // `null` is a normal dependency; "build" is a build script
+                // dependency. Both resolve into production builds.
+                None | Some("build") => assert!(
+                    !enables_test_support,
+                    "crate '{package_name}' enables `test-support` on '{dep_name}' through a \
+                     production ({kind:?}) dependency edge; the sanctioned test seams must be \
+                     reachable only through dev-dependencies"
+                ),
+                Some("dev") => {
+                    if enables_test_support {
+                        saw_dev_enablement = true;
+                    }
+                }
+                other => panic!("unrecognized dependency kind {other:?}"),
+            }
+        }
+    }
+
+    assert!(
+        checked_declarations > 0,
+        "expected to inspect at least one dependency declaration on a feature-gated crate"
+    );
+    assert!(
+        saw_dev_enablement,
+        "expected `spark-testkit` to dev-enable `test-support`; if it no longer does, the \
+         sanctioned seams are untested and this test is vacuous"
     );
 }

@@ -15,9 +15,14 @@
 //!   the complete observable ingress state including staged/poisoned
 //!   slots — so an empty scenario cannot hash identically to a scenario
 //!   with one successfully staged unfinalized command.
-//! - `transcript_digest`: a hash of every operation's actual structured
-//!   result in order, so two scenarios whose *outcomes* differ are
-//!   distinguishable even when their final state happens to coincide.
+//! - `outcome_transcript_digest`: a hash of every operation's actual
+//!   structured result in order, so two scenarios whose *outcomes* differ
+//!   are distinguishable even when their final state happens to coincide.
+//!   The name says what it is (Codex documentation ruling #13): it is a
+//!   digest of the *outcome sequence*, not a standalone scenario identity.
+//!   Scenario context — profile, epoch, sequencer, window width — is
+//!   carried by `ingress_state_digest`, which is why the three values are
+//!   reported together and never used interchangeably.
 //!
 //! The transcript records the acknowledgement/finalization evidence the
 //! re-founded ingress issues, not merely a coarse enum tag: a
@@ -116,8 +121,10 @@ pub struct ScenarioReplay {
     pub history_digest: Digest,
     /// Complete observable ingress state, including staged slots.
     pub ingress_state_digest: Digest,
-    /// Every operation's structured outcome, in order.
-    pub transcript_digest: Digest,
+    /// Every operation's structured outcome, in order. See the module
+    /// documentation: this is an *outcome* transcript, not a scenario
+    /// identity.
+    pub outcome_transcript_digest: Digest,
 }
 
 fn payload_hash(tag: &str) -> Digest {
@@ -153,7 +160,7 @@ pub fn build_envelope(
 
 /// The canonical command kind every scenario command carries, validated
 /// by the compiler rather than at runtime.
-const SCENARIO_COMMAND_KIND: CanonicalTag = CanonicalTag::from_static("scenario.command");
+const SCENARIO_COMMAND_KIND: CanonicalTag = spark_core::canonical_tag!("scenario.command");
 
 fn push_stage_result(enc: &mut CanonicalEncoder, result: &Result<StageDisposition, StageError>) {
     enc.push_str("stage");
@@ -334,11 +341,18 @@ pub fn run_scenario(scenario: &Scenario) -> Result<ScenarioReplay, ScenarioError
     Ok(ScenarioReplay {
         history_digest: ingress.canonical_history_digest(),
         ingress_state_digest: ingress.canonical_state_digest(),
-        transcript_digest: transcript.finish(),
+        outcome_transcript_digest: transcript.finish(),
     })
 }
 
 #[cfg(test)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects
+)]
 mod tests {
     use super::*;
 
@@ -417,7 +431,10 @@ mod tests {
         let empty = run_scenario(&empty_scenario()).unwrap();
         let one_staged = run_scenario(&one_staged_unfinalized_scenario()).unwrap();
         assert_ne!(empty.ingress_state_digest, one_staged.ingress_state_digest);
-        assert_ne!(empty.transcript_digest, one_staged.transcript_digest);
+        assert_ne!(
+            empty.outcome_transcript_digest,
+            one_staged.outcome_transcript_digest
+        );
         // Neither finalized anything, so finalized history is legitimately
         // identical — which is exactly why the two digests are separate.
         assert_eq!(empty.history_digest, one_staged.history_digest);
@@ -439,8 +456,8 @@ mod tests {
             poisoned_result.ingress_state_digest
         );
         assert_ne!(
-            clean_result.transcript_digest,
-            poisoned_result.transcript_digest
+            clean_result.outcome_transcript_digest,
+            poisoned_result.outcome_transcript_digest
         );
     }
 
@@ -493,9 +510,76 @@ mod tests {
         let ok_result = run_scenario(&valid_fence).unwrap();
         let rejected_result = run_scenario(&wrong_digest_fence).unwrap();
         assert_ne!(
-            ok_result.transcript_digest,
-            rejected_result.transcript_digest
+            ok_result.outcome_transcript_digest,
+            rejected_result.outcome_transcript_digest
         );
+    }
+
+    /// AT-F4 (Codex #13): the outcome transcript is deliberately a digest
+    /// of the *outcome sequence*, so two scenarios that differ only in
+    /// context (profile, epoch, sequencer, window width) and produce the
+    /// same outcomes legitimately share it. The context difference is
+    /// carried by `ingress_state_digest`, which is why the three digests
+    /// are reported together and never used interchangeably.
+    #[test]
+    fn scenario_context_is_distinguished_through_the_state_digest() {
+        let base = one_staged_unfinalized_scenario();
+
+        let mut other_profile = base.clone();
+        other_profile.profile_id = ProfileId::new("mci-social").unwrap();
+        let mut other_epoch = base.clone();
+        other_epoch.timeline_epoch = TimelineEpoch(7);
+        let mut other_sequencer = base.clone();
+        other_sequencer.sequencer = SourceId::new("sequencer.secondary").unwrap();
+        let mut other_width = base.clone();
+        other_width.window_width = 5;
+
+        let baseline = run_scenario(&base).unwrap();
+        for variant in [other_profile, other_epoch, other_sequencer, other_width] {
+            let replay = run_scenario(&variant).unwrap();
+            assert_ne!(
+                baseline.ingress_state_digest, replay.ingress_state_digest,
+                "scenario context must reach the ingress state digest"
+            );
+        }
+    }
+
+    /// AT-F2: empty, staged, poisoned, and finalized scenarios are
+    /// pairwise digest-distinct on at least one of the three digests.
+    #[test]
+    fn empty_staged_poisoned_and_finalized_scenarios_are_pairwise_distinct() {
+        let mut poisoned = one_staged_unfinalized_scenario();
+        poisoned
+            .ops
+            .push(stage(0, "cmd.conflict", "payload.conflict"));
+
+        let mut finalized = one_staged_unfinalized_scenario();
+        finalized.ops.push(ScenarioOp::Fence {
+            start: 0,
+            end: 0,
+            fence_tag: "fence.1".to_string(),
+            commands: vec![(0, "cmd.0".to_string(), "payload.0".to_string())],
+        });
+
+        let scenarios = [
+            empty_scenario(),
+            one_staged_unfinalized_scenario(),
+            poisoned,
+            finalized,
+        ];
+        let replays: Vec<ScenarioReplay> =
+            scenarios.iter().map(|s| run_scenario(s).unwrap()).collect();
+
+        for i in 0..replays.len() {
+            for j in (i + 1)..replays.len() {
+                assert!(
+                    replays[i].ingress_state_digest != replays[j].ingress_state_digest
+                        || replays[i].outcome_transcript_digest
+                            != replays[j].outcome_transcript_digest,
+                    "scenarios {i} and {j} are indistinguishable"
+                );
+            }
+        }
     }
 
     /// A zero window width is a configuration error, not a panic.

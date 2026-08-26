@@ -2,7 +2,7 @@
 resolver = "2"
 members = [
     "crates/spark-core",
-    "crates/spark-profile",
+    "crates/spark-engine",
     "crates/spark-testkit",
 ]
 
