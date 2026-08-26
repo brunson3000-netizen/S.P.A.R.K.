@@ -1,0 +1,114 @@
+S.P.A.R.K. Phase-1 Re-Foundation v2 - Step 1 (tests first) baseline evidence
+Recorded: 2026-08-26
+Branch: phase1-refoundation-v2
+Inherited HEAD: 244391d41aa2c6f6f32af1f7529b22e934493a81
+Command: cargo test -p spark-testkit --test refoundation_v2_baseline
+Fixture: crates/spark-testkit/tests/refoundation_v2_baseline.rs (external crate vantage point)
+
+=== RAW OUTPUT ===
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/refoundation_v2_baseline.rs (target/debug/deps/refoundation_v2_baseline-777948f388da7a5b)
+
+running 12 tests
+test baseline_builtin_kind_bit_must_not_be_caller_assertable ... FAILED
+test baseline_invalid_static_tag_must_not_panic ... FAILED
+test baseline_neither_payload_survives_a_conflict ... FAILED
+test baseline_conflict_evidence_cap_must_be_order_independent ... FAILED
+test baseline_resume_at_frontier_must_be_absent_from_production_surface ... FAILED
+test baseline_poison_evidence_is_arrival_order_independent ... ok
+test baseline_raw_declaration_must_not_reach_activation ... FAILED
+test baseline_poison_evidence_must_distinguish_competing_pairs ... FAILED
+test baseline_reversed_clamp_bounds_must_not_panic ... FAILED
+test baseline_same_key_conflict_state_must_be_arrival_order_independent ... FAILED
+test baseline_valid_definition_spec_must_not_self_activate ... FAILED
+test baseline_three_way_conflict_must_converge_in_all_orders ... FAILED
+
+failures:
+
+---- baseline_builtin_kind_bit_must_not_be_caller_assertable stdout ----
+
+thread 'baseline_builtin_kind_bit_must_not_be_caller_assertable' (678034) panicked at crates/spark-testkit/tests/refoundation_v2_baseline.rs:110:5:
+external code must not be able to assert that a profile-invented tag is engine baseline vocabulary; `DefinitionKindTag::builtin` must not be externally callable
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- baseline_invalid_static_tag_must_not_panic stdout ----
+
+thread 'baseline_invalid_static_tag_must_not_panic' (678036) panicked at crates/spark-core/src/id.rs:273:9:
+canonical tag literal is not valid canonical syntax
+
+thread 'baseline_invalid_static_tag_must_not_panic' (678036) panicked at crates/spark-testkit/tests/refoundation_v2_baseline.rs:248:5:
+a public canonical constructor must not panic on caller input; `CanonicalTag::from_static` panics at runtime for an invalid static string
+
+---- baseline_neither_payload_survives_a_conflict stdout ----
+
+thread 'baseline_neither_payload_survives_a_conflict' (678037) panicked at crates/spark-testkit/tests/refoundation_v2_baseline.rs:175:5:
+neither payload of a poisoned key may be drained as executable work; found [DueWorkItem { key: WorkKey { due_time: LogicalTime(5), profile_id: ProfileId(game-world), producer_definition_id: DefinitionId(trigger.weather.drought), scope_id: settlement:settlement.pontafique, occurrence_index: OccurrenceIndex(0), work_kind: WorkKind(CanonicalTag(trigger.evaluate)) }, payload: WorkPayload { canonical_payload_hash: Digest(b792173a38b94d052fc210923b8a8ac5575da967b48464624c42246e6cf03937) } }]
+
+---- baseline_conflict_evidence_cap_must_be_order_independent stdout ----
+
+thread 'baseline_conflict_evidence_cap_must_be_order_independent' (678035) panicked at crates/spark-testkit/tests/refoundation_v2_baseline.rs:230:5:
+assertion `left == right` failed: more distinct claims than the evidence cap must still produce identical canonical conflict state in any arrival order
+  left: Digest(3d3b52d7dc220d375e5526242405df29a1781250ed05075d1211b7fe5bbcd3de)
+ right: Digest(8f8acadd3a08ff1fb84224db8ca72736e6ef58a29eb904b5555eb8d2ed85b721)
+
+---- baseline_resume_at_frontier_must_be_absent_from_production_surface stdout ----
+
+thread 'baseline_resume_at_frontier_must_be_absent_from_production_surface' (678041) panicked at crates/spark-testkit/tests/refoundation_v2_baseline.rs:285:5:
+an external caller must not be able to construct a canonical timeline at an arbitrary nonzero frontier from the default production surface
+
+---- baseline_raw_declaration_must_not_reach_activation stdout ----
+
+thread 'baseline_raw_declaration_must_not_reach_activation' (678040) panicked at crates/spark-testkit/tests/refoundation_v2_baseline.rs:98:5:
+an external caller must not be able to mint activated authority from a raw caller-authored declaration
+
+---- baseline_poison_evidence_must_distinguish_competing_pairs stdout ----
+
+thread 'baseline_poison_evidence_must_distinguish_competing_pairs' (678039) panicked at crates/spark-testkit/tests/refoundation_v2_baseline.rs:332:5:
+assertion `left != right` failed: two poisoned slots caused by different competing envelope pairs must not share one canonical ingress state digest; an evidence-free `Poisoned` unit variant erases the difference
+  left: Digest(ebcc17e050b4582d5fa84b6da1d63ccb6cadd610cde6a95dd741e9e710592b98)
+ right: Digest(ebcc17e050b4582d5fa84b6da1d63ccb6cadd610cde6a95dd741e9e710592b98)
+
+---- baseline_reversed_clamp_bounds_must_not_panic stdout ----
+
+thread 'baseline_reversed_clamp_bounds_must_not_panic' (678042) panicked at crates/spark-core/src/value.rs:95:27:
+min > max. min = 1000000, max = 0
+
+thread 'baseline_reversed_clamp_bounds_must_not_panic' (678042) panicked at crates/spark-testkit/tests/refoundation_v2_baseline.rs:263:5:
+a public canonical arithmetic operation must not panic on caller input; `FixedPoint::clamp` panics for reversed bounds
+
+---- baseline_same_key_conflict_state_must_be_arrival_order_independent stdout ----
+
+thread 'baseline_same_key_conflict_state_must_be_arrival_order_independent' (678043) panicked at crates/spark-testkit/tests/refoundation_v2_baseline.rs:155:5:
+assertion `left == right` failed: a same-key payload conflict must reach one canonical state in either arrival order; first-arrival-wins makes canonical scheduler state an arrival-order artifact
+  left: Digest(224fe437c17f708cc2a2e07e17036e495b467331b98db85c562ea5b4bb468c3a)
+ right: Digest(80043239d92c736724db9eb265245057e7508342bd011e2dfc74ca0e1a74af17)
+
+---- baseline_valid_definition_spec_must_not_self_activate stdout ----
+
+thread 'baseline_valid_definition_spec_must_not_self_activate' (678045) panicked at crates/spark-testkit/tests/refoundation_v2_baseline.rs:76:5:
+a fully valid DefinitionSpec must not be able to self-activate through an intermediate mint; activation must run the complete ceremony behind one door
+
+---- baseline_three_way_conflict_must_converge_in_all_orders stdout ----
+
+thread 'baseline_three_way_conflict_must_converge_in_all_orders' (678044) panicked at crates/spark-testkit/tests/refoundation_v2_baseline.rs:204:5:
+assertion `left == right` failed: all six arrival permutations of a three-way same-key conflict must converge to one canonical scheduler state; found 3 distinct states
+  left: 3
+ right: 1
+
+
+failures:
+    baseline_builtin_kind_bit_must_not_be_caller_assertable
+    baseline_conflict_evidence_cap_must_be_order_independent
+    baseline_invalid_static_tag_must_not_panic
+    baseline_neither_payload_survives_a_conflict
+    baseline_poison_evidence_must_distinguish_competing_pairs
+    baseline_raw_declaration_must_not_reach_activation
+    baseline_resume_at_frontier_must_be_absent_from_production_surface
+    baseline_reversed_clamp_bounds_must_not_panic
+    baseline_same_key_conflict_state_must_be_arrival_order_independent
+    baseline_three_way_conflict_must_converge_in_all_orders
+    baseline_valid_definition_spec_must_not_self_activate
+
+test result: FAILED. 1 passed; 11 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p spark-testkit --test refoundation_v2_baseline`
