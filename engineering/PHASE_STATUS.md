@@ -1,37 +1,28 @@
 # S.P.A.R.K. Engineering Status
 
-**Date:** 2026-08-25
+**Date:** 2026-08-26
 
 ## Phase 0
 
-**PASS**
-
-Independent closure review result:
-
-```text
-PASS_PHASE_0
-B-01A = CLOSED
-B-02 = CLOSED
-B-03 = CLOSED
-REMAINING BLOCKERS = NONE
-MAJORS = NONE
-MINORS = NONE
-PHASE-1 AUTHORIZATION = YES
-```
-
-The frozen causal primitive set remains sufficient.
+PASS.
 
 ## Phase 1
 
-**WRITER COMPLETE / INDEPENDENT REVIEW PENDING**
+Writer candidate completed, but independent Codex review returned:
 
-Scope: bounded Rust core skeleton only.
+```text
+REVISE_PHASE_1
+BLOCKERS: 4
+MAJORS: 4
+MINORS: 1
+PHASE-2 AUTHORIZATION: NO
+```
 
-Writer: Claude Code
-Implementation commit: `336d4e3b0fec1e5ef5db6edcf591254bfbf32702`
-Report: `engineering/phase1/PHASE_1_CLAUDE_IMPLEMENTATION_REPORT_2026-08-25.md`
-Independent implementation reviewer: Codex (not yet run)
+Bounded correction v0.1 is authorized.
 
-`cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, and `cargo test --workspace` all pass on Linux (45/45 tests, all 20 minimum test-corpus items covered). `cargo check` passes cleanly against `x86_64-pc-windows-{gnu,msvc}` and three Android ABIs; actual Windows/Android build/link/execution remains unexecuted and is not claimed as passing.
+Writer: Claude Code.  
+Independent re-review after correction: Codex.
 
-Phase 1 does not authorize Phase 2 rule/effect implementation, service transport, persistence backend, actor behavioral richness, MCI integration, game integration, dialogue, voice, or catalog expansion. **`PHASE_2_AUTHORIZATION: NO`** pending independent Codex review of this implementation.
+## Phase 2
+
+**NOT AUTHORIZED.**
