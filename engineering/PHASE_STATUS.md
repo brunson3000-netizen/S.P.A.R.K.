@@ -96,10 +96,49 @@ audits over the full tree found no further violation beyond one MINOR
 authorization reserved by the previous pass. See
 `PHASE_1_FABLE_OVERNIGHT_SYNTHESIS_2026-08-26.md`.
 
+**Final closure implementation completed** (`ee2e850`, `b8b7414`),
+test-first under the operator authorization of
+`PHASE_1_FINAL_CLOSURE_AUTHORIZATION_2026-08-26.md`. The AT-H corpus was
+encoded against the inherited tree first: seven assertions failed and four
+stayed green, and the two tests that failed where the Fable synthesis's
+one-line tally predicted green (AT-H6, AT-H8) are red for exactly the
+defect the architecture describes — a bookkeeping inconsistency inside the
+prediction, not a contradiction of it, analyzed in §3 of the report.
+
+The staged command-ID and `(source_id, source_sequence)` registries are
+now **derived indexes over the positively staged slots and nothing else**:
+a poisoned ordinal withdraws the formerly staged envelope's claims, the
+poisoning claimant is still never registered and never screened, and fence
+promotion *moves* claims into the permanent registries instead of leaving
+duplicates. Contested identities therefore become unclaimed after a
+contest, identically in every arrival order, so opposite arrival orders
+leave identical canonical state *and* identical future admission
+behavior — with **no digest change at all**, because the registries are
+now a pure function of state the digest already commits to. Bundled: m-02
+(manifest content hash is a multiset function on every input, with every
+activatable manifest's hash bit-for-bit unchanged), S2 (the duplicated
+scheduler/timeline bounded-claim-set machinery unified into one
+`pub(crate)` `BoundedClaimSet`), and S3 (the provably always-true
+retention conjunct dropped with its proof documented).
+
+232 tests pass, up from 221, with no pre-existing test file modified and
+nothing weakened. All fmt/clippy/strict-lint/test/metadata gates and all
+ten Windows/Android static `cargo check` runs pass; Windows/Android remain
+static checks only. A pre/post canonical-digest probe run in a clean
+worktree at `87da5be` proves the three cleanups moved no digest value.
+Verdict: `PHASE_1_FINAL_CLOSURE_WRITER_STATUS: COMPLETE`. See
+`PHASE_1_FINAL_CLOSURE_IMPLEMENTATION_REPORT_2026-08-26.md`.
+
+**Independent Codex review per
+`PHASE_1_CODEX_FINAL_CLOSURE_REVIEW_PLAN_2026-08-26.md` remains mandatory;
+only a `PHASE_1_CLOSED` verdict ends Phase 1.**
+
 Re-foundation v2 writer: Claude Code (Opus, HIGH effort).
 Architecture/process review: Fable.
 Independent review of the v2 pass: Codex.
 Final digest correction writer: Claude Code (Opus, HIGH effort).
+Overnight closure architecture: Fable.
+Final closure implementation writer: Claude Code (Opus, HIGH effort).
 
 ## Phase 2
 
