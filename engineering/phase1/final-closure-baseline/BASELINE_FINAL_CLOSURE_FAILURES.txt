@@ -1,0 +1,105 @@
+S.P.A.R.K. Phase-1 Final Closure (AT-H) — inherited red/green baseline
+Recorded: 2026-08-26
+Branch: phase1-refoundation-v2
+Inherited HEAD: 6a764ab01d0d582ed61dfd9d6b6cdcb4d53b7e3c
+Inherited workspace suite before AT-H was added: 221 passed / 0 failed
+
+The AT-H corpus below was encoded against the INHERITED implementation
+and run before any production change, per the test-first discipline of
+PHASE_1_FINAL_CLOSURE_TEST_MATRIX_2026-08-26.md.
+
+=== cargo test -p spark-core --lib timeline::final_closure_registry_invariant (AT-H3, AT-H6) ===
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running unittests src/lib.rs (target/debug/deps/spark_core-1a6fb04f9af4894d)
+
+running 2 tests
+test timeline::final_closure_registry_invariant::finalization_moves_identity_from_staged_to_finalized_registries ... FAILED
+test timeline::final_closure_registry_invariant::staged_registries_are_a_derived_index_over_staged_slots ... FAILED
+
+failures:
+
+---- timeline::final_closure_registry_invariant::finalization_moves_identity_from_staged_to_finalized_registries stdout ----
+
+thread 'timeline::final_closure_registry_invariant::finalization_moves_identity_from_staged_to_finalized_registries' (756224) panicked at crates/spark-core/src/timeline.rs:1949:9:
+assertion failed: !ingress.staged_command_identity.contains_key(&e0.command_id)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- timeline::final_closure_registry_invariant::staged_registries_are_a_derived_index_over_staged_slots stdout ----
+
+thread 'timeline::final_closure_registry_invariant::staged_registries_are_a_derived_index_over_staged_slots' (756225) panicked at crates/spark-core/src/timeline.rs:1828:9:
+assertion `left == right` failed: after `contest poisons ordinal 1`: the staged command-ID registry is not a derived index over the positively staged slots
+  left: {CommandId(cmd.0): Digest(4c39ae672940c40975849556fec1192e7642f24d8cbd69045c60199b9b2c05db), CommandId(cmd.1): Digest(be895947144ecf4ba645e0f2e202cfc31bc3c9cf5ae9b0e45c2170ad51d51ea8)}
+ right: {CommandId(cmd.0): Digest(4c39ae672940c40975849556fec1192e7642f24d8cbd69045c60199b9b2c05db)}
+
+
+failures:
+    timeline::final_closure_registry_invariant::finalization_moves_identity_from_staged_to_finalized_registries
+    timeline::final_closure_registry_invariant::staged_registries_are_a_derived_index_over_staged_slots
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 61 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p spark-core --lib`
+
+=== cargo test -p spark-testkit --test final_closure (AT-H1/H2/H4/H5/H7/H8/H9/H11) ===
+   Compiling spark-core v0.1.0 (/home/chromikey/Projects/SPARK/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/home/chromikey/Projects/SPARK/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/home/chromikey/Projects/SPARK/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.59s
+     Running tests/final_closure.rs (target/debug/deps/final_closure-c087ae2c209cdf42)
+
+running 9 tests
+test contested_command_identity_is_arrival_order_independent ... FAILED
+test contested_identities_are_unclaimed_after_the_contest ... FAILED
+test contested_source_sequence_is_arrival_order_independent ... FAILED
+test epoch_reset_convergence_is_preserved ... ok
+test hidden_evidence_guards_stay_green ... ok
+test manifest_content_hash::duplicate_id_manifest_hash_is_order_independent ... FAILED
+test manifest_content_hash::valid_manifest_hashes_are_unchanged_by_the_duplicate_id_fix ... ok
+test poison_evidence_insertion_is_unconditional_and_unscreened ... ok
+test three_way_contest_with_reuse_converges_in_all_orders ... FAILED
+
+failures:
+
+---- contested_command_identity_is_arrival_order_independent stdout ----
+
+thread 'contested_command_identity_is_arrival_order_independent' (756554) panicked at crates/spark-testkit/tests/final_closure.rs:210:5:
+assertion `left == right` failed: two ingresses holding equal canonical state must answer the same identity-reuse submission identically
+  left: Err(CommandIdentityConflict { command_id: CommandId(cmd.a) })
+ right: Ok(Acknowledged(StageAcknowledgement { profile_id: ProfileId(game-world), timeline_epoch: TimelineEpoch(1), input_ordinal: Ordinal(1), command_id: CommandId(cmd.a), semantic_envelope_hash: Digest(946014cec90fcf9d17c9a5da6bb30e4180635542590e876456366e5d7da9e148), slot_state: NewlyStaged, acknowledgement_hash: Digest(627f3b20959248985f9dabc6e6f5cc3e272693572663d3cfa9e6c2bcbe021bec) }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- contested_identities_are_unclaimed_after_the_contest stdout ----
+
+thread 'contested_identities_are_unclaimed_after_the_contest' (756555) panicked at crates/spark-testkit/tests/final_closure.rs:135:18:
+expected Acknowledged(NewlyStaged), got Err(CommandIdentityConflict { command_id: CommandId(cmd.a) })
+
+---- contested_source_sequence_is_arrival_order_independent stdout ----
+
+thread 'contested_source_sequence_is_arrival_order_independent' (756556) panicked at crates/spark-testkit/tests/final_closure.rs:253:5:
+assertion `left == right` failed
+  left: Err(SourceSequenceConflict { source_id: SourceId(sequencer.primary), source_sequence: 5 })
+ right: Ok(Acknowledged(StageAcknowledgement { profile_id: ProfileId(game-world), timeline_epoch: TimelineEpoch(1), input_ordinal: Ordinal(1), command_id: CommandId(cmd.c), semantic_envelope_hash: Digest(436397b640d9ce4fd5e2758a2f9f9c9779dd09b9a6660da26fe16306e43ec253), slot_state: NewlyStaged, acknowledgement_hash: Digest(e595f2afabd2995cb0e1d79d414d3866d0d73739f36105c43a6194ef42ceb31b) }))
+
+---- manifest_content_hash::duplicate_id_manifest_hash_is_order_independent stdout ----
+
+thread 'manifest_content_hash::duplicate_id_manifest_hash_is_order_independent' (756559) panicked at crates/spark-testkit/tests/final_closure.rs:700:9:
+assertion `left == right` failed: the manifest content hash must be a multiset function of the definitions, including on invalid duplicate-ID input
+  left: Digest(9ba08b4d1643277d64b7b7b0b2d189cacadf55669dc8ed4724f5c0910eca0178)
+ right: Digest(eab0bacfc268279db5c2e7927793d4a2d14b780af0a6edf7a355bf0ce2c1af84)
+
+---- three_way_contest_with_reuse_converges_in_all_orders stdout ----
+
+thread 'three_way_contest_with_reuse_converges_in_all_orders' (756562) panicked at crates/spark-testkit/tests/final_closure.rs:135:18:
+expected Acknowledged(NewlyStaged), got Err(CommandIdentityConflict { command_id: CommandId(cmd.a) })
+
+
+failures:
+    contested_command_identity_is_arrival_order_independent
+    contested_identities_are_unclaimed_after_the_contest
+    contested_source_sequence_is_arrival_order_independent
+    manifest_content_hash::duplicate_id_manifest_hash_is_order_independent
+    three_way_contest_with_reuse_converges_in_all_orders
+
+test result: FAILED. 4 passed; 5 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+error: test failed, to rerun pass `-p spark-testkit --test final_closure`

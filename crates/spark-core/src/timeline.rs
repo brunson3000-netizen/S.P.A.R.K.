@@ -1705,3 +1705,295 @@ impl TimelineIngress {
         enc.finish()
     }
 }
+
+/// **AT-H3 / AT-H6** — the closure corpus assertions that are statements
+/// about the ingress's *private* staged identity registries rather than
+/// about its public surface, and so are expressed here rather than in
+/// `spark-testkit`'s `final_closure.rs` (the final closure test matrix
+/// sanctions either form).
+///
+/// The invariant under test is the whole of the B-01 repair:
+///
+/// ```text
+/// staged_command_identity         == { env.command_id -> h(env)                | Staged(env) in slots }
+/// staged_source_sequence_identity == { (env.source_id, env.source_sequence) -> h(env) | Staged(env) in slots }
+/// ```
+///
+/// Everything else about the repair follows from it, which is why it is
+/// asserted after *every prefix* of a scripted operation sequence rather
+/// than only at the end.
+#[cfg(test)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects
+)]
+mod final_closure_registry_invariant {
+    use super::*;
+    use crate::hash::hash_bytes;
+
+    fn profile() -> ProfileId {
+        ProfileId::new("game-world").unwrap()
+    }
+
+    fn sequencer() -> SourceId {
+        SourceId::new("sequencer.primary").unwrap()
+    }
+
+    fn env(
+        command: &str,
+        epoch: u64,
+        ordinal: u64,
+        source_sequence: u64,
+        payload: &str,
+    ) -> SemanticCommandEnvelope {
+        SemanticCommandEnvelope {
+            command_id: CommandId::new(command).unwrap(),
+            profile_id: profile(),
+            timeline_epoch: TimelineEpoch(epoch),
+            effective_time: LogicalTime(0),
+            source_id: sequencer(),
+            source_sequence,
+            input_ordinal: Ordinal(ordinal),
+            command_kind: CommandKind::new(CanonicalTag::new("test.command").unwrap()),
+            canonical_payload_hash: hash_bytes(payload.as_bytes()),
+        }
+    }
+
+    fn stage(
+        ingress: &mut TimelineIngress,
+        envelope: &SemanticCommandEnvelope,
+    ) -> Result<StageDisposition, StageError> {
+        let ticket = ingress
+            .current_admission_window()
+            .expect("the admission window is open")
+            .ticket();
+        ingress.stage(&sequencer(), &envelope.clone().submit_with(ticket))
+    }
+
+    fn fence(
+        ingress: &TimelineIngress,
+        tag: &str,
+        start: u64,
+        end: u64,
+        ordered: &[SemanticCommandEnvelope],
+    ) -> TimelineFence {
+        let pairs: Vec<(Ordinal, Digest)> = ordered
+            .iter()
+            .map(|e| (e.input_ordinal, e.semantic_hash()))
+            .collect();
+        TimelineFence {
+            profile_id: ingress.profile_id().clone(),
+            timeline_epoch: ingress.timeline_epoch(),
+            fence_id: FenceId::new(tag).unwrap(),
+            start_ordinal: Ordinal(start),
+            end_ordinal: Ordinal(end),
+            previous_fence_hash: ingress.last_finalized_fence_hash().clone(),
+            ordered_stream_digest: compute_ordered_stream_digest(&pairs),
+        }
+    }
+
+    /// The two registries recomputed from scratch as a pure index over
+    /// the currently `Staged` slots — the definition the repair makes
+    /// true.
+    #[allow(clippy::type_complexity)]
+    fn derived_index(
+        ingress: &TimelineIngress,
+    ) -> (
+        BTreeMap<CommandId, Digest>,
+        BTreeMap<(SourceId, u64), Digest>,
+    ) {
+        let mut commands = BTreeMap::new();
+        let mut sequences = BTreeMap::new();
+        for slot in ingress.slots.values() {
+            if let SlotState::Staged {
+                envelope,
+                semantic_hash,
+            } = slot
+            {
+                commands.insert(envelope.command_id.clone(), semantic_hash.clone());
+                sequences.insert(
+                    (envelope.source_id.clone(), envelope.source_sequence),
+                    semantic_hash.clone(),
+                );
+            }
+        }
+        (commands, sequences)
+    }
+
+    fn assert_derived_index(ingress: &TimelineIngress, step: &str) {
+        let (commands, sequences) = derived_index(ingress);
+        assert_eq!(
+            ingress.staged_command_identity, commands,
+            "after `{step}`: the staged command-ID registry is not a derived \
+             index over the positively staged slots"
+        );
+        assert_eq!(
+            ingress.staged_source_sequence_identity, sequences,
+            "after `{step}`: the staged source-sequence registry is not a \
+             derived index over the positively staged slots"
+        );
+    }
+
+    /// **AT-H3** — after every prefix of a scripted sequence containing
+    /// stages, a contest, poison pile-ons, an identity-conflicting
+    /// attempt, a fence promotion, and an epoch reset, both staged
+    /// registries equal the index recomputed from the current `Staged`
+    /// slots.
+    ///
+    /// Architecture §3.2's safe-removal lemma is what makes the poisoning
+    /// removals sound: an entry under key `c` was created by the envelope
+    /// that staged into this slot, and screening guarantees at most one
+    /// semantically *distinct* staged envelope per key; a semantically
+    /// identical envelope has an equal semantic hash, hence an equal
+    /// `input_ordinal`, hence is this very slot. So the entry being
+    /// removed can never belong to a different staged envelope.
+    #[test]
+    fn staged_registries_are_a_derived_index_over_staged_slots() {
+        let mut ingress =
+            TimelineIngress::new(profile(), TimelineEpoch(1), sequencer(), 4).unwrap();
+        assert_derived_index(&ingress, "construction");
+
+        let e0 = env("cmd.0", 1, 0, 0, "zero");
+        stage(&mut ingress, &e0).unwrap();
+        assert_derived_index(&ingress, "stage ordinal 0");
+
+        let e1 = env("cmd.1", 1, 1, 1, "one");
+        stage(&mut ingress, &e1).unwrap();
+        assert_derived_index(&ingress, "stage ordinal 1");
+
+        // Idempotent restage: no registry action at all.
+        stage(&mut ingress, &e1).unwrap();
+        assert_derived_index(&ingress, "idempotent restage of ordinal 1");
+
+        // An identity-conflicting attempt at an empty ordinal leaves no
+        // trace: no slot, no registration.
+        let conflicting = env("cmd.1", 1, 2, 21, "conflicting");
+        assert!(matches!(
+            stage(&mut ingress, &conflicting),
+            Err(StageError::CommandIdentityConflict { .. })
+        ));
+        assert_derived_index(&ingress, "rejected identity-conflicting stage");
+
+        // The contest: ordinal 1 poisons, and the formerly staged
+        // envelope's two claims must be withdrawn.
+        let contestant = env("cmd.1-rival", 1, 1, 11, "rival");
+        assert!(matches!(
+            stage(&mut ingress, &contestant),
+            Ok(StageDisposition::Poisoned(_))
+        ));
+        assert_derived_index(&ingress, "contest poisons ordinal 1");
+        assert!(!ingress.staged_command_identity.contains_key(&e1.command_id));
+        assert!(!ingress
+            .staged_command_identity
+            .contains_key(&contestant.command_id));
+
+        // Pile-on claims on the poisoned slot are evidence only.
+        for (index, payload) in ["pile-a", "pile-b"].iter().enumerate() {
+            let pile = env(
+                &format!("cmd.pile.{index}"),
+                1,
+                1,
+                31 + index as u64,
+                payload,
+            );
+            assert!(matches!(
+                stage(&mut ingress, &pile),
+                Ok(StageDisposition::Poisoned(_))
+            ));
+            assert_derived_index(&ingress, "pile-on claim on the poisoned slot");
+        }
+
+        // A contested identity is free again, at a fresh ordinal.
+        let reclaim = env("cmd.1", 1, 2, 12, "reclaimed");
+        stage(&mut ingress, &reclaim).unwrap();
+        assert_derived_index(&ingress, "reuse of a contested command ID");
+
+        // Fence promotion moves ordinal 0's claims into the finalized
+        // registries; the staged registries must not keep duplicates.
+        let promotion = fence(&ingress, "fence.0", 0, 0, &[e0.clone()]);
+        ingress.submit_fence(&sequencer(), &promotion).unwrap();
+        assert_derived_index(&ingress, "fence promotes ordinal 0");
+        assert!(!ingress.staged_command_identity.contains_key(&e0.command_id));
+        assert!(ingress
+            .finalized_command_identity
+            .contains_key(&e0.command_id));
+
+        // A stage after the window slid.
+        let e4 = env("cmd.4", 1, 4, 4, "four");
+        stage(&mut ingress, &e4).unwrap();
+        assert_derived_index(&ingress, "stage after the window slid");
+
+        // Epoch reset clears slots and both staged registries together.
+        ingress
+            .reset_epoch(&sequencer(), TimelineEpoch(2), sequencer())
+            .unwrap();
+        assert_derived_index(&ingress, "epoch reset");
+        assert!(ingress.staged_command_identity.is_empty());
+        assert!(ingress.staged_source_sequence_identity.is_empty());
+
+        let after_reset = env("cmd.after", 2, 1, 40, "after");
+        stage(&mut ingress, &after_reset).unwrap();
+        assert_derived_index(&ingress, "stage after the epoch reset");
+    }
+
+    /// **AT-H6** — fence promotion *moves* identity claims from the
+    /// staged registries into the finalized ones (S1), and finalized
+    /// identity remains permanently reserved across an epoch reset.
+    #[test]
+    fn finalization_moves_identity_from_staged_to_finalized_registries() {
+        let mut ingress =
+            TimelineIngress::new(profile(), TimelineEpoch(1), sequencer(), 4).unwrap();
+        let e0 = env("cmd.0", 1, 0, 7, "zero");
+        stage(&mut ingress, &e0).unwrap();
+        assert!(ingress.staged_command_identity.contains_key(&e0.command_id));
+
+        let promotion = fence(&ingress, "fence.0", 0, 0, &[e0.clone()]);
+        ingress.submit_fence(&sequencer(), &promotion).unwrap();
+
+        // (b) The staged registries no longer carry the promoted entries.
+        assert!(!ingress.staged_command_identity.contains_key(&e0.command_id));
+        assert!(!ingress
+            .staged_source_sequence_identity
+            .contains_key(&(e0.source_id.clone(), e0.source_sequence)));
+        assert_derived_index(&ingress, "fence promotion");
+
+        // (a) ...because the permanent registries took over: reuse of a
+        // finalized command ID or source-sequence pair by a semantically
+        // different envelope is still rejected.
+        assert_eq!(
+            stage(&mut ingress, &env("cmd.0", 1, 1, 8, "different")),
+            Err(StageError::CommandIdentityConflict {
+                command_id: CommandId::new("cmd.0").unwrap()
+            })
+        );
+        assert_eq!(
+            stage(&mut ingress, &env("cmd.other", 1, 1, 7, "different")),
+            Err(StageError::SourceSequenceConflict {
+                source_id: sequencer(),
+                source_sequence: 7,
+            })
+        );
+
+        // (c) An epoch reset voids unfinalized state only; finalized
+        // identity stays reserved forever.
+        ingress
+            .reset_epoch(&sequencer(), TimelineEpoch(2), sequencer())
+            .unwrap();
+        assert_eq!(
+            stage(&mut ingress, &env("cmd.0", 2, 1, 9, "different-again")),
+            Err(StageError::CommandIdentityConflict {
+                command_id: CommandId::new("cmd.0").unwrap()
+            })
+        );
+        assert_eq!(
+            stage(&mut ingress, &env("cmd.other", 2, 1, 7, "different-again")),
+            Err(StageError::SourceSequenceConflict {
+                source_id: sequencer(),
+                source_sequence: 7,
+            })
+        );
+    }
+}
