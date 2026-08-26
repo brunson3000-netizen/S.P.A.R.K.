@@ -51,14 +51,39 @@ probe suite caught a genuine defect during the pass — removing
 `FixedPoint`'s panicking `clamp` had silently handed the panic to the
 standard library's `Ord::clamp`. fmt/clippy/strict-lint/test/metadata
 gates and all five installed Windows/Android `cargo check` targets pass.
-Windows/Android remain static checks only. Pending independent Codex
-review of the v2 pass.
+Windows/Android remain static checks only.
 
-See `PHASE_1_REFOUNDATION_V2_IMPLEMENTATION_REPORT_2026-08-26.md`.
+**Independent Codex review of the v2 pass** returned `CONVERGED` on the
+foundational architecture — B-02, B-03's first-arrival defect and M-03 all
+closed — with `REVISE_PHASE_1` for one remaining MAJOR: the canonical
+scheduler and timeline state digests committed only to the exposed 16-hash
+presentation of contested-slot evidence, so two states holding different
+hidden tracked claims shared a digest and then reacted differently to the
+same next claim.
+
+**Final digest correction completed** (`42b22ab`, `b759192`), test-first:
+the eight AT-G assertions were encoded against the inherited tree and four
+failed — both hidden-evidence discrimination tests and both paired
+behavioral-divergence tests, in the scheduler and the timeline — while the
+four order-independence and cap-collapse guards stayed green. Conflict
+evidence and poison evidence now canonicalize every claim hash they still
+track; presentation stays at 16. 221 tests pass, up from 213, with nothing
+removed or weakened. All fmt/clippy/strict-lint/test/metadata gates and all
+five Windows/Android static targets pass.
+
+One out-of-scope finding of the same class was reproduced and reported
+rather than patched: the timeline's staged command-identity registries are
+arrival-order sensitive hidden state, whose correct repair is a change to
+B-01 admission semantics rather than a digest change. It awaits separate
+operator authorization.
+
+See `PHASE_1_REFOUNDATION_V2_IMPLEMENTATION_REPORT_2026-08-26.md` and
+`PHASE_1_FINAL_DIGEST_CORRECTION_REPORT_2026-08-26.md`.
 
 Re-foundation v2 writer: Claude Code (Opus, HIGH effort).
 Architecture/process review: Fable.
 Independent review of the v2 pass: Codex.
+Final digest correction writer: Claude Code (Opus, HIGH effort).
 
 ## Phase 2
 
