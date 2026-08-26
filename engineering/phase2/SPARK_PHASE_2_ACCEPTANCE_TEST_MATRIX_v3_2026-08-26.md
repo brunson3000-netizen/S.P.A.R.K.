@@ -1,7 +1,7 @@
 # S.P.A.R.K. Phase 2 — Acceptance Test Matrix v3 (AT-I)
 
 **Date:** 2026-08-26
-**Companion to:** `SPARK_PHASE_2_FABLE_ARCHITECTURE_FREEZE_v3_2026-08-26.md` (controlling
+**Companion to:** `SPARK_PHASE_2_OPUS_ARCHITECTURE_FREEZE_v3_2026-08-26.md` (controlling
 design; unqualified section references are to that document, "v2 §…" / "v1 §…" to the
 earlier freezes).
 **Supersedes:** `SPARK_PHASE_2_ACCEPTANCE_TEST_MATRIX_v2_2026-08-26.md` (retained
@@ -10,6 +10,16 @@ unmodified as history), which superseded the v1 matrix (also retained). Tests ar
 blocking finding **B01** or **B02** in
 `SPARK_PHASE_2_CODEX_ARCHITECTURE_V2_REREVIEW_2026-08-26.md`, or to a consistency edit
 enumerated in freeze v3 §7. No test cleared by the rereview is weakened.
+
+**Provenance correction (metadata only, 2026-08-26).** The **Companion to:** pointer
+above was retargeted from `SPARK_PHASE_2_FABLE_ARCHITECTURE_FREEZE_v3_2026-08-26.md` to
+the canonical, correctly attributed
+`SPARK_PHASE_2_OPUS_ARCHITECTURE_FREEZE_v3_2026-08-26.md`. The v3 architecture pass was
+performed by **Claude Code running Opus**, not Fable; the mis-attributed freeze file is
+retained on disk and in Git history, unmodified, as historical evidence, and no Git
+history is rewritten. That pointer and this note are the **only** changes: **no
+acceptance-test requirement, case, discipline rule, traceability entry, or scope
+boundary in this matrix is changed, reinterpreted, expanded, or weakened.**
 
 **Discipline (unchanged from v1/v2):** identical to AT-A…AT-H. Every AT-I test is
 encoded red-first; baselines are recorded verbatim under
