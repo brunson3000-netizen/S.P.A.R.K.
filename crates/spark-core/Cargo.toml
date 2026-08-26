@@ -1,0 +1,19 @@
+[package]
+name = "spark-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "S.P.A.R.K. canonical deterministic core: IDs, scopes, authority, StateCell, logical clock, scheduler, random addresses, canonical timeline ingress."
+
+[dependencies]
+# "pure" disables blake3's optional C/assembly SIMD backends so the build
+# never requires a target C toolchain (e.g. an Android NDK clang for
+# cross-checks) - see the dependency rationale in the Phase-1 report.
+blake3 = { version = "1", default-features = false, features = ["std", "pure"] }
+
+[dev-dependencies]
+spark-testkit = { path = "../spark-testkit" }
+
+[lints.rust]
+unsafe_code = "forbid"

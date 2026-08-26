@@ -1,0 +1,16 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/spark-core",
+    "crates/spark-profile",
+    "crates/spark-testkit",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[profile.release]
+panic = "unwind"
