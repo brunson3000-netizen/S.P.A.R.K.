@@ -1,0 +1,48 @@
+{
+  "evidence_packet_sha256": "fee3460689fa56b38b18e978f1cfd4caabba715c6182f1e96381b990a167e47e",
+  "finish_reason": "stop",
+  "http_status": 200,
+  "latency_s": 110.08,
+  "model": "nvidia/nemotron-3-super-120b-a12b",
+  "ok": true,
+  "raw_response_file": "architecture_consistency__fallback__nvidia_nemotron-3-super-120b-a12b.json",
+  "reason": "bounded replacement for a failed/not-deployed panel seat; successful seats were not rerun",
+  "role": "architecture_consistency",
+  "source_files": [
+    {
+      "bytes": 27054,
+      "path": "engineering/phase2/SPARK_PHASE_2_CODEX_ARCHITECTURE_V2_REREVIEW_2026-08-26.md",
+      "sha256": "a3505189fa795a2ddcf7f965fce0561def675ed58cbd95858ed9dd0f5b7e16d4"
+    },
+    {
+      "bytes": 42873,
+      "path": "engineering/phase2/SPARK_PHASE_2_OPUS_ARCHITECTURE_FREEZE_v3_2026-08-26.md",
+      "sha256": "50053b0410ff23c8ba1d03a8d45cac2e94abe2c61ec0ec7c509970fd59480e45"
+    },
+    {
+      "bytes": 29338,
+      "path": "engineering/phase2/SPARK_PHASE_2_ACCEPTANCE_TEST_MATRIX_v3_2026-08-26.md",
+      "sha256": "a06dc4d05dc22dccef63d5319ecf9ad57bb12c67aca5f5617ac24d2094da604c"
+    },
+    {
+      "bytes": 33138,
+      "path": "engineering/phase2/SPARK_PHASE_2_FABLE_ARCHITECTURE_FREEZE_v2_2026-08-26.md",
+      "sha256": "6a6d8bb765947ad7d45f27b4951cc07079632524639ffeab20aaae28b2890b2c"
+    },
+    {
+      "bytes": 29558,
+      "path": "engineering/phase2/SPARK_PHASE_2_FABLE_ARCHITECTURE_FREEZE_2026-08-26.md",
+      "sha256": "d1cfa9864ea3166344762c5ed3bd307355ac7a37dde23bcaef29457bd9a6014c"
+    },
+    {
+      "bytes": 40711,
+      "path": "crates/spark-core/src/scheduler.rs",
+      "sha256": "e58992aff3d70bf209bf1873fa9fade26c7077005fb3212c3d18bf5e182c2317"
+    }
+  ],
+  "usage": {
+    "completion_tokens": 5566,
+    "prompt_tokens": 50045,
+    "total_tokens": 55611
+  }
+}

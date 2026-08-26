@@ -1,0 +1,23 @@
+{
+  "evidence_packet_sha256": "fee3460689fa56b38b18e978f1cfd4caabba715c6182f1e96381b990a167e47e",
+  "finished_at_utc": "2026-08-26T16:27:32.618301+00:00",
+  "gateway_credential_source": "file:~/.local/share/swarm/secrets/nvidia/api-key",
+  "model": "nvidia/nemotron-3-ultra-550b-a55b",
+  "prompt_sha256": "082e0f83fd6c20c20cd68aacd21342dfd68a4a0c7e4082e33b3716158f1d8aed",
+  "result": {
+    "error_class": "not-deployed",
+    "error_detail": "{\"error\": \"\"}",
+    "finish_reason": null,
+    "http_status": 404,
+    "latency_s": 1.99,
+    "model": "nvidia/nemotron-3-ultra-550b-a55b",
+    "ok": false,
+    "reasoning": null,
+    "text": "",
+    "usage": null
+  },
+  "role": "architecture_consistency",
+  "started_at_utc": "2026-08-26T16:27:30.625695+00:00",
+  "system_prompt": "You are an independent architecture-review worker. Review only the\ncommitted evidence in the prompt. Do not assume an implementation exists. Do not invent\nnew Phase-2 scope or reopen a cleared decision merely because another design is possible.\nA blocker requires: a concrete counterexample, the violated controlling invariant,\narchitectural impact, and the smallest safe correction. Distinguish architecture defects\nfrom test-only defects and implementation choices. Return a concise evidence-grounded\nreport ending with exactly KEEP or REVISE. You are advisory; Codex remains adjudicator.",
+  "task": "Trace the v2 B01/B02 findings into v3 and its matrix. Attack internal\nconsistency across inherited scheduler semantics, cohort selection, engine digest,\nstable-boundary claims, and the no-hidden-state rule. Confirm or falsify that v3 is a\ncomplete, implementable freeze. Report only concrete blockers."
+}
