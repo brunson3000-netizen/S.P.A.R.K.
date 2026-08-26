@@ -4,7 +4,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
-description = "S.P.A.R.K. canonical deterministic core: IDs, scopes, authority, StateCell, logical clock, scheduler, random addresses, canonical timeline ingress."
+description = "S.P.A.R.K. canonical deterministic core: bounded IDs/tags, scopes, authority, definition-identity activation, StateCell, logical clock, semantic-key scheduler, random addresses, canonical timeline ingress."
 
 [dependencies]
 # "pure" disables blake3's optional C/assembly SIMD backends so the build

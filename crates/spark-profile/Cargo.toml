@@ -4,7 +4,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
-description = "S.P.A.R.K. profile manifest logical types, validation skeleton, and canonical content hashing/definition fingerprints."
+description = "S.P.A.R.K. profile manifest logical types, the validation/activation path, validated config revisions, and canonical content hashing/definition fingerprints."
 
 [dependencies]
 spark-core = { path = "../spark-core" }

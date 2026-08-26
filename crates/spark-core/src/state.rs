@@ -1,32 +1,48 @@
-//! `StateCell`, the immutable profile-qualified [`DefinitionSchema`], and
-//! the authority-safe `StateStore` write API.
+//! `StateCell` and the authority-safe, activation-bound `StateStore`.
 //!
-//! The Phase-1 correction brief (B-02) requires that Phase 1 expose **no
-//! public raw state mutation API** that lets an arbitrary external crate
-//! declare authority on demand, invoke host-ingress/evaluator writes
-//! directly, or write a value that violates a validated definition's
-//! type/bounds/scope/profile. This module therefore has exactly one way
-//! to build a `StateStore`: from an already-validated, immutable
-//! [`DefinitionSchema`] table supplied at construction. There is no
-//! runtime schema-mutation method, and the three write paths
-//! (`observe_host_owned`, `apply_spark_effect`, `commit_derived`) are
-//! `pub(crate)` rather than public — the only "later higher-level
-//! host/evaluator facade" Phase 1 has is its own internal tests, which the
-//! correction brief explicitly sanctions ("tests may access internal
-//! paths from inside the crate; do not make unsafe runtime APIs public
-//! merely for test convenience"). A caller outside this crate can read
-//! state (`get`) but cannot write it at all in Phase 1: that capability is
-//! deliberately deferred to the Phase-2/3 rule runtime and host/evaluator
-//! facades that do not exist yet.
+//! Re-founded per `PHASE_1_REFOUNDATION_BRIEF_v0.1.md` §3 (trusted schema
+//! activation). The previous boundary failed independent review twice for
+//! the same reason: a `StateStore` was built from a caller-supplied
+//! `DefinitionSchema` whose fields — including its authority mode and its
+//! identity fingerprint — were all public. Making the write facades
+//! crate-internal did not repair that, because the schema those facades
+//! validated against was itself forgeable, so external code could declare
+//! `Derived` authority with a `Digest::ZERO` fingerprint and have it
+//! installed as activated truth.
+//!
+//! There is now exactly one way to obtain a `StateStore`:
+//! [`StateStore::from_activated_schema`], which consumes a
+//! [`crate::activation::ActivatedSchema`] — a type with private fields and
+//! no public constructor, obtainable only from
+//! [`crate::activation::DefinitionIdentityRegistry::activate`]. Provenance
+//! is therefore structural: a `StateStore`'s schema cannot exist without
+//! having passed the activation ceremony, and there is no method that can
+//! alter it afterwards.
+//!
+//! ```compile_fail
+//! use spark_core::state::StateStore;
+//! // The raw-schema constructor is gone; there is no way to install
+//! // arbitrary authority metadata into a store.
+//! let store = StateStore::new(std::iter::empty());
+//! ```
+//!
+//! The three write paths (`observe_host_owned`, `apply_spark_effect`,
+//! `commit_derived`) remain `pub(crate)`: Phase 1 authorizes no
+//! host/evaluator facade, so a caller outside this crate can read state
+//! but cannot write it at all. Each path is hard-coded to one authority
+//! and validates profile, authority, value type, declared bounds, and
+//! scope compatibility against the activated schema before writing
+//! anything.
 
+use crate::activation::{ActivatedDefinition, ActivatedSchema};
 use crate::authority::Authority;
 use crate::clock::LogicalTime;
 use crate::hash::{CanonicalEncoder, Digest};
 use crate::id::{DefinitionId, ProfileId};
 use crate::scope::ScopeId;
 use crate::scope::ScopeKind;
-use crate::value::{CanonicalValue, ValueConstraint, ValueType};
-use std::collections::{BTreeMap, BTreeSet};
+use crate::value::{CanonicalValue, ValueType};
+use std::collections::BTreeMap;
 
 /// Maximum number of bounded source references retained per cell
 /// (`CONTROLLING_BLUEPRINT_v0.2.md` §12.2 `source_refs (bounded)`).
@@ -58,22 +74,6 @@ impl SourceRefs {
     pub fn as_slice(&self) -> &[DefinitionId] {
         &self.0
     }
-}
-
-/// The immutable, profile-qualified schema entry a `StateStore` is built
-/// from (Phase-1 correction brief B-02): the definition's full identity
-/// fingerprint (opaque to this crate — computed and owned by
-/// `spark-profile`), its authority, its declared value constraint, and its
-/// valid scopes. `StateStore` has no way to construct or alter this table
-/// after activation.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DefinitionSchema {
-    pub profile_id: ProfileId,
-    pub definition_id: DefinitionId,
-    pub fingerprint: Digest,
-    pub authority: Authority,
-    pub value_constraint: ValueConstraint,
-    pub valid_scopes: BTreeSet<ScopeKind>,
 }
 
 /// A typed value attached to a scope
@@ -118,16 +118,21 @@ impl StateCell {
     }
 }
 
-/// Rejects a write that violates the definition's declared schema.
+/// Rejects a write that violates the activated schema.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StateWriteError {
-    /// No schema entry exists for `(profile_id, definition_id)`; declare
-    /// it in the immutable schema supplied at `StateStore` construction.
+    /// The write names a profile other than the one this store was
+    /// activated for (ADR-0004 profile/trust-domain isolation).
+    ForeignProfile {
+        store_profile: ProfileId,
+        attempted_profile: ProfileId,
+    },
+    /// No activated definition exists for `definition_id` in this store.
     UndeclaredDefinition {
         profile_id: ProfileId,
         definition_id: DefinitionId,
     },
-    /// The definition's declared authority does not match the entry
+    /// The definition's activated authority does not match the entry
     /// point used to write it.
     WrongAuthorityForWritePath {
         profile_id: ProfileId,
@@ -135,8 +140,8 @@ pub enum StateWriteError {
         declared: Authority,
         attempted_path: &'static str,
     },
-    /// The value's runtime type does not match the definition's declared
-    /// value constraint.
+    /// The value's runtime type does not match the activated value
+    /// constraint.
     WrongValueType {
         profile_id: ProfileId,
         definition_id: DefinitionId,
@@ -144,12 +149,12 @@ pub enum StateWriteError {
         actual: ValueType,
     },
     /// The value's runtime type matches, but its content falls outside
-    /// the definition's declared bounds.
+    /// the activated declared bounds.
     OutOfBounds {
         profile_id: ProfileId,
         definition_id: DefinitionId,
     },
-    /// `scope_id`'s kind is not among the definition's declared
+    /// `scope_id`'s kind is not among the definition's activated
     /// `valid_scopes`.
     DisallowedScope {
         profile_id: ProfileId,
@@ -161,12 +166,19 @@ pub enum StateWriteError {
 impl std::fmt::Display for StateWriteError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            StateWriteError::ForeignProfile {
+                store_profile,
+                attempted_profile,
+            } => write!(
+                f,
+                "this state store was activated for profile '{store_profile}' and cannot hold state for profile '{attempted_profile}'"
+            ),
             StateWriteError::UndeclaredDefinition {
                 profile_id,
                 definition_id,
             } => write!(
                 f,
-                "definition '{definition_id}' has no declared schema in profile '{profile_id}'; it cannot be written"
+                "definition '{definition_id}' is not activated in profile '{profile_id}'; it cannot be written"
             ),
             StateWriteError::WrongAuthorityForWritePath {
                 profile_id,
@@ -207,65 +219,64 @@ impl std::fmt::Display for StateWriteError {
 
 impl std::error::Error for StateWriteError {}
 
-/// Holds canonical `StateCell` instances, keyed by `(profile_id,
-/// definition_id, scope_id)`, built once from an immutable, already
-/// profile-qualified [`DefinitionSchema`] table and exposing only
-/// authority-specific, crate-internal write paths.
+/// Holds canonical `StateCell` instances for exactly one profile, keyed by
+/// `(definition_id, scope_id)`, over an immutable activated schema.
 ///
-/// There is intentionally no public `set`/`write`/`declare_authority`
-/// method: that shape would let a bug (or a future careless caller)
-/// commit `host_owned` truth from inside S.P.A.R.K., let an external
-/// client write `derived` truth directly, or redeclare a definition's
-/// schema after activation. Each of the three `pub(crate)` write methods
-/// below is hard-coded to check one specific authority against the
-/// immutable schema before writing anything.
+/// There is intentionally no public `new`, `set`, `write`, or
+/// `declare_authority` method. The first would let arbitrary authority
+/// metadata become activated truth; the rest would let a bug (or a future
+/// careless caller) commit `host_owned` truth from inside S.P.A.R.K. or
+/// write `derived` truth directly from a client.
 #[derive(Debug)]
 pub struct StateStore {
-    schema: BTreeMap<(ProfileId, DefinitionId), DefinitionSchema>,
-    cells: BTreeMap<(ProfileId, DefinitionId, ScopeId), StateCell>,
-}
-
-fn cell_key(
-    profile_id: &ProfileId,
-    definition_id: &DefinitionId,
-    scope_id: &ScopeId,
-) -> (ProfileId, DefinitionId, ScopeId) {
-    (profile_id.clone(), definition_id.clone(), scope_id.clone())
+    schema: ActivatedSchema,
+    cells: BTreeMap<(DefinitionId, ScopeId), StateCell>,
 }
 
 impl StateStore {
-    /// Builds a `StateStore` from an immutable, already-validated schema
-    /// table. There is no method to add, remove, or alter a schema entry
-    /// afterward.
-    pub fn new(schema: impl IntoIterator<Item = DefinitionSchema>) -> Self {
-        let mut map = BTreeMap::new();
-        for entry in schema {
-            map.insert(
-                (entry.profile_id.clone(), entry.definition_id.clone()),
-                entry,
-            );
-        }
+    /// The only constructor: build a store over an already-activated,
+    /// immutable schema.
+    pub fn from_activated_schema(schema: ActivatedSchema) -> Self {
         Self {
-            schema: map,
+            schema,
             cells: BTreeMap::new(),
         }
+    }
+
+    /// The profile this store was activated for.
+    pub fn profile_id(&self) -> &ProfileId {
+        self.schema.profile_id()
+    }
+
+    /// The activated schema backing this store. Shared reference only —
+    /// there is no path that mutates it after activation.
+    pub fn activated_schema(&self) -> &ActivatedSchema {
+        &self.schema
+    }
+
+    /// The activation hash of the schema this store was built from, so a
+    /// caller can bind persisted state to the exact activated definition
+    /// set that produced it (ADR-0006 exact-artifact continuation).
+    pub fn activation_hash(&self) -> &Digest {
+        self.schema.activation_hash()
     }
 
     pub fn schema_of(
         &self,
         profile_id: &ProfileId,
         definition_id: &DefinitionId,
-    ) -> Option<&DefinitionSchema> {
-        self.schema
-            .get(&(profile_id.clone(), definition_id.clone()))
+    ) -> Option<&ActivatedDefinition> {
+        if profile_id != self.schema.profile_id() {
+            return None;
+        }
+        self.schema.get(definition_id)
     }
 
     // Phase 1 has no non-test caller for the write paths below: the
-    // "later higher-level host/evaluator facade" the correction brief
-    // anticipates is Phase 2/3 scope. `cfg_attr(not(test), allow(dead_code))`
-    // silences the resulting lint precisely in non-test builds without
-    // masking genuine dead code once a real caller exists (at which point
-    // the allow becomes inert, not misleading).
+    // higher-level host/evaluator facade is Phase 2/3 scope. The
+    // `cfg_attr(not(test), allow(dead_code))` silences the resulting lint
+    // precisely in non-test builds without masking genuine dead code once
+    // a real caller exists.
     #[cfg_attr(not(test), allow(dead_code))]
     fn validate_write(
         &self,
@@ -276,40 +287,47 @@ impl StateStore {
         required: Authority,
         attempted_path: &'static str,
     ) -> Result<(), StateWriteError> {
-        let schema = self
-            .schema
-            .get(&(profile_id.clone(), definition_id.clone()))
-            .ok_or_else(|| StateWriteError::UndeclaredDefinition {
+        if profile_id != self.schema.profile_id() {
+            return Err(StateWriteError::ForeignProfile {
+                store_profile: self.schema.profile_id().clone(),
+                attempted_profile: profile_id.clone(),
+            });
+        }
+
+        let definition = self.schema.get(definition_id).ok_or_else(|| {
+            StateWriteError::UndeclaredDefinition {
                 profile_id: profile_id.clone(),
                 definition_id: definition_id.clone(),
-            })?;
+            }
+        })?;
 
-        if !same_authority(schema.authority, required) {
+        if definition.authority() != required {
             return Err(StateWriteError::WrongAuthorityForWritePath {
                 profile_id: profile_id.clone(),
                 definition_id: definition_id.clone(),
-                declared: schema.authority,
+                declared: definition.authority(),
                 attempted_path,
             });
         }
 
-        if value.type_tag() != schema.value_constraint.value_type() {
+        let constraint = definition.value_constraint();
+        if value.type_tag() != constraint.value_type() {
             return Err(StateWriteError::WrongValueType {
                 profile_id: profile_id.clone(),
                 definition_id: definition_id.clone(),
-                expected: schema.value_constraint.value_type(),
+                expected: constraint.value_type(),
                 actual: value.type_tag(),
             });
         }
 
-        if !schema.value_constraint.accepts(value) {
+        if !constraint.accepts(value) {
             return Err(StateWriteError::OutOfBounds {
                 profile_id: profile_id.clone(),
                 definition_id: definition_id.clone(),
             });
         }
 
-        if !schema.valid_scopes.contains(scope_id.kind()) {
+        if !definition.valid_scopes().contains(scope_id.kind()) {
             return Err(StateWriteError::DisallowedScope {
                 profile_id: profile_id.clone(),
                 definition_id: definition_id.clone(),
@@ -341,14 +359,7 @@ impl StateStore {
             Authority::HostOwned,
             "observe_host_owned",
         )?;
-        self.upsert(
-            profile_id,
-            definition_id,
-            scope_id,
-            value,
-            at,
-            behavior_epoch,
-        );
+        self.upsert(definition_id, scope_id, value, at, behavior_epoch);
         Ok(())
     }
 
@@ -374,14 +385,7 @@ impl StateStore {
             Authority::SparkOwned,
             "apply_spark_effect",
         )?;
-        self.upsert(
-            profile_id,
-            definition_id,
-            scope_id,
-            value,
-            at,
-            behavior_epoch,
-        );
+        self.upsert(definition_id, scope_id, value, at, behavior_epoch);
         Ok(())
     }
 
@@ -406,28 +410,21 @@ impl StateStore {
             Authority::Derived,
             "commit_derived",
         )?;
-        self.upsert(
-            profile_id,
-            definition_id,
-            scope_id,
-            value,
-            at,
-            behavior_epoch,
-        );
+        self.upsert(definition_id, scope_id, value, at, behavior_epoch);
         Ok(())
     }
 
     #[cfg_attr(not(test), allow(dead_code))]
     fn upsert(
         &mut self,
-        profile_id: ProfileId,
         definition_id: DefinitionId,
         scope_id: ScopeId,
         value: CanonicalValue,
         at: LogicalTime,
         behavior_epoch: u64,
     ) {
-        let k = cell_key(&profile_id, &definition_id, &scope_id);
+        let profile_id = self.schema.profile_id().clone();
+        let k = (definition_id.clone(), scope_id.clone());
         match self.cells.get_mut(&k) {
             Some(existing) => {
                 existing.value = value;
@@ -460,272 +457,297 @@ impl StateStore {
         definition_id: &DefinitionId,
         scope_id: &ScopeId,
     ) -> Option<&StateCell> {
-        self.cells
-            .get(&cell_key(profile_id, definition_id, scope_id))
+        if profile_id != self.schema.profile_id() {
+            return None;
+        }
+        self.cells.get(&(definition_id.clone(), scope_id.clone()))
     }
-}
 
-#[cfg_attr(not(test), allow(dead_code))]
-fn same_authority(a: Authority, b: Authority) -> bool {
-    std::mem::discriminant(&a) == std::mem::discriminant(&b)
+    /// A deterministic canonical digest of this store's activated schema
+    /// and every cell, in stable key order.
+    pub fn canonical_state_digest(&self) -> Digest {
+        let mut enc = CanonicalEncoder::new();
+        enc.push_str("state_store");
+        enc.push_digest(self.schema.activation_hash());
+        enc.push_u64(self.cells.len() as u64);
+        for cell in self.cells.values() {
+            let mut inner = CanonicalEncoder::new();
+            cell.canonicalize(&mut inner);
+            enc.push_block(&inner);
+        }
+        enc.finish()
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::hash::hash_bytes;
-    use crate::scope::ScopeKind;
-    use crate::value::FixedPoint;
+    use crate::activation::{DefinitionDeclaration, DefinitionIdentityRegistry, DefinitionKindTag};
+    use crate::id::CanonicalTag;
+    use crate::value::ValueConstraint;
+    use std::collections::BTreeSet;
 
-    fn actor_scope(name: &str) -> ScopeId {
-        ScopeId::new(ScopeKind::Actor, name).unwrap()
-    }
-
-    fn profile_a() -> ProfileId {
+    fn profile() -> ProfileId {
         ProfileId::new("game-world").unwrap()
     }
 
-    fn profile_b() -> ProfileId {
-        ProfileId::new("mci-social").unwrap()
+    fn def(id: &str) -> DefinitionId {
+        DefinitionId::new(id).unwrap()
     }
 
-    fn schema_entry(
-        profile_id: ProfileId,
-        definition_id: &str,
-        authority: Authority,
-        value_constraint: ValueConstraint,
-        valid_scopes: BTreeSet<ScopeKind>,
-    ) -> DefinitionSchema {
-        DefinitionSchema {
-            profile_id,
-            definition_id: DefinitionId::new(definition_id).unwrap(),
-            fingerprint: hash_bytes(definition_id.as_bytes()),
+    fn declaration(id: &str, authority: Authority) -> DefinitionDeclaration {
+        DefinitionDeclaration {
+            profile_id: profile(),
+            definition_id: def(id),
+            kind: DefinitionKindTag::builtin(CanonicalTag::new("state_definition").unwrap()),
             authority,
-            value_constraint,
-            valid_scopes,
+            value_constraint: ValueConstraint::int(0, 10).unwrap(),
+            valid_scopes: BTreeSet::from([ScopeKind::Actor]),
         }
     }
 
-    #[test]
-    fn host_owned_cannot_be_mutated_by_spark_effect_write_path() {
-        let id = DefinitionId::new("state.resource.food_availability").unwrap();
-        let mut store = StateStore::new([schema_entry(
-            profile_a(),
-            id.as_str(),
-            Authority::HostOwned,
-            ValueConstraint::Int { min: 0, max: 1000 },
-            BTreeSet::from([ScopeKind::Actor]),
-        )]);
+    fn store_with(declarations: &[DefinitionDeclaration]) -> StateStore {
+        let mut registry = DefinitionIdentityRegistry::new();
+        let schema = registry.activate(&profile(), declarations).unwrap();
+        StateStore::from_activated_schema(schema)
+    }
 
+    fn actor() -> ScopeId {
+        ScopeId::new(ScopeKind::Actor, "bron").unwrap()
+    }
+
+    /// Phase-1 test corpus item 11: host-owned state cannot be mutated by
+    /// the S.P.A.R.K.-owned write path.
+    #[test]
+    fn host_owned_state_rejects_the_spark_effect_path() {
+        let mut store = store_with(&[declaration("state.food.availability", Authority::HostOwned)]);
         let err = store
             .apply_spark_effect(
-                profile_a(),
-                id.clone(),
-                actor_scope("bron"),
+                profile(),
+                def("state.food.availability"),
+                actor(),
                 CanonicalValue::Int(1),
-                LogicalTime(1),
-                0,
+                LogicalTime(0),
+                1,
             )
             .unwrap_err();
         assert!(matches!(
             err,
             StateWriteError::WrongAuthorityForWritePath { .. }
         ));
-        assert!(store.get(&profile_a(), &id, &actor_scope("bron")).is_none());
-    }
-
-    #[test]
-    fn derived_cannot_be_written_by_client_facing_effect_path() {
-        let id = DefinitionId::new("state.derived.food_insecurity").unwrap();
-        let mut store = StateStore::new([schema_entry(
-            profile_a(),
-            id.as_str(),
-            Authority::Derived,
-            ValueConstraint::Bool,
-            BTreeSet::from([ScopeKind::Household]),
-        )]);
-
-        let err = store
-            .apply_spark_effect(
-                profile_a(),
-                id.clone(),
-                ScopeId::new(ScopeKind::Household, "household.1").unwrap(),
-                CanonicalValue::Bool(true),
-                LogicalTime(1),
-                0,
-            )
-            .unwrap_err();
-        assert!(matches!(
-            err,
-            StateWriteError::WrongAuthorityForWritePath { .. }
-        ));
-
-        // Only the evaluator-only path succeeds.
-        store
-            .commit_derived(
-                profile_a(),
-                id.clone(),
-                ScopeId::new(ScopeKind::Household, "household.1").unwrap(),
-                CanonicalValue::Bool(true),
-                LogicalTime(1),
-                0,
-            )
-            .unwrap();
         assert!(store
-            .get(
-                &profile_a(),
-                &id,
-                &ScopeId::new(ScopeKind::Household, "household.1").unwrap()
-            )
-            .is_some());
+            .get(&profile(), &def("state.food.availability"), &actor())
+            .is_none());
     }
 
+    /// Phase-1 test corpus item 12: derived state cannot be independently
+    /// written through host ingress or a spark effect.
     #[test]
-    fn undeclared_definition_cannot_be_written_through_any_path() {
-        let mut store = StateStore::new([]);
-        let id = DefinitionId::new("trait.curiosity").unwrap();
-        let err = store
-            .apply_spark_effect(
-                profile_a(),
-                id,
-                actor_scope("bron"),
-                CanonicalValue::Fixed(FixedPoint::ZERO),
-                LogicalTime(0),
-                0,
-            )
-            .unwrap_err();
-        assert!(matches!(err, StateWriteError::UndeclaredDefinition { .. }));
-    }
-
-    #[test]
-    fn wrong_value_type_rejects() {
-        let id = DefinitionId::new("trait.curiosity").unwrap();
-        let mut store = StateStore::new([schema_entry(
-            profile_a(),
-            id.as_str(),
-            Authority::SparkOwned,
-            ValueConstraint::Fixed {
-                min: FixedPoint::ZERO,
-                max: FixedPoint::from_integer(1).unwrap(),
-            },
-            BTreeSet::from([ScopeKind::Actor]),
-        )]);
-        let err = store
-            .apply_spark_effect(
-                profile_a(),
-                id,
-                actor_scope("bron"),
-                CanonicalValue::Bool(true),
-                LogicalTime(0),
-                0,
-            )
-            .unwrap_err();
-        assert!(matches!(err, StateWriteError::WrongValueType { .. }));
-    }
-
-    #[test]
-    fn out_of_bounds_value_rejects() {
-        let id = DefinitionId::new("state.resource.food_availability").unwrap();
-        let mut store = StateStore::new([schema_entry(
-            profile_a(),
-            id.as_str(),
-            Authority::HostOwned,
-            ValueConstraint::Int { min: 0, max: 10 },
-            BTreeSet::from([ScopeKind::Settlement]),
-        )]);
-        let err = store
+    fn derived_state_rejects_host_ingress_and_spark_effect_paths() {
+        let mut store = store_with(&[declaration("state.pressure.derived", Authority::Derived)]);
+        assert!(store
             .observe_host_owned(
-                profile_a(),
-                id,
-                ScopeId::new(ScopeKind::Settlement, "pontafique").unwrap(),
-                CanonicalValue::Int(11),
+                profile(),
+                def("state.pressure.derived"),
+                actor(),
+                CanonicalValue::Int(1),
                 LogicalTime(0),
-                0,
+                1,
             )
-            .unwrap_err();
-        assert!(matches!(err, StateWriteError::OutOfBounds { .. }));
+            .is_err());
+        assert!(store
+            .apply_spark_effect(
+                profile(),
+                def("state.pressure.derived"),
+                actor(),
+                CanonicalValue::Int(1),
+                LogicalTime(0),
+                1,
+            )
+            .is_err());
+        // Only the evaluator path succeeds.
+        assert!(store
+            .commit_derived(
+                profile(),
+                def("state.pressure.derived"),
+                actor(),
+                CanonicalValue::Int(1),
+                LogicalTime(0),
+                1,
+            )
+            .is_ok());
     }
 
     #[test]
-    fn disallowed_scope_rejects() {
-        let id = DefinitionId::new("trait.curiosity").unwrap();
-        let mut store = StateStore::new([schema_entry(
-            profile_a(),
-            id.as_str(),
-            Authority::SparkOwned,
-            ValueConstraint::Bool,
-            BTreeSet::from([ScopeKind::Actor]),
-        )]);
-        let err = store
-            .apply_spark_effect(
-                profile_a(),
-                id,
-                ScopeId::new(ScopeKind::Settlement, "pontafique").unwrap(),
-                CanonicalValue::Bool(true),
+    fn each_authority_accepts_only_its_own_path() {
+        let mut store = store_with(&[
+            declaration("state.host.value", Authority::HostOwned),
+            declaration("state.spark.value", Authority::SparkOwned),
+        ]);
+        assert!(store
+            .observe_host_owned(
+                profile(),
+                def("state.host.value"),
+                actor(),
+                CanonicalValue::Int(3),
                 LogicalTime(0),
-                0,
+                1
             )
-            .unwrap_err();
-        assert!(matches!(err, StateWriteError::DisallowedScope { .. }));
+            .is_ok());
+        assert!(store
+            .apply_spark_effect(
+                profile(),
+                def("state.spark.value"),
+                actor(),
+                CanonicalValue::Int(4),
+                LogicalTime(0),
+                1
+            )
+            .is_ok());
+        assert!(store
+            .commit_derived(
+                profile(),
+                def("state.spark.value"),
+                actor(),
+                CanonicalValue::Int(4),
+                LogicalTime(0),
+                1
+            )
+            .is_err());
     }
 
     #[test]
-    fn wrong_profile_rejects() {
-        let id = DefinitionId::new("trait.curiosity").unwrap();
-        let mut store = StateStore::new([schema_entry(
-            profile_a(),
-            id.as_str(),
-            Authority::SparkOwned,
-            ValueConstraint::Bool,
-            BTreeSet::from([ScopeKind::Actor]),
-        )]);
+    fn undeclared_definition_cannot_be_written() {
+        let mut store = store_with(&[declaration("state.spark.value", Authority::SparkOwned)]);
         let err = store
             .apply_spark_effect(
-                profile_b(),
-                id,
-                actor_scope("bron"),
-                CanonicalValue::Bool(true),
+                profile(),
+                def("state.never.declared"),
+                actor(),
+                CanonicalValue::Int(1),
                 LogicalTime(0),
-                0,
+                1,
             )
             .unwrap_err();
         assert!(matches!(err, StateWriteError::UndeclaredDefinition { .. }));
     }
 
-    /// Same `DefinitionId` declared independently in two different
-    /// profiles must not let a write to one profile become visible under
-    /// the other (Phase-1 correction brief B-02: "profile A cannot
-    /// write/read private state as profile B through ID collision").
     #[test]
-    fn same_definition_id_in_two_profiles_does_not_cross_contaminate() {
-        let id = DefinitionId::new("trait.curiosity").unwrap();
-        let mut store = StateStore::new([
-            schema_entry(
-                profile_a(),
-                id.as_str(),
-                Authority::SparkOwned,
-                ValueConstraint::Bool,
-                BTreeSet::from([ScopeKind::Actor]),
-            ),
-            schema_entry(
-                profile_b(),
-                id.as_str(),
-                Authority::SparkOwned,
-                ValueConstraint::Bool,
-                BTreeSet::from([ScopeKind::Actor]),
-            ),
-        ]);
+    fn out_of_bounds_and_mistyped_values_are_rejected() {
+        let mut store = store_with(&[declaration("state.spark.value", Authority::SparkOwned)]);
+        assert!(matches!(
+            store
+                .apply_spark_effect(
+                    profile(),
+                    def("state.spark.value"),
+                    actor(),
+                    CanonicalValue::Int(11),
+                    LogicalTime(0),
+                    1
+                )
+                .unwrap_err(),
+            StateWriteError::OutOfBounds { .. }
+        ));
+        assert!(matches!(
+            store
+                .apply_spark_effect(
+                    profile(),
+                    def("state.spark.value"),
+                    actor(),
+                    CanonicalValue::Bool(true),
+                    LogicalTime(0),
+                    1
+                )
+                .unwrap_err(),
+            StateWriteError::WrongValueType { .. }
+        ));
+    }
+
+    #[test]
+    fn disallowed_scope_kind_is_rejected() {
+        let mut store = store_with(&[declaration("state.spark.value", Authority::SparkOwned)]);
+        let household = ScopeId::new(ScopeKind::Household, "bron").unwrap();
+        assert!(matches!(
+            store
+                .apply_spark_effect(
+                    profile(),
+                    def("state.spark.value"),
+                    household,
+                    CanonicalValue::Int(1),
+                    LogicalTime(0),
+                    1
+                )
+                .unwrap_err(),
+            StateWriteError::DisallowedScope { .. }
+        ));
+    }
+
+    /// ADR-0004 profile isolation: a store activated for one profile
+    /// cannot be used to hold or resolve another profile's state.
+    #[test]
+    fn foreign_profile_writes_and_reads_are_rejected() {
+        let mut store = store_with(&[declaration("state.spark.value", Authority::SparkOwned)]);
+        let other = ProfileId::new("mci-social").unwrap();
+        assert!(matches!(
+            store
+                .apply_spark_effect(
+                    other.clone(),
+                    def("state.spark.value"),
+                    actor(),
+                    CanonicalValue::Int(1),
+                    LogicalTime(0),
+                    1
+                )
+                .unwrap_err(),
+            StateWriteError::ForeignProfile { .. }
+        ));
+        assert!(store.schema_of(&other, &def("state.spark.value")).is_none());
+    }
+
+    /// The store's schema carries the registry-computed fingerprint, not
+    /// anything a caller supplied.
+    #[test]
+    fn activated_schema_carries_registry_computed_identity() {
+        let decl = declaration("state.spark.value", Authority::SparkOwned);
+        let store = store_with(std::slice::from_ref(&decl));
+        let activated = store
+            .schema_of(&profile(), &def("state.spark.value"))
+            .unwrap();
+        assert_eq!(
+            activated.fingerprint(),
+            &crate::activation::definition_fingerprint(&decl)
+        );
+        assert_ne!(activated.fingerprint(), &Digest::ZERO);
+    }
+
+    #[test]
+    fn source_refs_are_bounded() {
+        let mut refs = SourceRefs::default();
+        for i in 0..MAX_SOURCE_REFS {
+            refs.push(def(&format!("trigger.source_{i}"))).unwrap();
+        }
+        assert_eq!(
+            refs.push(def("trigger.overflow")),
+            Err(SourceRefsBoundExceeded {
+                limit: MAX_SOURCE_REFS
+            })
+        );
+    }
+
+    #[test]
+    fn state_digest_reflects_written_cells() {
+        let mut store = store_with(&[declaration("state.spark.value", Authority::SparkOwned)]);
+        let empty = store.canonical_state_digest();
         store
             .apply_spark_effect(
-                profile_a(),
-                id.clone(),
-                actor_scope("bron"),
-                CanonicalValue::Bool(true),
+                profile(),
+                def("state.spark.value"),
+                actor(),
+                CanonicalValue::Int(1),
                 LogicalTime(0),
-                0,
+                1,
             )
             .unwrap();
-        assert!(store.get(&profile_a(), &id, &actor_scope("bron")).is_some());
-        assert!(store.get(&profile_b(), &id, &actor_scope("bron")).is_none());
+        assert_ne!(empty, store.canonical_state_digest());
     }
 }

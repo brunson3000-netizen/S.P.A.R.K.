@@ -3,12 +3,26 @@
 //! provisional (ADR-0004); this struct is the deterministic,
 //! format-independent logical representation used for validation and
 //! content hashing.
+//!
+//! Re-founded per `PHASE_1_REFOUNDATION_BRIEF_v0.1.md`:
+//!
+//! - Every canonical string here is a bounded validated type. A custom
+//!   definition kind is a [`CanonicalTag`], not an arbitrary `String`;
+//!   `domain`/`layer` are canonical tags; `description` is
+//!   [`BoundedText`]. An unbounded custom kind used to be accepted and
+//!   became immutable definition identity.
+//! - There is no `to_definition_schema`. A spec cannot promote itself into
+//!   activated authority; it can only produce a
+//!   [`DefinitionDeclaration`], which carries no fingerprint and no trust
+//!   and must still pass
+//!   [`spark_core::activation::DefinitionIdentityRegistry::activate`].
 
+use crate::text::BoundedText;
+use spark_core::activation::{DefinitionDeclaration, DefinitionKindTag};
 use spark_core::authority::Authority;
 use spark_core::hash::{CanonicalEncoder, Digest};
-use spark_core::id::{DefinitionId, ProfileId};
+use spark_core::id::{CanonicalTag, DefinitionId, ProfileId};
 use spark_core::scope::ScopeKind;
-use spark_core::state::DefinitionSchema;
 use spark_core::value::ValueConstraint;
 use std::collections::BTreeSet;
 
@@ -18,11 +32,12 @@ use std::collections::BTreeSet;
 /// `Custom` keeps the taxonomy open as profile vocabulary per ADR-0004's
 /// taxonomy rule, without requiring a Rust change to add a new kind tag.
 ///
-/// Canonical encoding is domain-separated (Phase-1 correction brief
-/// B-04): a built-in variant encodes as its literal tag, while `Custom`
-/// always encodes with a `"custom:"` prefix, so a built-in `Trigger` can
-/// never collide with `Custom("trigger")` even though both display the
-/// same human-readable word.
+/// `Custom` carries a bounded [`CanonicalTag`], so an oversized or
+/// malformed custom kind cannot be constructed and therefore cannot become
+/// immutable definition identity. Built-in and custom kinds are
+/// domain-separated by [`DefinitionKindTag`], so `Trigger` and
+/// `Custom("trigger")` are different identities even though they read the
+/// same.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DefinitionKind {
     Trigger,
@@ -32,25 +47,42 @@ pub enum DefinitionKind {
     Goal,
     Behavior,
     Relationship,
-    Custom(String),
+    Custom(CanonicalTag),
 }
 
 impl DefinitionKind {
-    fn canonical_tag(&self) -> String {
-        match self {
-            DefinitionKind::Trigger => "trigger".to_string(),
-            DefinitionKind::StateDefinition => "state_definition".to_string(),
-            DefinitionKind::Trait => "trait".to_string(),
-            DefinitionKind::Appraisal => "appraisal".to_string(),
-            DefinitionKind::Goal => "goal".to_string(),
-            DefinitionKind::Behavior => "behavior".to_string(),
-            DefinitionKind::Relationship => "relationship".to_string(),
-            DefinitionKind::Custom(tag) => format!("custom:{tag}"),
-        }
+    /// Builds a `Custom` kind from a raw string, rejecting anything that
+    /// is not a valid bounded canonical tag.
+    pub fn custom(tag: impl Into<String>) -> Result<Self, spark_core::id::StableIdError> {
+        Ok(DefinitionKind::Custom(CanonicalTag::new(tag)?))
     }
 
-    fn canonicalize(&self, enc: &mut CanonicalEncoder) {
-        enc.push_str(&self.canonical_tag());
+    /// The kernel-side, domain-separated representation of this kind.
+    ///
+    /// The baseline vocabulary is expressed as compile-time constants
+    /// built with [`CanonicalTag::from_static`], so each literal is
+    /// validated by the compiler. This function therefore has no fallible
+    /// or panicking path at all: an invalid built-in tag would be a build
+    /// failure, not a runtime surprise.
+    pub fn kind_tag(&self) -> DefinitionKindTag {
+        const TRIGGER: CanonicalTag = CanonicalTag::from_static("trigger");
+        const STATE_DEFINITION: CanonicalTag = CanonicalTag::from_static("state_definition");
+        const TRAIT: CanonicalTag = CanonicalTag::from_static("trait");
+        const APPRAISAL: CanonicalTag = CanonicalTag::from_static("appraisal");
+        const GOAL: CanonicalTag = CanonicalTag::from_static("goal");
+        const BEHAVIOR: CanonicalTag = CanonicalTag::from_static("behavior");
+        const RELATIONSHIP: CanonicalTag = CanonicalTag::from_static("relationship");
+
+        match self {
+            DefinitionKind::Trigger => DefinitionKindTag::builtin(TRIGGER),
+            DefinitionKind::StateDefinition => DefinitionKindTag::builtin(STATE_DEFINITION),
+            DefinitionKind::Trait => DefinitionKindTag::builtin(TRAIT),
+            DefinitionKind::Appraisal => DefinitionKindTag::builtin(APPRAISAL),
+            DefinitionKind::Goal => DefinitionKindTag::builtin(GOAL),
+            DefinitionKind::Behavior => DefinitionKindTag::builtin(BEHAVIOR),
+            DefinitionKind::Relationship => DefinitionKindTag::builtin(RELATIONSHIP),
+            DefinitionKind::Custom(tag) => DefinitionKindTag::custom(tag.clone()),
+        }
     }
 }
 
@@ -63,7 +95,7 @@ pub enum BehavioralLeverage {
 }
 
 impl BehavioralLeverage {
-    fn tag(&self) -> &'static str {
+    pub fn tag(&self) -> &'static str {
         match self {
             BehavioralLeverage::High => "high",
             BehavioralLeverage::Medium => "medium",
@@ -73,23 +105,22 @@ impl BehavioralLeverage {
 }
 
 /// The logical, format-independent shape of one profile definition
-/// (common fields per `CONTROLLING_BLUEPRINT_v0.2.md` §12.1). `profile_id`
-/// is carried explicitly so identity, fingerprinting, and the resulting
-/// `StateStore` schema are all profile-qualified end to end (Phase-1
-/// correction brief B-02/B-04).
+/// (common fields per `CONTROLLING_BLUEPRINT_v0.2.md` §12.1).
+/// `profile_id` is carried explicitly so identity, fingerprinting, and the
+/// resulting activated schema are all profile-qualified end to end.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DefinitionSpec {
     pub profile_id: ProfileId,
     pub id: DefinitionId,
     pub kind: DefinitionKind,
-    pub domain: Option<String>,
-    pub layer: Option<String>,
+    pub domain: Option<CanonicalTag>,
+    pub layer: Option<CanonicalTag>,
     pub value_constraint: ValueConstraint,
     pub authority: Authority,
     pub valid_scopes: BTreeSet<ScopeKind>,
     pub enabled: bool,
     pub version: u32,
-    pub description: String,
+    pub description: BoundedText,
     pub behavioral_leverage: Option<BehavioralLeverage>,
 }
 
@@ -98,80 +129,60 @@ impl DefinitionSpec {
     /// [`crate::manifest::ProfileManifest::manifest_content_hash`]. This
     /// covers every field, including ones that are not part of immutable
     /// identity (description, enabled, version label), so that *any*
-    /// content change - not only an identity change - produces a
+    /// content change — not only an identity change — produces a
     /// different manifest hash.
     pub(crate) fn canonicalize_full(&self, enc: &mut CanonicalEncoder) {
         self.profile_id.canonicalize(enc);
         self.id.canonicalize(enc);
-        self.kind.canonicalize(enc);
+        self.kind.kind_tag().canonicalize(enc);
         enc.push_bool(self.domain.is_some());
-        enc.push_str(self.domain.as_deref().unwrap_or(""));
+        enc.push_str(self.domain.as_ref().map(|t| t.as_str()).unwrap_or(""));
         enc.push_bool(self.layer.is_some());
-        enc.push_str(self.layer.as_deref().unwrap_or(""));
+        enc.push_str(self.layer.as_ref().map(|t| t.as_str()).unwrap_or(""));
         self.value_constraint.canonicalize(enc);
         self.authority.canonicalize(enc);
-        let mut scopes: Vec<String> = self
-            .valid_scopes
-            .iter()
-            .map(|s| s.canonical_tag())
-            .collect();
-        scopes.sort_unstable();
-        enc.push_u64(scopes.len() as u64);
-        for s in &scopes {
-            enc.push_str(s);
+        // `valid_scopes` is a BTreeSet, so this iteration is already in a
+        // stable total order.
+        enc.push_u64(self.valid_scopes.len() as u64);
+        for scope in &self.valid_scopes {
+            enc.push_str(&scope.canonical_tag());
         }
         enc.push_bool(self.enabled);
         enc.push_u32(self.version);
-        enc.push_str(&self.description);
+        enc.push_str(self.description.as_str());
         enc.push_bool(self.behavioral_leverage.is_some());
         enc.push_str(self.behavioral_leverage.map(|l| l.tag()).unwrap_or(""));
     }
 
-    /// The immutable-identity subset of this definition's content, hashed
-    /// independently of mutable/descriptive fields (ADR-0004 "Content
-    /// identity"): profile ID, definition ID, kind, value constraint
-    /// (which implies value type), authority mode, implied write class,
-    /// and sorted valid scopes. Two definitions with the same fingerprint
-    /// are the same identity for save-continuation purposes even if their
-    /// description or enabled/disabled status later changes; two
-    /// definitions that differ in *any* of these fields are different
-    /// identities even under the same `DefinitionId` (Phase-1 correction
-    /// brief B-04).
-    pub fn definition_fingerprint(&self) -> Digest {
-        let mut enc = CanonicalEncoder::new();
-        enc.push_str("definition_fingerprint");
-        self.profile_id.canonicalize(&mut enc);
-        self.id.canonicalize(&mut enc);
-        self.kind.canonicalize(&mut enc);
-        self.value_constraint.canonicalize(&mut enc);
-        self.authority.canonicalize(&mut enc);
-        enc.push_str(self.authority.implied_write_class().tag());
-        let mut scopes: Vec<String> = self
-            .valid_scopes
-            .iter()
-            .map(|s| s.canonical_tag())
-            .collect();
-        scopes.sort_unstable();
-        enc.push_u64(scopes.len() as u64);
-        for s in &scopes {
-            enc.push_str(s);
-        }
-        enc.finish()
-    }
-
-    /// Converts this validated definition into the immutable
-    /// [`DefinitionSchema`] entry `spark_core::state::StateStore` is built
-    /// from. Only meaningful to call after this definition has passed
-    /// [`crate::identity::validate`].
-    pub fn to_definition_schema(&self) -> DefinitionSchema {
-        DefinitionSchema {
+    /// The untrusted declaration this spec offers to the canonical
+    /// identity registry.
+    ///
+    /// Note what this does **not** do: it does not produce activated
+    /// authority, and it does not assert a fingerprint. Only
+    /// [`spark_core::activation::DefinitionIdentityRegistry::activate`]
+    /// can turn a declaration into an
+    /// [`spark_core::activation::ActivatedDefinition`], and it computes the
+    /// fingerprint itself.
+    pub fn to_declaration(&self) -> DefinitionDeclaration {
+        DefinitionDeclaration {
             profile_id: self.profile_id.clone(),
             definition_id: self.id.clone(),
-            fingerprint: self.definition_fingerprint(),
+            kind: self.kind.kind_tag(),
             authority: self.authority,
             value_constraint: self.value_constraint.clone(),
             valid_scopes: self.valid_scopes.clone(),
         }
+    }
+
+    /// The immutable-identity fingerprint of this definition
+    /// (ADR-0004 "Content identity").
+    ///
+    /// This delegates to the canonical kernel so there is exactly one
+    /// definition of what a definition's identity is: the profile layer
+    /// cannot compute a fingerprint that disagrees with the one the
+    /// registry will enforce.
+    pub fn definition_fingerprint(&self) -> Digest {
+        spark_core::activation::definition_fingerprint(&self.to_declaration())
     }
 }
 
@@ -187,28 +198,80 @@ mod tests {
             kind,
             domain: None,
             layer: None,
-            value_constraint: ValueConstraint::Fixed {
-                min: FixedPoint::ZERO,
-                max: FixedPoint::from_integer(1).unwrap(),
-            },
+            value_constraint: ValueConstraint::fixed(
+                FixedPoint::ZERO,
+                FixedPoint::from_integer(1).unwrap(),
+            )
+            .unwrap(),
             authority: Authority::SparkOwned,
             valid_scopes: BTreeSet::from([ScopeKind::Actor]),
             enabled: true,
             version: 1,
-            description: "test".to_string(),
+            description: BoundedText::new("test").unwrap(),
             behavioral_leverage: None,
         }
     }
 
-    /// B-04: a built-in `Trigger` kind must never fingerprint identically
-    /// to `Custom("trigger")`, even though both display as "trigger".
+    /// B-04 regression: a built-in `Trigger` kind must never fingerprint
+    /// identically to `Custom("trigger")`, even though both read as
+    /// "trigger".
     #[test]
     fn builtin_trigger_fingerprint_differs_from_custom_trigger() {
         let builtin = base(DefinitionKind::Trigger);
-        let custom = base(DefinitionKind::Custom("trigger".to_string()));
+        let custom = base(DefinitionKind::custom("trigger").unwrap());
         assert_ne!(
             builtin.definition_fingerprint(),
             custom.definition_fingerprint()
+        );
+    }
+
+    /// Every built-in variant must map to a distinct, non-custom,
+    /// valid canonical tag, so no two baseline kinds can alias and no
+    /// baseline kind can be mistaken for profile vocabulary.
+    #[test]
+    fn builtin_kind_tags_are_distinct_valid_and_non_custom() {
+        let variants = [
+            DefinitionKind::Trigger,
+            DefinitionKind::StateDefinition,
+            DefinitionKind::Trait,
+            DefinitionKind::Appraisal,
+            DefinitionKind::Goal,
+            DefinitionKind::Behavior,
+            DefinitionKind::Relationship,
+        ];
+        let mut seen = BTreeSet::new();
+        for variant in &variants {
+            let kind_tag = variant.kind_tag();
+            assert!(
+                !kind_tag.is_custom(),
+                "{variant:?} is not profile vocabulary"
+            );
+            assert!(CanonicalTag::new(kind_tag.tag().as_str()).is_ok());
+            assert!(
+                seen.insert(kind_tag.tag().as_str().to_string()),
+                "{variant:?} reuses another baseline kind tag"
+            );
+        }
+        assert_eq!(seen.len(), variants.len());
+    }
+
+    /// Re-foundation bounds requirement 3: an oversized custom kind is
+    /// rejected at construction, so it can never become identity.
+    #[test]
+    fn oversized_custom_definition_kind_is_rejected_at_construction() {
+        assert!(DefinitionKind::custom("k".repeat(100_000)).is_err());
+        assert!(DefinitionKind::custom("weather_system").is_ok());
+        assert!(DefinitionKind::custom("Weather System").is_err());
+    }
+
+    /// The profile layer's fingerprint must agree with the kernel's, since
+    /// the kernel's is the one actually enforced.
+    #[test]
+    fn profile_fingerprint_agrees_with_the_kernel_registry() {
+        let spec = base(DefinitionKind::Trait);
+        assert_eq!(
+            spec.definition_fingerprint(),
+            spark_core::activation::definition_fingerprint(&spec.to_declaration())
         );
     }
 }

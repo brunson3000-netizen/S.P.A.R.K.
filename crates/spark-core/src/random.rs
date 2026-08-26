@@ -69,11 +69,16 @@ impl RandomAddressService {
     }
 
     /// Derives a uniformly distributed `u64` for the given address.
+    ///
+    /// The eight bytes are indexed out of the digest's fixed-size `[u8; 32]`
+    /// explicitly rather than through a fallible slice conversion, so this
+    /// function has no panic path at all.
     pub fn derive_u64(&self, address: &RandomAddress) -> u64 {
         let mut enc = CanonicalEncoder::new();
         address.canonicalize(&mut enc);
-        let digest = enc.finish();
-        u64::from_le_bytes(digest.as_bytes()[0..8].try_into().unwrap())
+        let b = enc.finish();
+        let b = b.as_bytes();
+        u64::from_le_bytes([b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]])
     }
 
     /// Derives a fixed-point value in `[0, FIXED_SCALE)`
