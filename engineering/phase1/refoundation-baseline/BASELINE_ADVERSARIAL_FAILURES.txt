@@ -1,0 +1,133 @@
+S.P.A.R.K. Phase-1 Re-Foundation — Step 2 baseline evidence
+Recorded: 2026-08-26
+Branch: phase1-refoundation
+Inherited HEAD: 1ac3e3b4b9cfe7bb9f2862bb364b908e169eb738
+Command: cargo test -p spark-testkit --test refoundation_adversarial_baseline
+Fixture: crates/spark-testkit/tests/refoundation_adversarial_baseline.rs (external crate vantage point)
+
+=== RAW OUTPUT ===
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running tests/refoundation_adversarial_baseline.rs (target/debug/deps/refoundation_adversarial_baseline-21917b6e0f27d95a)
+
+running 15 tests
+test baseline_definition_id_must_require_a_namespace ... FAILED
+test baseline_duplicate_schema_keys_must_reject ... FAILED
+test baseline_definition_spec_must_not_self_activate ... FAILED
+test baseline_duplicate_config_keys_must_reject ... FAILED
+test baseline_external_code_must_not_forge_and_activate_a_schema ... FAILED
+test baseline_independent_producers_may_share_an_occurrence_index ... FAILED
+test baseline_independent_scopes_may_share_an_occurrence_index ... FAILED
+test baseline_oversized_categorical_value_must_reject ... FAILED
+test baseline_finalized_history_must_not_retain_admission_token ... FAILED
+test baseline_oversized_config_value_must_reject ... FAILED
+test baseline_admission_timing_must_not_change_canonical_state_digest ... FAILED
+test baseline_reversed_insertion_of_independent_producers_drains_identically ... FAILED
+test baseline_incoherent_value_bounds_must_reject ... FAILED
+test baseline_oversized_custom_definition_kind_must_reject ... FAILED
+test baseline_oversized_command_kind_must_reject ... FAILED
+
+failures:
+
+---- baseline_definition_id_must_require_a_namespace stdout ----
+
+thread 'baseline_definition_id_must_require_a_namespace' (653924) panicked at crates/spark-testkit/tests/refoundation_adversarial_baseline.rs:357:5:
+a non-namespaced definition ID must be rejected
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- baseline_duplicate_schema_keys_must_reject stdout ----
+
+thread 'baseline_duplicate_schema_keys_must_reject' (653927) panicked at crates/spark-testkit/tests/refoundation_adversarial_baseline.rs:197:5:
+duplicate schema keys must reject rather than let insertion order pick the winner
+
+---- baseline_definition_spec_must_not_self_activate stdout ----
+
+thread 'baseline_definition_spec_must_not_self_activate' (653925) panicked at crates/spark-testkit/tests/refoundation_adversarial_baseline.rs:225:5:
+activation must require a validated profile/identity-registry result
+
+---- baseline_duplicate_config_keys_must_reject stdout ----
+
+thread 'baseline_duplicate_config_keys_must_reject' (653926) panicked at crates/spark-testkit/tests/refoundation_adversarial_baseline.rs:324:5:
+assertion `left == right` failed: duplicate-key config must be rejected, never order-sensitively hashed
+  left: Digest(991a81561d630e94cbbbff5be803dcdd0669bd0b2cb6bca99f17672fd8e9d87d)
+ right: Digest(e8297d58f73ace713126123e91a6887d62538d7b3697dacad368a38df2cc9188)
+
+---- baseline_external_code_must_not_forge_and_activate_a_schema stdout ----
+
+thread 'baseline_external_code_must_not_forge_and_activate_a_schema' (653928) panicked at crates/spark-testkit/tests/refoundation_adversarial_baseline.rs:171:5:
+a fabricated raw schema must never become activated authority
+
+---- baseline_independent_producers_may_share_an_occurrence_index stdout ----
+
+thread 'baseline_independent_producers_may_share_an_occurrence_index' (653931) panicked at crates/spark-testkit/tests/refoundation_adversarial_baseline.rs:256:10:
+independent producers must not collide on occurrence 0: ConflictingDuplicateWorkKey { due_time: LogicalTime(5), occurrence_index: OccurrenceIndex(0) }
+
+---- baseline_independent_scopes_may_share_an_occurrence_index stdout ----
+
+thread 'baseline_independent_scopes_may_share_an_occurrence_index' (653932) panicked at crates/spark-testkit/tests/refoundation_adversarial_baseline.rs:287:10:
+independent scopes must not collide on occurrence 0: ConflictingDuplicateWorkKey { due_time: LogicalTime(5), occurrence_index: OccurrenceIndex(0) }
+
+---- baseline_oversized_categorical_value_must_reject stdout ----
+
+thread 'baseline_oversized_categorical_value_must_reject' (653933) panicked at crates/spark-testkit/tests/refoundation_adversarial_baseline.rs:453:5:
+an unbounded categorical canonical value must be structurally impossible
+
+---- baseline_finalized_history_must_not_retain_admission_token stdout ----
+
+thread 'baseline_finalized_history_must_not_retain_admission_token' (653929) panicked at crates/spark-testkit/tests/refoundation_adversarial_baseline.rs:147:5:
+assertion `left == right` failed: finalized canonical history must contain semantic command data only
+  left: CommandEnvelope { command_id: CommandId(cmd.0), profile_id: ProfileId(game-world), timeline_epoch: TimelineEpoch(1), effective_time: LogicalTime(0), source_id: SourceId(sequencer.primary), source_sequence: 0, input_ordinal: Ordinal(0), admission_window_token: AdmissionWindowToken(Digest(503b707aa4cc1df02fc099d89261bffc36c179d81e8dd132efafe1c1c39438f6)), command_kind: "test.command", canonical_payload_hash: Digest(a9dac10c229aa8282e13895c6171de5cfdc876cbb3f3284f3438ce3fa0a6a028) }
+ right: CommandEnvelope { command_id: CommandId(cmd.0), profile_id: ProfileId(game-world), timeline_epoch: TimelineEpoch(1), effective_time: LogicalTime(0), source_id: SourceId(sequencer.primary), source_sequence: 0, input_ordinal: Ordinal(0), admission_window_token: AdmissionWindowToken(Digest(977b9a9f91a434bf89d99ac7d49995cd0b2b650165715fde87615d3985e075e9)), command_kind: "test.command", canonical_payload_hash: Digest(a9dac10c229aa8282e13895c6171de5cfdc876cbb3f3284f3438ce3fa0a6a028) }
+
+---- baseline_oversized_config_value_must_reject stdout ----
+
+thread 'baseline_oversized_config_value_must_reject' (653935) panicked at crates/spark-testkit/tests/refoundation_adversarial_baseline.rs:340:5:
+an unbounded canonical config value must not be constructible
+
+---- baseline_admission_timing_must_not_change_canonical_state_digest stdout ----
+
+thread 'baseline_admission_timing_must_not_change_canonical_state_digest' (653923) panicked at crates/spark-testkit/tests/refoundation_adversarial_baseline.rs:120:5:
+assertion `left == right` failed: nonsemantic admission timing must not become canonical replay identity
+  left: Digest(f481d275105ad00d58526eddcaa02d9a593bd426dc226a317406181157d31223)
+ right: Digest(34075bbdfbe7aa61f2fda701eb9a0d2a1a6627e9e00fc1c933744058a4fff38c)
+
+---- baseline_reversed_insertion_of_independent_producers_drains_identically stdout ----
+
+thread 'baseline_reversed_insertion_of_independent_producers_drains_identically' (653937) panicked at crates/spark-testkit/tests/refoundation_adversarial_baseline.rs:267:55:
+called `Result::unwrap()` on an `Err` value: ConflictingDuplicateWorkKey { due_time: LogicalTime(5), occurrence_index: OccurrenceIndex(0) }
+
+---- baseline_incoherent_value_bounds_must_reject stdout ----
+
+thread 'baseline_incoherent_value_bounds_must_reject' (653930) panicked at crates/spark-testkit/tests/refoundation_adversarial_baseline.rs:395:5:
+a definition with min > max must fail validation
+
+---- baseline_oversized_custom_definition_kind_must_reject stdout ----
+
+thread 'baseline_oversized_custom_definition_kind_must_reject' (653936) panicked at crates/spark-testkit/tests/refoundation_adversarial_baseline.rs:426:5:
+an unbounded custom definition-kind string must fail validation
+
+---- baseline_oversized_command_kind_must_reject stdout ----
+
+thread 'baseline_oversized_command_kind_must_reject' (653934) panicked at crates/spark-testkit/tests/refoundation_adversarial_baseline.rs:440:5:
+an unbounded canonical command kind must never be admitted
+
+
+failures:
+    baseline_admission_timing_must_not_change_canonical_state_digest
+    baseline_definition_id_must_require_a_namespace
+    baseline_definition_spec_must_not_self_activate
+    baseline_duplicate_config_keys_must_reject
+    baseline_duplicate_schema_keys_must_reject
+    baseline_external_code_must_not_forge_and_activate_a_schema
+    baseline_finalized_history_must_not_retain_admission_token
+    baseline_incoherent_value_bounds_must_reject
+    baseline_independent_producers_may_share_an_occurrence_index
+    baseline_independent_scopes_may_share_an_occurrence_index
+    baseline_oversized_categorical_value_must_reject
+    baseline_oversized_command_kind_must_reject
+    baseline_oversized_config_value_must_reject
+    baseline_oversized_custom_definition_kind_must_reject
+    baseline_reversed_insertion_of_independent_producers_drains_identically
+
+test result: FAILED. 0 passed; 15 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p spark-testkit --test refoundation_adversarial_baseline`
