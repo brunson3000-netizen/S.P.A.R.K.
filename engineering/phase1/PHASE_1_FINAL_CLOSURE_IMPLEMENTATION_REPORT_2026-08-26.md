@@ -24,7 +24,7 @@ remains mandatory before Phase 1 can close.**
 | Pre-production-change reference | `87da5be` — the last commit before this pass touched any Rust |
 | Step 1 commit (tests + baseline) | `ee2e850` — *Encode the AT-H final closure corpus against the inherited tree* |
 | Step 2 commit (repair + cleanups) | `b8b7414` — *Repair B-01 staged identity registries as derived indexes* |
-| Step 4 commit (this report + status) | recorded in §12 |
+| Step 4 commit (this report + status) | `1d8b7f0` — *Report the Phase-1 final closure implementation and refresh phase status* (this row filled in by the immediately following commit, which changes nothing but this line) |
 
 Git discipline: all previous evidence and history preserved; no rebase, amend, or force
 push; no file deleted. The worktree is clean at the end of the pass.
