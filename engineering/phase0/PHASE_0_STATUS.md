@@ -1,14 +1,15 @@
 # S.P.A.R.K. Phase 0 Status
 
-- Original Phase 0 writer pass: complete
-- First independent Codex review: `REVISE_PHASE_0`
-- First bounded correction v0.2: complete
-- Independent Codex re-review: `REVISE_PHASE_0`
+- Original writer pass: complete
+- Independent review 1: `REVISE_PHASE_0`
+- Correction v0.2: complete
+- Independent review 2: `REVISE_PHASE_0`
+- Correction v0.3: complete
+- Independent review 3: `REVISE_PHASE_0`
 - B-02 immutable authority/write class: **CLOSED**
 - B-03 exact save/behavior-artifact binding: **CLOSED**
-- Prior majors M-01 through M-08: **CLOSED / appropriately gated**
-- Remaining B-01A ordinal ownership/finality: **CORRECTED in v0.3, awaiting final re-review**
-- Residual matrix-status minor: **CORRECTED**
-- Frozen causal primitive set: sufficient; unchanged
+- Prior majors: **NONE REMAINING**
+- B-01A sequencer/finality core: closed except bounded staging admission
+- B-01A bounded staging admission: **CORRECTED in v0.4, awaiting closure review**
+- Frozen causal primitive set: sufficient and unchanged
 - Phase 1 authorization: **NO**
-- Rust implementation must not begin until final independent re-review passes

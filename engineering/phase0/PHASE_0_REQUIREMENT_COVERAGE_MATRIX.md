@@ -2,8 +2,8 @@
 
 **Project:** S.P.A.R.K. — System for Propagating Affective Responses and Consequences  
 **Controlling source:** `CONTROLLING_BLUEPRINT_v0.2.md`  
-**Matrix version:** 0.3  
-**Status:** Phase 0 second corrected writer pass / final independent re-review required / implementation not started  
+**Matrix version:** 0.4  
+**Status:** Phase 0 third corrected writer pass / independent closure review required / implementation not started  
 **Supersedes:** matrix v0.1  
 **Rule:** A requirement is not covered merely because a module exists. Coverage requires an implementation location, a falsifiable verification path, and—where architectural—a gate test or independent review.
 
@@ -120,12 +120,14 @@
 | R-098 | Provenance pruning is deterministic and reports evidence coverage; summaries never masquerade as source evidence | §§25.3, 26.5 | Coverage status/counts/pruning policy/summary hash | persistence/inspection | repeated pruning equality + missing-source honesty fixture | 3 | FROZEN |
 | R-099 | The role of domain/family taxonomies as profile vocabulary is frozen; the current exact baseline membership/counts remain editable profile data | §§6.1, 14, 34 | Grammar/vocabulary separation | profile/ADR governance | modify profile taxonomy within existing semantics without Rust primitive change | 6+ | FROZEN |
 | R-100 | Exact trigger rates, probabilities, volatility multipliers, and calibration values are tunable/calibration data | §§13.2, 19.2, 33, 34.2 | Validated config/profile values, not engine law | profiles/config | rate edits through allowed config preserve schema/determinism | 10 | PENDING_CALIBRATION |
-
 | R-101 | Each profile timeline epoch has exactly one exclusive authoritative sequencer for canonical state-changing/evaluation input order | §§9, 18, 19, 28 | TimelineSequencerAuthority integration contract; non-composable grant | core/protocol/service | non-sequencer staging/fence rejection; epoch handoff tests | 1–3 | FROZEN |
-| R-102 | Received commands remain non-canonical staged data until an authorized contiguous digest fence finalizes them | §§9, 19, 28 | bounded ordinal-keyed staging buffer + TimelineFence | core/protocol | reversed-delivery, gap, digest, collision, overflow tests | 1–3 | FROZEN |
+| R-102 | Received commands remain non-canonical staged data in deterministic ordinal-addressed slots until acknowledged and fenced | §§9, 19, 28 | admission window + one slot per ordinal + TimelineFence | core/protocol | reversed-delivery/capacity/frontier-reservation tests | 1–3 | FROZEN |
 | R-103 | Same-ordinal conflicting payloads cannot be resolved by first arrival; the ordinal is poisoned and fence finalization rejects atomically | §§19, 28 | collision state in isolated staging; no partial canonical commit | core/testkit | opposite-arrival collision fixtures produce identical rejection/state hash | 1–2 | FROZEN |
 | R-104 | Finality fences form a contiguous hash-linked chain and cannot skip ordinals or rewrite finalized history | §§19, 28 | start/end frontier + previous-fence hash + ordered stream digest | core/persistence | gap, replayed fence, wrong previous hash, late conflict fixtures | 1–3 | FROZEN |
-| R-105 | Service and embedded forms share identical logical staging/fence/finality semantics; embedded convenience APIs are syntactic sugar only | §§8.2, 9, 28, 31 | shared canonical engine ingress API | core/service/embedded/testkit | explicit service versus convenience embedded reversed-delivery parity | 1–3 | FROZEN |
+| R-105 | Service and embedded forms share identical admission-window/staging/ack/fence/finality semantics; embedded convenience APIs are syntactic sugar only | §§8.2, 9, 28, 31 | shared canonical engine ingress API | core/service/embedded/testkit | capacity-two and retry parity across service/embedded/concurrent delivery | 1–3 | FROZEN |
+| R-106 | Canonical staging capacity is allocated by deterministic ordinal credit window, not first-arrival queue occupancy | §§9, 19, 28 | frontier-derived AdmissionWindow; one slot per ordinal | core/protocol | full-higher-slots cannot crowd out frontier; capacity-two reversed-delivery fixture | 1–3 | FROZEN |
+| R-107 | Out-of-window submissions never evict or opportunistically occupy canonical staging; they return retryable status and require a later valid window token | §§9, 19, 28 | token-bound eligibility + explicit sequencer retry | core/protocol | old-token late arrival still rejects; new-token retry succeeds | 1–3 | FROZEN |
+| R-108 | Sequencer may fence only after positive STAGED acknowledgements for every ordinal in the fence range | §§9, 19, 28 | acknowledgement-gated finality | core/protocol | early fence prohibited; service/embedded parity | 1–3 | FROZEN |
 
 ## Phase-0 Correction Result
 
@@ -134,6 +136,8 @@
 No independent-review finding requires a new runtime primitive. The reviewer explicitly found the frozen primitive set sufficient; the correction therefore changes transaction, authority, persistence, trust-domain, boundedness, and traceability contracts around those primitives rather than expanding the causal grammar.
 
 ### Corrections incorporated
+
+- deterministic frontier-derived ordinal credit window, one reserved slot per ordinal, token-bound out-of-window retry, and STAGED-acknowledgement fence precondition;
 
 - exclusive per-profile timeline sequencer ownership, isolated staging, digest-fence finality, contiguous ordinal frontier, collision poisoning, and sequencer epoch handoff;
 
@@ -156,7 +160,7 @@ No independent-review finding requires a new runtime primitive. The reviewer exp
 
 Phase 0 may advance to Phase 1 only when:
 
-1. the final independent re-review confirms B-01A is closed and B-02/B-03 remain closed;
+1. the independent closure review confirms the remaining B-01A bounded-admission defect is closed and B-02/B-03 remain closed;
 2. no new blocker demonstrates a missing foundational invariant;
 3. the corrected matrix has no unresolved FROZEN requirement without an implementation home and falsifiable verification path;
 4. Phase 1 remains limited to the Rust core skeleton authorized by blueprint v0.2.

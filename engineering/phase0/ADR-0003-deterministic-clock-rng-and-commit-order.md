@@ -1,39 +1,39 @@
-# ADR-0003 — Canonical Timeline Sequencer, Finality Fences, Deterministic Clock, RNG, and Commit Order
+# ADR-0003 — Canonical Timeline Sequencer, Ordinal Credit Window, Finality Fences, Deterministic Clock, RNG, and Commit Order
 
-**Status:** REVISED AFTER SECOND INDEPENDENT PHASE-0 REVIEW  
+**Status:** REVISED AFTER THIRD INDEPENDENT PHASE-0 REVIEW  
 **Date:** 2026-08-25  
 **Decision class:** Foundational / FROZEN
 
 ## Context
 
-S.P.A.R.K. requires deterministic replay across declared Windows/Linux/Android support builds. The host advances simulation time, but service request arrival order, concurrent clients, thread interleaving, transport batch partitioning, and delayed delivery must never construct canonical history accidentally.
+S.P.A.R.K. requires deterministic replay across declared Windows/Linux/Android support builds. Canonical history must not depend on network arrival order, concurrent delivery, worker interleaving, transport batching, or bounded-buffer accident.
 
-The first Phase-0 review found that canonical input transaction boundaries were undefined. The v0.2 correction added an explicit command envelope, total-order ordinal, idempotency, command barriers, and transport-batch independence.
+Previous Phase-0 corrections established:
 
-The second independent review confirmed those evaluation-side corrections but found one remaining ingress defect: the architecture named `input_ordinal` without defining who has exclusive authority to issue it or when an ordinal stream becomes final. A first-arriving conflicting command could therefore still win before a later collision was observed.
+- one exclusive authoritative timeline sequencer per profile timeline epoch;
+- canonical command envelopes;
+- causally inert staging;
+- unique sequencer-issued ordinals;
+- digest/hash-linked finality fences;
+- contiguous finalization;
+- command barriers after finality;
+- immutable authority and exact behavior-artifact continuation.
+
+The third independent review found one remaining ingress hole: a generic bounded staging buffer that “rejects the new request when full” can crowd out the next canonical frontier ordinal if higher ordinals happen to arrive first.
 
 ## Decision
 
 ### 1. One authoritative timeline sequencer per profile timeline epoch
 
-Every canonical profile timeline has exactly one active `TimelineSequencerAuthority` for a given `timeline_epoch`.
+Every profile timeline epoch has exactly one active `TimelineSequencerAuthority`.
 
-The sequencer is an integration authority, not a causal-state primitive. It owns only the ordering/finality of external canonical inputs for that profile epoch.
+Only that authority may submit canonical state-changing/evaluation commands and finality fences for the profile epoch.
 
-The sequencer is normally the authoritative host adapter for the game profile and the sanitized MCI bridge for the MCI-social profile.
-
-Rules:
-
-1. only the active sequencer principal may stage state-changing/evaluation commands for canonical admission;
-2. the sequencer capability is exclusive and non-composable within a profile epoch;
-3. read-only queries do not require timeline ordinals and do not enter canonical history;
-4. ordinary clients/actors/NPCs do not independently issue canonical ordinals;
-5. multiple upstream sources must be ordered by the host/integration sequencer before they become canonical S.P.A.R.K. commands;
-6. changing the sequencer requires an explicit epoch handoff/fence at a stable boundary; two sequencers cannot be active for the same profile epoch.
+Multiple upstream sources are ordered by the host/integration sequencer before they become candidate canonical S.P.A.R.K. inputs.
 
 ### 2. Canonical command envelope
 
-Every command that can affect canonical state or canonical evaluation is staged using a `CanonicalCommandEnvelope` containing at least:
+Every canonical state-changing/evaluation command contains at least:
 
 ```text
 command_id
@@ -43,38 +43,111 @@ effective_time
 source_id
 source_sequence
 input_ordinal
+admission_window_token
 command_kind
 canonical_payload_hash
 ```
 
-`source_id/source_sequence` preserve provenance and source-local ordering validation. `input_ordinal` is issued by the active timeline sequencer and is the unique total-order position in that profile epoch.
+`input_ordinal` is issued by the active sequencer.
 
-Transport/session metadata is causally inert.
+Transport/session metadata is not canonical.
 
-### 3. Staging is not canonical admission
+### 3. Deterministic ordinal credit window
 
-Receiving a command does **not** make it canonical.
-
-Commands first enter an isolated bounded staging buffer keyed by:
+At every unfinalized frontier, the engine exposes a deterministic `AdmissionWindow`:
 
 ```text
-(profile_id, timeline_epoch, input_ordinal)
+profile_id
+timeline_epoch
+frontier_ordinal
+window_width
+window_end = frontier_ordinal + window_width - 1
+last_finalized_fence_hash
+admission_window_token
 ```
 
-Staging rules:
+`admission_window_token` is deterministically derived from the profile/timeline epoch, current frontier, configured window width, and last finalized fence hash.
 
-- identical duplicate envelope/payload is idempotent;
-- two different payloads for the same staged ordinal poison that ordinal and prevent finalization;
-- higher ordinals may arrive before lower ordinals and remain non-canonical staged data;
-- no staged command may mutate canonical state, advance canonical time, consume canonical RNG occurrence identity, or emit canonical outputs.
+The active window is therefore not chosen by request arrival.
 
-This removes first-arrival authority.
+`window_width` is finite, declared by the deployment/profile compatibility contract, and included in service/embedded conformance context.
 
-### 4. Timeline finality fence
+### 4. One logical slot per ordinal
 
-Only the active sequencer can submit a `TimelineFence`.
+The staging structure is not a generic first-come queue.
 
-A fence contains at least:
+It is a fixed ordinal-addressed slot set for the current admission window.
+
+For every ordinal in:
+
+```text
+[frontier_ordinal, window_end]
+```
+
+there is exactly one logical staging slot.
+
+Consequences:
+
+- a higher ordinal can never consume the frontier ordinal's capacity;
+- at most one distinct payload identity occupies a slot;
+- identical duplicate for the same slot is idempotent;
+- a different payload for the same slot poisons that ordinal;
+- duplicates/conflicts do not consume additional staging capacity.
+
+### 5. Admission rule
+
+A state-changing/evaluation envelope is eligible for staging only when:
+
+1. sequencer authority is valid;
+2. profile/timeline epoch matches;
+3. `admission_window_token` is valid for the window under which the sequencer submitted it;
+4. `input_ordinal` lies within that token's ordinal range;
+5. command/source/idempotency validation passes.
+
+An ordinal outside the envelope's declared/tokenized window is never admitted merely because network delay causes it to arrive after the frontier later moves.
+
+### 6. Out-of-window behavior: retry, never eviction
+
+An otherwise valid command whose ordinal is outside its tokenized credit window receives a retryable logical result such as:
+
+```text
+NOT_IN_ADMISSION_WINDOW
+```
+
+It:
+
+- does not consume a slot;
+- does not mutate canonical state;
+- does not poison another ordinal;
+- is not evicted into a different slot;
+- is not silently buffered in an unbounded overflow queue.
+
+The sequencer may retry it only after obtaining the later admission-window token under which its ordinal is eligible.
+
+There is **no arrival-based eviction policy**.
+
+### 7. Stage acknowledgement before fence
+
+The sequencer must not submit a finality fence for an ordinal range until it has received a positive logical `STAGED` acknowledgement for every ordinal in that range.
+
+A positive staging acknowledgement identifies:
+
+```text
+profile_id
+timeline_epoch
+input_ordinal
+command_id
+canonical_payload_hash
+staged_slot_state
+```
+
+This is a protocol precondition, not an advisory suggestion.
+
+Therefore a compliant fence cannot race ahead of the commands it claims to finalize.
+
+### 8. Timeline finality fence
+
+A `TimelineFence` contains at least:
 
 ```text
 profile_id
@@ -86,152 +159,153 @@ previous_fence_hash
 ordered_stream_digest
 ```
 
-The digest commits to the complete ordered canonical representation of every envelope/payload in the fenced ordinal range.
+Fence rules:
 
-A fence is accepted only when:
+1. only the active sequencer may submit it;
+2. `start_ordinal` equals the current frontier;
+3. `end_ordinal` is within the currently stageable/finalizable ordinal horizon;
+4. every ordinal in the range is positively staged exactly once and unpoisoned;
+5. the digest matches the ordered canonical envelopes/payloads;
+6. `previous_fence_hash` matches the finalized chain;
+7. the range is contiguous;
+8. failure rejects the fence atomically and promotes nothing.
 
-1. it comes from the active sequencer authority;
-2. its epoch matches the active profile timeline epoch;
-3. `start_ordinal` equals the next unfinalized ordinal;
-4. every ordinal through `end_ordinal` is present exactly once and unpoisoned;
-5. the ordered-stream digest matches;
-6. `previous_fence_hash` matches the last finalized fence;
-7. no canonical command in the range has previously been finalized differently.
+A successful fence promotes the range into canonical history, then commands execute in ascending ordinal order through individual stable command barriers.
 
-If any condition fails, the entire fence is rejected and **none** of its staged commands become canonical.
+### 9. Sliding window after prefix finalization
 
-### 5. Finalized stream
+A fence may finalize a contiguous prefix of the current ordinal window.
 
-A successfully validated fence atomically promotes its contiguous command range into the canonical profile input stream.
+After finalization:
 
-Only after promotion are commands processed, in ascending `input_ordinal`, through their individual stable command barriers.
+- `frontier_ordinal` advances to `end_ordinal + 1`;
+- a new deterministic admission-window token is issued;
+- already-staged unfinalized higher ordinals that remain within the new window keep their dedicated slots;
+- newly exposed higher ordinal slots become available;
+- new submissions for newly exposed ordinals require the new token.
 
-Therefore:
+This preserves bounded capacity while ensuring the next frontier always has a reserved slot.
+
+### 10. Reversed-delivery capacity invariant
+
+For `window_width = 2` and frontier `n`, the only eligible ordinals are:
 
 ```text
-arrival order != canonical order
-staging != admission
-fence validation == finality decision
+n
+n+1
 ```
 
-A later conflicting arrival cannot replace a finalized command. Before finalization, a collision blocks the fence rather than allowing whichever command arrived first to win.
-
-### 6. Gap and late-arrival rules
-
-- A fence cannot skip an ordinal.
-- An unfenced higher ordinal may wait in the bounded staging buffer.
-- A command below the next unfinalized ordinal that exactly matches its finalized canonical hash is an idempotent late duplicate.
-- A command below the next unfinalized ordinal with a different hash is rejected as a finalized-history conflict.
-- Staging-buffer limits are governed by the Phase-0 performance/security budget. Overflow rejects new staging atomically; it cannot force canonical reordering.
-- Wall-clock timeout is never used to decide canonical order or fill a gap.
-
-### 7. Sequencer epoch handoff
-
-Changing sequencer ownership or resetting ordinal space requires:
+So both delivery orders:
 
 ```text
-complete stable canonical boundary
--> final fence for old epoch
--> explicit epoch-handoff record
--> new timeline_epoch
--> new exclusive sequencer grant
--> ordinal space starts according to the declared epoch contract
+n+1, n+2, n
+n, n+1, n+2
 ```
 
-The handoff is itself persisted and auditable. An old-epoch sequencer cannot stage/finalize commands in the new epoch.
-
-### 8. Embedded convenience API
-
-Embedded integrations may expose a convenience call that stages one or more commands and immediately supplies a matching fence.
-
-That convenience API is only syntactic sugar. It must execute the same logical stage/fence/finalize rules as service mode.
-
-### 9. Command barrier after finality
-
-For each finalized command:
+produce the same logical staging result:
 
 ```text
-current stable snapshot
--> apply/validate direct canonical ingress
--> evaluate all permitted zero-delay work
--> deterministic effect collection/sort/validation
+n     -> STAGED
+n+1   -> STAGED
+n+2   -> NOT_IN_ADMISSION_WINDOW
+```
+
+A fence through `n+1` can then finalize identically in both cases.
+
+After finalization, `n+2` may be retried with the new admission-window token.
+
+### 11. Poison/cancellation/recovery policy
+
+There is no arrival-based eviction or winner selection.
+
+Within a timeline epoch:
+
+- an unpoisoned staged exact duplicate is idempotent;
+- a conflicting payload poisons the ordinal;
+- a poisoned ordinal cannot be “fixed” by replacing one competing payload based on arrival time;
+- there is no ordinary per-command cancellation that can race submission and choose history.
+
+Recovery from a poisoned/unrecoverable staging state requires an explicit sequencer epoch handoff/reset at a stable canonical boundary:
+
+```text
+freeze current finalized frontier
+-> discard all unfinalized staged state for old epoch
+-> persist handoff/reset evidence
+-> create new timeline_epoch
+-> grant one sequencer
+-> recompute admission window from the unchanged finalized frontier
+-> resubmit intended unfinalized commands under the new epoch
+```
+
+No finalized history is altered.
+
+### 12. Generic ingress/backpressure is outside canonical staging
+
+Transport implementations may have ordinary bounded socket/request queues before logical staging.
+
+Such transport backpressure may reject/drop a request before it becomes a logical staging attempt, but conformance/equivalence tests must operate within declared transport resource limits and compare the same logical submissions.
+
+No transport queue may be treated as the canonical ordinal staging store.
+
+### 13. Embedded convenience API
+
+Embedded mode may combine:
+
+```text
+obtain current window
+-> stage eligible commands
+-> receive STAGED acknowledgements
+-> submit fence
+```
+
+inside one convenience call.
+
+That is syntactic sugar only. The same logical eligibility, slots, acknowledgements, digest, frontier, and finality semantics apply.
+
+### 14. Command barrier after finality
+
+For every finalized command:
+
+```text
+stable snapshot
+-> direct canonical ingress
+-> deterministic due/zero-delay evaluation
+-> collect/sort/validate effects
 -> atomic commit wave(s)
 -> stable boundary
--> next finalized command
+-> next finalized ordinal
 ```
 
-The next canonical command never observes an incomplete prior barrier.
+### 15. Logical time, scheduled occurrences, snapshots, RNG, and numeric model
 
-### 10. Logical time and `advance_time`
+The existing frozen rules remain:
 
 - wall-clock time is never canonical;
 - host simulation time is monotonic integer time;
-- finalized commands are processed by `input_ordinal`, and their declared `effective_time` must satisfy the timeline/time policy;
-- `advance_time(target)` processes due work deterministically before the committed clock moves beyond it;
-- runtime quota/yield may change latency only, not occurrence identity, ordering, or hashes;
-- one ten-day advance versus ten one-day advances with no intervening canonical inputs must converge to the same final canonical state/output hashes.
+- quota/yield changes latency, not semantics;
+- scheduled occurrence identity derives from persisted logical occurrence indexes, never batching/worker/catch-up chunks;
+- profile/config activation is sequenced and barrier-bound;
+- snapshots represent complete stable boundaries;
+- randomness uses semantic random addresses rather than a mutable global RNG stream;
+- canonical arithmetic/serialization is normalized and integer/fixed-point where practical.
 
-### 11. Scheduled occurrence identity
+## Why this closes the bounded-overflow defect
 
-Scheduled/recurring work derives occurrence identity from persisted schedule/obligation identity and logical occurrence index, never from:
+Capacity is allocated by ordinal position, not arrival.
 
-- arrival order;
-- worker count;
-- transport batch;
-- catch-up chunk count;
-- runtime quota resume count.
+Higher ordinals cannot fill or evict the frontier's slot.
 
-### 12. Profile/config activation
-
-Any profile/config activation that can alter canonical outcomes is itself a sequenced, fenced canonical command and activates only at its declared stable barrier.
-
-### 13. Snapshots
-
-Persistence snapshots represent complete stable canonical commit boundaries only.
-
-### 14. Randomness
-
-Canonical stochastic decisions derive semantic random addresses from:
-
-```text
-root_seed
-+ exact behavior epoch/artifact context
-+ rule_or_trigger_id
-+ scope_or_actor_id
-+ persisted logical occurrence/index
-```
-
-No mutable global RNG stream exists.
-
-### 15. Numeric model
-
-Canonical probability/score arithmetic uses integer/fixed-point representation where practical. Accepted wire/config representations normalize before hashing/evaluation; ambiguous representations reject.
-
-## Why a fence instead of arrival-time sequencing
-
-A single service thread would still make network arrival order canonical. Rejecting `n+1` merely because it arrived before `n` would make the accepted command set depend on delivery order.
-
-Staging plus a sequencer-authored digest fence allows commands to arrive in any order while making finality depend only on the sequencer's explicit ordered commitment.
-
-## Consequences
-
-- Neither of two conflicting same-ordinal commands can become canonical merely by arriving first.
-- `(n+1, n)` and `(n, n+1)` delivery produce the same finalized stream when the same valid fence is supplied.
-- A gap cannot be silently skipped.
-- Service and embedded modes share one finality contract.
-- Timeline sequencing is explicit integration authority and does not add a causal runtime primitive.
+Commands beyond the deterministic credit window are not opportunistically accepted depending on when they arrive; their envelope carries the window token under which the sequencer submitted them, and they must be explicitly retried under a later valid token.
 
 ## Required falsification tests
 
-1. Stage ordinals `(n+1, n)` and `(n, n+1)` with the same valid fence; both finalize identical commands/hashes.
-2. Two different payloads claim ordinal `n` before finalization; the slot is poisoned and the fence rejects atomically regardless of arrival order.
-3. A non-sequencer source claims a valid-looking ordinal; staging rejects before canonical mutation.
-4. Submit `n+1` without `n`; a fence through `n+1` rejects for a gap and neither command becomes canonical.
-5. Late exact duplicate below the finalized frontier is idempotent; late differing payload rejects as history conflict.
-6. Same staged commands with different fence digest reject without partial finalization.
-7. Replayed/branched fence with wrong `previous_fence_hash` rejects.
-8. Old-epoch sequencer attempts staging/finalization after handoff; reject.
-9. Service delivery and embedded convenience API with reversed arrival produce identical accepted/finalized streams and canonical hashes.
-10. Staging-buffer overflow never advances canonical order or state.
-11. Ten-day once vs one-day ten-times remains hash-equivalent with quota yielding.
-12. Concurrent delivery/worker interleaving cannot change a finalized fenced stream.
+1. capacity two: `n+1,n+2,n` versus `n,n+1,n+2` yields identical stage statuses and identical finalization through `n+1`;
+2. deliver `n+2` late after frontier advances but with the old token: still reject; retry with new token succeeds;
+3. frontier slot remains available after all higher eligible slots are occupied;
+4. opposite-order same-ordinal conflict poisons identically and consumes only one ordinal slot;
+5. no arrival-based eviction exists;
+6. fence cannot be issued successfully without positive STAGED acknowledgements for its full range;
+7. partial-prefix fence slides the window deterministically and preserves still-valid staged higher ordinals;
+8. poisoned-window recovery uses explicit epoch reset and cannot rewrite finalized history;
+9. service, embedded, and concurrent-worker delivery paths produce identical logical stage/fence results;
+10. transport backpressure is proven separate from logical canonical staging.

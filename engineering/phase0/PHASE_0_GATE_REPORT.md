@@ -1,48 +1,33 @@
-# S.P.A.R.K. Phase 0 Gate Report — Second Corrected Writer Pass v0.3
+# S.P.A.R.K. Phase 0 Gate Report — Third Corrected Writer Pass v0.4
 
 **Date:** 2026-08-25  
-**Current gate:** FINAL CONTRACT CORRECTION COMPLETE / INDEPENDENT FINAL RE-REVIEW REQUIRED  
+**Current gate:** BOUNDED ADMISSION CORRECTION COMPLETE / INDEPENDENT CLOSURE REVIEW REQUIRED  
 **Phase 1 authorization:** **NO**
 
-## What remains from independent review
+## Sole reviewed blocker before v0.4
 
-One Phase-1 blocker remained after the v0.2 correction:
+Arrival-dependent staging-capacity overflow.
 
-```text
-B-01A — canonical ordinal ownership and stream finality
-```
+## v0.4 correction
 
-B-02 and B-03 were independently closed. No majors remained.
+- deterministic frontier-derived admission window;
+- one dedicated slot per ordinal;
+- frontier capacity can never be consumed by a higher ordinal;
+- envelope binds to the admission-window token under which it was submitted;
+- out-of-window command is retryable and consumes no canonical staging capacity;
+- no arrival-based eviction;
+- sequencer must receive STAGED acknowledgement for full fence range before fencing;
+- poisoned staging recovery requires explicit timeline-epoch reset;
+- service/embedded/concurrent paths share the same logical contract.
 
-## v0.3 frozen correction
+## Closure condition
 
-- one exclusive timeline sequencer per profile timeline epoch;
-- upstream sources are ordered before becoming canonical S.P.A.R.K. input;
-- received envelopes are staged and causally inert;
-- canonical finality requires a sequencer-authored hash-linked digest fence;
-- fence ranges are contiguous from the current frontier;
-- gaps reject;
-- conflicting same-ordinal payloads poison the slot and prevent finalization;
-- first arrival cannot win;
-- finalized late exact duplicates are idempotent;
-- finalized late differing payloads reject;
-- sequencer handoff requires stable boundary + new timeline epoch;
-- embedded and service modes share the same logical staging/fence/finality contract.
-
-## Gate condition
-
-Authorize Phase 1 only if an independent final re-review reports:
+Authorize Phase 1 only if independent review returns:
 
 ```text
 B-01A = CLOSED
-B-02 = CLOSED (no regression)
-B-03 = CLOSED (no regression)
+B-02 = CLOSED
+B-03 = CLOSED
 REMAINING BLOCKERS = NONE
 PHASE-1 AUTHORIZATION = YES
-```
-
-Until that result:
-
-```text
-PHASE_1_AUTHORIZATION = NO
 ```
