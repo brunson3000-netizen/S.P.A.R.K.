@@ -80,6 +80,22 @@ operator authorization.
 See `PHASE_1_REFOUNDATION_V2_IMPLEMENTATION_REPORT_2026-08-26.md` and
 `PHASE_1_FINAL_DIGEST_CORRECTION_REPORT_2026-08-26.md`.
 
+**Fable overnight architecture closure mission completed** (architecture/
+falsification/planning only; no production code changed). The staged
+command-identity defect was independently reproduced and extended: the
+`(source, sequence)` registry carries the identical defect, and the
+occupied-slot identity bypass was ruled deliberate and load-bearing. The
+repair architecture — identity registration coextensive with positive
+staging, making the registries a derived index over digest-committed
+state with **no digest change** — is complete, with the AT-H closure test
+matrix, a bounded Opus implementation plan, a Codex review plan, and a
+Phase-2 readiness blueprint. State-commitment and order-independence
+audits over the full tree found no further violation beyond one MINOR
+(duplicate-ID manifest hash order sensitivity, m-02). Verdict:
+`OPERATOR_DECISION_REQUIRED` — the closure pass awaits the operator
+authorization reserved by the previous pass. See
+`PHASE_1_FABLE_OVERNIGHT_SYNTHESIS_2026-08-26.md`.
+
 Re-foundation v2 writer: Claude Code (Opus, HIGH effort).
 Architecture/process review: Fable.
 Independent review of the v2 pass: Codex.

@@ -1,0 +1,288 @@
+S.P.A.R.K. Phase-1 Fable Overnight Architecture Mission - probe evidence
+Recorded: 2026-08-26
+Branch: phase1-refoundation-v2 at 87da5be5545e37e779c62f8a3461d97c574f86d7
+Baseline: cargo test --workspace = 221 passed / 0 failed (verified before probing)
+
+=== PROBE OUTPUT (cargo test -p spark-testkit --test fable_overnight_probes -- --nocapture --test-threads 1) ===
+running 7 tests
+test p1_command_identity_registry_is_arrival_order_sensitive_hidden_state ... P1 pre-reuse state digests equal: true
+P1 forward  reuse: Err(CommandIdentityConflict { command_id: CommandId(cmd.a) })
+P1 reversed reuse: Ok(newly_staged)
+P1 post-reuse digests equal: false
+ok
+test p2_source_sequence_registry_is_arrival_order_sensitive_hidden_state ... P2 pre-reuse state digests equal: true
+P2 forward  reuse: Err(SourceSequenceConflict { source_id: SourceId(sequencer.primary), source_sequence: 5 })
+P2 reversed reuse: Ok(newly_staged)
+ok
+test p3_identity_checks_are_bypassed_on_occupied_slots ... P3 conflicting id at occupied ordinal: Ok(poisoned)
+P3 conflicting id at empty ordinal   : Err(CommandIdentityConflict { command_id: CommandId(cmd.a) })
+ok
+test p4_epoch_reset_restores_convergence ... P4 post-reset forward : Ok(newly_staged)
+P4 post-reset reversed: Ok(newly_staged)
+P4 post-reset digests equal: true
+ok
+test p5_first_arrival_decides_which_contested_identity_stays_reserved ... P5 reuse of first-arrival id  (cmd.a): Err(CommandIdentityConflict { command_id: CommandId(cmd.a) })
+P5 reuse of second-arrival id (cmd.b): Ok(newly_staged)
+ok
+test p6_duplicate_id_manifest_hash_is_order_sensitive ... P6 duplicate-id manifest hashes equal across orders: false
+P6 (both manifests are rejected by activation, so no activated artifact carries either hash)
+ok
+test p7_stage_error_variants_sanity ... P7 id reuse : Err(CommandIdentityConflict { command_id: CommandId(cmd.a) })
+P7 seq reuse: Err(SourceSequenceConflict { source_id: SourceId(sequencer.primary), source_sequence: 0 })
+ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+=== PROBE SOURCE (temporary; removed from the tree after recording) ===
+//! TEMPORARY Fable overnight architecture probes — NOT part of the
+//! canonical corpus. Deleted before commit; outputs recorded in the
+//! overnight evidence files.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects
+)]
+
+use spark_core::clock::LogicalTime;
+use spark_core::hash::hash_bytes;
+use spark_core::id::{CanonicalTag, CommandId, ProfileId, SourceId};
+use spark_core::timeline::{
+    CommandKind, Ordinal, SemanticCommandEnvelope, StageError, TimelineEpoch, TimelineIngress,
+};
+
+fn p() -> ProfileId {
+    ProfileId::new("game-world").unwrap()
+}
+fn s() -> SourceId {
+    SourceId::new("sequencer.primary").unwrap()
+}
+
+fn env(name: &str, ordinal: u64, seq: u64, payload: &str) -> SemanticCommandEnvelope {
+    SemanticCommandEnvelope {
+        command_id: CommandId::new(name).unwrap(),
+        profile_id: p(),
+        timeline_epoch: TimelineEpoch(1),
+        effective_time: LogicalTime(0),
+        source_id: s(),
+        source_sequence: seq,
+        input_ordinal: Ordinal(ordinal),
+        command_kind: CommandKind::new(CanonicalTag::new("test.command").unwrap()),
+        canonical_payload_hash: hash_bytes(payload.as_bytes()),
+    }
+}
+
+fn stage(ingress: &mut TimelineIngress, e: &SemanticCommandEnvelope) -> String {
+    let t = ingress.current_admission_window().unwrap().ticket();
+    match ingress.stage(&s(), &e.clone().submit_with(t)) {
+        Ok(d) => format!("Ok({})", d.tag()),
+        Err(err) => format!("Err({err:?})"),
+    }
+}
+
+/// P1 — independent reproduction of the reported B-01 staged
+/// command-identity defect: equal state digests, divergent reaction to the
+/// same later command-id reuse.
+#[test]
+fn p1_command_identity_registry_is_arrival_order_sensitive_hidden_state() {
+    let a = env("cmd.a", 0, 0, "a");
+    let b = env("cmd.b", 0, 1, "b");
+
+    let mut fwd = TimelineIngress::new(p(), TimelineEpoch(1), s(), 2).unwrap();
+    stage(&mut fwd, &a);
+    stage(&mut fwd, &b);
+
+    let mut rev = TimelineIngress::new(p(), TimelineEpoch(1), s(), 2).unwrap();
+    stage(&mut rev, &b);
+    stage(&mut rev, &a);
+
+    let digests_equal = fwd.canonical_state_digest() == rev.canonical_state_digest();
+    println!("P1 pre-reuse state digests equal: {digests_equal}");
+
+    // Reuse command id "cmd.a" at ordinal 1 with different content.
+    let reuse = env("cmd.a", 1, 7, "different");
+    let rf = stage(&mut fwd, &reuse);
+    let rr = stage(&mut rev, &reuse);
+    println!("P1 forward  reuse: {rf}");
+    println!("P1 reversed reuse: {rr}");
+    println!(
+        "P1 post-reuse digests equal: {}",
+        fwd.canonical_state_digest() == rev.canonical_state_digest()
+    );
+    assert!(digests_equal, "defect requires equal pre-reuse digests");
+    assert_ne!(rf, rr, "defect: divergent reaction to identical input");
+}
+
+/// P2 — the same defect through the (source, sequence) registry.
+#[test]
+fn p2_source_sequence_registry_is_arrival_order_sensitive_hidden_state() {
+    // Same (source, seq) would collide only via slot; use distinct seqs at
+    // the contest, then reuse one of them.
+    let a = env("cmd.a", 0, 5, "a");
+    let b = env("cmd.b", 0, 6, "b");
+
+    let mut fwd = TimelineIngress::new(p(), TimelineEpoch(1), s(), 2).unwrap();
+    stage(&mut fwd, &a);
+    stage(&mut fwd, &b);
+    let mut rev = TimelineIngress::new(p(), TimelineEpoch(1), s(), 2).unwrap();
+    stage(&mut rev, &b);
+    stage(&mut rev, &a);
+
+    let digests_equal = fwd.canonical_state_digest() == rev.canonical_state_digest();
+    println!("P2 pre-reuse state digests equal: {digests_equal}");
+
+    // Reuse (source, 5) under a fresh command id with different content.
+    let reuse = env("cmd.c", 1, 5, "different");
+    let rf = stage(&mut fwd, &reuse);
+    let rr = stage(&mut rev, &reuse);
+    println!("P2 forward  reuse: {rf}");
+    println!("P2 reversed reuse: {rr}");
+    assert!(digests_equal);
+    assert_ne!(rf, rr);
+}
+
+/// P3 — identity checks are skipped entirely on occupied slots: an
+/// envelope whose command id conflicts with an already-staged different
+/// command is refused as CommandIdentityConflict at an EMPTY ordinal but
+/// accepted as a poisoning claim at an OCCUPIED ordinal.
+#[test]
+fn p3_identity_checks_are_bypassed_on_occupied_slots() {
+    let a = env("cmd.a", 0, 0, "a");
+    // Same command id as `a`, different semantics, targeting the SAME
+    // ordinal: lands in the occupied-slot branch where the registries are
+    // never consulted.
+    let evil_same_ordinal = env("cmd.a", 0, 1, "different");
+    // Identical twin targeting the next (empty) ordinal: hits the registry.
+    let evil_next_ordinal = env("cmd.a", 1, 1, "different");
+
+    let mut one = TimelineIngress::new(p(), TimelineEpoch(1), s(), 2).unwrap();
+    stage(&mut one, &a);
+    let occupied = stage(&mut one, &evil_same_ordinal);
+
+    let mut two = TimelineIngress::new(p(), TimelineEpoch(1), s(), 2).unwrap();
+    stage(&mut two, &a);
+    let empty = stage(&mut two, &evil_next_ordinal);
+
+    println!("P3 conflicting id at occupied ordinal: {occupied}");
+    println!("P3 conflicting id at empty ordinal   : {empty}");
+    assert!(occupied.contains("poisoned"));
+    assert!(empty.contains("CommandIdentityConflict"));
+}
+
+/// P4 — epoch reset erases the divergence: after ADR-0003 §11 recovery the
+/// two ingresses re-converge (registries and slots both cleared).
+#[test]
+fn p4_epoch_reset_restores_convergence() {
+    let a = env("cmd.a", 0, 0, "a");
+    let b = env("cmd.b", 0, 1, "b");
+
+    let mut fwd = TimelineIngress::new(p(), TimelineEpoch(1), s(), 2).unwrap();
+    stage(&mut fwd, &a);
+    stage(&mut fwd, &b);
+    let mut rev = TimelineIngress::new(p(), TimelineEpoch(1), s(), 2).unwrap();
+    stage(&mut rev, &b);
+    stage(&mut rev, &a);
+
+    fwd.reset_epoch(&s(), TimelineEpoch(2), s()).unwrap();
+    rev.reset_epoch(&s(), TimelineEpoch(2), s()).unwrap();
+
+    let mut reuse = env("cmd.a", 0, 7, "different");
+    reuse.timeline_epoch = TimelineEpoch(2);
+    let rf = stage(&mut fwd, &reuse);
+    let rr = stage(&mut rev, &reuse);
+    println!("P4 post-reset forward : {rf}");
+    println!("P4 post-reset reversed: {rr}");
+    println!(
+        "P4 post-reset digests equal: {}",
+        fwd.canonical_state_digest() == rev.canonical_state_digest()
+    );
+    assert_eq!(rf, rr);
+    assert_eq!(fwd.canonical_state_digest(), rev.canonical_state_digest());
+}
+
+/// P5 — the poisoning claimant's identity is never registered even at an
+/// otherwise-empty future: after A stages and B poisons, reusing B's
+/// command id with different semantics is ACCEPTED, while reusing A's is
+/// REJECTED — first arrival decides which contested identity stays
+/// reserved.
+#[test]
+fn p5_first_arrival_decides_which_contested_identity_stays_reserved() {
+    let a = env("cmd.a", 0, 0, "a");
+    let b = env("cmd.b", 0, 1, "b");
+
+    let mut ingress = TimelineIngress::new(p(), TimelineEpoch(1), s(), 3).unwrap();
+    stage(&mut ingress, &a); // A stages, registers cmd.a
+    stage(&mut ingress, &b); // B poisons, cmd.b never registered
+
+    let reuse_a = env("cmd.a", 1, 7, "different-a");
+    let reuse_b = env("cmd.b", 2, 8, "different-b");
+    let ra = stage(&mut ingress, &reuse_a);
+    let rb = stage(&mut ingress, &reuse_b);
+    println!("P5 reuse of first-arrival id  (cmd.a): {ra}");
+    println!("P5 reuse of second-arrival id (cmd.b): {rb}");
+    assert!(ra.contains("CommandIdentityConflict"));
+    assert!(rb.contains("newly_staged"));
+}
+
+/// P6 — manifest_content_hash of a duplicate-ID manifest is
+/// construction-order sensitive (the sort is by ID only, stable). Such a
+/// manifest can never activate, so no activated artifact is affected; the
+/// hash function itself is nevertheless order-sensitive on invalid input.
+#[test]
+fn p6_duplicate_id_manifest_hash_is_order_sensitive() {
+    use spark_core::authority::Authority;
+    use spark_core::scope::ScopeKind;
+    use spark_core::value::ValueConstraint;
+    use spark_engine::profile::definition::{DefinitionKind, DefinitionSpec};
+    use spark_engine::profile::manifest::ProfileManifest;
+    use spark_engine::profile::text::BoundedText;
+    use std::collections::BTreeSet;
+
+    let spec = |desc: &str| DefinitionSpec {
+        profile_id: p(),
+        id: spark_core::id::DefinitionId::new("trait.curiosity").unwrap(),
+        kind: DefinitionKind::Trait,
+        domain: None,
+        layer: None,
+        value_constraint: ValueConstraint::boolean(),
+        authority: Authority::SparkOwned,
+        valid_scopes: BTreeSet::from([ScopeKind::Actor]),
+        enabled: true,
+        version: 1,
+        description: BoundedText::new(desc).unwrap(),
+        behavioral_leverage: None,
+    };
+
+    let one = spec("first");
+    let two = spec("second");
+    let fwd = ProfileManifest::new(
+        p(),
+        BoundedText::new("1.0.0").unwrap(),
+        vec![one.clone(), two.clone()],
+    );
+    let rev = ProfileManifest::new(p(), BoundedText::new("1.0.0").unwrap(), vec![two, one]);
+    let equal = fwd.manifest_content_hash() == rev.manifest_content_hash();
+    println!("P6 duplicate-id manifest hashes equal across orders: {equal}");
+    println!("P6 (both manifests are rejected by activation, so no activated artifact carries either hash)");
+}
+
+/// P7 — the StageError identity conflicts really are the divergent
+/// observable (sanity print of the exact variants).
+#[test]
+fn p7_stage_error_variants_sanity() {
+    let a = env("cmd.a", 0, 0, "a");
+    let mut ingress = TimelineIngress::new(p(), TimelineEpoch(1), s(), 3).unwrap();
+    stage(&mut ingress, &a);
+    let reuse_id = env("cmd.a", 1, 7, "x");
+    let reuse_seq = env("cmd.c", 1, 0, "y");
+    let t = ingress.current_admission_window().unwrap().ticket();
+    let r1 = ingress.stage(&s(), &reuse_id.submit_with(t.clone()));
+    let t2 = ingress.current_admission_window().unwrap().ticket();
+    let r2 = ingress.stage(&s(), &reuse_seq.submit_with(t2));
+    println!("P7 id reuse : {r1:?}");
+    println!("P7 seq reuse: {r2:?}");
+    assert!(matches!(r1, Err(StageError::CommandIdentityConflict { .. })));
+    assert!(matches!(r2, Err(StageError::SourceSequenceConflict { .. })));
+}
