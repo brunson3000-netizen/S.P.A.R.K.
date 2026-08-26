@@ -58,6 +58,10 @@
 
 pub mod authority;
 pub mod clock;
+// The shared bounded contested-claim set behind `scheduler` conflicts and
+// `timeline` poison evidence. Internal: the public surface stays the two
+// consumers' own evidence types.
+pub(crate) mod evidence;
 pub mod hash;
 pub mod id;
 pub mod random;

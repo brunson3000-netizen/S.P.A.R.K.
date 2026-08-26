@@ -60,20 +60,43 @@ impl ProfileManifest {
     }
 
     /// Deterministic, format-independent content hash. Definitions are
-    /// sorted by ID before hashing so that construction order never
-    /// affects the result.
+    /// sorted before hashing so that construction order never affects the
+    /// result — on **every** input, valid or not.
+    ///
+    /// The sort key is `(definition ID, full canonical encoding)`, not the
+    /// ID alone. A manifest is untrusted authoring input, so it may carry
+    /// two *different* definitions under one ID; sorting by ID alone left
+    /// their relative order decided by construction order, and the hash
+    /// with it (finding m-02). Such a manifest is invalid and can never
+    /// pass the activation ceremony, so no activated artifact, save, or
+    /// epoch has ever referenced an affected hash — but ADR-0004 requires
+    /// the canonical logical representation used for content hashing to be
+    /// deterministic, and a canonical hash function that is order-sensitive
+    /// on any input is a trap for later tooling that hashes unvalidated
+    /// manifests (authoring diffs, artifact stores). Adding the encoded
+    /// block as the tie-break makes the hash a true multiset function.
+    ///
+    /// The ID stays the primary key so the hash of every manifest that can
+    /// actually activate — IDs unique, hence no tie to break — is
+    /// bit-for-bit what it was before this correction.
     pub fn manifest_content_hash(&self) -> Digest {
-        let mut defs: Vec<&DefinitionSpec> = self.definitions.iter().collect();
-        defs.sort_by(|a, b| a.id.as_str().cmp(b.id.as_str()));
+        let mut blocks: Vec<(&str, Vec<u8>)> = self
+            .definitions
+            .iter()
+            .map(|d| {
+                let mut inner = CanonicalEncoder::new();
+                d.canonicalize_full(&mut inner);
+                (d.id.as_str(), inner.into_bytes())
+            })
+            .collect();
+        blocks.sort();
 
         let mut enc = CanonicalEncoder::new();
         enc.push_str("profile_manifest_content");
         self.profile_id.canonicalize(&mut enc);
-        enc.push_u64(defs.len() as u64);
-        for d in defs {
-            let mut inner = CanonicalEncoder::new();
-            d.canonicalize_full(&mut inner);
-            enc.push_block(&inner);
+        enc.push_u64(blocks.len() as u64);
+        for (_, block) in &blocks {
+            enc.push_bytes(block);
         }
         enc.finish()
     }

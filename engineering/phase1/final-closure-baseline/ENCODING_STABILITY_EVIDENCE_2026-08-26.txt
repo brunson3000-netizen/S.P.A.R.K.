@@ -1,0 +1,176 @@
+S.P.A.R.K. Phase-1 Final Closure — canonical encoding stability evidence
+Recorded: 2026-08-26
+
+Purpose: prove that the three bundled cleanups (m-02 manifest hash, S2
+evidence-type unification, S3 retention-bound simplification) changed no
+canonical encoding and no canonical digest VALUE, not merely that the
+relative equalities the AT-G suite asserts still hold.
+
+Method: one temporary probe printing canonical digests for conflicted
+scheduler slots and poisoned timeline slots at every mandated claim-set
+size (2, 5, 17, 64, the tracking cap, and past it) plus valid profile
+manifest content hashes. The identical probe was run in a clean git
+worktree at the pre-change commit 87da5be and against the post-change
+working tree, and the outputs diffed. The probe was then removed.
+
+=== PRE-CHANGE (git worktree at 87da5be) ===
+scheduler_conflict[2] = beca43a9ec90575246644960dae8526337853888fe242bd6eb0f1139cefd421c
+scheduler_conflict[5] = 921253ad304246f487f1a348a9af5d8ffec54332f758f90db173d8d5d7b87e97
+scheduler_conflict[17] = 1170249fd3ec6c8d0666559b264395768986fb60eda6837424f7dabfd2cd65c3
+scheduler_conflict[64] = 3299cb97c1e9785cdbbec92b75d08c0572b4b0f7ef3d369762308d0d6fd0408d
+scheduler_conflict[256] = 39287b7305628b698db10497409620e16386dbd384447c26ad989d5a14198dbf
+scheduler_conflict[300] = 6ea0cf4d40e4a2fddbfbfb259aa693216dcb88df6bea6089621d619a9958a44d
+timeline_poison[2]    = f474567a7815175f32a25af794d6e80969a9b34443344d3b4994e5a62210b1ac
+timeline_poison[5]    = f23291987c23895067c19a2fe0193553bd6cc8061ff98e7d46ec817e1f247686
+timeline_poison[17]    = 951afbd030bd57a91d7ef3cbecee5463518d49d156a63c22e2b62bb160cd0839
+timeline_poison[64]    = 58c9e816a483ad74c001b0de594beae817e5f03efc3720071009b925b73feb8b
+timeline_poison[256]    = 266ddc8ba37161a54dfdf4a2b9fdbf850135eaf19c142e7015cdd1f0179478ae
+timeline_poison[300]    = a8a86695dbdfd3958dae452d583e040b3e2492eb7b015c37c24cec0cdb2aed25
+valid_manifest[1]         = 8fefaaa9e017f12b51770c92b44ad1f0c949b4446dfa63c138fe4011fdc91874
+valid_manifest[2]         = 9bdc65bfcf8d9feaa23a7b3521afafdf21a77d2417fccbd88c78bdacc615c12c
+
+=== POST-CHANGE (B-01 repair + S1 + m-02 + S2 + S3) ===
+scheduler_conflict[2] = beca43a9ec90575246644960dae8526337853888fe242bd6eb0f1139cefd421c
+scheduler_conflict[5] = 921253ad304246f487f1a348a9af5d8ffec54332f758f90db173d8d5d7b87e97
+scheduler_conflict[17] = 1170249fd3ec6c8d0666559b264395768986fb60eda6837424f7dabfd2cd65c3
+scheduler_conflict[64] = 3299cb97c1e9785cdbbec92b75d08c0572b4b0f7ef3d369762308d0d6fd0408d
+scheduler_conflict[256] = 39287b7305628b698db10497409620e16386dbd384447c26ad989d5a14198dbf
+scheduler_conflict[300] = 6ea0cf4d40e4a2fddbfbfb259aa693216dcb88df6bea6089621d619a9958a44d
+timeline_poison[2]    = f474567a7815175f32a25af794d6e80969a9b34443344d3b4994e5a62210b1ac
+timeline_poison[5]    = f23291987c23895067c19a2fe0193553bd6cc8061ff98e7d46ec817e1f247686
+timeline_poison[17]    = 951afbd030bd57a91d7ef3cbecee5463518d49d156a63c22e2b62bb160cd0839
+timeline_poison[64]    = 58c9e816a483ad74c001b0de594beae817e5f03efc3720071009b925b73feb8b
+timeline_poison[256]    = 266ddc8ba37161a54dfdf4a2b9fdbf850135eaf19c142e7015cdd1f0179478ae
+timeline_poison[300]    = a8a86695dbdfd3958dae452d583e040b3e2492eb7b015c37c24cec0cdb2aed25
+valid_manifest[1]         = 8fefaaa9e017f12b51770c92b44ad1f0c949b4446dfa63c138fe4011fdc91874
+valid_manifest[2]         = 9bdc65bfcf8d9feaa23a7b3521afafdf21a77d2417fccbd88c78bdacc615c12c
+
+=== diff before after ===
+(no differences: every canonical digest is byte-for-byte unchanged)
+
+=== PROBE SOURCE (temporary; removed from the tree after recording) ===
+//! TEMPORARY encoding-stability probe for the S2 evidence unification and
+//! the m-02 manifest-hash correction. Not part of the canonical corpus:
+//! it is run at the pre-change commit and at the post-change tree, and the
+//! two outputs are compared. Removed from the tree after recording.
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects
+)]
+
+use spark_core::authority::Authority;
+use spark_core::clock::LogicalTime;
+use spark_core::hash::hash_bytes;
+use spark_core::id::{CanonicalTag, CommandId, DefinitionId, ProfileId, SourceId};
+use spark_core::scheduler::{
+    DueWorkItem, OccurrenceIndex, Scheduler, WorkKey, WorkKind, WorkPayload,
+    MAX_CONFLICT_TRACKED_CLAIMS,
+};
+use spark_core::scope::{ScopeId, ScopeKind};
+use spark_core::timeline::{
+    CommandKind, Ordinal, SemanticCommandEnvelope, TimelineEpoch, TimelineIngress,
+    MAX_POISON_TRACKED_CLAIMS,
+};
+use spark_core::value::ValueConstraint;
+use spark_engine::profile::definition::{DefinitionKind, DefinitionSpec};
+use spark_engine::profile::manifest::ProfileManifest;
+use spark_engine::profile::text::BoundedText;
+use std::collections::BTreeSet;
+
+fn profile() -> ProfileId {
+    ProfileId::new("game-world").unwrap()
+}
+fn sequencer() -> SourceId {
+    SourceId::new("sequencer.primary").unwrap()
+}
+
+fn item(index: usize) -> DueWorkItem {
+    DueWorkItem {
+        key: WorkKey {
+            due_time: LogicalTime(7),
+            profile_id: profile(),
+            producer_definition_id: DefinitionId::new("rule.decay").unwrap(),
+            scope_id: ScopeId::new(ScopeKind::Actor, "actor.a").unwrap(),
+            occurrence_index: OccurrenceIndex(0),
+            work_kind: WorkKind::new(CanonicalTag::new("work.decay").unwrap()),
+        },
+        payload: WorkPayload::new(hash_bytes(format!("payload.{index:05}").as_bytes())),
+    }
+}
+
+fn envelope(index: usize) -> SemanticCommandEnvelope {
+    let name = format!("cmd.{index:05}");
+    SemanticCommandEnvelope {
+        command_id: CommandId::new(&name).unwrap(),
+        profile_id: profile(),
+        timeline_epoch: TimelineEpoch(1),
+        effective_time: LogicalTime(0),
+        source_id: sequencer(),
+        source_sequence: 0,
+        input_ordinal: Ordinal(0),
+        command_kind: CommandKind::new(CanonicalTag::new("test.command").unwrap()),
+        canonical_payload_hash: hash_bytes(name.as_bytes()),
+    }
+}
+
+fn scheduler_digest(count: usize) -> String {
+    let mut scheduler = Scheduler::new();
+    for index in 0..count {
+        let _ = scheduler.schedule(item(index));
+    }
+    format!("{}", scheduler.canonical_state_digest())
+}
+
+fn timeline_digest(count: usize) -> String {
+    let mut ingress = TimelineIngress::new(profile(), TimelineEpoch(1), sequencer(), 2).unwrap();
+    for index in 0..count {
+        let ticket = ingress.current_admission_window().unwrap().ticket();
+        let _ = ingress.stage(&sequencer(), &envelope(index).submit_with(ticket));
+    }
+    format!("{}", ingress.canonical_state_digest())
+}
+
+fn definition(id: &str, description: &str) -> DefinitionSpec {
+    DefinitionSpec {
+        profile_id: profile(),
+        id: DefinitionId::new(id).unwrap(),
+        kind: DefinitionKind::Trait,
+        domain: None,
+        layer: None,
+        value_constraint: ValueConstraint::boolean(),
+        authority: Authority::SparkOwned,
+        valid_scopes: BTreeSet::from([ScopeKind::Actor]),
+        enabled: true,
+        version: 1,
+        description: BoundedText::new(description).unwrap(),
+        behavioral_leverage: None,
+    }
+}
+
+#[test]
+fn print_canonical_digests() {
+    for count in [2, 5, 17, 64, MAX_CONFLICT_TRACKED_CLAIMS, 300] {
+        println!("scheduler_conflict[{count}] = {}", scheduler_digest(count));
+    }
+    for count in [2, 5, 17, 64, MAX_POISON_TRACKED_CLAIMS, 300] {
+        println!("timeline_poison[{count}]    = {}", timeline_digest(count));
+    }
+    let curiosity = definition("trait.curiosity", "Curiosity trait.");
+    let mut trust = definition("relationship.trust", "Trust relationship dimension.");
+    trust.kind = DefinitionKind::Relationship;
+    let one = ProfileManifest::new(
+        profile(),
+        BoundedText::new("1.0.0").unwrap(),
+        vec![curiosity.clone()],
+    );
+    let two = ProfileManifest::new(
+        profile(),
+        BoundedText::new("1.0.0").unwrap(),
+        vec![curiosity, trust],
+    );
+    println!("valid_manifest[1]         = {}", one.manifest_content_hash());
+    println!("valid_manifest[2]         = {}", two.manifest_content_hash());
+}

@@ -65,7 +65,23 @@
 //!    `effective_time`, `source_id`, `source_sequence`, or `command_kind`
 //!    are distinct commands.
 //! 3. **Command IDs and `(source_id, source_sequence)` pairs are unique**
-//!    within finalized-and-staged history.
+//!    within finalized-and-staged history — and *only* within it. A claim
+//!    is reserved exactly while its envelope is finalized or positively
+//!    staged; an envelope swallowed by a contest is neither, so both
+//!    contestants' identities become **unclaimed** after the contest, in
+//!    every arrival order. That is the coherent reading of the frozen
+//!    poison rule (ADR-0003 §11): if no arrival picks a winner, then
+//!    neither contestant's claim is honored, including its identity
+//!    reservation.
+//!
+//!    Screening for that uniqueness guards **admission into positive
+//!    staging only**. A claim recorded as contest evidence is recorded by
+//!    semantic hash, unconditionally and without consulting any identity
+//!    registry: evidence is a record of contest, not an admission. The
+//!    asymmetry is deliberate and load-bearing — screening the poison
+//!    branch would make a poisoned slot's evidence *set* depend on
+//!    registry contents, hence on arrival order, which is exactly the
+//!    property the poison evidence exists to avoid.
 //! 4. **Finalized per-source sequence numbers strictly increase**; gaps
 //!    are legal, regression is not.
 //! 5. **All ordinal arithmetic is total.** Nothing here panics: window and
@@ -74,6 +90,7 @@
 //!    is promoted.
 
 use crate::clock::LogicalTime;
+use crate::evidence::BoundedClaimSet;
 use crate::hash::{CanonicalEncoder, Digest};
 use crate::id::{CanonicalTag, CommandId, FenceId, ProfileId, SourceId};
 use std::collections::{BTreeMap, BTreeSet};
@@ -754,12 +771,14 @@ impl FinalizationResult {
 /// poisoned slot retains as exposed evidence, and the cap on how many
 /// distinct claims it tracks in order to report an exact omitted count.
 ///
-/// These mirror the scheduler's conflict-evidence discipline
-/// ([`crate::scheduler::MAX_CONFLICT_EVIDENCE`]) so the two poisoned-state
-/// representations in the kernel behave identically: retain the smallest
-/// hashes of the whole claim set, report how many distinct claims were
-/// omitted, and flag saturation. All three are functions of the claim set,
-/// never of arrival order.
+/// These are the scheduler's conflict-evidence discipline
+/// ([`crate::scheduler::MAX_CONFLICT_EVIDENCE`]) applied to the timeline:
+/// retain the smallest hashes of the whole claim set, report how many
+/// distinct claims were omitted, and flag saturation. All three are
+/// functions of the claim set, never of arrival order. The two
+/// poisoned-state representations cannot drift apart, because since the
+/// closure pass they are one implementation ([`BoundedClaimSet`])
+/// instantiated at these caps.
 pub const MAX_POISON_EVIDENCE: usize = 16;
 pub const MAX_POISON_TRACKED_CLAIMS: usize = 256;
 
@@ -775,102 +794,55 @@ pub const MAX_POISON_TRACKED_CLAIMS: usize = 256;
 /// hash/acknowledgement/fence property is untouched, and the per-call
 /// [`SlotPoisonRecord`] keeps its per-call fields, because call *results*
 /// may legitimately differ per call while canonical *state* may not.
+///
+/// The set itself is [`BoundedClaimSet`], the one implementation this
+/// kernel has of a bounded order-independent contested-claim set; the
+/// scheduler's conflict evidence is the same machinery at the same caps.
+/// This type remains the public face of a poisoned timeline slot, with
+/// its accessors, constants, and canonical encoding unchanged.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct SlotPoisonEvidence {
-    competing: BTreeSet<Digest>,
-    truncated: bool,
-}
+pub struct SlotPoisonEvidence(BoundedClaimSet<MAX_POISON_EVIDENCE, MAX_POISON_TRACKED_CLAIMS>);
 
 impl SlotPoisonEvidence {
     fn from_pair(a: Digest, b: Digest) -> Self {
-        let mut evidence = SlotPoisonEvidence {
-            competing: BTreeSet::new(),
-            truncated: false,
-        };
-        evidence.insert(a);
-        evidence.insert(b);
-        evidence
+        SlotPoisonEvidence(BoundedClaimSet::from_pair(a, b))
     }
 
     /// Idempotent, commutative insert retaining the smallest hashes, so
     /// the resulting value is a function of the claim set.
     fn insert(&mut self, hash: Digest) {
-        if self.competing.contains(&hash) {
-            return;
-        }
-        if self.competing.len() < MAX_POISON_TRACKED_CLAIMS {
-            self.competing.insert(hash);
-            return;
-        }
-        self.truncated = true;
-        let largest = match self.competing.iter().next_back() {
-            Some(largest) => largest.clone(),
-            // Unreachable: the branch above proved the set is at its
-            // non-zero cap. Reported rather than asserted so this
-            // function has no panic path.
-            None => return,
-        };
-        if hash < largest {
-            self.competing.remove(&largest);
-            self.competing.insert(hash);
-        }
+        self.0.insert(hash);
     }
 
     /// The retained competing semantic-envelope hashes, ascending.
     pub fn competing_semantic_hashes(&self) -> BTreeSet<Digest> {
-        self.competing
-            .iter()
-            .take(MAX_POISON_EVIDENCE)
-            .cloned()
-            .collect()
+        self.0.retained()
     }
 
     /// How many further distinct claims contested the slot without being
     /// retained as evidence.
     pub fn omitted_distinct(&self) -> u64 {
-        self.competing.len().saturating_sub(MAX_POISON_EVIDENCE) as u64
+        self.0.omitted_distinct()
     }
 
     /// Whether the claim set exceeded [`MAX_POISON_TRACKED_CLAIMS`], in
     /// which case [`omitted_distinct`](Self::omitted_distinct) is a
     /// saturated lower bound.
     pub fn evidence_truncated(&self) -> bool {
-        self.truncated
+        self.0.truncated()
     }
 
     /// Commits to **every** tracked competing hash, not to the exposed
-    /// [`MAX_POISON_EVIDENCE`] projection.
-    ///
-    /// [`competing_semantic_hashes`](Self::competing_semantic_hashes) is a
-    /// *presentation* of the evidence; canonicalizing that presentation is
-    /// what let two genuinely different poisoned slots share one ingress
-    /// state digest — sets agreeing on their smallest 16 hashes but
-    /// differing in tracked claims 17..=256 — and then react differently
-    /// to the same next claim, because those hidden claims decide whether
-    /// it is a duplicate or a new contestant. Canonical state identity
-    /// commits to every retained value that can change future canonical
-    /// behavior, so it commits to `competing` in full. This mirrors
-    /// [`crate::scheduler`]'s conflict evidence exactly, which is the
-    /// point: the two poisoned-state representations in the kernel must
-    /// not drift apart.
-    ///
-    /// The retained and omitted counts are total functions of `competing`
-    /// and add no discrimination, so they are not pushed. `truncated` is
-    /// pushed because it is independent retained state. Claims dropped
-    /// past [`MAX_POISON_TRACKED_CLAIMS`] are genuinely not retained and
-    /// stay collapsed: the digest commits to what the ingress remembers,
-    /// never to what it deliberately forgot.
+    /// [`MAX_POISON_EVIDENCE`] projection — see
+    /// [`BoundedClaimSet::canonicalize`] for why that distinction is the
+    /// whole point of the type.
     ///
     /// This changes only the *state* representation. Finalized history is
     /// untouched — a poisoned slot can never be finalized, so no poison
     /// evidence has ever entered
     /// [`TimelineIngress::canonical_history_digest`].
     fn canonicalize(&self, enc: &mut CanonicalEncoder) {
-        enc.push_u64(self.competing.len() as u64);
-        for hash in &self.competing {
-            enc.push_digest(hash);
-        }
-        enc.push_bool(self.truncated);
+        self.0.canonicalize(enc);
     }
 }
 
@@ -963,8 +935,34 @@ pub struct TimelineIngress {
     frontier_ordinal: Ordinal,
     last_finalized_fence_hash: Digest,
     slots: BTreeMap<u64, SlotState>,
-    // In-flight (this epoch, unfinalized) identity registries; cleared on
-    // epoch reset along with `slots`.
+    // In-flight (this epoch, unfinalized) identity registries.
+    //
+    // These are **derived indexes over the positively staged slots and
+    // nothing else**:
+    //
+    //     staged_command_identity
+    //         == { env.command_id -> h(env) | Staged(env) in slots }
+    //     staged_source_sequence_identity
+    //         == { (env.source_id, env.source_sequence) -> h(env)
+    //              | Staged(env) in slots }
+    //
+    // An envelope's identity claims are registered exactly while that
+    // envelope occupies a `Staged` slot, and at no other time: registered
+    // on staging into an empty slot, withdrawn when that slot poisons,
+    // moved into the permanent registries at fence promotion, and cleared
+    // wholesale with `slots` on epoch reset.
+    //
+    // The invariant is load-bearing, not tidiness. `canonical_state_digest`
+    // commits to every staged envelope in full but does not (and must not)
+    // hash these maps: hashing arrival-order-sensitive state would make
+    // equal claim sets produce unequal digests and regress AT-F1. Keeping
+    // them a pure function of the staged slots is what makes equal digests
+    // imply equal future admission behavior *structurally* — the state is
+    // incapable of violating the invariant rather than audited for it.
+    // Before this repair they were neither committed nor derivable: a
+    // contested ordinal left the first arrival's claims registered
+    // forever, so arrival order silently decided whether a later command
+    // reusing a contested identity was admitted.
     staged_command_identity: BTreeMap<CommandId, Digest>,
     staged_source_sequence_identity: BTreeMap<(SourceId, u64), Digest>,
     // Permanent registries covering finalized history; never cleared.
@@ -1346,8 +1344,8 @@ impl TimelineIngress {
                 }))
             }
             Some(SlotState::Staged {
+                envelope: staged,
                 semantic_hash: existing,
-                ..
             }) => {
                 if *existing == semantic_hash {
                     Ok(StageDisposition::Acknowledged(StageAcknowledgement::issue(
@@ -1359,8 +1357,29 @@ impl TimelineIngress {
                         AcknowledgedSlotState::AlreadyStagedIdempotent,
                     )))
                 } else {
+                    // The slot poisons, so the envelope that held it stops
+                    // being staged and can never be finalized in this
+                    // epoch: its identity claims are withdrawn with it.
+                    // The incoming claimant is *not* registered — it was
+                    // never admitted to positive staging either.
+                    //
+                    // Safe-removal lemma (admission architecture §3.2):
+                    // the entry under `staged.command_id` was created by
+                    // this very envelope, because empty-slot screening
+                    // admits at most one semantically *distinct* staged
+                    // envelope per command ID, and a semantically
+                    // identical envelope has an equal semantic hash —
+                    // which covers `input_ordinal` — so it would be this
+                    // same slot. The removal therefore cannot evict
+                    // another staged envelope's registration. The same
+                    // argument covers the source-sequence key.
+                    let displaced_command_id = staged.command_id.clone();
+                    let displaced_sequence_key = (staged.source_id.clone(), staged.source_sequence);
                     let evidence =
                         SlotPoisonEvidence::from_pair(existing.clone(), semantic_hash.clone());
+                    self.staged_command_identity.remove(&displaced_command_id);
+                    self.staged_source_sequence_identity
+                        .remove(&displaced_sequence_key);
                     self.slots.insert(ordinal.0, SlotState::Poisoned(evidence));
                     Ok(StageDisposition::Poisoned(SlotPoisonRecord {
                         profile_id: self.profile_id.clone(),
@@ -1516,12 +1535,19 @@ impl TimelineIngress {
         // All checks passed: promote atomically.
         let finalized_command_count = ordered.len() as u64;
         for (ordinal, envelope, semantic_hash) in ordered {
+            // The identity claims *move* from the in-flight registries to
+            // the permanent ones rather than being copied: the command is
+            // no longer staged, so leaving a duplicate entry behind would
+            // break the derived-index invariant on
+            // `staged_command_identity` and leave two authoritative
+            // records of one fact.
+            let sequence_key = (envelope.source_id.clone(), envelope.source_sequence);
+            self.staged_command_identity.remove(&envelope.command_id);
+            self.staged_source_sequence_identity.remove(&sequence_key);
             self.finalized_command_identity
                 .insert(envelope.command_id.clone(), semantic_hash.clone());
-            self.finalized_source_sequence_identity.insert(
-                (envelope.source_id.clone(), envelope.source_sequence),
-                semantic_hash.clone(),
-            );
+            self.finalized_source_sequence_identity
+                .insert(sequence_key, semantic_hash.clone());
             self.last_finalized_source_sequence
                 .insert(envelope.source_id.clone(), envelope.source_sequence);
             self.finalized_commands.push(FinalizedCommand {
@@ -1539,12 +1565,22 @@ impl TimelineIngress {
         // Promoted ordinals are exactly `[old_frontier, new_frontier)`, so
         // requiring `ord >= new_frontier` already drops every promoted
         // slot; only an unfinalized staged tail above the new frontier
-        // (within the new window) survives. If the new window cannot be
-        // computed at all, the ordinal space is exhausted and no slot can
-        // remain eligible, so retaining nothing is the correct behavior.
-        let new_window_end = self.window_end().map_or(u64::MAX, |o| o.0);
-        self.slots
-            .retain(|ord, _| *ord >= new_frontier && *ord <= new_window_end);
+        // survives.
+        //
+        // An upper bound is not needed, because no slot can ever exceed
+        // the *new* window end. Proof: `stage` only ever inserts at an
+        // ordinal within the window open at that moment, the window is
+        // `[frontier, frontier + width - 1]` for a fixed `width`, and the
+        // frontier is monotonically nondecreasing — so every slot is at or
+        // below the current window end at all times, and this promotion
+        // strictly *raises* the frontier, hence the window end. The old
+        // `*ord <= new_window_end` conjunct was therefore always true for
+        // every slot that survived the lower bound. (It was also
+        // ill-defined in the exhaustion case, where `window_end()` fails
+        // and no upper bound is computable at all; retaining the staged
+        // tail is correct there too, since nothing has been finalized past
+        // it.)
+        self.slots.retain(|ord, _| *ord >= new_frontier);
 
         Ok(FinalizationResult {
             profile_id: self.profile_id.clone(),
@@ -1913,7 +1949,7 @@ mod final_closure_registry_invariant {
 
         // Fence promotion moves ordinal 0's claims into the finalized
         // registries; the staged registries must not keep duplicates.
-        let promotion = fence(&ingress, "fence.0", 0, 0, &[e0.clone()]);
+        let promotion = fence(&ingress, "fence.0", 0, 0, std::slice::from_ref(&e0));
         ingress.submit_fence(&sequencer(), &promotion).unwrap();
         assert_derived_index(&ingress, "fence promotes ordinal 0");
         assert!(!ingress.staged_command_identity.contains_key(&e0.command_id));
@@ -1950,7 +1986,7 @@ mod final_closure_registry_invariant {
         stage(&mut ingress, &e0).unwrap();
         assert!(ingress.staged_command_identity.contains_key(&e0.command_id));
 
-        let promotion = fence(&ingress, "fence.0", 0, 0, &[e0.clone()]);
+        let promotion = fence(&ingress, "fence.0", 0, 0, std::slice::from_ref(&e0));
         ingress.submit_fence(&sequencer(), &promotion).unwrap();
 
         // (b) The staged registries no longer carry the promoted entries.

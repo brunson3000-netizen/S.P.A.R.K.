@@ -57,6 +57,7 @@
 //! through [`DrainOutcome::conflicted`] rather than executed.
 
 use crate::clock::LogicalTime;
+use crate::evidence::BoundedClaimSet;
 use crate::hash::{CanonicalEncoder, Digest};
 use crate::id::{CanonicalTag, DefinitionId, ProfileId};
 use crate::scope::ScopeId;
@@ -285,21 +286,19 @@ impl fmt::Display for WorkKeyConflict {
 
 /// The internal claim record behind a conflicted key: the smallest
 /// distinct hashes seen, capped for finiteness.
+///
+/// This is [`BoundedClaimSet`], the one implementation this kernel has of
+/// a bounded order-independent contested-claim set, instantiated at the
+/// scheduler's caps; [`crate::timeline::SlotPoisonEvidence`] is the same
+/// machinery at the timeline's. The two used to be line-for-line
+/// duplicates kept in step by doc comments, which is a convention
+/// standing where a type belongs.
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct ConflictEvidence {
-    tracked: BTreeSet<Digest>,
-    truncated: bool,
-}
+struct ConflictEvidence(BoundedClaimSet<MAX_CONFLICT_EVIDENCE, MAX_CONFLICT_TRACKED_CLAIMS>);
 
 impl ConflictEvidence {
     fn from_pair(a: Digest, b: Digest) -> Self {
-        let mut evidence = ConflictEvidence {
-            tracked: BTreeSet::new(),
-            truncated: false,
-        };
-        evidence.insert(a);
-        evidence.insert(b);
-        evidence
+        ConflictEvidence(BoundedClaimSet::from_pair(a, b))
     }
 
     /// Inserts one claim, retaining the numerically smallest hashes. This
@@ -307,81 +306,24 @@ impl ConflictEvidence {
     /// resulting state a function of the claim set rather than of arrival
     /// order.
     fn insert(&mut self, hash: Digest) {
-        if self.tracked.contains(&hash) {
-            return;
-        }
-        if self.tracked.len() < MAX_CONFLICT_TRACKED_CLAIMS {
-            self.tracked.insert(hash);
-            return;
-        }
-        // The tracking set is full. Keep the smallest hashes: if this
-        // claim is smaller than the current largest tracked hash it
-        // displaces it, otherwise it is itself dropped. Either way one
-        // distinct claim is now untracked.
-        self.truncated = true;
-        let largest = match self.tracked.iter().next_back() {
-            Some(largest) => largest.clone(),
-            // Unreachable: the branch above proved the set is at its
-            // non-zero cap. Reported rather than asserted so this
-            // function has no panic path.
-            None => return,
-        };
-        if hash < largest {
-            self.tracked.remove(&largest);
-            self.tracked.insert(hash);
-        }
-    }
-
-    fn retained(&self) -> BTreeSet<Digest> {
-        self.tracked
-            .iter()
-            .take(MAX_CONFLICT_EVIDENCE)
-            .cloned()
-            .collect()
-    }
-
-    fn omitted_distinct(&self) -> u64 {
-        self.tracked.len().saturating_sub(MAX_CONFLICT_EVIDENCE) as u64
+        self.0.insert(hash);
     }
 
     fn to_conflict(&self, key: &WorkKey) -> WorkKeyConflict {
         WorkKeyConflict {
             key: key.clone(),
-            competing_payload_hashes: self.retained(),
-            omitted_distinct: self.omitted_distinct(),
-            evidence_truncated: self.truncated,
+            competing_payload_hashes: self.0.retained(),
+            omitted_distinct: self.0.omitted_distinct(),
+            evidence_truncated: self.0.truncated(),
         }
     }
 
     /// Commits to **every** tracked claim, not to the exposed
-    /// [`MAX_CONFLICT_EVIDENCE`] projection.
-    ///
-    /// This distinction is the whole point of the type. `WorkKeyConflict`
-    /// is a *presentation* of the evidence — the smallest 16 hashes plus a
-    /// count and a flag — and hashing that presentation is what made two
-    /// genuinely different states collide: sets sharing their smallest 16
-    /// but differing in tracked claims 17..=256 produced one digest, and
-    /// then reacted differently to the same next claim, because those
-    /// hidden claims decide whether that claim is a duplicate or a new
-    /// one. Canonical state identity must commit to every retained value
-    /// that can change future canonical behavior, so it commits to
-    /// `tracked` in full.
-    ///
-    /// The exposed count and omitted count are deliberately *not* pushed:
-    /// both are total functions of `tracked`, so pushing them would add no
-    /// discrimination. `truncated` is pushed because it is independent
-    /// retained state — it records that claims beyond the cap were
-    /// forgotten, which no longer follows from `tracked` alone once the
-    /// set is back at or below the cap. Claims dropped past the cap are
-    /// genuinely not retained and are therefore genuinely collapsed: the
-    /// digest commits to what the scheduler remembers, never to what it
-    /// deliberately forgot.
+    /// [`MAX_CONFLICT_EVIDENCE`] projection — see
+    /// [`BoundedClaimSet::canonicalize`] for why that distinction is the
+    /// whole point of the type.
     fn canonicalize(&self, enc: &mut CanonicalEncoder) {
-        enc.push_u64(self.tracked.len() as u64);
-        for hash in &self.tracked {
-            enc.push_digest(hash);
-        }
-        enc.push_bool(self.truncated);
+        self.0.canonicalize(enc);
     }
 }
 

@@ -356,7 +356,7 @@ fn poison_evidence_insertion_is_unconditional_and_unscreened() {
     let colliding = env("cmd.elsewhere", 0, 2, "colliding");
 
     // Side 1: the empty ordinal screens it.
-    let mut screened = fed(4, &[staged_elsewhere.clone()]);
+    let mut screened = fed(4, std::slice::from_ref(&staged_elsewhere));
     let at_empty = stage(&mut screened, &env("cmd.elsewhere", 2, 3, "colliding-two"));
     assert_eq!(
         at_empty,
