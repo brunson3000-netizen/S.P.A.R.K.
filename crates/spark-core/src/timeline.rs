@@ -838,13 +838,38 @@ impl SlotPoisonEvidence {
         self.truncated
     }
 
+    /// Commits to **every** tracked competing hash, not to the exposed
+    /// [`MAX_POISON_EVIDENCE`] projection.
+    ///
+    /// [`competing_semantic_hashes`](Self::competing_semantic_hashes) is a
+    /// *presentation* of the evidence; canonicalizing that presentation is
+    /// what let two genuinely different poisoned slots share one ingress
+    /// state digest — sets agreeing on their smallest 16 hashes but
+    /// differing in tracked claims 17..=256 — and then react differently
+    /// to the same next claim, because those hidden claims decide whether
+    /// it is a duplicate or a new contestant. Canonical state identity
+    /// commits to every retained value that can change future canonical
+    /// behavior, so it commits to `competing` in full. This mirrors
+    /// [`crate::scheduler`]'s conflict evidence exactly, which is the
+    /// point: the two poisoned-state representations in the kernel must
+    /// not drift apart.
+    ///
+    /// The retained and omitted counts are total functions of `competing`
+    /// and add no discrimination, so they are not pushed. `truncated` is
+    /// pushed because it is independent retained state. Claims dropped
+    /// past [`MAX_POISON_TRACKED_CLAIMS`] are genuinely not retained and
+    /// stay collapsed: the digest commits to what the ingress remembers,
+    /// never to what it deliberately forgot.
+    ///
+    /// This changes only the *state* representation. Finalized history is
+    /// untouched — a poisoned slot can never be finalized, so no poison
+    /// evidence has ever entered
+    /// [`TimelineIngress::canonical_history_digest`].
     fn canonicalize(&self, enc: &mut CanonicalEncoder) {
-        let retained = self.competing_semantic_hashes();
-        enc.push_u64(retained.len() as u64);
-        for hash in &retained {
+        enc.push_u64(self.competing.len() as u64);
+        for hash in &self.competing {
             enc.push_digest(hash);
         }
-        enc.push_u64(self.omitted_distinct());
         enc.push_bool(self.truncated);
     }
 }
@@ -1643,7 +1668,11 @@ impl TimelineIngress {
     /// Staged slots are hashed as their semantic envelopes, so an empty
     /// scenario and a scenario with one successfully staged unfinalized
     /// command cannot collide — while remaining independent of the
-    /// admission credential under which that command was staged.
+    /// admission credential under which that command was staged. Poisoned
+    /// slots hash **every** competing hash they still track, not the
+    /// [`MAX_POISON_EVIDENCE`] presentation projection, so two slots
+    /// contested by different claim sets never collide even when their
+    /// exposed evidence is identical.
     pub fn canonical_state_digest(&self) -> Digest {
         let mut enc = CanonicalEncoder::new();
         enc.push_str("timeline_ingress_state");

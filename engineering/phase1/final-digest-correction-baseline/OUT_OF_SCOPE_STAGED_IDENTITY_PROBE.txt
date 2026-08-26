@@ -1,0 +1,93 @@
+S.P.A.R.K. Phase-1 Final Digest Correction - out-of-scope finding probe
+Recorded: 2026-08-26
+Branch: phase1-refoundation-v2
+
+FINDING: the timeline's staged command-identity and source-sequence-identity
+registries are retained internal state that changes future canonical behavior
+and does not participate in canonical state identity - the same *class* of
+defect this correction closes for conflict/poison evidence, but NOT fixable the
+same way, and NOT one of the two application points the brief authorizes.
+
+Only the branch that stages into an *empty* slot registers the envelope's
+command id and (source, sequence) pair. The envelope that poisons an already
+staged slot is never registered. So two ingresses fed the same two contesting
+envelopes in opposite orders reach an identical canonical state digest while
+holding different identity registries, and a later command that reuses one of
+those command ids is rejected by one ingress and accepted by the other.
+
+This is arrival-order sensitive, so adding the registries to the digest would
+NOT fix it - it would only make the divergence visible, and would break the
+arrival-order independence of poisoned-slot state that B-01/AT-F1 require. The
+correct repair is to make registration a function of the claim set rather than
+of which envelope arrived first, which is a change to B-01 admission semantics
+and therefore outside a bounded correction that is told not to redesign
+architecture and to apply its rule to conflict evidence and poison evidence.
+
+Reported for separate operator authorization. Not fixed in this pass.
+
+=== PROBE SOURCE ===
+#![allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+use spark_core::clock::LogicalTime;
+use spark_core::hash::hash_bytes;
+use spark_core::id::{CanonicalTag, CommandId, ProfileId, SourceId};
+use spark_core::timeline::{
+    CommandKind, Ordinal, SemanticCommandEnvelope, TimelineEpoch, TimelineIngress,
+};
+
+fn p() -> ProfileId { ProfileId::new("game-world").unwrap() }
+fn s() -> SourceId { SourceId::new("sequencer.primary").unwrap() }
+
+fn env(name: &str, ordinal: u64, seq: u64, payload: &str) -> SemanticCommandEnvelope {
+    SemanticCommandEnvelope {
+        command_id: CommandId::new(name).unwrap(),
+        profile_id: p(),
+        timeline_epoch: TimelineEpoch(1),
+        effective_time: LogicalTime(0),
+        source_id: s(),
+        source_sequence: seq,
+        input_ordinal: Ordinal(ordinal),
+        command_kind: CommandKind::new(CanonicalTag::new("test.command").unwrap()),
+        canonical_payload_hash: hash_bytes(payload.as_bytes()),
+    }
+}
+
+#[test]
+fn probe_staged_identity_registry_is_arrival_order_sensitive_hidden_state() {
+    let a = env("cmd.a", 0, 0, "a");
+    let b = env("cmd.b", 0, 0, "b");
+
+    let mut fwd = TimelineIngress::new(p(), TimelineEpoch(1), s(), 2).unwrap();
+    for e in [a.clone(), b.clone()] {
+        let t = fwd.current_admission_window().unwrap().ticket();
+        let _ = fwd.stage(&s(), &e.submit_with(t));
+    }
+    let mut rev = TimelineIngress::new(p(), TimelineEpoch(1), s(), 2).unwrap();
+    for e in [b.clone(), a.clone()] {
+        let t = rev.current_admission_window().unwrap().ticket();
+        let _ = rev.stage(&s(), &e.submit_with(t));
+    }
+
+    println!("state digests equal: {}", fwd.canonical_state_digest() == rev.canonical_state_digest());
+
+    // Reuse command id "cmd.a" at a different ordinal with different content.
+    let reuse = env("cmd.a", 1, 7, "different");
+    let tf = fwd.current_admission_window().unwrap().ticket();
+    let rf = fwd.stage(&s(), &reuse.clone().submit_with(tf));
+    let tr = rev.current_admission_window().unwrap().ticket();
+    let rr = rev.stage(&s(), &reuse.submit_with(tr));
+
+    println!("forward  : {rf:?}");
+    println!("reversed : {rr:?}");
+    println!("post digests equal: {}", fwd.canonical_state_digest() == rev.canonical_state_digest());
+}
+
+=== PROBE OUTPUT ===
+running 1 test
+state digests equal: true
+forward  : Err(CommandIdentityConflict { command_id: CommandId(cmd.a) })
+reversed : Ok(Acknowledged(StageAcknowledgement { profile_id: ProfileId(game-world), timeline_epoch: TimelineEpoch(1), input_ordinal: Ordinal(1), command_id: CommandId(cmd.a), semantic_envelope_hash: Digest(98582763a8626e57ce5c14639b3bf9aede36472c3dbc269e32ce267c7157641a), slot_state: NewlyStaged, acknowledgement_hash: Digest(c7a876d43c0b7eb5f53800c94a8e404689a0ce55c058ab75632c5d717a99b1b0) }))
+post digests equal: false
+test probe_staged_identity_registry_is_arrival_order_sensitive_hidden_state ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

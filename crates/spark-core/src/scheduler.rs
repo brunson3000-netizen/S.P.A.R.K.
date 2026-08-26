@@ -259,15 +259,6 @@ impl WorkKeyConflict {
     pub fn evidence_truncated(&self) -> bool {
         self.evidence_truncated
     }
-
-    fn canonicalize(&self, enc: &mut CanonicalEncoder) {
-        enc.push_u64(self.competing_payload_hashes.len() as u64);
-        for hash in &self.competing_payload_hashes {
-            enc.push_digest(hash);
-        }
-        enc.push_u64(self.omitted_distinct);
-        enc.push_bool(self.evidence_truncated);
-    }
 }
 
 impl fmt::Display for WorkKeyConflict {
@@ -360,6 +351,37 @@ impl ConflictEvidence {
             omitted_distinct: self.omitted_distinct(),
             evidence_truncated: self.truncated,
         }
+    }
+
+    /// Commits to **every** tracked claim, not to the exposed
+    /// [`MAX_CONFLICT_EVIDENCE`] projection.
+    ///
+    /// This distinction is the whole point of the type. `WorkKeyConflict`
+    /// is a *presentation* of the evidence — the smallest 16 hashes plus a
+    /// count and a flag — and hashing that presentation is what made two
+    /// genuinely different states collide: sets sharing their smallest 16
+    /// but differing in tracked claims 17..=256 produced one digest, and
+    /// then reacted differently to the same next claim, because those
+    /// hidden claims decide whether that claim is a duplicate or a new
+    /// one. Canonical state identity must commit to every retained value
+    /// that can change future canonical behavior, so it commits to
+    /// `tracked` in full.
+    ///
+    /// The exposed count and omitted count are deliberately *not* pushed:
+    /// both are total functions of `tracked`, so pushing them would add no
+    /// discrimination. `truncated` is pushed because it is independent
+    /// retained state — it records that claims beyond the cap were
+    /// forgotten, which no longer follows from `tracked` alone once the
+    /// set is back at or below the cap. Claims dropped past the cap are
+    /// genuinely not retained and are therefore genuinely collapsed: the
+    /// digest commits to what the scheduler remembers, never to what it
+    /// deliberately forgot.
+    fn canonicalize(&self, enc: &mut CanonicalEncoder) {
+        enc.push_u64(self.tracked.len() as u64);
+        for hash in &self.tracked {
+            enc.push_digest(hash);
+        }
+        enc.push_bool(self.truncated);
     }
 }
 
@@ -572,9 +594,11 @@ impl Scheduler {
     /// for canonical equality.
     ///
     /// Scheduled and conflicted slots carry distinct domain tags, and a
-    /// conflicted slot hashes its full sorted evidence set, omitted count,
-    /// and truncation flag — so two keys poisoned by *different* competing
-    /// payload sets never collide, while the same claim set in any arrival
+    /// conflicted slot hashes **every** claim hash it still tracks — all
+    /// of them, not the [`MAX_CONFLICT_EVIDENCE`] presentation projection
+    /// — plus its truncation flag. Two keys contested by *different*
+    /// claim sets therefore never collide even when their exposed
+    /// evidence is identical, while the same claim set in any arrival
     /// order always agrees.
     pub fn canonical_state_digest(&self) -> Digest {
         let mut enc = CanonicalEncoder::new();
@@ -590,7 +614,7 @@ impl Scheduler {
                 }
                 SlotState::Conflicted(evidence) => {
                     inner.push_str("slot.conflicted");
-                    evidence.to_conflict(key).canonicalize(&mut inner);
+                    evidence.canonicalize(&mut inner);
                 }
             }
             enc.push_block(&inner);
@@ -810,7 +834,11 @@ mod tests {
         ];
 
         let mut digests: BTreeSet<Digest> = BTreeSet::new();
-        let mut drains: BTreeSet<Digest> = BTreeSet::new();
+        // `WorkKeyConflict` is a presentation value rather than a
+        // canonical one — it deliberately has no `canonicalize` — so the
+        // reports are compared as values, which is strictly stronger than
+        // comparing a digest of them.
+        let mut drains: Vec<WorkKeyConflict> = Vec::new();
         for permutation in permutations {
             let mut sched = Scheduler::new();
             for index in permutation {
@@ -827,12 +855,12 @@ mod tests {
 
             let outcome = sched.drain_due(LogicalTime(5));
             assert!(outcome.due.is_empty());
-            let mut enc = CanonicalEncoder::new();
-            outcome.conflicted[0].canonicalize(&mut enc);
-            drains.insert(enc.finish());
+            drains.push(outcome.conflicted[0].clone());
         }
         assert_eq!(digests.len(), 1, "all six orders must converge");
-        assert_eq!(drains.len(), 1, "all six orders must drain identically");
+        for drain in &drains {
+            assert_eq!(drain, &drains[0], "all six orders must drain identically");
+        }
     }
 
     /// AT-B4: re-submitting a payload already present in the evidence set
