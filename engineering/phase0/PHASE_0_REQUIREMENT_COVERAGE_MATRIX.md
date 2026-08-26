@@ -2,8 +2,8 @@
 
 **Project:** S.P.A.R.K. — System for Propagating Affective Responses and Consequences  
 **Controlling source:** `CONTROLLING_BLUEPRINT_v0.2.md`  
-**Matrix version:** 0.2  
-**Status:** Phase 0 corrected writer pass / independent re-review required / implementation not started  
+**Matrix version:** 0.3  
+**Status:** Phase 0 second corrected writer pass / final independent re-review required / implementation not started  
 **Supersedes:** matrix v0.1  
 **Rule:** A requirement is not covered merely because a module exists. Coverage requires an implementation location, a falsifiable verification path, and—where architectural—a gate test or independent review.
 
@@ -78,7 +78,7 @@
 | R-056 | Explanations admit missing/truncated history and never invent provenance | §§25.3, 26.5 | Deterministic bounded refs + explicit complete/truncated/unknown coverage metadata | inspection/persistence | pruning/coverage fixture; summaries never treated as authoritative refs | 3 | FROZEN |
 | R-057 | Engine telemetry measures scheduler, propagation, behavior, growth, latency, divergence | §26.4 | internal metrics API, no ownership of core truth | inspection/service | telemetry schema + benchmark harness | 3–10 | FROZEN |
 | R-058 | Work scales with due rules/changed state/sparse edges/aggregates | §27.2 | event/due-driven scheduling + sparse stores | core | asymptotic/load benchmarks | 1–10 | FROZEN |
-| R-059 | Rich named actor remains bounded in traits/goals/memories/relationships | §27.3 | profile budgets + pruning | core/profile/persistence | growth load test | 4 | CALIBRATE |
+| R-059 | Rich named actor remains bounded in traits/goals/memories/relationships | §27.3 | profile budgets + pruning | core/profile/persistence | growth load test; final numeric caps tuned by profiling | 4 | PENDING_CALIBRATION |
 | R-060 | Deterministic replay across supported Windows/Linux/Android builds | §28 | Version/epoch/artifact/ordering/RNG constitution | core/persistence/testkit | Executable canonical fixture hash parity on Linux, Windows, and Android | 1–10 | FROZEN |
 | R-061 | Service security is local-only/deny-by-default/untrusted-input/no arbitrary code | §10 | capability/security budget + validation | service/protocol/profile | malformed/oversized/auth adversarial suite | 3 | FROZEN |
 | R-062 | Config mutation is explicitly scoped, validated, versioned, content-addressed, barrier-activated, and cannot alter invariants | §10.3 | Mutable-field allowlist + immutable authority identity + config revision hash | profile/protocol/service | permission/range/hash/epoch/mid-wave activation/authority-conversion tests | 3 | FROZEN |
@@ -100,8 +100,8 @@
 | R-078 | New primitive/authority weakening/determinism weakening/paid dependency/etc. requires escalation | §35.3 | mandatory escalation rule | engineering process | milestone review | all | FROZEN |
 | R-079 | Requirement coverage must be reported at every milestone | §§2.4, 37 | this matrix is living traceability record | repository docs | gate checklist diff | all | FROZEN |
 | R-080 | Performance claims/world-size ceilings wait for joint profiling | §§18.4, 27.4 | benchmark-before-freeze rule | `spark-testkit` benchmarks | measured scaling curves | 1–10 | FROZEN |
-| R-081 | Canonical state-changing/evaluation inputs carry effective time, logical source/sequence, unique total-order ordinal, idempotency ID, and payload hash | §§9.3, 18, 19, 28 | CanonicalCommandEnvelope | core/protocol | missing/ambiguous order reject; duplicate/id conflict tests | 1–3 | FROZEN |
-| R-082 | Transport batching, concurrent request arrival, worker interleaving, and session identity cannot alter an already accepted canonical command stream | §§8.2, 9, 19, 28 | Transport packaging separated from command barriers | service/embedded/testkit | one batch vs split vs concurrent service requests produce identical hashes | 1–3 | FROZEN |
+| R-081 | Canonical state-changing/evaluation inputs carry profile/timeline epoch, effective time, logical source/sequence, sequencer-issued unique total-order ordinal, idempotency ID, and payload hash | §§9.3, 18, 19, 28 | CanonicalCommandEnvelope + exclusive timeline sequencer | core/protocol | non-sequencer reject; duplicate/id conflict; epoch/ordinal validation | 1–3 | FROZEN |
+| R-082 | Transport batching, concurrent request arrival, reversed delivery, worker interleaving, and session identity cannot determine canonical command order/finality | §§8.2, 9, 19, 28 | Isolated staging + sequencer digest fence + contiguous finalization | service/embedded/testkit | `(n+1,n)` vs `(n,n+1)` and same-ordinal collision tests finalize/reject identically | 1–3 | FROZEN |
 | R-083 | Authority/write class is immutable for a persisted definition ID | §§7, 12, 28, 35.3 | Definition fingerprint; new ID + explicit migration + authority ADR + operator approval for authority change | profile/persistence | reload/alias/migration/restore authority-conversion attacks | 0–3 | FROZEN |
 | R-084 | Profile/config changes activate atomically only at declared canonical barriers | §§10.3, 12.4, 28 | Staged candidate + effective time/ordinal + checkpoint/rollback | profile/core/persistence | mid-wave hot tune/reload tests | 1–3 | FROZEN |
 | R-085 | Old-save continuation is bound to immutable content-addressed behavior artifacts, not human version strings alone | §§12.3, 26, 28 | Manifest/config hashes + definition fingerprints + artifact resolver | persistence/profile | reused-version/different-hash and missing-artifact tests | 1–3 | FROZEN |
@@ -121,6 +121,12 @@
 | R-099 | The role of domain/family taxonomies as profile vocabulary is frozen; the current exact baseline membership/counts remain editable profile data | §§6.1, 14, 34 | Grammar/vocabulary separation | profile/ADR governance | modify profile taxonomy within existing semantics without Rust primitive change | 6+ | FROZEN |
 | R-100 | Exact trigger rates, probabilities, volatility multipliers, and calibration values are tunable/calibration data | §§13.2, 19.2, 33, 34.2 | Validated config/profile values, not engine law | profiles/config | rate edits through allowed config preserve schema/determinism | 10 | PENDING_CALIBRATION |
 
+| R-101 | Each profile timeline epoch has exactly one exclusive authoritative sequencer for canonical state-changing/evaluation input order | §§9, 18, 19, 28 | TimelineSequencerAuthority integration contract; non-composable grant | core/protocol/service | non-sequencer staging/fence rejection; epoch handoff tests | 1–3 | FROZEN |
+| R-102 | Received commands remain non-canonical staged data until an authorized contiguous digest fence finalizes them | §§9, 19, 28 | bounded ordinal-keyed staging buffer + TimelineFence | core/protocol | reversed-delivery, gap, digest, collision, overflow tests | 1–3 | FROZEN |
+| R-103 | Same-ordinal conflicting payloads cannot be resolved by first arrival; the ordinal is poisoned and fence finalization rejects atomically | §§19, 28 | collision state in isolated staging; no partial canonical commit | core/testkit | opposite-arrival collision fixtures produce identical rejection/state hash | 1–2 | FROZEN |
+| R-104 | Finality fences form a contiguous hash-linked chain and cannot skip ordinals or rewrite finalized history | §§19, 28 | start/end frontier + previous-fence hash + ordered stream digest | core/persistence | gap, replayed fence, wrong previous hash, late conflict fixtures | 1–3 | FROZEN |
+| R-105 | Service and embedded forms share identical logical staging/fence/finality semantics; embedded convenience APIs are syntactic sugar only | §§8.2, 9, 28, 31 | shared canonical engine ingress API | core/service/embedded/testkit | explicit service versus convenience embedded reversed-delivery parity | 1–3 | FROZEN |
+
 ## Phase-0 Correction Result
 
 ### Primitive sufficiency
@@ -128,6 +134,8 @@
 No independent-review finding requires a new runtime primitive. The reviewer explicitly found the frozen primitive set sufficient; the correction therefore changes transaction, authority, persistence, trust-domain, boundedness, and traceability contracts around those primitives rather than expanding the causal grammar.
 
 ### Corrections incorporated
+
+- exclusive per-profile timeline sequencer ownership, isolated staging, digest-fence finality, contiguous ordinal frontier, collision poisoning, and sequencer epoch handoff;
 
 - canonical input envelope, total order, command barriers, idempotency, source sequence, batch-partition invariance;
 - immutable authority/write class for persisted definition identity;
@@ -148,7 +156,7 @@ No independent-review finding requires a new runtime primitive. The reviewer exp
 
 Phase 0 may advance to Phase 1 only when:
 
-1. the independent re-review confirms B-01, B-02, and B-03 are closed;
+1. the final independent re-review confirms B-01A is closed and B-02/B-03 remain closed;
 2. no new blocker demonstrates a missing foundational invariant;
 3. the corrected matrix has no unresolved FROZEN requirement without an implementation home and falsifiable verification path;
 4. Phase 1 remains limited to the Rust core skeleton authorized by blueprint v0.2.

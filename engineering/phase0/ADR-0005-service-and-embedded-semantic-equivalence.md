@@ -1,25 +1,32 @@
 # ADR-0005 — Service and Embedded Semantic Equivalence
 
-**Status:** REVISED AFTER INDEPENDENT PHASE-0 REVIEW  
+**Status:** REVISED AFTER SECOND INDEPENDENT PHASE-0 REVIEW  
 **Date:** 2026-08-25  
 **Decision class:** Foundational / FROZEN; transport implementation PROVISIONAL
 
 ## Context
 
-S.P.A.R.K. must work as a standalone service and as an embeddable runtime. Both forms expose equivalent logical semantics through one versioned integration contract.
+S.P.A.R.K. must work as a standalone service and as an embeddable runtime with equivalent logical semantics.
 
-The independent Phase-0 review found that the prior equivalence tuple omitted canonical input framing, capability/config context, and several transport/session influences that must be explicitly semantic or explicitly inert.
+The Phase-0 review process established that equivalence cannot begin only after an accepted stream mysteriously exists. Service and embedded forms must share the same logical construction of that stream: exclusive sequencer authority, staging, explicit digest fences, contiguous finalization, and canonical command barriers.
 
 ## Decision
 
 1. Canonical causal evaluation lives in reusable Rust engine crates, never in service transport.
-2. Service and embedded entry points normalize into the same `CanonicalCommandEnvelope` and query model.
-3. The public protocol is defined independently of internal Rust structs and host internals.
-4. Canonical validation/canonicalization occurs at the engine boundary in both modes.
-5. Embedded integrations may bypass serialization for performance but may not bypass canonical command validation, authority, ordering, profile, configuration, acknowledgement, or trust-domain rules.
-6. Capability negotiation and profile selection exist in both logical modes.
-7. Transport batches are packaging only and cannot create semantic barriers.
-8. Subscriber presence/backpressure, request arrival order, network connection identity, worker identity, and session nonce are causally inert unless a future ADR deliberately promotes a field into canonical input.
+2. Service and embedded entry points implement the same logical timeline-ingress contract from ADR-0003:
+   - one active sequencer per profile timeline epoch;
+   - canonical envelopes;
+   - isolated staging;
+   - collision/gap validation;
+   - sequencer-authored digest fence;
+   - contiguous atomic finalization;
+   - canonical command barriers.
+3. A request becoming merely **staged** is not canonical admission.
+4. Transport batching, arrival order, worker scheduling, subscriber pressure, connection identity, and session nonce cannot choose final command order.
+5. Embedded integrations may bypass serialization and may offer a stage+fence convenience call, but they may not bypass sequencer/finality semantics.
+6. Capability negotiation/profile selection exist in both logical modes.
+7. Read-only queries remain outside canonical timeline history unless a later ADR deliberately defines an authoritative query-side effect.
+8. Canonical validation/canonicalization occurs at the shared engine boundary.
 
 ## Equivalence criterion
 
@@ -32,47 +39,56 @@ starting stable snapshot hash
 exact profile manifest content hash
 exact configuration revision hash
 behavior epoch
-same effective trust-domain/capability set for the accepted operations
-same ordered CanonicalCommandEnvelope stream
+timeline epoch
+active sequencer identity/grant
+same effective trust-domain/capability context
+same set of staged canonical envelopes/payloads
+same valid ordered TimelineFence chain
 ```
 
-service and embedded paths must produce the same canonical state/output hashes.
+service and embedded forms must:
 
-The command stream includes effective logical time and canonical `input_ordinal`. A transport/session identifier is not a substitute for a logical `source_id`.
+- finalize the same canonical command set in the same ordinal order;
+- accept/reject the same conflicting/gapped/fenced inputs at the logical boundary;
+- produce the same canonical state/output hashes.
 
-## Acceptance boundary versus canonical equivalence
+Delivery order of the staged envelopes is explicitly **not** part of this tuple.
 
-Transport authentication, rate limiting, malformed-input rejection, and resource admission may determine whether a request becomes an accepted canonical command. Once the same command has been accepted in both modes, transport details cannot change its causal result.
+## Transport/admission distinction
 
-Tests must separately verify parity of security/validation decisions where both modes expose the relevant boundary.
+Transport authentication, coarse rate limiting, malformed framing, and resource availability may reject a request before it reaches logical staging.
+
+For conformance fixtures, once the same logically valid requests are presented inside declared resource limits, service and embedded paths must apply the same sequencer/staging/fence rules.
+
+A transport may not substitute "first request received" for timeline finality.
 
 ## Canonical representation
 
-- canonical integer/fixed-point values have one validated logical representation;
+- canonical integer/fixed-point values have one validated normalized logical representation;
 - semantically equivalent accepted wire representations normalize to the same canonical payload hash;
-- ambiguous numeric representations are rejected rather than allowed to create platform/serializer-dependent behavior.
+- ambiguous numeric values reject.
 
 ## Trust-domain routing
 
-Profile/output routing is part of the integration contract:
-
 - MCI output allowlists cannot route to real-work adapters;
-- cross-profile subscriptions/references are rejected unless explicitly defined as a safe bridge;
-- inspection dry-run/staging operates on isolated snapshots and has no production commit route.
+- cross-profile subscriptions/references reject unless explicitly defined as a safe bridge;
+- each profile has its own timeline epoch/sequencer authority;
+- inspection dry-run/staging uses isolated snapshots/config candidates and has no production timeline-finalization or commit route.
 
 ## Consequences
 
-- Performance-sensitive games are not forced through IPC.
-- Concurrent HTTP requests cannot become an accidental ordering protocol.
-- Session/subscriber behavior cannot perturb simulation truth.
-- Service and embedded fixtures compare complete semantic context rather than only seed/profile labels.
+- Concurrent HTTP delivery and embedded call ordering cannot diverge the canonical timeline.
+- The accepted/finalized stream itself is now part of the equivalence contract.
+- Multiple upstream data sources may exist, but one profile sequencer explicitly orders them before canonical finality.
 
-## Verification
+## Required verification
 
-- same canonical command stream through service and embedded paths with different transport batch partitioning;
-- concurrent service delivery versus deterministic embedded delivery;
-- different session IDs/subscriber counts/backpressure with identical accepted commands;
-- capability/config/manifest mismatch is detected rather than silently compared;
-- semantically equivalent numeric serialization normalizes equally; ambiguous values reject;
-- malformed-input/security decision parity where applicable;
-- MCI routing and inspection-isolation negative tests.
+1. same envelopes delivered `(n+1,n)` and `(n,n+1)` plus the same fence -> identical finalized stream/hashes;
+2. conflicting same-ordinal envelopes in opposite delivery orders -> same fence rejection/no partial finalization;
+3. gap/fence tests match across service and embedded forms;
+4. non-sequencer staging/fence attempts reject in both forms;
+5. different transport batch partitioning/session IDs/subscriber counts preserve the same logical result;
+6. embedded stage+fence convenience API matches explicit service staging/fencing;
+7. capability/config/manifest/timeline-epoch mismatch is detected;
+8. semantically equivalent numeric serialization normalizes equally; ambiguous values reject;
+9. MCI routing and inspection-isolation negative tests remain passing.

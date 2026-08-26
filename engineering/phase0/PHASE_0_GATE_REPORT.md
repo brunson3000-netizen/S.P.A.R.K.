@@ -1,38 +1,47 @@
-# S.P.A.R.K. Phase 0 Gate Report — Corrected Writer Pass v0.2
+# S.P.A.R.K. Phase 0 Gate Report — Second Corrected Writer Pass v0.3
 
 **Date:** 2026-08-25  
-**Current gate:** CORRECTION WRITER COMPLETE / INDEPENDENT RE-REVIEW REQUIRED  
-**Implementation authorization:** **NO**
+**Current gate:** FINAL CONTRACT CORRECTION COMPLETE / INDEPENDENT FINAL RE-REVIEW REQUIRED  
+**Phase 1 authorization:** **NO**
 
-## Completed
+## What remains from independent review
 
-- controlling blueprint preserved unchanged;
-- original independent Codex review preserved as evidence;
-- B-01 canonical command/transaction/barrier contract corrected;
-- B-02 immutable authority/write-class contract corrected;
-- B-03 content-addressed save/epoch/delayed-work contract corrected;
-- reviewer majors/minors incorporated where they affect Phase-0 contracts;
-- requirement matrix expanded from 80 to 100 explicit traceability rows;
-- performance/security budget revised to v0.2;
-- independent re-review prompt prepared.
+One Phase-1 blocker remained after the v0.2 correction:
 
-## Architecture result
+```text
+B-01A — canonical ordinal ownership and stream finality
+```
 
-The correction does not add a runtime primitive and does not alter the controlling causal grammar.
+B-02 and B-03 were independently closed. No majors remained.
 
-## Open gate
+## v0.3 frozen correction
 
-An independent reviewer must attempt to falsify the corrected contracts.
+- one exclusive timeline sequencer per profile timeline epoch;
+- upstream sources are ordered before becoming canonical S.P.A.R.K. input;
+- received envelopes are staged and causally inert;
+- canonical finality requires a sequencer-authored hash-linked digest fence;
+- fence ranges are contiguous from the current frontier;
+- gaps reject;
+- conflicting same-ordinal payloads poison the slot and prevent finalization;
+- first arrival cannot win;
+- finalized late exact duplicates are idempotent;
+- finalized late differing payloads reject;
+- sequencer handoff requires stable boundary + new timeline epoch;
+- embedded and service modes share the same logical staging/fence/finality contract.
 
-## Pass condition
+## Gate condition
 
-Phase 1 may be authorized only if the re-review:
+Authorize Phase 1 only if an independent final re-review reports:
 
-1. closes B-01, B-02, and B-03;
-2. finds no new foundational blocker;
-3. agrees the corrected artifacts remain within blueprint v0.2 scope.
+```text
+B-01A = CLOSED
+B-02 = CLOSED (no regression)
+B-03 = CLOSED (no regression)
+REMAINING BLOCKERS = NONE
+PHASE-1 AUTHORIZATION = YES
+```
 
-Until then:
+Until that result:
 
 ```text
 PHASE_1_AUTHORIZATION = NO

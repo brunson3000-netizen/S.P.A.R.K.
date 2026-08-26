@@ -1,13 +1,14 @@
 # S.P.A.R.K. Phase 0 Status
 
-- Phase 0 original writer pass: complete
-- Independent Codex review: complete (`REVISE_PHASE_0`)
-- Corrected writer pass v0.2: complete
-- Primitive sufficiency: independently supported; no new primitive required
-- B-01 canonical transaction contract: corrected, awaiting re-review
-- B-02 immutable authority/write-class contract: corrected, awaiting re-review
-- B-03 exact save/behavior-artifact contract: corrected, awaiting re-review
-- Reviewer majors/minors: documentation-level corrections incorporated
-- Independent re-review: **REQUIRED**
+- Original Phase 0 writer pass: complete
+- First independent Codex review: `REVISE_PHASE_0`
+- First bounded correction v0.2: complete
+- Independent Codex re-review: `REVISE_PHASE_0`
+- B-02 immutable authority/write class: **CLOSED**
+- B-03 exact save/behavior-artifact binding: **CLOSED**
+- Prior majors M-01 through M-08: **CLOSED / appropriately gated**
+- Remaining B-01A ordinal ownership/finality: **CORRECTED in v0.3, awaiting final re-review**
+- Residual matrix-status minor: **CORRECTED**
+- Frozen causal primitive set: sufficient; unchanged
 - Phase 1 authorization: **NO**
-- Rust Phase 1 implementation must not begin until re-review passes
+- Rust implementation must not begin until final independent re-review passes
