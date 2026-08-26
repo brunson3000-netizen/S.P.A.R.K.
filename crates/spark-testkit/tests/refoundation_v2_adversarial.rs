@@ -1065,6 +1065,49 @@ fn poisoned_slot_evidence_is_order_independent_and_discriminating() {
     assert_ne!(three, poisoned_state("cmd.a", "cmd.b"));
 }
 
+/// **AT-F1 (companion)** — poison evidence is *inspectable*, not merely
+/// hashed: a caller can see exactly which semantic identities contested a
+/// slot, and the reported set does not depend on arrival order.
+#[test]
+fn poisoned_slot_evidence_is_inspectable() {
+    let epoch = TimelineEpoch(1);
+    let hashes = |order: [&str; 3]| {
+        let mut ingress = TimelineIngress::new(profile(), epoch, sequencer(), 2).unwrap();
+        let mut expected = BTreeSet::new();
+        for command in order {
+            let ticket = ingress.current_admission_window().unwrap().ticket();
+            let envelope = SemanticCommandEnvelope {
+                command_id: CommandId::new(command).unwrap(),
+                profile_id: profile(),
+                timeline_epoch: epoch,
+                effective_time: LogicalTime(0),
+                source_id: sequencer(),
+                source_sequence: 0,
+                input_ordinal: Ordinal(0),
+                command_kind: CommandKind::new(CanonicalTag::new("test.command").unwrap()),
+                canonical_payload_hash: hash_bytes(command.as_bytes()),
+            };
+            expected.insert(envelope.semantic_hash());
+            let _ = ingress.stage(&sequencer(), &envelope.submit_with(ticket));
+        }
+        let evidence = ingress
+            .poison_evidence(Ordinal(0))
+            .expect("a contested slot is poisoned and carries evidence");
+        assert_eq!(evidence.omitted_distinct(), 0);
+        assert!(!evidence.evidence_truncated());
+        (evidence.competing_semantic_hashes(), expected)
+    };
+
+    let (reported, expected) = hashes(["cmd.a", "cmd.b", "cmd.c"]);
+    assert_eq!(reported, expected);
+    let (reversed, _) = hashes(["cmd.c", "cmd.b", "cmd.a"]);
+    assert_eq!(reported, reversed);
+
+    // A slot that was never contested has no evidence to report.
+    let clean = TimelineIngress::new(profile(), epoch, sequencer(), 2).unwrap();
+    assert!(clean.poison_evidence(Ordinal(0)).is_none());
+}
+
 /// **AT-F3** (Codex counterexample #11) — a per-field mutation sweep:
 /// `StageAcknowledgement::covers` must fail after mutating **any**
 /// semantic field of the envelope it was issued for.

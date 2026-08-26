@@ -38,6 +38,15 @@ impl std::error::Error for BoundedTextError {}
 /// Bounded, control-character-free human-readable text. Empty is
 /// permitted (an undescribed definition is legal); unbounded is not.
 ///
+/// # Unicode contract: deliberate byte distinction, no normalization
+///
+/// Like [`spark_core::value::CategoricalValue`], this type compares and
+/// hashes its **exact** scalar sequence: composed and decomposed
+/// spellings of the same glyph are different values. Normalization is
+/// deliberately absent from canonical hashing so that no Unicode table
+/// version can change what a canonical artifact hashes to across the
+/// declared support envelope.
+///
 /// The inner `String` is private, so an oversized value cannot be
 /// constructed:
 ///

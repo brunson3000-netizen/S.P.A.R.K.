@@ -1357,6 +1357,21 @@ impl TimelineIngress {
         }
     }
 
+    /// The order-independent competing-envelope evidence for a poisoned
+    /// ordinal, if that ordinal's slot is poisoned.
+    ///
+    /// Poisoning is a legitimate, deterministic outcome, and the
+    /// blueprint's inspection posture requires it to be *explainable*
+    /// rather than merely reported: a caller can see exactly which
+    /// semantic identities contested the slot, in a form that does not
+    /// depend on the order they arrived in.
+    pub fn poison_evidence(&self, ordinal: Ordinal) -> Option<&SlotPoisonEvidence> {
+        match self.slots.get(&ordinal.0) {
+            Some(SlotState::Poisoned(evidence)) => Some(evidence),
+            _ => None,
+        }
+    }
+
     /// Returns `true` if `ordinal` currently holds a positive `STAGED`
     /// acknowledgement (unpoisoned) — the protocol precondition a
     /// sequencer must confirm for every ordinal in a fence's range before

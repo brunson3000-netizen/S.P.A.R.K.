@@ -341,6 +341,22 @@ impl std::error::Error for CategoricalValueError {}
 /// at construction. The inner `String` is private, so an unbounded
 /// categorical value is not constructible.
 ///
+/// # Unicode contract: deliberate byte distinction, no normalization
+///
+/// A categorical value compares and hashes its **exact** scalar sequence.
+/// Composed and decomposed spellings of the same glyph (`café` as
+/// `U+00E9` versus `e` + `U+0301`) are therefore *different* canonical
+/// values with different hashes, even though Unicode considers them
+/// canonically equivalent.
+///
+/// This is a decision, not an oversight. Normalizing would drag Unicode
+/// tables into canonical hashing and create version-skew risk across the
+/// declared support envelope: two deployments on different Unicode
+/// versions could disagree about what a canonical value *is*, which is
+/// exactly the class of silent divergence the determinism constitution
+/// exists to prevent. Warning an author that two definitions differ only
+/// by normalization form is an authoring-tool concern for Phase 3+.
+///
 /// ```compile_fail
 /// use spark_core::value::CategoricalValue;
 /// let forged = CategoricalValue("x".repeat(100_000));

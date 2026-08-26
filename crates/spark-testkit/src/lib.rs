@@ -17,4 +17,5 @@
 
 #![forbid(unsafe_code)]
 
+pub mod composition;
 pub mod scenario;
