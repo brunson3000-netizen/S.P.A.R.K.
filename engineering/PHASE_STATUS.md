@@ -106,6 +106,23 @@ and Phase 3 remain unauthorized. The next permitted step is the bounded foundati
 logical-time/catch-up adjudication and a separated correction writer/reviewer cycle
 specified by the independent review. Phase 1 remains closed.
 
+#### V3-F01 foundational logical-time adjudication candidate (Gate C1 Fable pass, 2026-09-06)
+
+The bounded foundational adjudication required by the independent review now exists as a
+**candidate** and returned `FOUNDATIONAL_TIME_ADJUDICATION_CANDIDATE_READY`:
+
+- `engineering/phase2/SPARK_PHASE_2_V3_F01_FOUNDATIONAL_TIME_ADJUDICATION_CANDIDATE_2026-09-06.md`
+- `engineering/phase2/SPARK_PHASE_2_V3_F01_FOUNDATIONAL_TIME_ADJUDICATION_REPORT_2026-09-06.md`
+
+It chooses horizon expansion with per-barrier canonical time: one host catch-up call
+expands into one canonical logical-time barrier per resident due time inside the
+horizon, every scheduled cohort evaluates with `now` equal to its own `due_time`, and
+created work is eligible at its own barrier. **V3-F01 remains OPEN.** The adjudication is
+not accepted, not frozen, and not canonical; the controlling verdicts are unchanged. The
+next permitted step is a separated Opus V3-F01 correction writer pass under the
+candidate's downstream constraints, then independent Codex review. Phase-2
+implementation and Phase 3 remain unauthorized; Phase 1 remains closed.
+
 ## Phase 3
 
 **NOT AUTHORIZED.**
