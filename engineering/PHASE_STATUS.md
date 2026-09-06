@@ -93,6 +93,19 @@ the controlling independent verdict is still `PHASE_2_ARCHITECTURE_V3_REVISE`. P
 implementation remains unauthorized, Phase 3 remains unauthorized, Phase 1 remains
 closed, and no production Rust was written or changed by the writer pass.
 
+#### V3-F01 independent Gate C1 review (2026-09-06)
+
+Independent Codex review of writer commit
+`03daa82032cecc6ed84407b440bc9eab06cbcd69` returned
+`V3_F01_FOUNDATIONAL_REVIEW_REQUIRED`:
+
+`engineering/phase2/SPARK_PHASE_2_CODEX_V3_F01_INDEPENDENT_REVIEW_2026-09-06.md`
+
+The candidate is **not accepted or frozen**. V3-F01 remains open; Phase-2 implementation
+and Phase 3 remain unauthorized. The next permitted step is the bounded foundational
+logical-time/catch-up adjudication and a separated correction writer/reviewer cycle
+specified by the independent review. Phase 1 remains closed.
+
 ## Phase 3
 
 **NOT AUTHORIZED.**

@@ -1,0 +1,279 @@
+{
+  "accepted": true,
+  "caller": "codex",
+  "capability": "bundle",
+  "correlation_id": "spark-v3-f01-c1-review-20260906",
+  "detail": "",
+  "lifecycle": [
+    [
+      "received",
+      1788693459.28
+    ],
+    [
+      "validated",
+      1788693459.28
+    ],
+    [
+      "dispatched",
+      1788693459.28
+    ],
+    [
+      "completed",
+      1788694204.61
+    ]
+  ],
+  "mci_request_id": "mci-dev-e9c9b5ca9492",
+  "notice": "Non-authoritative development-compute evidence. Workers responded independently; the primary engineering agent owns synthesis and every implementation decision.",
+  "project": "spark",
+  "result": {
+    "attribution": {
+      "caller": "codex",
+      "correlation_id": "spark-v3-f01-c1-review-20260906",
+      "mci_request_id": "mci-dev-e9c9b5ca9492",
+      "project": "spark"
+    },
+    "bundle_id": "dcb-d92644ddfeda",
+    "created_at": "2026-09-06T06:17:39-0500",
+    "credential_source": "file:~/.local/share/swarm/secrets/nvidia/api-key",
+    "detail": "",
+    "duration_s": 745.33,
+    "jobs": [
+      {
+        "attribution": {
+          "caller": "codex",
+          "correlation_id": "spark-v3-f01-c1-review-20260906",
+          "mci_request_id": "mci-dev-e9c9b5ca9492",
+          "project": "spark"
+        },
+        "bundle_id": "dcb-d92644ddfeda",
+        "created_at": "2026-09-06T06:17:39-0500",
+        "credential_source": "file:~/.local/share/swarm/secrets/nvidia/api-key",
+        "detail": "",
+        "duration_s": 745.33,
+        "job_id": "dcj-2d5e06677ca2",
+        "max_parallel": 4,
+        "notice": "Non-authoritative development-compute evidence. Workers responded independently; the primary engineering agent owns synthesis and every implementation decision.",
+        "panel": false,
+        "selections": [
+          {
+            "detail": "",
+            "model": "moonshotai/kimi-k3",
+            "ok": true,
+            "role": "deep_reviewer",
+            "skipped": []
+          }
+        ],
+        "status": "failed",
+        "task_type": "code_review",
+        "workers": [
+          {
+            "ended_at": "2026-09-06T06:20:04-0500",
+            "error_class": "throttled",
+            "error_detail": "{\"error\": \"{\\\"status\\\":429,\\\"title\\\":\\\"Too Many Requests\\\"}\"}",
+            "finish_reason": null,
+            "http_status": 429,
+            "job_id": "dcj-2d5e06677ca2",
+            "latency_s": 5.56,
+            "model": "moonshotai/kimi-k3",
+            "ok": false,
+            "reasoning": null,
+            "response": "",
+            "role": "deep_reviewer",
+            "started_at": "2026-09-06T06:19:58-0500",
+            "task_type": "code_review",
+            "usage": null,
+            "worker_id": "dcj-2d5e06677ca2-w1"
+          }
+        ]
+      },
+      {
+        "attribution": {
+          "caller": "codex",
+          "correlation_id": "spark-v3-f01-c1-review-20260906",
+          "mci_request_id": "mci-dev-e9c9b5ca9492",
+          "project": "spark"
+        },
+        "bundle_id": "dcb-d92644ddfeda",
+        "created_at": "2026-09-06T06:17:39-0500",
+        "credential_source": "file:~/.local/share/swarm/secrets/nvidia/api-key",
+        "detail": "",
+        "duration_s": 745.33,
+        "job_id": "dcj-b9d0e24d536b",
+        "max_parallel": 4,
+        "notice": "Non-authoritative development-compute evidence. Workers responded independently; the primary engineering agent owns synthesis and every implementation decision.",
+        "panel": false,
+        "selections": [
+          {
+            "detail": "",
+            "model": "openai/gpt-oss-20b",
+            "ok": true,
+            "role": "judge",
+            "skipped": [
+              [
+                "nvidia/nemotron-3-ultra-550b-a55b",
+                "unhealthy-timeout"
+              ],
+              [
+                "moonshotai/kimi-k3",
+                "usable-but-already-seated"
+              ]
+            ]
+          }
+        ],
+        "status": "ok",
+        "task_type": "falsification",
+        "workers": [
+          {
+            "ended_at": "2026-09-06T06:24:23-0500",
+            "error_class": null,
+            "error_detail": "",
+            "finish_reason": "length",
+            "http_status": 200,
+            "job_id": "dcj-b9d0e24d536b",
+            "latency_s": 264.14,
+            "model": "openai/gpt-oss-20b",
+            "ok": true,
+            "reasoning": "We need to review the candidate architecture correction and the provided context. The task: \"Attempt to falsify the provided claim, design, or proof. Hunt for counterexamples, hostile interleavings, edge inputs, and hidden assumptions. Report each attack as: claim attacked, concrete scenario, expected-vs-actual outcome. State clearly which attacks succeed and which fail; a defensible 'the claim survives' is a valid result.\"\n\nWe need to examine the candidate architecture correction (SPARK_PHASE_2_V3_F01_ARCHITECTURE_CORRECTION_CANDIDATE_2026-09-06.md) and the acceptance test matrix, and see if we can find any counterexamples or attacks that falsify claims or proofs. We need to identify claims in the candidate that might be false or incomplete. The candidate claims to fix V3-F01: the inconsistency between v3's cohort-granular pre-wave digest requirement and the inherited whole-prefix drain_due. The candidate introduces a new extraction surface: DueCohortView, DueCohortSelection, Scheduler::take_due_cohort. It claims that this resolves the inconsistency and ensures partition independence. We need to see if there are any attacks that break the claims.\n\nWe need to consider the claims:\n\n- The scheduler's residency at the instant a cohort's pre-wave digest is captured is a function of the cohort's position in the global ascending (due_time, profile_id) order and nothing else. (Claim P)\n- The extraction surface is atomic and bounded, and the removal occurs before the pre-wave digest.\n- The extraction removes exactly the occupied slots whose due_time and profile_id match the selection, nothing else.\n- The extraction is deterministic and does not depend on state changes between view and extraction.\n- The extraction does not alter the scheduler state except for removing the cohort.\n- The extraction is safe: no panic, no failure except typed errors that leave state unchanged.\n- The extraction is bounded: it removes at most the number of slots in the cohort, which is bounded by the scheduler size.\n- The extraction does not allow arbitrary removal or cancellation.\n- The extraction does not leak any payload or conflict evidence.\n- The extraction does not allow reading the scheduler state beyond the view.\n\nWe need to find potential attacks: e.g., concurrency, reentrancy, race conditions, or hidden assumptions about ordering, about the scheduler's internal state, about the view's immutability, about the selection token's integrity, about the pre-wave digest capture order, about the possibility of a malicious caller forging a selection token, about the possibility of a malicious caller modifying the scheduler between view and extraction, about the possibility of a malicious caller calling extraction with a selection that doesn't match the view, about the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction, about the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction, about the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction, about the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction, about the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction, about the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction, about the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction, about the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction, about the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction, about the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction, about the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction.\n\nWe need to consider concurrency: The scheduler is not thread-safe? The code uses BTreeMap and no concurrency primitives. So concurrency is not considered. So we can ignore concurrency.\n\nWe need to consider the possibility of a malicious caller forging a selection token. The selection token contains due_time, profile_id, work_key_count, cohort_key_digest. The selection token is constructed by the view's selection method. The view is read-only and borrows the scheduler. The selection token is not public, no From or Deserialize. So forging is not possible. But a malicious caller could create a selection token manually by constructing a DueCohortSelection struct if it is public. But the struct is defined as:\n\n```\npub struct DueCohortSelection {\n    due_time: LogicalTime,\n    profile_id: ProfileId,\n    work_key_count: usize,\n    cohort_key_digest: Digest,\n}\n```\n\nBut the fields are private? The code snippet in the candidate shows \"private fields: due_time, profile_id, work_key_count, cohort_key_digest\". But the actual code for DueCohortSelection is not provided. We need to check if the struct is public or not. The candidate says \"Owned, small, and the only thing that can name a cohort to C-3. Private fields: due_time, profile_id, work_key_count, and cohort_key_digest. Not constructible from outside. No public constructor, no public field, no From/Deserialize/literal path.\" So we need to check if the actual code implements that. The code snippet for DueCohortSelection is not present in the provided scheduler.rs. So we need to assume it's implemented accordingly. But we need to check if there is any possibility of forging a selection token. If the struct is public and fields are public, forging is possible. But the candidate claims it's not. So we need to check if the actual code matches that. We don't have the actual code for DueCohortSelection. So we need to consider that as a potential attack: forging a selection token.\n\nBut the candidate claims that the selection token is not constructible from outside. But if the struct is public and fields are public, then forging is possible. But the candidate claims it's not. So we need to check if the code enforces that. We don't have the code. So we need to consider that as a potential attack: forging a selection token.\n\nAlso, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. The candidate claims that the view is borrowed immutably, so no modifications can happen between view and extraction. But the scheduler is borrowed mutably for extraction. But the view is borrowed immutably, so the scheduler cannot be mutated between view and extraction. But the caller could call extraction concurrently? But concurrency is not considered. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed mutably for extraction, so no other operations can happen concurrently. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious attacker forging a selection token. The candidate claims it's not possible. But we need to check if the struct is public. The code for DueCohortSelection is not present. So we need to consider that as a potential attack: forging a selection token. But we need to see if the code actually implements that. We don't have the code. So we need to consider that as a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction. So it's fine.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nWe need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen between view and extraction.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token. That might be a potential attack.\n\nWe also need to consider the possibility of a malicious caller calling extraction with a selection that matches but the scheduler changed due to other operations between view and extraction. But the scheduler is borrowed immutably for view, then borrowed mutably for extraction. So no modifications can happen.\n\nOk, we need to consider the possibility of a malicious caller forging a selection token",
+            "response": "",
+            "role": "judge",
+            "started_at": "2026-09-06T06:19:58-0500",
+            "task_type": "falsification",
+            "usage": {
+              "completion_tokens": 8192,
+              "prompt_tokens": 46631,
+              "prompt_tokens_details": null,
+              "total_tokens": 54823
+            },
+            "worker_id": "dcj-b9d0e24d536b-w1"
+          }
+        ]
+      },
+      {
+        "attribution": {
+          "caller": "codex",
+          "correlation_id": "spark-v3-f01-c1-review-20260906",
+          "mci_request_id": "mci-dev-e9c9b5ca9492",
+          "project": "spark"
+        },
+        "bundle_id": "dcb-d92644ddfeda",
+        "created_at": "2026-09-06T06:17:39-0500",
+        "credential_source": "file:~/.local/share/swarm/secrets/nvidia/api-key",
+        "detail": "",
+        "duration_s": 745.33,
+        "job_id": "dcj-19cb14e7efdf",
+        "max_parallel": 4,
+        "notice": "Non-authoritative development-compute evidence. Workers responded independently; the primary engineering agent owns synthesis and every implementation decision.",
+        "panel": false,
+        "selections": [
+          {
+            "detail": "no unused usable candidate; reusing a seated model",
+            "model": "moonshotai/kimi-k3",
+            "ok": true,
+            "role": "judge",
+            "skipped": [
+              [
+                "nvidia/nemotron-3-ultra-550b-a55b",
+                "unhealthy-timeout"
+              ],
+              [
+                "moonshotai/kimi-k3",
+                "usable-but-already-seated"
+              ],
+              [
+                "openai/gpt-oss-20b",
+                "usable-but-already-seated"
+              ]
+            ]
+          }
+        ],
+        "status": "failed",
+        "task_type": "architecture_review",
+        "workers": [
+          {
+            "ended_at": "2026-09-06T06:20:04-0500",
+            "error_class": "throttled",
+            "error_detail": "{\"error\": \"{\\\"status\\\":429,\\\"title\\\":\\\"Too Many Requests\\\"}\"}",
+            "finish_reason": null,
+            "http_status": 429,
+            "job_id": "dcj-19cb14e7efdf",
+            "latency_s": 5.56,
+            "model": "moonshotai/kimi-k3",
+            "ok": false,
+            "reasoning": null,
+            "response": "",
+            "role": "judge",
+            "started_at": "2026-09-06T06:19:58-0500",
+            "task_type": "architecture_review",
+            "usage": null,
+            "worker_id": "dcj-19cb14e7efdf-w1"
+          }
+        ]
+      },
+      {
+        "attribution": {
+          "caller": "codex",
+          "correlation_id": "spark-v3-f01-c1-review-20260906",
+          "mci_request_id": "mci-dev-e9c9b5ca9492",
+          "project": "spark"
+        },
+        "bundle_id": "dcb-d92644ddfeda",
+        "created_at": "2026-09-06T06:17:39-0500",
+        "credential_source": "file:~/.local/share/swarm/secrets/nvidia/api-key",
+        "detail": "",
+        "duration_s": 745.33,
+        "job_id": "dcj-ec714b72da5a",
+        "max_parallel": 4,
+        "notice": "Non-authoritative development-compute evidence. Workers responded independently; the primary engineering agent owns synthesis and every implementation decision.",
+        "panel": false,
+        "selections": [
+          {
+            "detail": "no unused usable candidate; reusing a seated model",
+            "model": "moonshotai/kimi-k3",
+            "ok": true,
+            "role": "test_generator",
+            "skipped": [
+              [
+                "moonshotai/kimi-k3",
+                "usable-but-already-seated"
+              ],
+              [
+                "minimaxai/minimax-m3",
+                "unhealthy-timeout"
+              ],
+              [
+                "openai/gpt-oss-20b",
+                "usable-but-already-seated"
+              ]
+            ]
+          }
+        ],
+        "status": "failed",
+        "task_type": "test_generation",
+        "workers": [
+          {
+            "ended_at": "2026-09-06T06:30:04-0500",
+            "error_class": "unhealthy-timeout",
+            "error_detail": "{\"error\": \"The read operation timed out\"}",
+            "finish_reason": null,
+            "http_status": null,
+            "job_id": "dcj-ec714b72da5a",
+            "latency_s": 605.62,
+            "model": "moonshotai/kimi-k3",
+            "ok": false,
+            "reasoning": null,
+            "response": "",
+            "role": "test_generator",
+            "started_at": "2026-09-06T06:19:58-0500",
+            "task_type": "test_generation",
+            "usage": null,
+            "worker_id": "dcj-ec714b72da5a-w1"
+          }
+        ]
+      }
+    ],
+    "max_parallel": 4,
+    "notice": "Non-authoritative development-compute evidence. Workers responded independently; the primary engineering agent owns synthesis and every implementation decision.",
+    "status": "partial"
+  },
+  "status": "partial"
+}
