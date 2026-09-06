@@ -79,6 +79,20 @@ This is an architecture correction only. It introduces no new causal primitive a
 
 **The correction is now the active convergence frontier. Phase-2 implementation writer remains unreleased until the correction is frozen and independently accepted.**
 
+#### V3-F01 correction candidate (Gate C1 writer pass, 2026-09-06)
+
+A bounded architecture-correction candidate and a corrected acceptance-test-oracle
+candidate now exist and **await independent Codex review**:
+
+- `engineering/phase2/SPARK_PHASE_2_V3_F01_ARCHITECTURE_CORRECTION_CANDIDATE_2026-09-06.md`
+- `engineering/phase2/SPARK_PHASE_2_ACCEPTANCE_TEST_MATRIX_V3_F01_CORRECTION_CANDIDATE_2026-09-06.md`
+- `engineering/phase2/SPARK_PHASE_2_V3_F01_ARCHITECTURE_WRITER_REPORT_2026-09-06.md`
+
+**V3-F01 remains OPEN.** The candidate is not accepted, not frozen, and not canonical;
+the controlling independent verdict is still `PHASE_2_ARCHITECTURE_V3_REVISE`. Phase-2
+implementation remains unauthorized, Phase 3 remains unauthorized, Phase 1 remains
+closed, and no production Rust was written or changed by the writer pass.
+
 ## Phase 3
 
 **NOT AUTHORIZED.**
