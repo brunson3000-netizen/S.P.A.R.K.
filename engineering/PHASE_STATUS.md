@@ -2,24 +2,21 @@
 
 **Updated:** 2026-09-06  
 **Branch:** `phase1-refoundation-v2`  
-**Status basis:** repository history through pre-update HEAD `d88806938eab74a6b468c12eef92cedeca32a666`
+**Status basis:** repository history through pre-convergence HEAD `5d45b29b1664018d44ca7f1130f703f95906969d`
 
 This file is a current-status summary. Detailed historical evidence remains in the phase reports, reviews, ADRs, Git history, and thread closeout records.
 
 ## Project operating state
 
-**PARKED BY OPERATOR.**
+**REACTIVATED BY OPERATOR FOR G.A.M.E. CONVERGENCE.**
 
-Normal S.P.A.R.K. production/Phase-2 engineering is on HOLD to conserve scarce premium-model capacity until shared NVIDIA NIM development resources are better able to absorb engineering load.
+The 2026-09-06 parking decision remains historical operating evidence, but the later Operator direction reactivates S.P.A.R.K. on the earliest safe path to a G.A.M.E.-usable S.P.A.R.K. device. Speed is a priority; deterministic correctness, writer/reviewer separation, project authority boundaries, and phase gates remain controlling.
 
-Parking does not change any frozen architecture or phase result. In particular, it does not resolve the remaining Phase-2 architecture blocker and does not authorize implementation.
+The active cross-project operating record is:
 
-While parked, S.P.A.R.K. work may proceed only when it independently advances the shared NIM sub-project goals of:
+`engineering/SPARK_GAME_CONVERGENCE_PROTOCOL_V1.md`
 
-1. improving reusable tools for practical NIM engineering utilization; and/or
-2. developing evidence-backed architecture for amplifying heterogeneous NIM work in ways reusable by S.W.A.R.M. and the MCI.
-
-Such work must not be used as a pretext to continue ordinary S.P.A.R.K. Phase-2 implementation. S.P.A.R.K. may serve as a real workload laboratory for ontology/semantic tooling, invariant-to-adversarial-test tooling, complexity pruning, engineering challenge corpora, independent panel architecture, and marginal-worker-value measurement.
+Reactivation does not resolve V3-F01, authorize Phase-2 implementation, or authorize Phase 3. The immediate active action is the bounded V3-F01 architecture correction and independent acceptance/freeze. G.A.M.E. integration requirements and test fixtures may be prepared without prematurely implementing Phase-3 product protocol/service code.
 
 ## Phase 0
 
@@ -52,7 +49,7 @@ No Phase-1 semantic identity, encoding, conflict, authority, or determinism inva
 
 ## Phase 2
 
-**ARCHITECTURE V3 REQUIRES ONE BOUNDED REVISION. IMPLEMENTATION NOT AUTHORIZED. PROJECT PARKED.**
+**ARCHITECTURE V3 REQUIRES ONE BOUNDED REVISION. IMPLEMENTATION NOT AUTHORIZED. CONVERGENCE ACTIVE.**
 
 Phase-2 architecture went through the original freeze, Codex adversarial review, v2 correction, Codex v2 rereview, v3 correction, provenance correction, and final bounded Codex confirmation.
 
@@ -80,7 +77,7 @@ The independent review identifies the smallest safe bounded correction:
 
 This is an architecture correction only. It introduces no new causal primitive and does not authorize production Rust.
 
-**The correction is not active while the project is parked. Phase-2 implementation writer remains unreleased.**
+**The correction is now the active convergence frontier. Phase-2 implementation writer remains unreleased until the correction is frozen and independently accepted.**
 
 ## Phase 3
 
