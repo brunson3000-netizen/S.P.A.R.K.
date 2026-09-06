@@ -167,6 +167,24 @@ contains false budget, post-extraction digest, replay, and rejection assertions.
 remains open; Phase-2 implementation and Phase 3 remain unauthorized; Phase 1 remains
 closed. No Operator acceptance or G.A.M.E. change is claimed.
 
+#### V3-F01 command-time adjudication candidate (Gate C1 Fable pass, 2026-09-06)
+
+The focused command-time adjudication required by the V2 review now exists as a
+**candidate** and returned `COMMAND_TIME_ADJUDICATION_CANDIDATE_READY`:
+
+- `engineering/phase2/SPARK_PHASE_2_V3_F01_COMMAND_TIME_ADJUDICATION_CANDIDATE_2026-09-06.md`
+- `engineering/phase2/SPARK_PHASE_2_V3_F01_COMMAND_TIME_ADJUDICATION_REPORT_2026-09-06.md`
+
+It withdraws the V2 frontier `Φ`, SH-1/SH-2, and R-8; adopts unified time-ordered
+processing in which finalized commands are pending inputs consumed by the catch-up call
+after every earlier-time scheduled slice; gates command admission on the host horizon
+and the finalized time ceiling at staging and fence, non-canonically and retryably; and
+defines exactly two added state items, the horizon frontier and a per-timeline execution
+cursor. Three Operator amendments (engine-digest inclusion of both, and an ADR-0003
+admission addendum) are **proposed, not enacted**. **V3-F01 remains OPEN.** Nothing is
+accepted, frozen, or canonical; controlling verdicts are unchanged; Phase-2
+implementation and Phase 3 remain unauthorized; Phase 1 remains closed.
+
 ## Phase 3
 
 **NOT AUTHORIZED.**
