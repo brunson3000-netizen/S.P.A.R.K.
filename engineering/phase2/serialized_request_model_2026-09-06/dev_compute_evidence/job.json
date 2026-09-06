@@ -1,0 +1,76 @@
+{
+  "attribution": {
+    "caller": "fable",
+    "mci_request_id": "mci-dev-277d0d84ec7e",
+    "project": "spark"
+  },
+  "bundle_id": "",
+  "cancelled": false,
+  "created_at": "2026-09-06T08:51:40-0500",
+  "credential_source": "file:~/.local/share/swarm/secrets/nvidia/api-key",
+  "detail": "",
+  "duration_s": 55.12,
+  "failed_or_timed_out_workers": [],
+  "job_id": "dcj-043a36fc012f",
+  "late_response_disposition": "NONE",
+  "max_parallel": 1,
+  "minimum_useful_responses": 1,
+  "minimum_useful_responses_met": true,
+  "notice": "Non-authoritative development-compute evidence. Workers responded independently; the primary engineering agent owns synthesis and every implementation decision.",
+  "panel": false,
+  "panel_state": "COMPLETE",
+  "requested_worker_count": 1,
+  "selections": [
+    {
+      "detail": "",
+      "model": "openai/gpt-oss-20b",
+      "ok": true,
+      "role": "fast_reviewer",
+      "skipped": [
+        [
+          "nvidia/nemotron-3-nano-30b-a3b",
+          "end-of-life"
+        ]
+      ]
+    }
+  ],
+  "status": "ok",
+  "successful_count": 1,
+  "task_type": "falsification",
+  "workers": [
+    {
+      "attempt_count": 1,
+      "cleanup_status": "CLEAN",
+      "completion_time": "2026-09-06T08:52:35-0500",
+      "deadline": "2026-09-06T08:54:13-0500",
+      "ended_at": "2026-09-06T08:52:35-0500",
+      "error_class": null,
+      "error_detail": "",
+      "failure_reason": "",
+      "finish_reason": "stop",
+      "http_status": 200,
+      "job_id": "dcj-043a36fc012f",
+      "latency_s": 52.53,
+      "mission_id": "mci-dev-277d0d84ec7e",
+      "model": "openai/gpt-oss-20b",
+      "ok": true,
+      "panel_id": "dcj-043a36fc012f",
+      "partial_output_preserved": true,
+      "provider": "dev-compute.nvidia-nim",
+      "reasoning": "We need to attempt falsification of claims (a)-(d). Provide attacks or explain why they fail. We need to be terse. Provide each attack: claim attacked, scenario, expected vs actual. If cannot, state assumptions needed and failed.\n\nWe need to consider the architecture: bounded FIFO mailbox, one consumer, one active request until completion, budget exhaustion pauses, completion defined as all scheduled work with due_time <= horizon consumed, plus for command staging+finalizing+executing atomically at end. Scalar F = horizon of last completed request. Request may start only if horizon >= F. Per-cohort engine digest excludes F; stable-boundary digest includes F. No finalized-but-unexecuted command state exists.\n\nWe need to try to construct counterexamples for:\n\n(a) pacing budget changes canonical results or request order.\n\n(b) a command evaluates at a time earlier than a committed cell timestamp.\n\n(c) restart from (stores, F) with the head request re-presented diverges from an uninterrupted run.\n\n(d) two engines with equal stable-boundary digests respond differently to the same next request.\n\nWe need to give exact step sequences. If cannot, say what assumption each attack needed and failed on.\n\nWe need to be terse.\n\nWe need to analyze each claim.\n\n(a) Pacing budget changes canonical results or request order. The architecture says that pacing only changes number of calls needed, not canonical results or order. We need to see if there is a scenario where budget exhaustion leads to different canonical results. Since the engine processes scheduled slices with due_time <= horizon in ascending order, and budget exhaustion only pauses, not discards work. So canonical results should be same. But maybe if budget exhaustion occurs during a command's finalization, could that affect? But finalization is atomic at end of request, so no. So attack fails.\n\n(b) Command evaluates at a time earlier than a committed cell timestamp. The rule is that request may start only if horizon >= F. So if a command has horizon earlier than F, it will be rejected. So cannot evaluate earlier. Attack fails.\n\nBut maybe if F is not updated correctly? But assumption: F updated only at completion. So if a command is paused and later resumed, F unchanged. But still horizon >= F. So cannot evaluate earlier.\n\n(c) Restart from (stores, F) with the head request re-presented diverges from uninterrupted run. The claim: restart from stores and F, re-present head, should produce same canonical results. Attack: maybe if the head request had been paused and had partially executed work that is not in stores? But partial work is scheduled slices with due_time <= horizon that have been consumed. But if paused, some work may have been consumed but not yet completed? Wait: if paused, the request is not completed, so some work may have been consumed but not all. But those consumed slices are part of the engine state? The engine state includes stores and F. But the consumed slices are not stored? Actually scheduled slices are part of the engine's schedule; consuming them removes them from schedule. So if paused, some slices have been removed from schedule and executed, but not yet completed. But the engine state at pause includes those changes. So restart from stores and F should include those changes. So canonical results should match. Attack fails.\n\nBut maybe if the head request had not been fully processed, and some scheduled slices were not yet executed but were removed from schedule due to budget exhaustion? Wait: budget exhaustion stops processing, but slices with due_time <= horizon that were not yet processed remain in schedule. So they are still present. So restart should process them again. So same.\n\n(d) Two engines with equal stable-boundary digests respond differently to same next request. The stable-boundary digest includes F. So if two engines have equal digest, they have same stores and same F. So they should respond identically. Attack fails.\n\nBut maybe if the digest excludes some state that matters? But stable-boundary digest includes F. So equal digest implies same F. So same.\n\nThus all attacks fail. We need to explain assumptions.\n\nWe need to produce final answer: each claim attacked, scenario, expected vs actual, success/failure, assumptions.\n\nLet's craft concise answer.",
+      "required_or_supplementary": "supplementary",
+      "response": "**Attack\u202f(a) \u2013 \u201cPacing budget changes canonical results or request order\u201d**  \n*Scenario*:  \n1. `Advance{T=10}` is accepted.  \n2. Engine processes slices with due_time\u202f\u2264\u202f10 until budget\u202fB=1 is exhausted after the first slice.  \n3. Consumer retries `process(Advance{10})` (budget\u202fB=2).  \n4. Engine continues and completes the request.  \n*Expected*: Canonical state after completion is the same as if the request had run with a single call.  \n*Actual*: The same slices are executed in the same order; only the number of calls differs.  \n*Result*: **Fails** \u2013 pacing only changes call count, not canonical results or order.  \n*Assumption*: The engine consumes slices deterministically in ascending `(due_time, profile_id)` order and does not alter any state when pausing.\n\n---\n\n**Attack\u202f(b) \u2013 \u201cA command evaluates at a time earlier than a committed cell timestamp\u201d**  \n*Scenario*:  \n1. `Advance{T=20}` completes, setting `F=20`.  \n2. Producer offers `Command{effective_time=15}`.  \n3. Engine checks `h=15 < F=20` \u2192 rejects.  \n*Expected*: Command is rejected, never evaluated.  \n*Actual*: Command is rejected; no evaluation occurs.  \n*Result*: **Fails** \u2013 the `h\u202f\u2265\u202fF` rule prevents any earlier evaluation.  \n*Assumption*: `F` is updated only at request completion and never decremented.\n\n---\n\n**Attack\u202f(c) \u2013 \u201cRestart from (stores,\u202fF) with the head request re\u2011presented diverges from an uninterrupted run\u201d**  \n*Scenario*:  \n1. `Advance{T=10}` is accepted.  \n2. Engine processes two slices (due_time\u202f\u2264\u202f10) and then pauses due to budget exhaustion.  \n3. Stores + `F=0` are snapshotted.  \n4. Engine is rebuilt from snapshot; consumer re\u2011presents the same `Advance{10}`.  \n5. Engine resumes and processes the remaining slice, then completes.  \n*Expected*: Final canonical state equals that of the uninterrupted run.  \n*Actual*: The same two slices are executed in the same order; the final state is identical.  \n*Result*: **Fails** \u2013 the snapshot includes all state changes made before the pause, so restart reproduces the same trace.  \n*Assumption*: Partial work that has been executed before the pause is reflected in the engine state; only the request argument is transient.\n\n---\n\n**Attack\u202f(d) \u2013 \u201cTwo engines with equal stable\u2011boundary digests respond differently to the same next request\u201d**  \n*Scenario*:  \n1. Engine\u202fA and Engine\u202fB both finish a request with horizon `h=30`, so `F=30`.  \n2. Their stable\u2011boundary digests are `H(stable_boundary_v1 \u2016 engine_state_digest \u2016 30)` and are equal.  \n3. Both receive `Command{effective_time=35}`.  \n4. Each engine checks `h=35\u202f\u2265\u202fF=30` \u2192 accepts and executes.  \n*Expected*: Both engines produce the same canonical result.  \n*Actual*: Both execute identically; no divergence.  \n*Result*: **Fails** \u2013 equal digests guarantee identical stores and `F`, so the next request is handled the same.  \n*Assumption*: The stable\u2011boundary digest includes `F` and all store contents; no hidden state influences request handling.\n\n---\n\n### Summary\nAll four attempted falsifications fail under the stated assumptions of the addendum.  \nThe only assumptions that were critical were:\n\n1. **Deterministic slice ordering** and **no state change on pause**.  \n2. **`F` updated only at request completion** and never decremented.  \n3. **Snapshot captures all state changes** made before pause.  \n4. **Stable\u2011boundary digest includes `F` and all store contents**.  \n\nWith these assumptions intact, the addendum\u2019s claims hold.",
+      "role": "fast_reviewer",
+      "started_at": "2026-09-06T08:51:43-0500",
+      "task_type": "falsification",
+      "terminal_status": "COMPLETED",
+      "usage": {
+        "completion_tokens": 1719,
+        "prompt_tokens": 4087,
+        "prompt_tokens_details": null,
+        "total_tokens": 5806
+      },
+      "worker_id": "dcj-043a36fc012f-w1"
+    }
+  ]
+}

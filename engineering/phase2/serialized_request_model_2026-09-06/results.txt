@@ -1,0 +1,12 @@
+[PASS] S1 second request waits while first paused — calls=[('Advance(20)', 'PAUSED'), ('Advance(20)', 'PAUSED'), ('Advance(20)', 'COMPLETED'), ('Command@21(c1)', 'COMPLETED')]
+[PASS] S2 budgets 1 and 2 give identical canonical results — budget1 calls=4 budget2 calls=3; cohort order=[('scheduled', 10), ('scheduled', 15), ('scheduled', 20), ('command', 21)]
+[PASS] S2 pacing diagnostics differ (noncanonical, expected)
+[PASS] S3 one catch-up == stepwise catch-ups (per-cohort digests, final state, F) — created D@15 consumed inside horizon in both; prewave digests exclude F
+[PASS] S3b stable-boundary digests agree at equal completed horizon
+[PASS] S3c stable-boundary digests differ at unequal completed horizons (F committed) — Advance(20) vs Advance(10) completion
+[PASS] S3d F excluded from per-cohort digest keeps equality; F included would break it — cohorts where F differs at capture (t, F_large, F_stepwise)=[(15, 0, 12), (20, 0, 17)]
+[PASS] S4 past-dated command rejected non-canonically; equal-time and later accepted — timeline=[(1, 20, 'ok_equal'), (2, 25, 'ok')]
+[PASS] S4b review §5.3: equal digests -> identical decision on Command@15; no extra state needed — the deciding value F=100 is equal and committed
+[PASS] S5 restart from (stores, F) with head re-presented == uninterrupted run — no active-request state inside the engine; the mailbox owns the head
+[PASS] S6 no backwards decay evaluation in any scenario — assert elapsed >= 0 held in every cohort
+ALL PASS

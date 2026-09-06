@@ -1,0 +1,38 @@
+{
+  "caller": "fable",
+  "capability": "falsification",
+  "detail": "",
+  "job_id": "dcj-043a36fc012f",
+  "jobs": [
+    {
+      "job_id": "dcj-043a36fc012f",
+      "status": "ok",
+      "task_type": "falsification"
+    }
+  ],
+  "late_response_disposition": "NONE",
+  "mci_request_id": "mci-dev-277d0d84ec7e",
+  "minimum_useful_responses_met": true,
+  "notice": "Non-authoritative development-compute evidence. Workers responded independently; the primary engineering agent owns synthesis and every implementation decision.",
+  "out_dir": "/tmp/claude-1000/-home-chromikey-Projects-SPARK/2d780a49-466c-4557-8baf-007fde674b2e/scratchpad/dc/out",
+  "panel_state": "COMPLETE",
+  "project": "spark",
+  "requested_worker_count": 1,
+  "status": "ok",
+  "successful_count": 1,
+  "task_type": "falsification",
+  "workers": [
+    {
+      "attempt_count": 1,
+      "cleanup_status": "CLEAN",
+      "error_class": null,
+      "latency_s": 52.53,
+      "model": "openai/gpt-oss-20b",
+      "ok": true,
+      "role": "fast_reviewer",
+      "task_type": "falsification",
+      "terminal_status": "COMPLETED",
+      "worker_id": "dcj-043a36fc012f-w1"
+    }
+  ]
+}

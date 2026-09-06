@@ -1,0 +1,157 @@
+{
+ "S4_log": [
+  [
+   "Advance(20)",
+   "PAUSED"
+  ],
+  [
+   "Advance(20)",
+   "COMPLETED"
+  ],
+  [
+   "Command@15(late)",
+   "REJECTED_HORIZON_BEHIND_FRONTIER"
+  ],
+  [
+   "Command@20(ok_equal)",
+   "COMPLETED"
+  ],
+  [
+   "Command@25(ok)",
+   "COMPLETED"
+  ]
+ ],
+ "boundary_large": [
+  {
+   "F": 20,
+   "completed": "Advance(20)",
+   "sbd": "5563af610d484d40"
+  },
+  {
+   "F": 21,
+   "completed": "Command@21(c1)",
+   "sbd": "77c826cf5385ccaa"
+  }
+ ],
+ "boundary_stepwise": [
+  {
+   "F": 10,
+   "completed": "Advance(10)",
+   "sbd": "b76c367cdfd93226"
+  },
+  {
+   "F": 12,
+   "completed": "Advance(12)",
+   "sbd": "b0dff80b42c089b3"
+  },
+  {
+   "F": 15,
+   "completed": "Advance(15)",
+   "sbd": "afd9131ba80b28e2"
+  },
+  {
+   "F": 17,
+   "completed": "Advance(17)",
+   "sbd": "0ddbc78c57481337"
+  },
+  {
+   "F": 20,
+   "completed": "Advance(20)",
+   "sbd": "5563af610d484d40"
+  },
+  {
+   "F": 21,
+   "completed": "Command@21(c1)",
+   "sbd": "77c826cf5385ccaa"
+  }
+ ],
+ "checks": {
+  "S1 second request waits while first paused": "PASS \u2014 calls=[('Advance(20)', 'PAUSED'), ('Advance(20)', 'PAUSED'), ('Advance(20)', 'COMPLETED'), ('Command@21(c1)', 'COMPLETED')]",
+  "S2 budgets 1 and 2 give identical canonical results": "PASS \u2014 budget1 calls=4 budget2 calls=3; cohort order=[('scheduled', 10), ('scheduled', 15), ('scheduled', 20), ('command', 21)]",
+  "S2 pacing diagnostics differ (noncanonical, expected)": "PASS",
+  "S3 one catch-up == stepwise catch-ups (per-cohort digests, final state, F)": "PASS \u2014 created D@15 consumed inside horizon in both; prewave digests exclude F",
+  "S3b stable-boundary digests agree at equal completed horizon": "PASS",
+  "S3c stable-boundary digests differ at unequal completed horizons (F committed)": "PASS \u2014 Advance(20) vs Advance(10) completion",
+  "S3d F excluded from per-cohort digest keeps equality; F included would break it": "PASS \u2014 cohorts where F differs at capture (t, F_large, F_stepwise)=[(15, 0, 12), (20, 0, 17)]",
+  "S4 past-dated command rejected non-canonically; equal-time and later accepted": "PASS \u2014 timeline=[(1, 20, 'ok_equal'), (2, 25, 'ok')]",
+  "S4b review \u00a75.3: equal digests -> identical decision on Command@15; no extra state needed": "PASS \u2014 the deciding value F=100 is equal and committed",
+  "S5 restart from (stores, F) with head re-presented == uninterrupted run": "PASS \u2014 no active-request state inside the engine; the mailbox owns the head",
+  "S6 no backwards decay evaluation in any scenario": "PASS \u2014 assert elapsed >= 0 held in every cohort"
+ },
+ "diag_budget1": [
+  {
+   "call": "Advance(20)",
+   "deferred_at": 15
+  },
+  {
+   "call": "Advance(20)",
+   "deferred_at": 20
+  }
+ ],
+ "diag_budget2": [
+  {
+   "call": "Advance(20)",
+   "deferred_at": 20
+  }
+ ],
+ "trace_budget1": [
+  {
+   "batch": "39dd18a286f5a14c",
+   "kind": "scheduled",
+   "p": "P",
+   "prewave": "39796db8529a45cb",
+   "t": 10
+  },
+  {
+   "batch": "126f8f46f1ae0d69",
+   "kind": "scheduled",
+   "p": "P",
+   "prewave": "ed3b4ed65cdf2f35",
+   "t": 15
+  },
+  {
+   "batch": "6679b13cf84041e3",
+   "kind": "scheduled",
+   "p": "P",
+   "prewave": "637183966fd4a801",
+   "t": 20
+  },
+  {
+   "batch": "2e639ebec8b873bf",
+   "kind": "command",
+   "p": "P",
+   "prewave": "175b1eeacdf2d995",
+   "t": 21
+  }
+ ],
+ "trace_budget2": [
+  {
+   "batch": "39dd18a286f5a14c",
+   "kind": "scheduled",
+   "p": "P",
+   "prewave": "39796db8529a45cb",
+   "t": 10
+  },
+  {
+   "batch": "126f8f46f1ae0d69",
+   "kind": "scheduled",
+   "p": "P",
+   "prewave": "ed3b4ed65cdf2f35",
+   "t": 15
+  },
+  {
+   "batch": "6679b13cf84041e3",
+   "kind": "scheduled",
+   "p": "P",
+   "prewave": "637183966fd4a801",
+   "t": 20
+  },
+  {
+   "batch": "2e639ebec8b873bf",
+   "kind": "command",
+   "p": "P",
+   "prewave": "175b1eeacdf2d995",
+   "t": 21
+  }
+ ]
+}

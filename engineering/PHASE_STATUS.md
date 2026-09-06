@@ -185,6 +185,24 @@ admission addendum) are **proposed, not enacted**. **V3-F01 remains OPEN.** Noth
 accepted, frozen, or canonical; controlling verdicts are unchanged; Phase-2
 implementation and Phase 3 remain unauthorized; Phase 1 remains closed.
 
+#### V3-F01 serialized request boundary addendum (Gate C1 Fable pass, 2026-09-06)
+
+Reconciles the command-time candidate with the Operator's serialized-request direction
+and returned `SERIALIZED_REQUEST_BOUNDARY_ADDENDUM_READY`:
+
+- `engineering/phase2/SPARK_PHASE_2_V3_F01_SERIALIZED_REQUEST_BOUNDARY_ADDENDUM_2026-09-06.md`
+- `engineering/phase2/SPARK_PHASE_2_V3_F01_SERIALIZED_REQUEST_BOUNDARY_REPORT_2026-09-06.md`
+- `engineering/phase2/serialized_request_model_2026-09-06/` (disposable executable model, all checks passing)
+
+A bounded mailbox feeds one consumer; one request is active until its defined horizon
+completes; budget exhaustion pauses it; commands finalize and execute atomically at
+completion; a request starts only if its horizon is at least the last completed horizon
+`F`. The unified pending-command loop, cursor `X`, and amendments A-1…A-3 are withdrawn;
+`F` is the only added state, committed in a stable-boundary digest and excluded from the
+per-cohort engine digest. One v1 §8 amendment is **proposed, not enacted**. **V3-F01
+remains OPEN.** Nothing is accepted, frozen, or canonical; Phase-2 implementation and
+Phase 3 remain unauthorized; Phase 1 remains closed.
+
 ## Phase 3
 
 **NOT AUTHORIZED.**
