@@ -2,7 +2,7 @@
 
 **Updated:** 2026-09-06  
 **Branch:** `phase1-refoundation-v2`  
-**Status basis:** repository history through pre-update HEAD `1aaa2fd65a3fdd328936c89c424ddfeb30bd5200`
+**Status basis:** repository history through pre-update HEAD `8398324e7f8943a8e19789537b3d38d9ded8ff25`
 
 This file is a current-status summary. Detailed historical evidence remains in the phase reports, reviews, ADRs, and Git history.
 
@@ -76,3 +76,16 @@ This is an architecture correction only. It introduces no new causal primitive a
 The production architecture remains one Rust canonical engine with platform deployment/adapters around it, not three platform-specific S.P.A.R.K. designs.
 
 Windows/Android static compilation has been demonstrated in the existing evidence. Executable cross-platform canonical fixture replay and digest parity remain required before the project may claim full Windows/Linux/Android runtime equivalence.
+
+## Operational handoff constraints
+
+These workflow rules do not change product architecture or phase authority, but they are durable operating constraints for successor engineering threads:
+
+- Important new programmer, auditor, research, review, or handoff artifacts use the `SPARK_` project prefix in their filenames. Historical artifacts are not renamed merely for cosmetic consistency if doing so would break references.
+- Repository copies are canonical project evidence. `~/Downloads` copies are disposable transfer copies for handoff and may be deleted after upload/review.
+- External-agent handoffs should state the agent/model, effort level, launch location, exact instruction, expected output artifact, and what the operator must return. Prefer a single paste-ready terminal command when safe, and authorize routine in-scope reads/tests/local artifact work so the operator is not asked to babysit each step.
+- Preserve writer/reviewer separation. The current successful pattern for difficult work is architecture specialization before implementation and independent adversarial review afterward; model-specific capability estimates are time-sensitive workflow choices, not frozen product architecture.
+- NVIDIA NIM development compute is available to the project and has already been tested by the operator. Credentials/API keys are not repository content. A shared cross-project NIM integration/workflow is being developed through S.W.A.R.M.; S.P.A.R.K. should adopt or adapt that shared result rather than independently invent a conflicting permanent harness. NIM is development/research compute only and does not gain canonical runtime or project authority from availability.
+- NIM integration is not a blocker for the current V3-F01 architecture correction. Continue the bounded Phase-2 architecture closure from the controlling repository evidence while the shared compute workflow matures separately.
+
+The thread-level operational addendum is recorded at `engineering/SPARK_THREAD_CLOSEOUT_OPERATIONAL_ADDENDUM_2026-09-06.md`.
