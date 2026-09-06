@@ -91,13 +91,25 @@ its hash is in the handoff manifest and the completion message.
 
 ## 6. Supplementary compute
 
-Not used. Two bounded probes of `~/.local/bin/swarm-mci-dev --help` (25 s; 20 s with
-stdin closed) did not return; the Operator reported mid-mission that this binary opens
-the MCI desktop GUI, which was never intended and is not the harness entry point. The
-prior review's evidence bundle records request identifiers and lifecycle only; **no
-CLI or API invocation is documented in this repository**. Per instruction, that missing
-instruction is recorded and no further MCI troubleshooting was performed. No request
-was submitted.
+**Observed:** two bounded probes of `~/.local/bin/swarm-mci-dev --help` (25 s;
+20 s with stdin closed) did not return, and the Operator reported mid-mission
+that the presumed harness command opened the S.W.A.R.M. MCI desktop GUI. That
+observation is preserved: the command is the desktop launcher and was not the
+intended headless caller surface. No compute request was submitted.
+
+**Not established:** the desktop launch did not prove that the Development
+Compute gateway was unavailable.
+
+**Bounded search result:** this S.P.A.R.K. engineering pass did not locate a
+documented headless invocation within its bounded repository/evidence search
+and correctly stopped troubleshooting rather than expanding scope. Its
+architectural conclusions therefore did not rely on supplementary compute.
+
+**Follow-up:** S.W.A.R.M. now documents the recovered, previously verified
+headless development invocation as
+`.venv/bin/python -m tools.dev_compute.orchestrate ...` in its canonical
+`tools/dev_compute/README.md`. This evidence correction adds no S.W.A.R.M.
+runtime dependency to S.P.A.R.K. and does not change S.P.A.R.K. architecture.
 
 ## 7. Unresolved decisions
 

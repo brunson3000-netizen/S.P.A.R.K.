@@ -210,14 +210,18 @@ to run the specified oracle against.
 
 ## 9. Supplementary compute
 
-One bounded attempt was made under existing authorization. The sanctioned MCI development
-gateway CLI at `~/.local/bin/swarm-mci-dev` was invoked with a 25-second bound and did not
-return; the process was terminated by the bound and **no request was submitted**, so no
-partial worker evidence exists beyond this record. Per the mission's instruction that
-supplementary work must not block completion after a bounded deadline, no retry was
-attempted and the pass continued. The credential file referenced by the prior review's
-evidence bundle is present, so the failure is a gateway-availability failure and not an
-authorization failure.
+One bounded attempt was made under existing authorization. The presumed harness command
+at `~/.local/bin/swarm-mci-dev` was invoked with a 25-second bound and did not return; the
+process was terminated by the bound and **no request was submitted**, so no partial worker
+evidence exists beyond this record. The Operator subsequently observed that the command
+opened the S.W.A.R.M. MCI desktop GUI. That observation is preserved: the command was the
+MCI desktop launcher, not the headless caller surface, and it does **not** establish
+Development Compute gateway unavailability. The writer failed only to locate a documented
+headless invocation in its bounded S.P.A.R.K. search and correctly stopped troubleshooting
+instead of expanding scope. S.W.A.R.M. subsequently documented the verified headless
+invocation as
+`.venv/bin/python -m tools.dev_compute.orchestrate ...` in
+`tools/dev_compute/README.md`. This follow-up creates no S.P.A.R.K. runtime dependency.
 
 This candidate therefore rests on the frozen record, the independent review, the
 foundational adjudication, and direct inspection of the Phase-1 source. Supplementary

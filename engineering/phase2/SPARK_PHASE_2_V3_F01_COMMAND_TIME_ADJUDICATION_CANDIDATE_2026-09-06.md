@@ -405,13 +405,16 @@ Consequences of this adjudication only; the items themselves are not redesigned.
    this contract is not implementable; that is the intended gate.
 5. **Supplementary compute was not used.** Two bounded probes (25 s, then 20 s with
    stdin closed) of `~/.local/bin/swarm-mci-dev --help` did not return; the Operator
-   reported that this binary launches the MCI desktop GUI, which is not the harness
-   entry point and was never intended to be opened. The prior review's evidence bundle
-   records request identifiers and lifecycle but no CLI or API invocation, so the
-   supported harness entry point is **not documented in this repository**. Per the
-   Operator's instruction, that missing instruction is recorded here and no further
-   MCI troubleshooting was done. No request was submitted. This candidate rests on the
-   frozen record and the three reviews.
+   reported that this binary launches the MCI desktop GUI, which is not the headless
+   harness entry point and was never intended to be opened. This observation did not
+   establish that the Development Compute gateway was unavailable. The prior review's
+   evidence bundle records request identifiers and lifecycle but no CLI or API
+   invocation; the engineer did not locate a documented headless entry point in the
+   bounded S.P.A.R.K. search and correctly stopped troubleshooting rather than expanding
+   scope. No request was submitted. S.W.A.R.M. now documents the recovered invocation as
+   `.venv/bin/python -m tools.dev_compute.orchestrate ...` in its canonical
+   `tools/dev_compute/README.md`; this follow-up creates no S.P.A.R.K. runtime dependency.
+   This candidate rests on the frozen record and the three reviews.
 6. **No adversarial review of this pass exists.**
 
 ---
