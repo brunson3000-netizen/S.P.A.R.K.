@@ -123,6 +123,34 @@ next permitted step is a separated Opus V3-F01 correction writer pass under the
 candidate's downstream constraints, then independent Codex review. Phase-2
 implementation and Phase 3 remain unauthorized; Phase 1 remains closed.
 
+The adjudication is recorded at commit `379f8dc355125e6bca09801e4a66b0b35ec9720c`
+(parent `513c3982d5b9cd14f86ec07369662f3a178f1d95`); its own report omitted that hash.
+
+#### V3-F01 correction candidate V2 (Gate C1 second writer pass, 2026-09-06)
+
+A separated second-pass correction candidate and acceptance matrix now exist and **await
+independent Codex review**, with writer verdict
+`CANDIDATE_READY_FOR_INDEPENDENT_REVIEW`:
+
+- `engineering/phase2/SPARK_PHASE_2_V3_F01_ARCHITECTURE_CORRECTION_CANDIDATE_V2_2026-09-06.md`
+- `engineering/phase2/SPARK_PHASE_2_ACCEPTANCE_TEST_MATRIX_V3_F01_CORRECTION_CANDIDATE_V2_2026-09-06.md`
+- `engineering/phase2/SPARK_PHASE_2_V3_F01_ARCHITECTURE_WRITER_REPORT_V2_2026-09-06.md`
+
+It builds on the foundational time adjudication as a **proposed** basis and resolves
+review findings F-01 through F-07 together: a least-due compare-and-take with an explicit
+eligibility horizon replaces the owned selection token; conflicted slots are extracted
+with their operational slice but belong to neither the executable cohort identity nor the
+pacing budget; the new canonical report fields are withdrawn in favour of the existing
+`test-support` observation seam; partition equivalence is stated with preconditions,
+separating completed-horizon from equal-prefix equivalence; and command effective-time
+ordering is bounded by two supported-history conditions with a fail-closed refusal, while
+the ADR-0003 staging question is left open.
+
+**V3-F01 remains OPEN.** The first-pass candidate, its matrix, the independent review, and
+the adjudication are preserved unchanged. Nothing here is accepted, frozen, or canonical;
+the controlling verdicts are unchanged. Phase-2 implementation and Phase 3 remain
+unauthorized; Phase 1 remains closed; no production Rust or test was written or executed.
+
 ## Phase 3
 
 **NOT AUTHORIZED.**
