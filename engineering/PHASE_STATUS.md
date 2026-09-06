@@ -2,9 +2,24 @@
 
 **Updated:** 2026-09-06  
 **Branch:** `phase1-refoundation-v2`  
-**Status basis:** repository history through pre-update HEAD `8398324e7f8943a8e19789537b3d38d9ded8ff25`
+**Status basis:** repository history through pre-update HEAD `d88806938eab74a6b468c12eef92cedeca32a666`
 
-This file is a current-status summary. Detailed historical evidence remains in the phase reports, reviews, ADRs, and Git history.
+This file is a current-status summary. Detailed historical evidence remains in the phase reports, reviews, ADRs, Git history, and thread closeout records.
+
+## Project operating state
+
+**PARKED BY OPERATOR.**
+
+Normal S.P.A.R.K. production/Phase-2 engineering is on HOLD to conserve scarce premium-model capacity until shared NVIDIA NIM development resources are better able to absorb engineering load.
+
+Parking does not change any frozen architecture or phase result. In particular, it does not resolve the remaining Phase-2 architecture blocker and does not authorize implementation.
+
+While parked, S.P.A.R.K. work may proceed only when it independently advances the shared NIM sub-project goals of:
+
+1. improving reusable tools for practical NIM engineering utilization; and/or
+2. developing evidence-backed architecture for amplifying heterogeneous NIM work in ways reusable by S.W.A.R.M. and the MCI.
+
+Such work must not be used as a pretext to continue ordinary S.P.A.R.K. Phase-2 implementation. S.P.A.R.K. may serve as a real workload laboratory for ontology/semantic tooling, invariant-to-adversarial-test tooling, complexity pruning, engineering challenge corpora, independent panel architecture, and marginal-worker-value measurement.
 
 ## Phase 0
 
@@ -37,7 +52,7 @@ No Phase-1 semantic identity, encoding, conflict, authority, or determinism inva
 
 ## Phase 2
 
-**ARCHITECTURE V3 REQUIRES ONE BOUNDED REVISION. IMPLEMENTATION NOT AUTHORIZED.**
+**ARCHITECTURE V3 REQUIRES ONE BOUNDED REVISION. IMPLEMENTATION NOT AUTHORIZED. PROJECT PARKED.**
 
 Phase-2 architecture went through the original freeze, Codex adversarial review, v2 correction, Codex v2 rereview, v3 correction, provenance correction, and final bounded Codex confirmation.
 
@@ -45,7 +60,7 @@ The latest controlling independent result is:
 
 `PHASE_2_ARCHITECTURE_V3_REVISE`
 
-at pre-update HEAD `1aaa2fd65a3fdd328936c89c424ddfeb30bd5200`, recorded in:
+recorded in:
 
 `engineering/phase2/SPARK_PHASE_2_CODEX_FINAL_ARCHITECTURE_V3_CONFIRMATION_2026-08-26.md`
 
@@ -65,7 +80,7 @@ The independent review identifies the smallest safe bounded correction:
 
 This is an architecture correction only. It introduces no new causal primitive and does not authorize production Rust.
 
-**Phase-2 implementation writer remains unreleased until V3-F01 is frozen and independently accepted.**
+**The correction is not active while the project is parked. Phase-2 implementation writer remains unreleased.**
 
 ## Phase 3
 
@@ -77,15 +92,17 @@ The production architecture remains one Rust canonical engine with platform depl
 
 Windows/Android static compilation has been demonstrated in the existing evidence. Executable cross-platform canonical fixture replay and digest parity remain required before the project may claim full Windows/Linux/Android runtime equivalence.
 
-## Operational handoff constraints
+## Durable operating constraints
 
-These workflow rules do not change product architecture or phase authority, but they are durable operating constraints for successor engineering threads:
+These workflow rules do not change product architecture or phase authority:
 
 - Important new programmer, auditor, research, review, or handoff artifacts use the `SPARK_` project prefix in their filenames. Historical artifacts are not renamed merely for cosmetic consistency if doing so would break references.
 - Repository copies are canonical project evidence. `~/Downloads` copies are disposable transfer copies for handoff and may be deleted after upload/review.
-- External-agent handoffs should state the agent/model, effort level, launch location, exact instruction, expected output artifact, and what the operator must return. Prefer a single paste-ready terminal command when safe, and authorize routine in-scope reads/tests/local artifact work so the operator is not asked to babysit each step.
-- Preserve writer/reviewer separation. The current successful pattern for difficult work is architecture specialization before implementation and independent adversarial review afterward; model-specific capability estimates are time-sensitive workflow choices, not frozen product architecture.
-- NVIDIA NIM development compute is available to the project and has already been tested by the operator. Credentials/API keys are not repository content. A shared cross-project NIM integration/workflow is being developed through S.W.A.R.M.; S.P.A.R.K. should adopt or adapt that shared result rather than independently invent a conflicting permanent harness. NIM is development/research compute only and does not gain canonical runtime or project authority from availability.
-- NIM integration is not a blocker for the current V3-F01 architecture correction. Continue the bounded Phase-2 architecture closure from the controlling repository evidence while the shared compute workflow matures separately.
+- Active external-agent mission text is treated as static/canonical for that mission. Do not casually regenerate an "equivalent" prompt. Any change must be explicitly labeled as a revision.
+- Operator handoff steps are given in execution order: open Terminal; `cd` to the repository; launch plain `claude` or `codex`; paste the canonical mission; select the stated model/effort if needed; return the requested artifacts. Do not default to giant combined terminal commands or extra launch flags.
+- Preserve writer/reviewer separation. Use Fable sparingly and only for genuinely critical foundational architecture moments or non-converging foundational defect classes. Prefer Opus HIGH for difficult bounded architecture/implementation corrections, Sonnet for mature/routine implementation, and Codex HIGH for independent adversarial review.
+- NVIDIA NIM is development/research compute only and gains no canonical runtime or project authority from availability. Credentials/API keys are not repository content.
+- Within bounded concurrency and provider-health limits, useful NIM work should maximize diversity of task, role, model, and failure hypothesis rather than redundant repetition. Independent workers do not see each other's results before synthesis; raw responses and model/task/provenance metadata are preserved; telemetry should measure disagreement, unique and duplicate findings, useful defects/tests, latency, failures/rate limits, and whether additional workers changed the primary conclusion.
+- Do not rerun the completed NIM benchmark study merely to increase panel size.
 
-The thread-level operational addendum is recorded at `engineering/SPARK_THREAD_CLOSEOUT_OPERATIONAL_ADDENDUM_2026-09-06.md`.
+The final thread handoff is recorded at `engineering/SPARK_THREAD_FINAL_CLOSEOUT_2026-09-06.md`.
