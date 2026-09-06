@@ -151,6 +151,22 @@ the adjudication are preserved unchanged. Nothing here is accepted, frozen, or c
 the controlling verdicts are unchanged. Phase-2 implementation and Phase 3 remain
 unauthorized; Phase 1 remains closed; no production Rust or test was written or executed.
 
+#### V3-F01 correction candidate V2 independent Gate C1 review (2026-09-06)
+
+Independent Codex review of writer commit
+`983a01fd6807b8c627c97d2673a1f40c54cc059c` returned:
+
+`V3_F01_FOUNDATIONAL_REVIEW_REQUIRED`
+
+`engineering/phase2/SPARK_PHASE_2_CODEX_V3_F01_V2_INDEPENDENT_REVIEW_2026-09-06.md`
+
+The scheduled horizon-expansion and least-slice compare-and-take core remain a viable
+basis, but the V2 candidate is **not accepted or frozen**. The command-time frontier and
+SH-1/SH-2 authority require focused foundational adjudication, and the acceptance oracle
+contains false budget, post-extraction digest, replay, and rejection assertions. V3-F01
+remains open; Phase-2 implementation and Phase 3 remain unauthorized; Phase 1 remains
+closed. No Operator acceptance or G.A.M.E. change is claimed.
+
 ## Phase 3
 
 **NOT AUTHORIZED.**
