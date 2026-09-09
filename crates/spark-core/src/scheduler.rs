@@ -509,6 +509,23 @@ impl Scheduler {
         self.slots.first_key_value().map(|(key, _)| key.due_time)
     }
 
+    /// RESEARCH-ONLY ADDITION (Fable architecture challenge pass 2,
+    /// 2026-09-09; not adopted): removes and returns exactly the first
+    /// resident slot in stable `WorkKey` order, scheduled or conflicted,
+    /// as a one-entry `DrainOutcome`. Nothing is buffered: an item is
+    /// either resident or returned to the caller.
+    pub fn take_next(&mut self) -> DrainOutcome {
+        let mut outcome = DrainOutcome::default();
+        if let Some(entry) = self.slots.first_entry() {
+            let (key, slot) = entry.remove_entry();
+            match slot {
+                SlotState::Scheduled(payload) => outcome.due.push(DueWorkItem { key, payload }),
+                SlotState::Conflicted(evidence) => outcome.conflicted.push(evidence.to_conflict(&key)),
+            }
+        }
+        outcome
+    }
+
     /// Whether the given complete semantic work key currently occupies a
     /// slot, scheduled **or** conflicted. Use
     /// [`slot_status`](Self::slot_status) when the distinction matters.
