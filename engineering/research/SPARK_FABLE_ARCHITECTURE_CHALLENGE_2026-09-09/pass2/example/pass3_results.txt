@@ -1,0 +1,8 @@
+PASS B1 producer faster than consumer -> Busy backpressure, nothing queued or lost — Busy; active request kept; GAME retains its own event
+PASS B2/B3 output bounded to chunk=5; Spark pauses while GAME does not consume; state unchanged — chunk seq=1 records=5 final=false
+PASS B5 lost ack: redelivery has the same seq; GAME applies once; ack then clears — effects applied=5 duplicate redeliveries detected=1
+PASS B4 restart after commit, before delivery (modeled): chunks 1..3 == unchunked reference; digest equal; 12 effects applied once — seqs [1, 2, 3]
+PASS B6 redelivered old Advance and duplicate Input refused explicitly — Refused(HorizonBehindClock { horizon: LogicalTime(5), clock: LogicalTime(10) }) / Refused(DuplicateCommand { command_id: "x1" })
+PASS EQ records and digests identical across chunk sizes 1/3/7/inf and budgets 1/2/inf/4 — delivery boundaries never change causal results
+PASS MEM after ack: retained report 0, undelivered 0; GAP: engine.trace holds 13 records (test oracle) and 12 consumed bodies are never released — finalized ids=1 bodies=12 scheduler=0 -> release rules in PASS3_REPORT.md
+0 check(s) failed
