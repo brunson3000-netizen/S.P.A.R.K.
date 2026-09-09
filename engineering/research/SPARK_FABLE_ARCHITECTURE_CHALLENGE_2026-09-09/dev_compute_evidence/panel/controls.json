@@ -1,0 +1,9 @@
+{
+  "legacy_mode": false,
+  "max_parallel": 3,
+  "maximum_retries": 1,
+  "minimum_useful_responses": 2,
+  "panel_deadline_seconds": 200.0,
+  "termination_grace_seconds": 10,
+  "worker_timeout_seconds": 150.0
+}

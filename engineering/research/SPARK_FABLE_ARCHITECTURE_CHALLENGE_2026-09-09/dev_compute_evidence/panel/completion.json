@@ -1,0 +1,14 @@
+{
+  "availability": {
+    "attempt_journal": "CAPTURED",
+    "attempts": "UNAVAILABLE: no strict attempt recorded",
+    "cleanup": "Only supervisor observations in worker/attempt records; otherwise UNAVAILABLE",
+    "provider_wire_interactions": "UNAVAILABLE: existing adapters do not expose wire transcripts",
+    "usage": "Only provider-reported counts in worker/telemetry records; absent counts are UNAVAILABLE, not zero-cost proof"
+  },
+  "completed_at": 1788931601.692482,
+  "elapsed_seconds": 0.0057048797607421875,
+  "run_id": "20260909T052641Z-d7d319f9fe43419383ac49c566444a96",
+  "status": "blocked",
+  "telemetry_path": "/home/chromikey/Projects/SPARK-fable-challenge-worktree/engineering/research/SPARK_FABLE_ARCHITECTURE_CHALLENGE_2026-09-09/dev_compute_evidence/panel/telemetry.jsonl"
+}

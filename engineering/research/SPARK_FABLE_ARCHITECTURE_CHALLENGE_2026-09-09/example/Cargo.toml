@@ -1,0 +1,16 @@
+[package]
+name = "spark-fable-example"
+version = "0.0.1"
+edition = "2021"
+publish = false
+description = "RESEARCH / PROPOSED DESIGN - NOT ADOPTED. Executable architectural example for the Fable S.P.A.R.K. architecture challenge (2026-09-09). Not an engine, not accepted, not a benchmark."
+
+# Standalone package root so this research example never joins the production workspace.
+[workspace]
+
+[dependencies]
+# The real Phase-1 kernel from the enclosing research worktree (scheduler, clock, hashing, IDs).
+spark-core = { path = "../../../../crates/spark-core" }
+
+[lints.rust]
+unsafe_code = "forbid"

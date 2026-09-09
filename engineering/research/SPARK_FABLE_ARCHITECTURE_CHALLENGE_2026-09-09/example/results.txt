@@ -1,0 +1,21 @@
+RESEARCH / PROPOSED DESIGN — NOT ADOPTED. spark-fable-example results:
+PASS C1 budget-invariance — budget1=4 calls, budget3=2 calls, unbudgeted=1 call(s); 4 cohorts; diagnostics differ: true
+PASS C2 catch-up partition equivalence — 10 x Advance(+5) in 10 calls vs 1 x Advance(50): traces equal, boundary digests equal; per-cohort pre-engine digests equal at every cohort
+PASS C3 second request waits while first is paused — first call paused=true, second accepted=Accepted, third=MailboxFull, head unchanged=true, remaining calls=4, input executed last at t=60, clock=60
+PASS C4 delayed work within and beyond horizon — work created at 10 ran at 15 and at 35 inside Advance(50); work due 135 stayed resident; ran under Advance(200): true
+PASS C5 typed cohort rejection is atomic and budget-invariant — cohort@40 rejected (Some(ZeroDelayFeedback { producer: DefinitionId(trigger.bad_rule) })); nothing committed (+999 discarded, drought=0), WorkKey consumed, traces equal under budget 1 and unbudgeted
+PASS C6 past-dated and duplicate requests rejected without mutation — Input@30 after clock=50 -> Rejected(HorizonBehindClock { horizon: LogicalTime(30), clock: LogicalTime(50) }); equal-time input accepted; redelivered command_id -> Rejected(DuplicateCommand { command_id: "c9" }); digest before rejection c74ed1406e0b
+PASS C7 snapshot at pause + resume equals uninterrupted run — snapshot = cells + scheduler + bodies + occurrences + finalized + clock; durable mailbox re-presents the head
+PASS W1 detects drain-whole-prefix defect (V3-F01 shape) — one-call trace has 2 cohorts vs 4 correct (created-inside-horizon work skipped); pre-engine digests differ: true; stepwise vs one-call differ within the wrong variant itself
+PASS W2 detects evaluate-at-horizon defect — one-call vs stepwise traces differ under the wrong variant (decay elapsed and created due times depend on horizon); correct variant: equal
+PASS C8 counterexample exposed: whole-time-slice transaction unit — 3 same-time items = 1 cohort: one zero-delay defect discarded all three (+10,+11,+12 never committed); budget 1 admitted all three at once. Smallest correction = per-WorkKey transactions in key order (Operator decision, see 04_SELF_CHALLENGE.md)
+PASS T1 telemetry is observable and canonically inert — queue depth at offer=2, second request waited 3 paused calls, 6 calls total, wall=956us (toy model timing, NOT Spark throughput); canonical prefix equals unbudgeted run
+PASS S1 self-challenge: clock-at-completion-only admits backwards writes; per-cohort clock rejects — CompletionOnly: Advance(12) and Input@12 accepted after a pause that committed t=30; hunger.updated_at rewritten 15->12 (backwards). PerCohort: both rejected, clock=30 = simulated-through time
+PASS C9 per-WorkKey unit: invariance holds, blast radius shrinks — budget 1 / unbudgeted / stepwise equal under PerWorkKey; C8 fixture: 3 records, only trigger.b rejected, drought = 10 + 12 = 22
+--- canonical trace (correct, Advance(50)): (at, batch_digest[..12], committed, scheduled, rejected)
+  (10, "9c45e1d4b60c", 1, 1, false)
+  (15, "6a6b18440782", 2, 1, false)
+  (30, "4a575e24929e", 1, 0, false)
+  (35, "e7373264a765", 1, 1, false)
+--- final boundary digest: c74ed1406e0bcfeef4652917bae2afd22a2714f9d37605bfede86a880e4f4087
+0 check(s) failed

@@ -1,0 +1,26 @@
+{
+  "accepted": true,
+  "caller": "fable",
+  "capability": "falsification",
+  "correlation_id": "",
+  "detail": "strict reliability contract requires current economic and readiness evidence",
+  "lifecycle": [
+    [
+      "received",
+      1788931601.69
+    ],
+    [
+      "validated",
+      1788931601.69
+    ],
+    [
+      "blocked",
+      1788931601.69
+    ]
+  ],
+  "mci_request_id": "mci-dev-9af27497b5fa",
+  "notice": "Non-authoritative development-compute evidence. Workers responded independently; the primary engineering agent owns synthesis and every implementation decision.",
+  "project": "spark",
+  "result": null,
+  "status": "blocked"
+}

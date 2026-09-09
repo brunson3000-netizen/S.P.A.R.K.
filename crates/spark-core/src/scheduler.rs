@@ -499,6 +499,16 @@ impl Scheduler {
         outcome
     }
 
+    /// RESEARCH-ONLY ADDITION (Fable architecture challenge, 2026-09-09;
+    /// not adopted): the least due time of any resident slot, scheduled
+    /// or conflicted. Together with `drain_due(least)` this yields exactly
+    /// one time-slice per call while every later slot stays resident and
+    /// byte-identical - the cohort-granular extraction V3-F01 asks for,
+    /// without a new extraction protocol.
+    pub fn next_due_time(&self) -> Option<LogicalTime> {
+        self.slots.first_key_value().map(|(key, _)| key.due_time)
+    }
+
     /// Whether the given complete semantic work key currently occupies a
     /// slot, scheduled **or** conflicted. Use
     /// [`slot_status`](Self::slot_status) when the distinction matters.

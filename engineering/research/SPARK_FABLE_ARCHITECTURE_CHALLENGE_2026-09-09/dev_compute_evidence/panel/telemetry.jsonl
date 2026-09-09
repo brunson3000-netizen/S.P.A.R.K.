@@ -1,0 +1,1 @@
+{"caller": "fable", "capability": "falsification", "event": "request-received", "layer": "mci-ingress", "mci_request_id": "mci-dev-9af27497b5fa", "project": "spark", "recorded_at": 1788931601.6896384, "telemetry_class": "NON_ATTEMPT", "ts": 1788931601.69}
