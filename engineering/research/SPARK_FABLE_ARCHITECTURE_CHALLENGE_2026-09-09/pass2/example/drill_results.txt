@@ -1,0 +1,7 @@
+RESEARCH / NOT ADOPTED — synthetic workload drill (machine-specific toy timings)
+budget | steps | max_step_us | total_engine_us | max_queue_depth | backpressured | completion_latency_steps(per request)
+     1 |    74 |         102 |            4810 |               2 |             0 | [1, 1, 1, 1, 1, 1, 1, 1, 1, 64, 1]
+     4 |    26 |         253 |            4060 |               2 |             0 | [1, 1, 1, 1, 1, 1, 1, 1, 1, 16, 1]
+    16 |    14 |         777 |            3591 |               2 |             0 | [1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1]
+   inf |    11 |        2935 |            3640 |               1 |             0 | [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+note: a transaction-count budget bounds transactions per step, not wall time; queue waiting (steps before start) is separate from engine time (per-step duration).

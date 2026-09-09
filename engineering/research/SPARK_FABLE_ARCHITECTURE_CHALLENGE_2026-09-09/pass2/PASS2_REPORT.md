@@ -32,12 +32,12 @@ The archive includes the patched `scheduler.rs` so a reviewer can rebuild from `
 | 3 bodies | P3b: body store emptied; body content corrupted under a valid digest | pass-1 silently skipped a missing body (`if let Some`) — silent disappearance counted as success | `MissingBody` and `BodyDigestMismatch` typed rejections; verify `body.digest() == advertised` on read | PASS, nothing written |
 | 4 collision | P4: transaction with a cell write + schedule into an occupied key with a different payload; then a slice containing only the poisoned key | undefined in pass 1 (key reported as "scheduled") | **committed poison**: writes stand, key becomes `Conflicted`, record lists it under `conflicts`; later the poisoned slot drains as a conflict-only record, never executed. Rollback rejected because it would reinstate arrival-order authority (ADR-0003 §11) | PASS; report matches `slot_status` |
 | 4 arithmetic | P4b: delay `u64::MAX−5` at now 10; occurrence counter at `u64::MAX` | **panic in debug at commit** (`occurrences += n` overflow; would wrap in release) — a real debug/release divergence found by the check | `checked_add` for due time and for the post-commit counter, validated in `apply` so commit cannot fail; `TimeOverflow` / `OccurrenceOverflow` typed rejections, no partial writes | PASS in debug and release |
-| 5 drill | not run | — | — | **deferred** (timebox); see below |
+| 5 drill | synthetic drill, 4 budgets | — | — | run; see below |
 
 Remaining failures: none in the 7 checks. Known gaps: the restore in P1/P2 is an in-memory
 clone, not a codec; no crash-recovery or exactly-once claim is made (a host crash between
 `Completed` and consuming the report loses that report unless the host persists it; the
-records remain in the engine's `trace`, which is append-only and unbounded here).
+records remain in the engine's `trace`, which is append-only and unbounded here). Clippy reports two large-`Err`-variant warnings in the example (cosmetic, left as is).
 
 ## What must persist where (from P2)
 
@@ -69,13 +69,30 @@ example's chain does. "One profile per engine" only removes the case of two *voc
 (e.g. `game-world` and `mci-agent-commons`) sharing one scheduler; those become two engines
 with no cross-engine propagation, which the game does not require.
 
-## Workload drill (task 5): deferred, with the caveat stated now
+## Workload drill (task 5): synthetic, machine-specific, not a benchmark
 
-Transaction-count budgets bound the number of transactions per consumer step, not wall
-time: one transaction may contain a deep wave chain or a wide cohort. A wall-clock bound
-needs either a size-aware budget (count effects, not transactions) or the host limiting
-steps per frame and accepting deferred work. Any timings would be synthetic and machine-
-specific and were not measured in this pass.
+`cargo run -q --release --bin drill` (`pass2/example/src/bin/drill.rs`, output `drill_results.txt`).
+Synthetic shape: 9 trickle observations at t=10…90, a same-time burst of 64 actor timers at
+t=100 (each rescheduling itself at +100), `Advance(100)`, `Advance(150)`; producer offers one
+request per consumer step into a capacity-4 mailbox; per-`WorkKey` transactions.
+
+| budget | steps | max step (µs) | engine total (µs) | max queue depth | backpressured | completion latency (steps) |
+|---|---|---|---|---|---|---|
+| 1 | 74 | 102 | 4810 | 2 | 0 | 1 ×9, **64**, 1 |
+| 4 | 26 | 253 | 4060 | 2 | 0 | 1 ×9, 16, 1 |
+| 16 | 14 | 777 | 3591 | 2 | 0 | 1 ×9, 4, 1 |
+| unbounded | 11 | 2935 | 3640 | 1 | 0 | 1 ×11 |
+
+Canonical record count is identical (73) under every budget (asserted). Queue waiting
+(steps before a request starts) is reported separately from engine time (per-step
+duration). The burst request's completion latency falls with budget while the maximum
+step duration rises: that is the tuning axis. Backpressure never triggered because this
+producer offers at most one request per step; a burstier producer would hit `MailboxFull`.
+A transaction-count budget bounds transactions per step, not wall time: one transaction
+with a deep wave chain or a wide fan-out can exceed any frame budget, so a wall-clock bound
+needs a size-aware budget or a host-side step cap. All numbers are toy-model timings on
+this machine and say nothing about Spark throughput. The next queued request never
+interrupted the active one (the mailbox head stays until `Completed`/`Rejected`).
 
 ## Revised recommendation and smallest next executable integration step
 
