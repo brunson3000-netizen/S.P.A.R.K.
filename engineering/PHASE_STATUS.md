@@ -203,6 +203,22 @@ per-cohort engine digest. One v1 §8 amendment is **proposed, not enacted**. **V
 remains OPEN.** Nothing is accepted, frozen, or canonical; Phase-2 implementation and
 Phase 3 remain unauthorized; Phase 1 remains closed.
 
+#### V3-F01 serialized-boundary independent review (2026-09-10)
+
+Independent Codex review at production baseline `e9e26e815f1d4d890c5f5621be9e2143e7dd9ac8`
+returned `V3_F01_BOUNDED_REVISION_REQUIRED`:
+
+`engineering/phase2/SPARK_PHASE_2_CODEX_V3_F01_SERIALIZED_BOUNDARY_INDEPENDENT_REVIEW_2026-09-10.md`
+
+The addendum's horizon expansion, cohort-local evaluation, least-slice extraction, `F`,
+and two-digest structure remain the viable basis. One blocker remains: after a paced
+pause, `F` is intentionally unchanged and the engine retains no active-request identity,
+so substituting a different request can satisfy `h >= F` and evaluate backward relative
+to already-processed work. The next writer must mechanically bind exact-request resume
+across pause/restart (recommended: a minimal digest-committed `ActiveRequest`
+discriminator), correct the carried oracle, and incorporate the Operator's section 8
+amendment decision. V3-F01 remains open; no implementation or later phase is authorized.
+
 ## Phase 3
 
 **NOT AUTHORIZED.**
