@@ -1,0 +1,221 @@
+{
+ "S16_diag": [
+  {
+   "call": "Advance(103)",
+   "command_deferred": false,
+   "deferred_cohort_count": 1,
+   "earliest_deferred_due_time": 103
+  }
+ ],
+ "S17_log": [
+  [
+   "Command@21(c1)",
+   "COMPLETED"
+  ],
+  [
+   "Command@25(dup)",
+   "COMPLETED_COMMAND_NOT_FINALIZED"
+  ]
+ ],
+ "S7_refusal_state": [
+  "60665596b054485c",
+  "546eecd04b96bc56",
+  [],
+  0,
+  {
+   "h": 20,
+   "id": "b23491834d5e8d3a",
+   "kind": "advance"
+  }
+ ],
+ "S9_sbd": [
+  "def30a2c5f1cb73e",
+  "8c7258eb1468272b",
+  "ff55046542a9d77e",
+  "ec4aa9bb33f70982",
+  "e9981e2a959bf332"
+ ],
+ "boundary_budget1": [
+  {
+   "F": 0,
+   "active": [
+    "active_request.some",
+    "advance",
+    20,
+    "b23491834d5e8d3a"
+   ],
+   "cohorts": 1,
+   "event": "PAUSED",
+   "req": "Advance(20)",
+   "sbd": "fcee1d94618f6e21"
+  },
+  {
+   "F": 0,
+   "active": [
+    "active_request.some",
+    "advance",
+    20,
+    "b23491834d5e8d3a"
+   ],
+   "cohorts": 2,
+   "event": "PAUSED",
+   "req": "Advance(20)",
+   "sbd": "60665596b054485c"
+  },
+  {
+   "F": 20,
+   "active": "active_request.none",
+   "cohorts": 3,
+   "event": "COMPLETED",
+   "req": "Advance(20)",
+   "sbd": "52641c58ea827801"
+  },
+  {
+   "F": 21,
+   "active": "active_request.none",
+   "cohorts": 4,
+   "event": "COMPLETED",
+   "req": "Command@21(c1)",
+   "sbd": "1a57dc5920c924c1"
+  }
+ ],
+ "boundary_budget2": [
+  {
+   "F": 0,
+   "active": [
+    "active_request.some",
+    "advance",
+    20,
+    "b23491834d5e8d3a"
+   ],
+   "cohorts": 2,
+   "event": "PAUSED",
+   "req": "Advance(20)",
+   "sbd": "60665596b054485c"
+  },
+  {
+   "F": 20,
+   "active": "active_request.none",
+   "cohorts": 3,
+   "event": "COMPLETED",
+   "req": "Advance(20)",
+   "sbd": "52641c58ea827801"
+  },
+  {
+   "F": 21,
+   "active": "active_request.none",
+   "cohorts": 4,
+   "event": "COMPLETED",
+   "req": "Command@21(c1)",
+   "sbd": "1a57dc5920c924c1"
+  }
+ ],
+ "checks": {
+  "S1 second request waits while first paused": "PASS - calls=[('Advance(20)', 'PAUSED'), ('Advance(20)', 'PAUSED'), ('Advance(20)', 'COMPLETED'), ('Command@21(c1)', 'COMPLETED')]",
+  "S10 ActiveRequest absent after COMPLETED and after HORIZON_BEHIND_FRONTIER refusal; refusal mutates neither F nor digest": "PASS",
+  "S10b equal-horizon Advance after completion is accepted and idempotent": "PASS",
+  "S12 budgets 1/2/3: per-cohort values equal by position; stable-boundary digests equal at equal progress points": "PASS - calls=4,3,2",
+  "S13 V2-05: missing/mismatched obligation record refuses before either store mutates; repaired store extracts with the record": "PASS",
+  "S14 wave-0 rejection: final state == post-extraction digest; later-wave rejection: earlier wave stays committed (no cohort rollback)": "PASS - keys terminally consumed on every route",
+  "S15 V2-04: {S} vs {S, X_conflicted}: equal cohort identity, pre-wave digest, batches, final state; only the conflict report differs": "PASS",
+  "S15b V2-03: budget 2 admits S then T (executable-only count); budget 1 admits S and defers T with count/diagnostics": "PASS",
+  "S16 V2-10: oversized exception admits 100 whole; all-conflicted 101/102 consumed at zero cost after it; 103 deferred; PAUSED => deferred_cohort_count == 1": "PASS",
+  "S16b all-conflicted slice before an oversized slice does not disturb the exception premise": "PASS",
+  "S17 duplicate command identity at finalization: COMPLETED_COMMAND_NOT_FINALIZED, F=25, ActiveRequest cleared, timeline unchanged": "PASS",
+  "S17b after the refused finalization, a request behind F=25 is still refused at start": "PASS",
+  "S18 non-least fingerprint => SliceChanged with the live least fingerprint; stale fingerprint after Scheduled->Conflicted => no-op": "PASS",
+  "S19 command deferred by budget executes on a later call; canonical result identical to the unbudgeted run": "PASS",
+  "S2 budgets 1 and 2 give identical canonical results": "PASS - budget1 calls=4 budget2 calls=3; cohort order=[('scheduled', 10), ('scheduled', 15), ('scheduled', 20), ('command', 21)]",
+  "S2 pacing diagnostics differ (noncanonical, expected)": "PASS",
+  "S3 one catch-up == stepwise catch-ups (per-cohort digests, final state, F, ActiveRequest)": "PASS - created D@15 consumed inside horizon in both",
+  "S3b stable-boundary digests agree at equal completed horizon": "PASS",
+  "S3c stable-boundary digests differ at unequal completed horizons (F committed)": "PASS",
+  "S3d F excluded from per-cohort digest keeps equality; F included would break it": "PASS - F at capture (t, one-call, stepwise)=[(15, 0, 12), (20, 0, 17)]",
+  "S3e ActiveRequest included in per-cohort digest would break equality (negative control)": "PASS - active at capture differs at every cohort: [(10, 20, 10), (15, 20, 15), (20, 20, 20), (21, 21, 21)]",
+  "S3f cohort@10 pre-wave digest == reference engine holding exactly {B@20} (whole-prefix drain killed)": "PASS",
+  "S4 past-dated command rejected non-canonically; equal-time and later accepted": "PASS - timeline=[(1, 20, 'cmd:20:ok_equal', 'ok_equal'), (2, 25, 'cmd:25:ok', 'ok')]",
+  "S4b equal digests -> identical decision on Command@15": "PASS",
+  "S5 restart from (stores, F, ActiveRequest) with the exact head re-presented == uninterrupted run": "PASS",
+  "S6 no backwards decay evaluation in any scenario": "PASS - assert elapsed >= 0 held in every cohort",
+  "S7 SB-01: paused-request substitution Command@12 refused, byte-identical state": "PASS - cells updated_at max=15 while F=0; refusal mutated nothing",
+  "S7b higher-horizon Advance(25) also refused while Advance(20) is active": "PASS",
+  "S7c exact head resumes and completes; ActiveRequest cleared, F=20": "PASS",
+  "S8 restart + exact request => byte-identical continuation": "PASS",
+  "S8b restart + same-horizon different request (Command@20) => refused, byte-identical": "PASS",
+  "S8c restore validation: active behind frontier rejected; tampered ActiveRequest fails the digest": "PASS",
+  "S9 discrimination: None vs Some, kind, horizon, identity all change stable_boundary_digest; engine_state_digest unchanged": "PASS",
+  "S9b equivalence: equal stable_boundary_digest (permuted construction) => identical response to the same next requests": "PASS"
+ },
+ "diag_budget1": [
+  {
+   "call": "Advance(20)",
+   "command_deferred": false,
+   "deferred_cohort_count": 2,
+   "earliest_deferred_due_time": 15
+  },
+  {
+   "call": "Advance(20)",
+   "command_deferred": false,
+   "deferred_cohort_count": 1,
+   "earliest_deferred_due_time": 20
+  }
+ ],
+ "diag_budget2": [
+  {
+   "call": "Advance(20)",
+   "command_deferred": false,
+   "deferred_cohort_count": 1,
+   "earliest_deferred_due_time": 20
+  }
+ ],
+ "trace_budget1": [
+  {
+   "batches": [
+    "bdf8e09d981771d9"
+   ],
+   "identity": "1836f59c994236fa",
+   "kind": "scheduled",
+   "outcome": "committed",
+   "p": "P",
+   "post": "e6fdb2e30978b363",
+   "prewave": "a06740a17af5095e",
+   "t": 10
+  },
+  {
+   "batches": [
+    "276a58e969c85f2d"
+   ],
+   "identity": "34539b1c54928285",
+   "kind": "scheduled",
+   "outcome": "committed",
+   "p": "P",
+   "post": "546eecd04b96bc56",
+   "prewave": "10aabbe177fc6a28",
+   "t": 15
+  },
+  {
+   "batches": [
+    "ed1b7ba7d8d4e8b8"
+   ],
+   "identity": "31e576e56e173d3a",
+   "kind": "scheduled",
+   "outcome": "committed",
+   "p": "P",
+   "post": "892754401880cb60",
+   "prewave": "8f1d16a0b4a0e7f9",
+   "t": 20
+  },
+  {
+   "batches": [
+    "2e70a9aa3bd09bb5"
+   ],
+   "identity": "a19470517e01c98f",
+   "kind": "command",
+   "outcome": "committed",
+   "p": "P",
+   "post": "d9aec345cd7e6e6a",
+   "prewave": "6b6527885b3f2566",
+   "t": 21
+  }
+ ]
+}

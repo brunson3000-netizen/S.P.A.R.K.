@@ -235,6 +235,24 @@ This decision releases the correction writer pass and its independent review. V3
 remains open until that exact candidate is independently accepted and frozen. Phase-2
 production Rust and Phase 3 remain unauthorized.
 
+#### V3-F01 final correction candidate (separated writer pass, 2026-09-10)
+
+The consolidated final correction package now exists on
+`candidate/v3-f01-final-correction-20260910` and **awaits independent Codex review**,
+with writer verdict `CANDIDATE_READY_FOR_INDEPENDENT_REVIEW`:
+
+- `engineering/phase2/SPARK_PHASE_2_V3_F01_ARCHITECTURE_CORRECTION_CANDIDATE_FINAL_2026-09-10.md`
+- `engineering/phase2/SPARK_PHASE_2_ACCEPTANCE_TEST_ORACLE_V3_F01_FINAL_2026-09-10.md`
+- `engineering/phase2/SPARK_PHASE_2_V3_F01_FINAL_CORRECTION_WRITER_REPORT_2026-09-10.md`
+- `engineering/phase2/v3_f01_final_correction_model_2026-09-10/` (disposable model, 34 checks passing)
+
+It defines the engine-owned `ActiveRequest` discriminator completely, commits it with `F`
+in the stable-boundary digest, corrects V2-03 through V2-10 and the false oracle
+assertions named by the independent reviews, and supersedes the earlier V3-F01 candidates
+as a proposal while preserving them unchanged. **V3-F01 remains OPEN.** Nothing is
+accepted, frozen, or canonical; Phase-2 production Rust and Phase 3 remain unauthorized;
+Phase 1 remains closed; no Rust or Rust test was written or run by this pass.
+
 ## Phase 3
 
 **NOT AUTHORIZED.**

@@ -1,0 +1,35 @@
+[PASS] S1 second request waits while first paused - calls=[('Advance(20)', 'PAUSED'), ('Advance(20)', 'PAUSED'), ('Advance(20)', 'COMPLETED'), ('Command@21(c1)', 'COMPLETED')]
+[PASS] S2 budgets 1 and 2 give identical canonical results - budget1 calls=4 budget2 calls=3; cohort order=[('scheduled', 10), ('scheduled', 15), ('scheduled', 20), ('command', 21)]
+[PASS] S2 pacing diagnostics differ (noncanonical, expected)
+[PASS] S3 one catch-up == stepwise catch-ups (per-cohort digests, final state, F, ActiveRequest) - created D@15 consumed inside horizon in both
+[PASS] S3b stable-boundary digests agree at equal completed horizon
+[PASS] S3c stable-boundary digests differ at unequal completed horizons (F committed)
+[PASS] S3d F excluded from per-cohort digest keeps equality; F included would break it - F at capture (t, one-call, stepwise)=[(15, 0, 12), (20, 0, 17)]
+[PASS] S3e ActiveRequest included in per-cohort digest would break equality (negative control) - active at capture differs at every cohort: [(10, 20, 10), (15, 20, 15), (20, 20, 20), (21, 21, 21)]
+[PASS] S3f cohort@10 pre-wave digest == reference engine holding exactly {B@20} (whole-prefix drain killed)
+[PASS] S4 past-dated command rejected non-canonically; equal-time and later accepted - timeline=[(1, 20, 'cmd:20:ok_equal', 'ok_equal'), (2, 25, 'cmd:25:ok', 'ok')]
+[PASS] S4b equal digests -> identical decision on Command@15
+[PASS] S5 restart from (stores, F, ActiveRequest) with the exact head re-presented == uninterrupted run
+[PASS] S6 no backwards decay evaluation in any scenario - assert elapsed >= 0 held in every cohort
+[PASS] S7 SB-01: paused-request substitution Command@12 refused, byte-identical state - cells updated_at max=15 while F=0; refusal mutated nothing
+[PASS] S7b higher-horizon Advance(25) also refused while Advance(20) is active
+[PASS] S7c exact head resumes and completes; ActiveRequest cleared, F=20
+[PASS] S8 restart + exact request => byte-identical continuation
+[PASS] S8b restart + same-horizon different request (Command@20) => refused, byte-identical
+[PASS] S8c restore validation: active behind frontier rejected; tampered ActiveRequest fails the digest
+[PASS] S9 discrimination: None vs Some, kind, horizon, identity all change stable_boundary_digest; engine_state_digest unchanged
+[PASS] S9b equivalence: equal stable_boundary_digest (permuted construction) => identical response to the same next requests
+[PASS] S10 ActiveRequest absent after COMPLETED and after HORIZON_BEHIND_FRONTIER refusal; refusal mutates neither F nor digest
+[PASS] S10b equal-horizon Advance after completion is accepted and idempotent
+[PASS] S12 budgets 1/2/3: per-cohort values equal by position; stable-boundary digests equal at equal progress points - calls=4,3,2
+[PASS] S13 V2-05: missing/mismatched obligation record refuses before either store mutates; repaired store extracts with the record
+[PASS] S14 wave-0 rejection: final state == post-extraction digest; later-wave rejection: earlier wave stays committed (no cohort rollback) - keys terminally consumed on every route
+[PASS] S15 V2-04: {S} vs {S, X_conflicted}: equal cohort identity, pre-wave digest, batches, final state; only the conflict report differs
+[PASS] S15b V2-03: budget 2 admits S then T (executable-only count); budget 1 admits S and defers T with count/diagnostics
+[PASS] S16 V2-10: oversized exception admits 100 whole; all-conflicted 101/102 consumed at zero cost after it; 103 deferred; PAUSED => deferred_cohort_count == 1
+[PASS] S16b all-conflicted slice before an oversized slice does not disturb the exception premise
+[PASS] S17 duplicate command identity at finalization: COMPLETED_COMMAND_NOT_FINALIZED, F=25, ActiveRequest cleared, timeline unchanged
+[PASS] S17b after the refused finalization, a request behind F=25 is still refused at start
+[PASS] S18 non-least fingerprint => SliceChanged with the live least fingerprint; stale fingerprint after Scheduled->Conflicted => no-op
+[PASS] S19 command deferred by budget executes on a later call; canonical result identical to the unbudgeted run
+ALL PASS
