@@ -219,6 +219,22 @@ across pause/restart (recommended: a minimal digest-committed `ActiveRequest`
 discriminator), correct the carried oracle, and incorporate the Operator's section 8
 amendment decision. V3-F01 remains open; no implementation or later phase is authorized.
 
+#### V3-F01 ActiveRequest Operator decision (2026-09-10)
+
+The Operator authorized the independent review's recommended minimal engine-owned
+`ActiveRequest` discriminator and the associated Phase-2 v1 section 8 retained-state
+amendment. The exact decision is recorded in:
+
+`engineering/phase2/SPARK_PHASE_2_V3_F01_ACTIVE_REQUEST_OPERATOR_DECISION_2026-09-10.md`
+
+The separated final correction writer mission is:
+
+`engineering/phase2/SPARK_PHASE_2_V3_F01_FINAL_CORRECTION_WRITER_MISSION_2026-09-10.md`
+
+This decision releases the correction writer pass and its independent review. V3-F01
+remains open until that exact candidate is independently accepted and frozen. Phase-2
+production Rust and Phase 3 remain unauthorized.
+
 ## Phase 3
 
 **NOT AUTHORIZED.**
