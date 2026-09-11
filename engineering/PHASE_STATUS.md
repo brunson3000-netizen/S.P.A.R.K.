@@ -275,6 +275,27 @@ pass.** V3-F01 remains OPEN, not accepted or frozen; Phase 1 remains closed; Pha
 production implementation and Phase 3 remain unauthorized. The review branch is
 `review/v3-f01-final-20260910`; production is not merged or advanced.
 
+#### V3-F01 bounded correction candidate, Revision 2 (separated writer pass, 2026-09-10)
+
+A Revision-2 correction package based on review commit
+`5b19d7b5aa935b65fcfad1d8bda9a210d5a5684d` now exists on
+`candidate/v3-f01-bounded-correction-rev2-20260910` and **awaits independent Codex HIGH
+review**, with writer verdict `CANDIDATE_READY_FOR_INDEPENDENT_REVIEW`:
+
+- `engineering/phase2/SPARK_PHASE_2_V3_F01_ARCHITECTURE_CORRECTION_CANDIDATE_REV2_2026-09-10.md`
+- `engineering/phase2/SPARK_PHASE_2_ACCEPTANCE_TEST_ORACLE_V3_F01_REV2_2026-09-10.md`
+- `engineering/phase2/SPARK_PHASE_2_V3_F01_BOUNDED_CORRECTION_WRITER_REPORT_REV2_2026-09-10.md`
+- `engineering/phase2/v3_f01_rev2_bounded_correction_evidence_2026-09-10/` (58-check model, disposable Phase-1 probe, validation logs)
+
+It corrects FINAL-01 with an engine-internal single-command finalization (complete
+read-only preflight, then an entailed stage-then-fence) whose every refusal leaves the whole
+timeline byte-identical; FINAL-02 with request-bound dequeue and a fail-closed consumer
+halt; FINAL-03 by scoping history-only replay to completed boundaries; and the five oracle
+precision items. The FINAL candidate and its oracle are superseded as proposals and kept
+unchanged. **V3-F01 remains OPEN.** Nothing is accepted, frozen, or canonical; Phase-2
+production Rust and Phase 3 remain unauthorized; Phase 1 remains closed; no production Rust
+was written.
+
 ## Phase 3
 
 **NOT AUTHORIZED.**

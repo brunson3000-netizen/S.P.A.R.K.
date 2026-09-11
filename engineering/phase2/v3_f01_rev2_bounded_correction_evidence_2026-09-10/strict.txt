@@ -1,0 +1,3 @@
+    Checking spark-core v0.1.0 (/home/chromikey/Projects/SPARK-v3-f01-rev2-writer/crates/spark-core)
+    Checking spark-engine v0.1.0 (/home/chromikey/Projects/SPARK-v3-f01-rev2-writer/crates/spark-engine)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.89s

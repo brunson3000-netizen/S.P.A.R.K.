@@ -1,0 +1,9 @@
+CONFIRMED: S:10 finalized; distinct S:9 positively staged; fence rejects SourceSequenceNotIncreasing { source_id: SourceId(s), previously_finalized: 10, attempted: 9 }; staged slot survives
+before=Digest(e3bfbfe8d8e4448770c818517c0d95a3d49f6915be2520af2f315d40383fe3f7)
+staged=Digest(d29c5a38fa267772f11621ca87d6b4e3a12050af85622189cfcaa7d877b217f9)
+after=Digest(d29c5a38fa267772f11621ca87d6b4e3a12050af85622189cfcaa7d877b217f9)
+CONFIRMED: candidate byte-identical timeline assertion fails (expected red control)
+PASS: candidate disposable model, 34/34 checks
+CONFIRMED: candidate terminal-pop rule loses actual active FIFO head on mismatch
+CONFIRMED: history + F cannot reconstruct pause; snapshot + exact request resumes equivalently
+ALL REVIEW PROBES PASS (confirmed defects, not candidate acceptance)
