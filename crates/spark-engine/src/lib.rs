@@ -75,7 +75,15 @@
 #![forbid(unsafe_code)]
 
 pub mod activation;
+pub mod effects;
+pub mod engine;
+pub mod epoch;
+pub mod ledger;
+pub mod obligation;
 pub mod profile;
+pub mod report;
+pub mod request;
+pub mod rules;
 pub mod state;
 
 #[cfg(any(test, feature = "test-support"))]

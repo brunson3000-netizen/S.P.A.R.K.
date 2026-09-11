@@ -18,4 +18,6 @@
 #![forbid(unsafe_code)]
 
 pub mod composition;
+pub mod consumer;
+pub mod phase2;
 pub mod scenario;

@@ -653,8 +653,8 @@ impl Scheduler {
         let mut current: Option<(LogicalTime, &ProfileId)> = None;
         let mut current_executable = false;
         let close = |summary: &mut DueSliceSummary,
-                         slice: Option<(LogicalTime, &ProfileId)>,
-                         executable: bool| {
+                     slice: Option<(LogicalTime, &ProfileId)>,
+                     executable: bool| {
             if let Some((due, _)) = slice {
                 summary.resident_slice_count = summary.resident_slice_count.saturating_add(1);
                 if executable {

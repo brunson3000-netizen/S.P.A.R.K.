@@ -336,6 +336,61 @@ impl StateStore {
         enc.finish()
     }
 
+    // ---------------- Phase-2 crate-internal read-only helpers ----------------
+
+    /// Every cell of one definition, in stable ascending scope order (the
+    /// aggregation input; v1 §7).
+    pub(crate) fn cells_of<'a>(
+        &'a self,
+        definition_id: &'a DefinitionId,
+    ) -> impl Iterator<Item = &'a StateCell> + 'a {
+        self.cells
+            .iter()
+            .filter(move |((d, _), _)| d == definition_id)
+            .map(|(_, c)| c)
+    }
+
+    /// Validates an evaluator effect without writing (the preflight half of
+    /// validate-all-then-apply-all; v1 Q3). `validate_write` reads only the
+    /// activated schema, never cell contents.
+    pub(crate) fn validate_effect(
+        &self,
+        definition_id: &DefinitionId,
+        scope_id: &ScopeId,
+        value: &CanonicalValue,
+        path: crate::report::WritePath,
+    ) -> Result<(), StateWriteError> {
+        let (required, name) = match path {
+            crate::report::WritePath::SparkEffect => (Authority::SparkOwned, "apply_spark_effect"),
+            crate::report::WritePath::CommitDerived => (Authority::Derived, "commit_derived"),
+        };
+        self.validate_write(
+            &self.profile_id,
+            definition_id,
+            scope_id,
+            value,
+            required,
+            name,
+        )
+    }
+
+    /// Validates a host observation without writing.
+    pub(crate) fn validate_observation(
+        &self,
+        definition_id: &DefinitionId,
+        scope_id: &ScopeId,
+        value: &CanonicalValue,
+    ) -> Result<(), StateWriteError> {
+        self.validate_write(
+            &self.profile_id,
+            definition_id,
+            scope_id,
+            value,
+            Authority::HostOwned,
+            "observe_host_owned",
+        )
+    }
+
     // ---------------- crate-internal write paths ----------------
     //
     // Phase 1 has no non-test caller for these: the host/evaluator facade

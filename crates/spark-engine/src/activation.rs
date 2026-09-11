@@ -460,6 +460,9 @@ pub struct ActivationRegistry {
     /// activation is idempotent and does not grow the lineage.
     lineage: Vec<ActivationRecord>,
     committed_records: BTreeSet<Digest>,
+    /// Phase-2 rule-set lineage: append-only, deduplicated content hashes.
+    rule_set_lineage: Vec<Digest>,
+    committed_rule_sets: BTreeSet<Digest>,
 }
 
 impl ActivationRegistry {
@@ -616,6 +619,72 @@ impl ActivationRegistry {
     /// lineage.
     pub fn lineage_len(&self) -> usize {
         self.lineage.len()
+    }
+
+    /// **THE rule-set door** (Phase-2 freeze v1 Q1). Validates a whole rule set
+    /// against an activated profile minted by this registry and, only if every
+    /// check passes, mints the [`ActivatedRuleSet`] and records it in the
+    /// rule-set lineage. A failure commits nothing and reports every error.
+    ///
+    /// The rule-set lineage is kept separate from the definition lineage, so
+    /// [`lineage_digest`](Self::lineage_digest) is byte-identical for every
+    /// registry that never activates a rule set (Phase-1 digest stability).
+    pub fn activate_rule_set(
+        &mut self,
+        profile: &ActivatedProfile,
+        spec: &crate::rules::RuleSetSpec,
+    ) -> Result<crate::rules::ActivatedRuleSet, Vec<crate::rules::RuleSetError>> {
+        let minted_here = profile.definitions().all(|d| {
+            self.identities
+                .get(&(d.profile_id().clone(), d.definition_id().clone()))
+                == Some(d.fingerprint())
+        });
+        if !minted_here {
+            return Err(vec![crate::rules::RuleSetError::ProfileNotActivatedHere {
+                profile_id: profile.profile_id().clone(),
+            }]);
+        }
+        let activated = crate::rules::validate_and_mint(profile, spec, true)?;
+        let hash = activated.content_hash().clone();
+        if self.committed_rule_sets.insert(hash.clone()) {
+            self.rule_set_lineage.push(hash);
+        }
+        Ok(activated)
+    }
+
+    /// Test-support only: the rule-set door with the static zero-delay depth
+    /// bound disabled (every other check, including cycle rejection, still
+    /// runs). Sound static validation makes runtime depth overflow unreachable;
+    /// this seam exists solely so the defense-in-depth conversion to strictly
+    /// later work (v1 Q4, v2 §11; AT-I21) is executable.
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn activate_rule_set_without_depth_bound(
+        &mut self,
+        profile: &ActivatedProfile,
+        spec: &crate::rules::RuleSetSpec,
+    ) -> Result<crate::rules::ActivatedRuleSet, Vec<crate::rules::RuleSetError>> {
+        let activated = crate::rules::validate_and_mint(profile, spec, false)?;
+        let hash = activated.content_hash().clone();
+        if self.committed_rule_sets.insert(hash.clone()) {
+            self.rule_set_lineage.push(hash);
+        }
+        Ok(activated)
+    }
+
+    /// A deterministic digest of the append-only, deduplicated rule-set
+    /// activation lineage.
+    pub fn rule_set_lineage_digest(&self) -> Digest {
+        let mut enc = CanonicalEncoder::new();
+        enc.push_str("rule_set_lineage");
+        enc.push_u64(self.rule_set_lineage.len() as u64);
+        for h in &self.rule_set_lineage {
+            enc.push_digest(h);
+        }
+        enc.finish()
+    }
+
+    pub fn rule_set_lineage_len(&self) -> usize {
+        self.rule_set_lineage.len()
     }
 
     pub fn len(&self) -> usize {

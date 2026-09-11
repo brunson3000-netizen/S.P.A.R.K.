@@ -90,3 +90,201 @@ pub fn commit_derived(
         behavior_epoch,
     )
 }
+
+// ---------------------------------------------------------------- Phase-2 seams
+//
+// Test-only observation and fault-injection seams for the Phase-2 acceptance
+// oracle. None of them exists without `test-support`; none reaches a canonical
+// report; the observation values are a distinct newtype with no conversion into
+// any evaluation-context type (AT-I46).
+
+use crate::engine::{Engine, EngineSnapshot, ExtractionRefusal, Observation, PreflightRow};
+use crate::obligation::{ObligationMode, ObligationRecord};
+use crate::request::Request;
+use spark_core::hash::Digest;
+use spark_core::scheduler::{DueWorkItem, WorkKey};
+use spark_core::timeline::SemanticCommandEnvelope;
+
+/// The observation log (pre-wave digests, outer-loop selections, finalization
+/// operation log).
+pub fn observation(engine: &Engine) -> &Observation {
+    &engine.observation
+}
+
+pub fn clear_observation(engine: &mut Engine) {
+    engine.observation = Observation::default();
+}
+
+/// AT-I48(j): disable one preflight row (test builds only).
+pub fn disable_preflight_row(engine: &mut Engine, row: Option<PreflightRow>) {
+    engine.disabled_row = row;
+}
+
+/// The engine extraction called directly (AT-I42(l)(m)(n)). Returns the
+/// executable records removed and the conflicted keys.
+#[allow(clippy::result_large_err)]
+pub fn extract_least_due_slice(
+    engine: &mut Engine,
+    horizon: LogicalTime,
+) -> Result<(Vec<ObligationRecord>, Vec<WorkKey>), ExtractionRefusal> {
+    let e = engine.extract_least_due_slice(horizon)?;
+    Ok((
+        e.executable.into_iter().map(|(_, r)| r).collect(),
+        e.conflicted
+            .into_iter()
+            .map(|(c, _)| c.key().clone())
+            .collect(),
+    ))
+}
+
+/// Replace (or delete, with `None`) the obligation claim set under `key`.
+pub fn tamper_obligations(
+    engine: &mut Engine,
+    key: &WorkKey,
+    records: Option<Vec<ObligationRecord>>,
+) {
+    engine.obligations.tamper(key, records);
+}
+
+/// Insert one record into both stores exactly as a committed wave would
+/// (commutative mirror of `Scheduler::schedule`), for collision fixtures.
+pub fn schedule_record(engine: &mut Engine, record: ObligationRecord) {
+    engine.scheduler.schedule(DueWorkItem {
+        key: record.key.clone(),
+        payload: record.payload(),
+    });
+    engine.obligations.insert(record);
+}
+
+/// A re-evaluation record under an arbitrary key (collision fixtures).
+pub fn reevaluation_record(
+    key: WorkKey,
+    rule_id: DefinitionId,
+    rule_fingerprint: Digest,
+    ruleset_content_hash: Digest,
+    creator_emission_identity: Digest,
+    behavior_artifact_hash: Digest,
+) -> ObligationRecord {
+    ObligationRecord {
+        key,
+        creator_rule_id: rule_id.clone(),
+        creator_behavior_epoch: 1,
+        creator_behavior_artifact_hash: behavior_artifact_hash,
+        creator_emission_identity,
+        mode: ObligationMode::RuleReEvaluation {
+            rule_id,
+            rule_fingerprint,
+            ruleset_content_hash,
+        },
+    }
+}
+
+/// A record with an arbitrary mode (fingerprint-drift fixtures).
+pub fn record_with_mode(template: &ObligationRecord, mode: ObligationMode) -> ObligationRecord {
+    let mut r = template.clone();
+    r.mode = mode;
+    r
+}
+
+/// Stage an envelope directly into the engine's timeline, bypassing the
+/// engine, to construct the unexpected (non-engine-reachable) staging states
+/// of AT-I48(c) P-6. Returns whether the call returned `Ok`.
+pub fn stage_raw(engine: &mut Engine, envelope: SemanticCommandEnvelope) -> bool {
+    let Ok(window) = engine.timeline.current_admission_window() else {
+        return false;
+    };
+    let grant = engine.grant.clone();
+    engine
+        .timeline
+        .stage(&grant, &envelope.submit_with(window.ticket()))
+        .is_ok()
+}
+
+/// Snapshot tampering for restore-validation tests.
+pub fn snapshot_set_active(snapshot: &mut EngineSnapshot, request: Option<&Request>) {
+    snapshot.active = request.map(Request::discriminator);
+}
+
+pub fn snapshot_set_frontier(snapshot: &mut EngineSnapshot, frontier: LogicalTime) {
+    snapshot.frontier = frontier;
+}
+
+pub fn snapshot_stage_raw(
+    snapshot: &mut EngineSnapshot,
+    envelope: SemanticCommandEnvelope,
+) -> bool {
+    let Ok(window) = snapshot.timeline.current_admission_window() else {
+        return false;
+    };
+    let grant = snapshot.grant.clone();
+    snapshot
+        .timeline
+        .stage(&grant, &envelope.submit_with(window.ticket()))
+        .is_ok()
+}
+
+/// Recompute and store the snapshot digest (to isolate one validation step).
+pub fn snapshot_reseal(snapshot: &mut EngineSnapshot) {
+    let esd = {
+        let mut enc = spark_core::hash::CanonicalEncoder::new();
+        enc.push_str("engine_state");
+        enc.push_digest(&snapshot.store.canonical_state_digest());
+        enc.push_digest(&snapshot.scheduler.canonical_state_digest());
+        enc.push_digest(&snapshot.timeline.canonical_state_digest());
+        enc.push_digest(&snapshot.epochs.canonical_digest());
+        enc.push_digest(&snapshot.obligations.canonical_digest());
+        enc.push_digest(&snapshot.occurrences.canonical_digest());
+        enc.push_digest(&snapshot.cooldowns.canonical_digest());
+        enc.finish()
+    };
+    snapshot.recorded_stable_boundary_digest =
+        crate::engine::stable_boundary_digest_of(&esd, snapshot.frontier, snapshot.active.as_ref());
+}
+
+/// Delete one obligation claim set inside a snapshot (bidirectional-invariant
+/// restore test).
+pub fn snapshot_drop_obligation(snapshot: &mut EngineSnapshot, key: &WorkKey) {
+    snapshot.obligations.tamper(key, None);
+}
+
+/// Set one occurrence-ledger sequence (AT-I8 exhaustion fixtures; `u64`
+/// exhaustion is otherwise unreachable in a test's lifetime).
+pub fn set_occurrence_next(
+    engine: &mut Engine,
+    key: crate::ledger::OccurrenceLedgerKey,
+    next: u64,
+) {
+    engine.occurrences.set_next(key, next);
+}
+
+/// The complete timeline state: the derived `Debug` rendering exposes every
+/// private field (slots, poison evidence, staged and finalized identity
+/// indexes, last-finalized sequences, fences, epoch metadata, frontier).
+pub fn timeline_debug(engine: &Engine) -> String {
+    format!("{:?}", engine.timeline)
+}
+
+/// An isolated working copy of the engine's timeline (the AT-I48(e)
+/// differential reference; never the production mechanism, D-6).
+pub fn timeline_clone(engine: &Engine) -> spark_core::timeline::TimelineIngress {
+    engine.timeline.clone()
+}
+
+/// Override the engine's sequencer grant (P-3 is unreachable otherwise).
+pub fn set_grant(engine: &mut Engine, grant: spark_core::id::SourceId) {
+    engine.grant = grant;
+}
+
+/// Replace the engine's timeline with one resumed at `frontier` (the
+/// Phase-1 `test-support` constructor), to reach ordinal-space exhaustion.
+pub fn resume_timeline_at(engine: &mut Engine, frontier: u64, window_width: u32) {
+    if let Ok(t) = spark_core::timeline::TimelineIngress::resume_at_frontier(
+        engine.profile_id.clone(),
+        engine.timeline.timeline_epoch(),
+        engine.grant.clone(),
+        window_width,
+        spark_core::timeline::Ordinal(frontier),
+    ) {
+        engine.timeline = t;
+    }
+}
