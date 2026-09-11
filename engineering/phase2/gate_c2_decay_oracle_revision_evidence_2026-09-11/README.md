@@ -41,6 +41,17 @@ unchanged.
 | `preservation` | **first run exit 1, a checker defect** (`preservation-first-run-checker-defect.txt`). The new fifth protected-function row compared `derived_indexes_consistent` with production, where it does not exist (it was added by accepted Gate C2 checkpoint `aad4633`). The corrected check compares it with the review commit and the four Phase-1 functions with production: exit 0, no failures (`preservation.txt`). No source changed between the runs |
 | `workload` | exit 0 (one release run, one developer machine): 1k / 4k / 16k finalized commands → history build 0.398 / 7.251 / 137.480 s; indexed P-9 preflight 2 361 / 2 431 / 2 405 ns per call (flat); forbidden-scan reference 5 848 / 38 494 / 1 206 013 ns; whole successful finalization 1.10 / 4.04 / 14.91 ms (linear in history through the unchanged Phase-1 `submit_fence`, C2-09). Not a benchmark |
 
+### Whitespace correction after checkpoint 2
+
+Checkpoint 2 (`00221d8`) committed four logs whose command output was empty — `fmt.txt`,
+`metadata.txt`, `whitespace-candidate-range.txt`, `whitespace-production-range.txt` — each
+ending in one blank line, which `git diff --check` flags. The staged-range check caught it,
+but a shell `&&` chain let the commit proceed. The follow-up commit removes only those
+trailing blank lines (content unchanged: each command's output is empty, exit 0),
+fixes `run_validation.py` so empty output adds no blank line, and refreshes `SHA256SUMS`.
+Both `git diff --check` ranges were re-verified on the final staged tree before that commit.
+History was not rewritten.
+
 ## Nonclaims
 
 These are finite tests, source analysis and one-machine measurements. They are not formal

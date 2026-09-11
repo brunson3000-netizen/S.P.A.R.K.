@@ -32,7 +32,9 @@ for name, cmd in checks:
     start = time.time()
     r = subprocess.run(cmd, shell=True, cwd=root, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     text = '\n'.join(line.rstrip() for line in r.stdout.rstrip().splitlines())
-    (out / (name + '.txt')).write_text(f'# tree: {head}\n# whitespace-normalized\n$ {cmd}\n{text}\n')
+    # An empty output adds no blank line (a trailing blank line fails `git diff --check`).
+    body = f'{text}\n' if text else ''
+    (out / (name + '.txt')).write_text(f'# tree: {head}\n# whitespace-normalized\n$ {cmd}\n{body}')
     results.append(dict(name=name, command=cmd, exit_code=r.returncode, seconds=round(time.time() - start, 3)))
     (out / 'checks.json').write_text(json.dumps({'tree': head, 'checks': results}, indent=2) + '\n')
     print(results[-1], flush=True)

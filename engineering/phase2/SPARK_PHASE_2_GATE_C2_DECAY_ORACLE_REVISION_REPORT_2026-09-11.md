@@ -52,7 +52,8 @@ Every other gate check passes (§10).
 | Production | `7e3a0aae069a8bf840e4dfb74221cdf2687b1db5` (ancestor; live `phase1-refoundation-v2`, unchanged) |
 | Checkpoint 0 | `8844264` — mission recorded before any code change |
 | Checkpoint 1 | `5ae506a` — C2R-01 … C2R-04 code, tests, seams, adaptations; pre-correction probe red |
-| Checkpoint 2 | report, evidence and review mission (hash in the receipt; a commit cannot record its own hash) |
+| Checkpoint 2 | `00221d8` — report, evidence and review mission |
+| Checkpoint 3 | evidence whitespace correction only: four empty-output logs lost a trailing blank line that `git diff --check` flags (see the evidence README). This is the final candidate commit; its hash is in the receipt, since a commit cannot record its own hash |
 
 Every pre-existing branch and worktree was left intact (`preservation.json` lists the
 worktrees). Before any production change, the second review's probes were run unchanged
