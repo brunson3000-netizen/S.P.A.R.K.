@@ -279,6 +279,70 @@ pub fn snapshot_truncate_lineage(snapshot: &mut EngineSnapshot) {
     snapshot.lineage.pop();
 }
 
+/// AT-I26: set one cooldown entry directly (only the `CooldownLedger` moves).
+pub fn set_cooldown(engine: &mut Engine, rule: DefinitionId, scope: ScopeId, expiry: LogicalTime) {
+    engine.cooldowns.set(rule, scope, expiry);
+}
+
+/// AT-I26: append one well-chained epoch record re-binding the current
+/// artifacts (only the `EpochRegistry` moves; the lineage is deliberately not
+/// extended, so such an engine must never be restored).
+pub fn append_epoch_record(engine: &mut Engine) {
+    let Some(current) = engine.epochs.current().cloned() else {
+        return;
+    };
+    let Ok((epoch, previous)) = engine.epochs.successor() else {
+        return;
+    };
+    let record = crate::epoch::EpochRecord::new(
+        engine.profile_id.clone(),
+        epoch,
+        current.manifest_content_hash().clone(),
+        current.config_revision_hash().clone(),
+        current.ruleset_content_hash().clone(),
+        engine.store.activation_hash().clone(),
+        previous,
+        crate::epoch::ActivatingBarrier::Genesis,
+    );
+    let _ = engine.epochs.append(record);
+}
+
+/// AT-I1: apply already-resolved committed effects to an engine's store at
+/// `at` exactly as a committed wave does (including baseline
+/// materialization) — "the same effects applied to an untouched clone".
+pub fn apply_committed_effects(
+    engine: &mut Engine,
+    effects: &[crate::report::CommittedEffect],
+    at: LogicalTime,
+) {
+    let epoch = engine.behavior_epoch();
+    for e in effects {
+        let _ = match e.write_path {
+            crate::report::WritePath::SparkEffect => engine.store.apply_spark_effect(
+                engine.profile_id.clone(),
+                e.definition.clone(),
+                e.scope.clone(),
+                e.value.clone(),
+                at,
+                epoch,
+            ),
+            crate::report::WritePath::CommitDerived => engine.store.commit_derived(
+                engine.profile_id.clone(),
+                e.definition.clone(),
+                e.scope.clone(),
+                e.value.clone(),
+                at,
+                epoch,
+            ),
+        };
+        if let Some(b) = engine.rule_set.baseline(&e.definition) {
+            engine
+                .store
+                .materialize_baseline(&e.definition, &e.scope, b);
+        }
+    }
+}
+
 /// The number of retained per-epoch artifact entries (one per epoch record).
 pub fn lineage_len(engine: &Engine) -> usize {
     engine.lineage.len()

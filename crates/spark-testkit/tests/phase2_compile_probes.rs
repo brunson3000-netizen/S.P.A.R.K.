@@ -242,6 +242,11 @@ fn forbidden() -> Vec<Forbidden> {
         Forbidden { name: "D-C2-7 the epoch artifact lineage is engine-internal", body: "let e = build(); let _ = &e.lineage;", expected_fragment: "lineage" },
         Forbidden { name: "D-C2-7 snapshots expose no lineage", body: "let e = build(); let s = e.snapshot().unwrap(); let _ = &s.lineage;", expected_fragment: "lineage" },
         Forbidden { name: "C2-05 the decay walk is not a host surface", body: "let e = build(); let _ = e.decay_walk;", expected_fragment: "decay_walk" },
+        Forbidden { name: "AT-I32/AT-I20d PacingDiagnostics cannot be constructed outside the engine", body: "let _ = spark_engine::report::PacingDiagnostics { declared_max_due_per_cycle: 1, admitted_cohort_count: 0, admitted_work_key_count: 0, admitted_cohort_identities: vec![], pacing_overrun: false, overrun_cohort_identity: None, deferred_cohort_count: 0, earliest_deferred_due_time: None };", expected_fragment: "non-exhaustive" },
+        Forbidden { name: "AT-I32/AT-I20d PacingDiagnostics has no public constructor", body: "let _ = spark_engine::report::PacingDiagnostics::default();", expected_fragment: "default" },
+        Forbidden { name: "AT-I32 evaluator intents are engine-internal", body: "let _: Option<spark_engine::effects::Intent> = None;", expected_fragment: "Intent" },
+        Forbidden { name: "AT-I32 epoch artifacts are engine-internal", body: "let _: Option<spark_engine::engine::EpochArtifacts> = None;", expected_fragment: "EpochArtifacts" },
+        Forbidden { name: "AT-I32 fail-stop state is engine-internal", body: "let _: Option<spark_engine::engine::FailStop> = None;", expected_fragment: "FailStop" },
         Forbidden { name: "C2-05 baselines are not materialized by a host", body: "let mut e = build(); let _ = e.state().materialize_baseline(todo!(), todo!(), 0);", expected_fragment: "materialize_baseline" },
     ]
 }

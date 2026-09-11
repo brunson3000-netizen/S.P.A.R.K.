@@ -468,7 +468,7 @@ enum Seed {
     },
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct EnqueueClaim {
     identity: Digest,
     ledger_key: OccurrenceLedgerKey,
@@ -1335,10 +1335,7 @@ impl Engine {
         let mut admitted_executable: u64 = 0;
         let mut exception_fired = false;
         let mut reports = Vec::new();
-        let mut diagnostics = PacingDiagnostics {
-            declared_max_due_per_cycle: self.rule_set.budgets().max_due_per_cycle,
-            ..PacingDiagnostics::default()
-        };
+        let mut diagnostics = PacingDiagnostics::new(self.rule_set.budgets().max_due_per_cycle);
         loop {
             // A2: the outer-loop selection seam.
             #[cfg(any(test, feature = "test-support"))]
@@ -2163,9 +2160,33 @@ impl Engine {
                 });
             }
         }
-        let converted_keys_from = draft.enqueues.len();
-        let mut enqueues = draft.enqueues;
-        enqueues.extend(conversions);
+        // v2 §3.2 idempotency covers every emitting operation, obligation
+        // emissions included: an exact duplicate enqueue claim (same
+        // identity, same claim) folds to one — a redelivered derived emission
+        // creates its obligation once — and one identity with a different
+        // claim is a contested emission rejecting the wave. The least
+        // contested identity is reported, so evidence is order-independent.
+        let mut claims: Vec<(bool, EnqueueClaim)> =
+            draft.enqueues.into_iter().map(|c| (false, c)).collect();
+        claims.extend(conversions.into_iter().map(|c| (true, c)));
+        let mut canonical: BTreeMap<Digest, (bool, EnqueueClaim)> = BTreeMap::new();
+        let mut contested: BTreeSet<Digest> = BTreeSet::new();
+        for (conversion, c) in claims {
+            match canonical.get(&c.identity) {
+                Some((_, existing)) if existing != &c => {
+                    contested.insert(c.identity.clone());
+                }
+                Some(_) => {}
+                None => {
+                    canonical.insert(c.identity.clone(), (conversion, c));
+                }
+            }
+        }
+        if let Some(identity) = contested.into_iter().next() {
+            return Err(WaveRejection::ContestedEmission { identity });
+        }
+        let conversion_flags: Vec<bool> = canonical.values().map(|(f, _)| *f).collect();
+        let enqueues: Vec<EnqueueClaim> = canonical.into_values().map(|(_, c)| c).collect();
         let enqueue_count = enqueues.len() as u64;
         if enqueue_count > u64::from(budgets.max_enqueue_per_wave) {
             return Err(WaveRejection::SemanticCap {
@@ -2266,7 +2287,7 @@ impl Engine {
         }
         let depth_conversions: Vec<WorkKey> = records
             .iter()
-            .filter(|(i, _)| *i >= converted_keys_from)
+            .filter(|(i, _)| conversion_flags.get(*i) == Some(&true))
             .map(|(_, r)| r.key.clone())
             .collect();
         Ok(WavePlan {

@@ -26,7 +26,11 @@ use std::collections::BTreeSet;
 /// field list. A deferred command is not a separate field: a command request
 /// that returns `Paused` with `deferred_cohort_count == 0` has its command
 /// deferred (FINAL/Revision-2 A6), which is derivable from the frozen fields.
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+///
+/// `#[non_exhaustive]` and without a public constructor: an external crate can
+/// read a result's diagnostics but cannot construct or forge one (v3 AT-I32).
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
 pub struct PacingDiagnostics {
     pub declared_max_due_per_cycle: u32,
     pub admitted_cohort_count: u64,
@@ -36,6 +40,21 @@ pub struct PacingDiagnostics {
     pub overrun_cohort_identity: Option<Digest>,
     pub deferred_cohort_count: u64,
     pub earliest_deferred_due_time: Option<LogicalTime>,
+}
+
+impl PacingDiagnostics {
+    pub(crate) fn new(declared_max_due_per_cycle: u32) -> Self {
+        PacingDiagnostics {
+            declared_max_due_per_cycle,
+            admitted_cohort_count: 0,
+            admitted_work_key_count: 0,
+            admitted_cohort_identities: Vec::new(),
+            pacing_overrun: false,
+            overrun_cohort_identity: None,
+            deferred_cohort_count: 0,
+            earliest_deferred_due_time: None,
+        }
+    }
 }
 
 /// ADR-0006 coverage status for bounded provenance.
