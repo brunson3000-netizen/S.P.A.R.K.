@@ -547,22 +547,350 @@ impl Scheduler {
         enc.push_str("scheduler_state");
         enc.push_u64(self.slots.len() as u64);
         for (key, slot) in &self.slots {
-            let mut inner = CanonicalEncoder::new();
-            key.canonicalize(&mut inner);
-            match slot {
-                SlotState::Scheduled(payload) => {
-                    inner.push_str("slot.scheduled");
-                    payload.canonicalize(&mut inner);
-                }
-                SlotState::Conflicted(evidence) => {
-                    inner.push_str("slot.conflicted");
-                    evidence.canonicalize(&mut inner);
-                }
-            }
-            enc.push_block(&inner);
+            enc.push_block(&slot_block(key, slot));
         }
         enc.finish()
     }
+
+    // ------------------------------------------------------------------
+    // Phase-2 least-due compare-and-take surface (X-1 … X-4).
+    //
+    // Frozen by the accepted V3-F01 architecture (FINAL candidate §10,
+    // V2 candidate §5): four *additive* items. `schedule`, `drain_due`,
+    // every Phase-1 type, and every canonical encoding are unchanged. The
+    // items are `pub` because ADR-0001's dependency direction leaves no
+    // other placement for the engine to reach them; no Rust-privacy claim
+    // is made. The enforced boundary is the `spark-engine` facade, which
+    // owns its `Scheduler` and exposes none of these to a host.
+    // ------------------------------------------------------------------
+
+    /// **X-1.** A borrowed handle on the single least resident
+    /// `(due_time, profile_id)` slice with `due_time <= horizon`, or `None`.
+    ///
+    /// There is deliberately no enumeration of later slices and no payload
+    /// or conflict evidence on the handle. Read-only: the canonical state
+    /// digest is unchanged by calling it.
+    pub fn least_due_slice(&self, horizon: LogicalTime) -> Option<LeastDueSlice<'_>> {
+        let first = self.slots.keys().next()?;
+        if first.due_time > horizon {
+            return None;
+        }
+        let due_time = first.due_time;
+        let profile_id = &first.profile_id;
+        let slots: Vec<(&WorkKey, &SlotState)> = self
+            .slots
+            .iter()
+            .take_while(|(k, _)| k.due_time == due_time && &k.profile_id == profile_id)
+            .collect();
+        Some(LeastDueSlice {
+            due_time,
+            profile_id,
+            slots,
+        })
+    }
+
+    /// **X-3.** Compare-and-take: removes the live least due slice with
+    /// `due_time <= horizon` **iff** its recomputed fingerprint equals
+    /// `expected`.
+    ///
+    /// The target is fixed by the operation, never by the argument: there
+    /// is no removal by key, range, predicate, count, or coordinate. The
+    /// slice is located, fingerprinted, and compared before anything is
+    /// removed, so both typed failures are byte-identical no-ops. The
+    /// `due`/`conflicted` partition, order, and every `WorkKeyConflict`
+    /// value are exactly what [`drain_due`](Self::drain_due) produces for
+    /// the same slots.
+    pub fn take_least_due_slice(
+        &mut self,
+        horizon: LogicalTime,
+        expected: &SliceFingerprint,
+    ) -> Result<SliceExtraction, TakeSliceError> {
+        let (due_time, profile_id, count, observed) = match self.least_due_slice(horizon) {
+            None => {
+                return Err(TakeSliceError::NoSliceDue {
+                    least_resident_due_time: self.slots.keys().next().map(|k| k.due_time),
+                })
+            }
+            Some(slice) => (
+                slice.due_time,
+                slice.profile_id.clone(),
+                slice.slots.len(),
+                slice.fingerprint(),
+            ),
+        };
+        if &observed != expected {
+            return Err(TakeSliceError::SliceChanged { observed });
+        }
+        let mut due = Vec::new();
+        let mut conflicted = Vec::new();
+        // The slice is exactly the first `count` entries of the map, so
+        // removal walks entries off the front with no fallible re-lookup.
+        for _ in 0..count {
+            if let Some(entry) = self.slots.first_entry() {
+                let (key, slot) = entry.remove_entry();
+                match slot {
+                    SlotState::Scheduled(payload) => due.push(DueWorkItem { key, payload }),
+                    SlotState::Conflicted(evidence) => {
+                        conflicted.push(evidence.to_conflict(&key));
+                    }
+                }
+            }
+        }
+        Ok(SliceExtraction {
+            due_time,
+            profile_id,
+            due,
+            conflicted,
+            fingerprint: observed,
+        })
+    }
+
+    /// **X-4.** Read-only, noncanonical pacing telemetry over every
+    /// resident slice with `due_time <= horizon`. Consumed only by pacing
+    /// diagnostics; never given to evaluation.
+    pub fn due_slice_summary(&self, horizon: LogicalTime) -> DueSliceSummary {
+        let mut summary = DueSliceSummary::default();
+        let mut current: Option<(LogicalTime, &ProfileId)> = None;
+        let mut current_executable = false;
+        let close = |summary: &mut DueSliceSummary,
+                         slice: Option<(LogicalTime, &ProfileId)>,
+                         executable: bool| {
+            if let Some((due, _)) = slice {
+                summary.resident_slice_count = summary.resident_slice_count.saturating_add(1);
+                if executable {
+                    summary.executable_slice_count =
+                        summary.executable_slice_count.saturating_add(1);
+                    if summary.earliest_executable_due_time.is_none() {
+                        summary.earliest_executable_due_time = Some(due);
+                    }
+                }
+            }
+        };
+        for (key, slot) in &self.slots {
+            if key.due_time > horizon {
+                break;
+            }
+            let this = (key.due_time, &key.profile_id);
+            if current != Some(this) {
+                close(&mut summary, current, current_executable);
+                current = Some(this);
+                current_executable = false;
+            }
+            if matches!(slot, SlotState::Scheduled(_)) {
+                current_executable = true;
+            }
+        }
+        close(&mut summary, current, current_executable);
+        summary
+    }
+}
+
+/// The per-slot canonical block exactly as
+/// [`Scheduler::canonical_state_digest`] commits it. Shared by the digest
+/// and the X-2 slice fingerprint, so the fingerprint is byte-for-byte the
+/// restriction of the frozen scheduler digest to one slice.
+fn slot_block(key: &WorkKey, slot: &SlotState) -> CanonicalEncoder {
+    let mut inner = CanonicalEncoder::new();
+    key.canonicalize(&mut inner);
+    match slot {
+        SlotState::Scheduled(payload) => {
+            inner.push_str("slot.scheduled");
+            payload.canonicalize(&mut inner);
+        }
+        SlotState::Conflicted(evidence) => {
+            inner.push_str("slot.conflicted");
+            evidence.canonicalize(&mut inner);
+        }
+    }
+    inner
+}
+
+/// **X-2.** An owned, retainable, **non-authorizing** comparison value for
+/// one due slice:
+///
+/// ```text
+/// H("due_slice_fingerprint_v1" ‖ due_time ‖ profile_id ‖ occupied_slot_count
+///   ‖ per-slot block, ascending by WorkKey)
+/// ```
+///
+/// It names no target: [`Scheduler::take_least_due_slice`] always acts on
+/// the live least due slice, so possessing a fingerprint grants nothing a
+/// fresh [`Scheduler::least_due_slice`] would not.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct SliceFingerprint(Digest);
+
+impl SliceFingerprint {
+    pub fn as_digest(&self) -> &Digest {
+        &self.0
+    }
+}
+
+/// The commitment of one occupied slot: the digest of its canonical
+/// per-slot block. It exposes neither a payload nor conflict evidence;
+/// the engine compares it against the block its own obligation records
+/// imply, which is how the cross-store extraction preflight is decided
+/// without a second read path for work content.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct SlotCommitment(Digest);
+
+impl SlotCommitment {
+    pub fn as_digest(&self) -> &Digest {
+        &self.0
+    }
+
+    /// The commitment a `Scheduled(payload)` slot under `key` has.
+    pub fn scheduled(key: &WorkKey, payload: &WorkPayload) -> Self {
+        SlotCommitment(slot_block(key, &SlotState::Scheduled(payload.clone())).finish())
+    }
+
+    /// The commitment a conflicted slot under `key` has when it tracks
+    /// exactly `tracked` distinct claim hashes with truncation flag
+    /// `truncated` (the `BoundedClaimSet` canonical form).
+    pub fn conflicted(key: &WorkKey, tracked: &BTreeSet<Digest>, truncated: bool) -> Self {
+        let mut inner = CanonicalEncoder::new();
+        key.canonicalize(&mut inner);
+        inner.push_str("slot.conflicted");
+        inner.push_u64(tracked.len() as u64);
+        for hash in tracked {
+            inner.push_digest(hash);
+        }
+        inner.push_bool(truncated);
+        SlotCommitment(inner.finish())
+    }
+}
+
+/// **X-1** handle: the least resident due slice, borrowed.
+#[derive(Debug)]
+pub struct LeastDueSlice<'a> {
+    due_time: LogicalTime,
+    profile_id: &'a ProfileId,
+    slots: Vec<(&'a WorkKey, &'a SlotState)>,
+}
+
+impl LeastDueSlice<'_> {
+    pub fn due_time(&self) -> LogicalTime {
+        self.due_time
+    }
+
+    pub fn profile_id(&self) -> &ProfileId {
+        self.profile_id
+    }
+
+    /// Occupied slots in `Scheduled` state: the executable cohort size.
+    pub fn executable_count(&self) -> usize {
+        self.slots
+            .iter()
+            .filter(|(_, s)| matches!(s, SlotState::Scheduled(_)))
+            .count()
+    }
+
+    pub fn conflicted_count(&self) -> usize {
+        self.slots
+            .iter()
+            .filter(|(_, s)| matches!(s, SlotState::Conflicted(_)))
+            .count()
+    }
+
+    pub fn occupied_slot_count(&self) -> usize {
+        self.slots.len()
+    }
+
+    /// The slice's keys in ascending order with their slot status.
+    pub fn keys(&self) -> Vec<(WorkKey, WorkSlotStatus)> {
+        self.slots
+            .iter()
+            .map(|(k, s)| ((*k).clone(), status_of(s)))
+            .collect()
+    }
+
+    /// The slice's keys with status and per-slot commitment.
+    pub fn slot_commitments(&self) -> Vec<(WorkKey, WorkSlotStatus, SlotCommitment)> {
+        self.slots
+            .iter()
+            .map(|(k, s)| {
+                (
+                    (*k).clone(),
+                    status_of(s),
+                    SlotCommitment(slot_block(k, s).finish()),
+                )
+            })
+            .collect()
+    }
+
+    /// **X-2.** The owned, non-authorizing slice fingerprint.
+    pub fn fingerprint(&self) -> SliceFingerprint {
+        let mut enc = CanonicalEncoder::new();
+        enc.push_str("due_slice_fingerprint_v1");
+        self.due_time.canonicalize(&mut enc);
+        self.profile_id.canonicalize(&mut enc);
+        enc.push_u64(self.slots.len() as u64);
+        for (key, slot) in &self.slots {
+            enc.push_block(&slot_block(key, slot));
+        }
+        SliceFingerprint(enc.finish())
+    }
+}
+
+fn status_of(slot: &SlotState) -> WorkSlotStatus {
+    match slot {
+        SlotState::Scheduled(_) => WorkSlotStatus::Scheduled,
+        SlotState::Conflicted(_) => WorkSlotStatus::Conflicted,
+    }
+}
+
+/// The result of one successful [`Scheduler::take_least_due_slice`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SliceExtraction {
+    pub due_time: LogicalTime,
+    pub profile_id: ProfileId,
+    /// The executable cohort, ascending by `WorkKey`.
+    pub due: Vec<DueWorkItem>,
+    /// Conflicted keys, ascending by `WorkKey`, in `drain_due` shape.
+    pub conflicted: Vec<WorkKeyConflict>,
+    /// The fingerprint of the removed slice.
+    pub fingerprint: SliceFingerprint,
+}
+
+/// Typed, byte-identical no-op failures of [`Scheduler::take_least_due_slice`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TakeSliceError {
+    /// No resident slice has `due_time <= horizon`.
+    NoSliceDue {
+        least_resident_due_time: Option<LogicalTime>,
+    },
+    /// The live least due slice's fingerprint differs from `expected`.
+    SliceChanged { observed: SliceFingerprint },
+}
+
+impl fmt::Display for TakeSliceError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            TakeSliceError::NoSliceDue {
+                least_resident_due_time,
+            } => write!(
+                f,
+                "no resident slice is due (least resident due time: {least_resident_due_time:?})"
+            ),
+            TakeSliceError::SliceChanged { observed } => write!(
+                f,
+                "the live least due slice changed (observed fingerprint {})",
+                observed.as_digest()
+            ),
+        }
+    }
+}
+
+impl std::error::Error for TakeSliceError {}
+
+/// **X-4** summary: noncanonical pacing telemetry only.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct DueSliceSummary {
+    /// Resident `(due_time, profile_id)` slices with `due_time <= horizon`.
+    pub resident_slice_count: u64,
+    /// Of those, slices with at least one `Scheduled` slot.
+    pub executable_slice_count: u64,
+    /// The least due time among executable slices.
+    pub earliest_executable_due_time: Option<LogicalTime>,
 }
 
 #[cfg(test)]

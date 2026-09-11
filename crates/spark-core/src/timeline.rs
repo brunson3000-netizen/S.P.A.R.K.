@@ -1214,6 +1214,83 @@ impl TimelineIngress {
         &self.epoch_resets
     }
 
+    // ------------------------------------------------------------------
+    // PX-1: bounded read-only lookups over the existing private registries.
+    //
+    // Frozen by the V3-F01 acceptance (precision pin 2): production
+    // finalization preflight rows P-7 … P-9 must use bounded indexed
+    // lookup, never a scan of ever-growing finalized history. These are
+    // `BTreeMap` reads of registries `stage`/`submit_fence` already
+    // maintain; they change no encoding, identity, admission semantics, or
+    // mutation authority.
+    // ------------------------------------------------------------------
+
+    /// The semantic hash that permanently claims `command_id` in finalized
+    /// history, if any.
+    pub fn finalized_command_claim(&self, command_id: &CommandId) -> Option<&Digest> {
+        self.finalized_command_identity.get(command_id)
+    }
+
+    /// The semantic hash that permanently claims the
+    /// `(source_id, source_sequence)` pair in finalized history, if any.
+    pub fn finalized_source_sequence_claim(
+        &self,
+        source_id: &SourceId,
+        source_sequence: u64,
+    ) -> Option<&Digest> {
+        self.finalized_source_sequence_identity
+            .get(&(source_id.clone(), source_sequence))
+    }
+
+    /// The last finalized `source_sequence` of `source_id`, if any.
+    pub fn last_finalized_source_sequence(&self, source_id: &SourceId) -> Option<u64> {
+        self.last_finalized_source_sequence.get(source_id).copied()
+    }
+
+    /// Read-only validation that every private derived index equals its
+    /// recomputation from the authoritative data it indexes: the staged
+    /// identity registries from the `Staged` slots (the B-01 invariant),
+    /// and the finalized registries and last-finalized sequences from the
+    /// finalized command log. Restore validation uses it so derived
+    /// indexes are validated rather than trusted. `O(history)`; never on a
+    /// per-command path.
+    pub fn derived_indexes_consistent(&self) -> bool {
+        let mut staged_cmd: BTreeMap<CommandId, Digest> = BTreeMap::new();
+        let mut staged_seq: BTreeMap<(SourceId, u64), Digest> = BTreeMap::new();
+        for slot in self.slots.values() {
+            if let SlotState::Staged {
+                envelope,
+                semantic_hash,
+            } = slot
+            {
+                staged_cmd.insert(envelope.command_id.clone(), semantic_hash.clone());
+                staged_seq.insert(
+                    (envelope.source_id.clone(), envelope.source_sequence),
+                    semantic_hash.clone(),
+                );
+            }
+        }
+        let mut fin_cmd: BTreeMap<CommandId, Digest> = BTreeMap::new();
+        let mut fin_seq: BTreeMap<(SourceId, u64), Digest> = BTreeMap::new();
+        let mut last: BTreeMap<SourceId, u64> = BTreeMap::new();
+        for fc in &self.finalized_commands {
+            fin_cmd.insert(
+                fc.envelope.command_id.clone(),
+                fc.semantic_envelope_hash.clone(),
+            );
+            fin_seq.insert(
+                (fc.envelope.source_id.clone(), fc.envelope.source_sequence),
+                fc.semantic_envelope_hash.clone(),
+            );
+            last.insert(fc.envelope.source_id.clone(), fc.envelope.source_sequence);
+        }
+        staged_cmd == self.staged_command_identity
+            && staged_seq == self.staged_source_sequence_identity
+            && fin_cmd == self.finalized_command_identity
+            && fin_seq == self.finalized_source_sequence_identity
+            && last == self.last_finalized_source_sequence
+    }
+
     /// Attempts to stage one submitted command.
     ///
     /// Key properties: (a) an out-of-window ordinal is reported via
