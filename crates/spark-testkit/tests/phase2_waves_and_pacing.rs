@@ -456,6 +456,9 @@ fn threshold_engine(parent_values: (i64, i64)) -> Engine {
     )
 }
 
+// One argument per component of the frozen v3 §4.4 formula: this is the
+// independent reference encoder the identity is pinned against.
+#[allow(clippy::too_many_arguments)]
 fn emission(
     cohort: &Digest,
     wave: u32,
@@ -583,7 +586,7 @@ fn at_i6c_at_i25_multi_parent_identity_is_complete_and_stable() {
     let keys: Vec<WorkKey> = vec![];
     let _ = keys;
     assert_ne!(
-        parents_emission(&[ea.clone()]),
+        parents_emission(std::slice::from_ref(&ea)),
         parents_emission(&[ea.clone(), eb.clone()])
     );
     assert_ne!(parents_emission(&[eb]), parents_emission(&[ea]));
