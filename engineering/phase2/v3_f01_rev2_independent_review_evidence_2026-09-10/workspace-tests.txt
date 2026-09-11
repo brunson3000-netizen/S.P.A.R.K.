@@ -1,0 +1,326 @@
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling cpufeatures v0.3.0
+   Compiling arrayvec v0.7.8
+   Compiling cfg-if v1.0.4
+   Compiling constant_time_eq v0.4.2
+   Compiling zmij v1.0.23
+   Compiling serde_core v1.0.229
+   Compiling cc v1.4.4
+   Compiling serde_json v1.0.151
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-v3-f01-rev2-review/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-v3-f01-rev2-review/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-v3-f01-rev2-review/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 31.19s
+     Running unittests src/lib.rs (target/debug/deps/spark_core-dd8691cdd0a0ccf2)
+
+running 63 tests
+test clock::tests::rejects_backward_advancement ... ok
+test clock::tests::advances_forward ... ok
+test authority::tests::authority_implies_fixed_write_class ... ok
+test hash::tests::same_input_produces_same_digest ... ok
+test clock::tests::same_time_is_idempotent ... ok
+test id::tests::accepts_namespaced_id ... ok
+test id::tests::canonical_tag_is_bounded_and_validated ... ok
+test id::tests::const_and_runtime_tag_validation_agree ... ok
+test hash::tests::length_prefixing_prevents_field_boundary_collision ... ok
+test id::tests::definition_id_requires_a_namespace ... ok
+test id::tests::const_tag_and_runtime_tag_are_equal_values ... ok
+test id::tests::distinct_newtypes_are_not_interchangeable_at_the_type_level ... ok
+test id::tests::non_definition_identity_spaces_permit_a_single_segment ... ok
+test id::tests::rejects_empty ... ok
+test id::tests::rejects_invalid_character ... ok
+test id::tests::rejects_id_longer_than_max_length ... ok
+test id::tests::rejects_leading_trailing_and_double_dot ... ok
+test id::tests::segment_count_is_reported ... ok
+test id::tests::try_from_static_is_total_at_runtime ... ok
+test random::tests::call_order_does_not_affect_result_for_unrelated_addresses ... ok
+test random::tests::different_occurrence_index_is_independent ... ok
+test random::tests::fixed_fraction_stays_in_bounds ... ok
+test random::tests::same_address_produces_identical_result ... ok
+test random::tests::same_ids_and_epoch_in_different_profiles_are_independent ... ok
+test random::tests::same_profile_different_behavior_artifact_hash_is_independent ... ok
+test scheduler::tests::different_conflict_evidence_produces_different_state_digests ... ok
+test scheduler::tests::conflict_report_and_requeue_are_deterministic ... ok
+test scheduler::tests::conflicted_key_is_only_reported_once_due ... ok
+test scheduler::tests::drain_only_returns_due_items_and_leaves_the_rest_scheduled ... ok
+test scheduler::tests::equal_due_time_drains_in_stable_semantic_order ... ok
+test scheduler::tests::exact_duplicate_schedule_is_idempotent ... ok
+test scheduler::tests::exact_duplicate_into_conflicted_slot_is_idempotent ... ok
+test scheduler::tests::independent_producers_may_share_an_occurrence_index ... ok
+test scheduler::tests::independent_profiles_may_share_an_occurrence_index ... ok
+test scheduler::tests::independent_work_kinds_may_share_an_occurrence_index ... ok
+test scheduler::tests::independent_scopes_may_share_an_occurrence_index ... ok
+test scheduler::tests::occurrence_identity_is_producer_and_scope_local_and_digestible ... ok
+test scheduler::tests::neither_payload_survives_a_conflict ... ok
+test scheduler::tests::occurrence_index_overflow_rejects ... ok
+test scheduler::tests::reversed_insertion_of_independent_producers_drains_identically ... ok
+test scheduler::tests::same_key_conflict_state_is_arrival_order_independent ... ok
+test scheduler::tests::evidence_cap_is_order_independent ... ok
+test scheduler::tests::scheduled_and_conflicted_slots_are_digest_distinct ... ok
+test scope::tests::built_in_kind_never_collides_with_custom_domain_separated_tag ... ok
+test scope::tests::custom_scope_kind_carries_its_real_identifier_and_does_not_collide ... ok
+test scope::tests::distinct_kinds_with_same_instance_id_are_distinct_scopes ... ok
+test timeline::final_closure_registry_invariant::finalization_moves_identity_from_staged_to_finalized_registries ... ok
+test timeline::final_closure_registry_invariant::staged_registries_are_a_derived_index_over_staged_slots ... ok
+test scheduler::tests::three_way_conflict_converges_in_all_six_orders ... ok
+test value::tests::categorical_constraint_bound_is_itself_bounded ... ok
+test value::tests::checked_fixed_point_arithmetic_reports_overflow ... ok
+test value::tests::clamp_is_total_or_fallible_never_panicking ... ok
+test value::tests::categorical_constraint_bounds_length ... ok
+test value::tests::constraint_rejects_wrong_type ... ok
+test value::tests::fixed_point_integer_overflow_is_rejected_not_wrapped ... ok
+test value::tests::incoherent_ranges_are_rejected_at_construction ... ok
+test value::tests::fixed_point_integer_round_trip ... ok
+test value::tests::int_constraint_rejects_out_of_bounds ... ok
+test value::tests::distinct_categorical_values_canonicalize_distinctly ... ok
+test value::tests::oversized_categorical_value_is_rejected_at_construction ... ok
+test value::tests::type_tag_matches_declared_value_type ... ok
+test value::tests::unicode_categorical_values_are_byte_distinct ... ok
+test scheduler::tests::evidence_beyond_the_tracking_cap_is_still_order_independent ... ok
+
+test result: ok. 63 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/timeline_admission.rs (target/debug/deps/timeline_admission-541a3a68213b9f33)
+
+running 24 tests
+test arbitrary_epoch_rollback_or_reuse_rejects ... ok
+test changed_effective_time_is_not_idempotent ... ok
+test changed_source_id_is_not_idempotent ... ok
+test changed_command_kind_is_not_idempotent ... ok
+test changed_source_sequence_is_not_idempotent ... ok
+test different_sources_may_legitimately_interleave ... ok
+test fence_beyond_the_stageable_horizon_rejects ... ok
+test exact_duplicate_is_idempotent ... ok
+test fence_not_starting_at_the_frontier_rejects ... ok
+test distinct_payload_collision_poisons_identically_in_opposite_orders ... ok
+test missing_ordinal_blocks_fence_atomically ... ok
+test finalized_history_digest_differs_for_behaviorally_distinct_envelopes ... ok
+test old_epoch_sequencer_rejects_after_handoff ... ok
+test out_of_window_submission_disturbs_nothing ... ok
+test non_sequencer_stage_and_fence_are_rejected ... ok
+test reused_command_id_for_different_envelope_at_different_ordinal_conflicts ... ok
+test reused_source_sequence_for_different_command_conflicts ... ok
+test partial_prefix_fence_slides_window_and_preserves_staged_tail ... ok
+test source_sequence_finalizing_in_descending_order_rejects ... ok
+test wrong_fence_digest_rejects ... ok
+test unauthorized_epoch_reset_rejects ... ok
+test reversed_delivery_within_capacity_two_window_is_order_independent ... ok
+test wrong_previous_fence_hash_rejects ... ok
+test stale_ticket_after_frontier_advance_is_rejected_then_succeeds_with_fresh_ticket ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/debug/deps/spark_engine-d5d82d79c5eb7576)
+
+running 38 tests
+test activation::tests::activation_computes_the_fingerprint_itself ... ok
+test activation::tests::duplicate_definition_ids_reject_the_whole_manifest_in_either_order ... ok
+test activation::tests::activation_hash_is_declaration_order_independent ... ok
+test activation::tests::builtin_and_custom_kinds_with_the_same_spelling_are_distinct ... ok
+test activation::tests::empty_lineage_digest_is_stable_and_distinct ... ok
+test activation::tests::every_immutable_identity_field_changes_the_fingerprint ... ok
+test activation::tests::failed_manifest_leaves_registry_unchanged_and_retry_succeeds ... ok
+test activation::tests::foreign_profile_definition_rejects ... ok
+test activation::tests::identity_change_under_the_same_id_rejects ... ok
+test activation::tests::reactivating_the_same_identity_is_idempotent ... ok
+test activation::tests::lineage_is_append_only_and_deterministic ... ok
+test profile::config::tests::changed_content_changes_hash ... ok
+test activation::tests::same_definition_id_in_independent_profiles_does_not_conflict ... ok
+test profile::config::tests::different_profile_changes_hash ... ok
+test profile::config::tests::duplicate_keys_are_rejected ... ok
+test profile::config::tests::duplicate_keys_reject_identically_in_either_order ... ok
+test profile::config::tests::entry_order_does_not_affect_hash ... ok
+test profile::config::tests::oversized_config_value_cannot_be_constructed ... ok
+test profile::config::tests::reused_label_with_different_content_hashes_differently ... ok
+test profile::definition::tests::builtin_kind_tags_are_distinct_valid_and_non_custom ... ok
+test profile::definition::tests::builtin_trigger_fingerprint_differs_from_custom_trigger ... ok
+test profile::definition::tests::spec_fingerprint_agrees_with_the_activation_door ... ok
+test profile::manifest::tests::changed_version_label_over_identical_content_does_not_change_the_hash ... ok
+test profile::manifest::tests::identical_content_hashes_identically_regardless_of_definition_order ... ok
+test profile::manifest::tests::reused_version_label_with_different_content_hashes_differently ... ok
+test profile::definition::tests::oversized_custom_definition_kind_is_rejected_at_construction ... ok
+test profile::text::tests::bounds_length_and_rejects_control_characters ... ok
+test state::tests::derived_state_rejects_host_ingress_and_spark_effect_paths ... ok
+test state::tests::activated_definitions_carry_door_computed_identity ... ok
+test state::tests::disallowed_scope_kind_is_rejected ... ok
+test state::tests::each_authority_accepts_only_its_own_path ... ok
+test state::tests::foreign_profile_writes_and_reads_are_rejected ... ok
+test state::tests::host_owned_state_rejects_the_spark_effect_path ... ok
+test state::tests::source_refs_are_bounded ... ok
+test state::tests::store_carries_full_artifact_binding ... ok
+test state::tests::state_digest_reflects_written_cells ... ok
+test state::tests::undeclared_definition_cannot_be_written ... ok
+test state::tests::out_of_bounds_and_mistyped_values_are_rejected ... ok
+
+test result: ok. 38 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/debug/deps/spark_testkit-8bf6041ef24ffb39)
+
+running 11 tests
+test composition::tests::one_runtime_keeps_one_lineage ... ok
+test composition::tests::a_second_runtime_is_either_identical_or_visibly_divergent ... ok
+test scenario::tests::empty_scenario_differs_from_one_staged_unfinalized_command ... ok
+test scenario::tests::differing_operation_outcome_changes_transcript_digest ... ok
+test scenario::tests::different_finalized_envelope_changes_history_digest ... ok
+test scenario::tests::malformed_scenario_identifier_is_reported_not_panicked ... ok
+test scenario::tests::poisoned_staging_differs_from_clean_staging ... ok
+test scenario::tests::empty_staged_poisoned_and_finalized_scenarios_are_pairwise_distinct ... ok
+test scenario::tests::zero_window_width_is_reported_not_panicked ... ok
+test scenario::tests::scenario_context_is_distinguished_through_the_state_digest ... ok
+test scenario::tests::same_scenario_replayed_many_times_produces_identical_digest ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/external_compile_probes.rs (target/debug/deps/external_compile_probes-1570b497dc110c45)
+
+running 1 test
+test forbidden_surfaces_do_not_compile_for_an_external_consumer ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 13.78s
+
+     Running tests/final_closure.rs (target/debug/deps/final_closure-c087ae2c209cdf42)
+
+running 9 tests
+test epoch_reset_convergence_is_preserved ... ok
+test contested_source_sequence_is_arrival_order_independent ... ok
+test manifest_content_hash::duplicate_id_manifest_hash_is_order_independent ... ok
+test manifest_content_hash::valid_manifest_hashes_are_unchanged_by_the_duplicate_id_fix ... ok
+test contested_command_identity_is_arrival_order_independent ... ok
+test poison_evidence_insertion_is_unconditional_and_unscreened ... ok
+test contested_identities_are_unclaimed_after_the_contest ... ok
+test three_way_contest_with_reuse_converges_in_all_orders ... ok
+test hidden_evidence_guards_stay_green ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests/final_digest_correction.rs (target/debug/deps/final_digest_correction-a9a492c14c61220c)
+
+running 8 tests
+test hidden_conflict_evidence_changes_the_reaction_to_the_next_claim ... ok
+test hidden_conflict_evidence_is_committed_to_canonical_state ... ok
+test claims_forgotten_beyond_the_tracking_cap_stay_collapsed ... ok
+test hidden_poison_evidence_changes_the_reaction_to_the_next_claim ... ok
+test hidden_poison_evidence_is_committed_to_canonical_state ... ok
+test conflict_permutations_converge_at_every_mandated_set_size ... ok
+test poison_claims_forgotten_beyond_the_tracking_cap_stay_collapsed ... ok
+test poison_permutations_converge_at_every_mandated_set_size ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s
+
+     Running tests/refoundation_adversarial.rs (target/debug/deps/refoundation_adversarial-4191ad31280d044c)
+
+running 27 tests
+test checked_fixed_point_construction_still_rejects_overflow ... ok
+test activated_identity_is_carried_from_the_ceremony_not_from_the_caller ... ok
+test command_and_work_kinds_are_bounded_canonical_types ... ok
+test custom_definition_kinds_are_bounded_and_validated ... ok
+test custom_scope_kinds_remain_distinct ... ok
+test config_identity_is_content_and_profile_never_order_or_label ... ok
+test admission_credential_is_not_part_of_finalized_identity ... ok
+test definition_id_requires_a_namespace ... ok
+test admission_timing_does_not_change_canonical_identity ... ok
+test duplicate_config_keys_reject_in_any_order ... ok
+test duplicate_schema_keys_reject_and_commit_nothing ... ok
+test drain_order_is_independent_of_call_order ... ok
+test epoch_handoff_is_authenticated_monotonic_and_history_preserving ... ok
+test incoherent_bounds_reject ... ok
+test finalization_returns_structured_evidence ... ok
+test fence_finalization_is_atomic_when_the_frontier_would_overflow ... ok
+test independent_producers_may_schedule_the_same_occurrence_index ... ok
+test invalid_definition_rejects_the_whole_manifest_atomically ... ok
+test oversized_config_value_is_rejected_before_hashability ... ok
+test occurrence_identity_is_producer_and_scope_local ... ok
+test post_activation_schema_mutation_is_unavailable ... ok
+test reversed_insertion_drains_identically ... ok
+test same_key_is_idempotent_or_poisons_deterministically ... ok
+test state_store_authority_derives_only_from_the_activation_door ... ok
+test stage_acknowledgement_binds_and_proves_its_envelope ... ok
+test timeline_window_arithmetic_is_total ... ok
+test distinct_semantic_fields_remain_canonical_identity ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/refoundation_v2_adversarial.rs (target/debug/deps/refoundation_v2_adversarial-c0e0b5160b8952ae)
+
+running 25 tests
+test checked_fixed_point_arithmetic ... ok
+test arbitrary_frontier_cannot_masquerade_as_a_validated_continuation ... ok
+test builtin_and_custom_kinds_stay_domain_separated ... ok
+test canonical_tag_macro_agrees_with_the_runtime_constructor ... ok
+test clamp_is_total_or_fallible_never_panicking ... ok
+test duplicate_config_diagnostics_are_deterministic_with_three_or_more ... ok
+test divergent_activations_are_never_interchangeable ... ok
+test different_conflict_evidence_is_digest_distinct ... ok
+test conflict_report_and_requeue_are_deterministic ... ok
+test frontier_at_max_is_idempotently_reportable ... ok
+test exact_duplicate_into_conflicted_slot_is_idempotent ... ok
+test neither_payload_survives_a_conflict ... ok
+test poisoned_slot_evidence_is_inspectable ... ok
+test original_minimum_corpus_items_15_to_18_remain_proved ... ok
+test same_key_conflict_state_is_arrival_order_independent ... ok
+test poisoned_slot_evidence_is_order_independent_and_discriminating ... ok
+test store_carries_full_artifact_binding ... ok
+test registry_lineage_is_append_only_and_deterministic ... ok
+test three_way_conflict_converges_in_all_six_orders ... ok
+test unicode_is_byte_distinct ... ok
+test stage_acknowledgement_covers_fails_after_any_field_mutation ... ok
+test try_from_static_is_total_at_runtime ... ok
+test evidence_cap_is_order_independent ... ok
+test valid_spec_activates_only_through_the_door ... ok
+test write_paths_still_enforce_every_validation_class ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/workspace_dependency_direction.rs (target/debug/deps/workspace_dependency_direction-c07e62a39277fd92)
+
+running 3 tests
+test every_crate_resolved_dependencies_respect_adr_0001_direction ... ok
+test spark_core_resolves_zero_dependencies_on_any_product_layer_crate ... ok
+test test_support_feature_is_never_enabled_through_a_production_edge ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+   Doc-tests spark_core
+
+running 15 tests
+test crates/spark-core/src/id.rs - id::CanonicalTag (line 200) - compile fail ... ok
+test crates/spark-core/src/id.rs - id::DefinitionId (line 504) ... ok
+test crates/spark-core/src/id.rs - id::canonical_tag (line 360) - compile fail ... ok
+test crates/spark-core/src/id.rs - id::CanonicalTag (line 191) ... ok
+test crates/spark-core/src/scheduler.rs - scheduler::WorkKeyConflict (line 222) - compile fail ... ok
+test crates/spark-core/src/id.rs - id::CanonicalTag::try_from_static (line 397) ... ok
+test crates/spark-core/src/id.rs - id::canonical_tag (line 354) ... ok
+test crates/spark-core/src/timeline.rs - timeline::StageAcknowledgement (line 355) - compile fail ... ok
+test crates/spark-core/src/timeline.rs - timeline (line 37) - compile fail ... ok
+test crates/spark-core/src/value.rs - value::CategoricalValue (line 360) - compile fail ... ok
+test crates/spark-core/src/value.rs - value::FixedRange (line 275) - compile fail ... ok
+test crates/spark-core/src/value.rs - value::ValueConstraint (line 559) - compile fail ... ok
+test crates/spark-core/src/value.rs - value::FixedPoint::checked_clamp (line 173) ... ok
+test crates/spark-core/src/value.rs - value::FixedRange (line 267) ... ok
+test crates/spark-core/src/value.rs - value::ValueConstraint (line 550) ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.27s
+
+   Doc-tests spark_engine
+
+running 8 tests
+test crates/spark-engine/src/activation.rs - activation::DefinitionKindTag (line 93) - compile fail ... ok
+test crates/spark-engine/src/activation.rs - activation (line 31) - compile fail ... ok
+test crates/spark-engine/src/activation.rs - activation (line 43) - compile fail ... ok
+test crates/spark-engine/src/state.rs - state (line 20) - compile fail ... ok
+test crates/spark-engine/src/profile/text.rs - profile::text::BoundedText (line 53) - compile fail ... ok
+test crates/spark-engine/src/state.rs - state (line 13) - compile fail ... ok
+test crates/spark-engine/src/profile/config.rs - profile::config::ConfigRevision (line 88) - compile fail ... ok
+test crates/spark-engine/src/state.rs - state (line 39) - compile fail ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.39s
+
+   Doc-tests spark_testkit
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

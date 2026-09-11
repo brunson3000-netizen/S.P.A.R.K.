@@ -1,0 +1,176 @@
+[
+  {
+    "check": "model",
+    "command": [
+      "python3",
+      "engineering/phase2/v3_f01_rev2_bounded_correction_evidence_2026-09-10/model.py",
+      "/tmp/spark-rev2-validation-before/model-results.json"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "probe",
+    "command": [
+      "python3",
+      "engineering/phase2/v3_f01_rev2_bounded_correction_evidence_2026-09-10/run_rev2_probe.py"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "historical-red",
+    "command": [
+      "python3",
+      "engineering/phase2/v3_f01_final_independent_review_evidence_2026-09-10/run_regressions.py"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "workspace-tests",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--offline"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "fmt",
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--check"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--all-features",
+      "--offline",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "strict",
+    "command": [
+      "cargo",
+      "clippy",
+      "-p",
+      "spark-core",
+      "-p",
+      "spark-engine",
+      "--lib",
+      "--all-features",
+      "--offline",
+      "--",
+      "-D",
+      "warnings",
+      "-D",
+      "clippy::unwrap_used",
+      "-D",
+      "clippy::expect_used",
+      "-D",
+      "clippy::panic",
+      "-D",
+      "clippy::indexing_slicing",
+      "-D",
+      "clippy::arithmetic_side_effects"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "metadata",
+    "command": [
+      "cargo",
+      "metadata",
+      "--format-version",
+      "1",
+      "--offline"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "whitespace",
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "e9e26e815f1d4d890c5f5621be9e2143e7dd9ac8"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "x86_64-pc-windows-gnu",
+    "command": [
+      "cargo",
+      "check",
+      "--workspace",
+      "--all-targets",
+      "--offline",
+      "--target",
+      "x86_64-pc-windows-gnu"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "x86_64-pc-windows-msvc",
+    "command": [
+      "cargo",
+      "check",
+      "--workspace",
+      "--all-targets",
+      "--offline",
+      "--target",
+      "x86_64-pc-windows-msvc"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "aarch64-linux-android",
+    "command": [
+      "cargo",
+      "check",
+      "--workspace",
+      "--all-targets",
+      "--offline",
+      "--target",
+      "aarch64-linux-android"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "armv7-linux-androideabi",
+    "command": [
+      "cargo",
+      "check",
+      "--workspace",
+      "--all-targets",
+      "--offline",
+      "--target",
+      "armv7-linux-androideabi"
+    ],
+    "exit": 0
+  },
+  {
+    "check": "x86_64-linux-android",
+    "command": [
+      "cargo",
+      "check",
+      "--workspace",
+      "--all-targets",
+      "--offline",
+      "--target",
+      "x86_64-linux-android"
+    ],
+    "exit": 0
+  }
+]

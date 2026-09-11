@@ -1,0 +1,17 @@
+INDEPENDENT: 2496 clean-state differential cases pass across two sources, two resets at one frontier, identity/profile/epoch/sequence variations; full-state refusal and success equality
+INDEPENDENT: ascending same-frontier reset order passes; reverse-order negative control fails (8 fixtures)
+ROUTE source-sequence regression S:10 then distinct S:9    REV2=SourceSequenceNotIncreasing { previously_finalized: 10, attempted: 9 } byte-identical=true | REF ok=false | OLD result=Err("fence: SourceSequenceNotIncreasing { source_id: SourceId(s), previously_finalized: 10, attempted: 9 }") mutated=true
+ROUTE command-id reuse                                     REV2=CommandIdentityConflict byte-identical=true | REF ok=false | OLD result=Err("stage: CommandIdentityConflict { command_id: CommandId(first) }") mutated=false
+ROUTE source-sequence pair reuse                           REV2=SourceSequenceConflict byte-identical=true | REF ok=false | OLD result=Err("stage: SourceSequenceConflict { source_id: SourceId(s), source_sequence: 10 }") mutated=false
+ROUTE wrong timeline epoch                                 REV2=WrongTimelineEpoch byte-identical=true | REF ok=false | OLD result=Err("stage: WrongTimelineEpoch") mutated=false
+ROUTE wrong profile                                        REV2=WrongProfile byte-identical=true | REF ok=false | OLD result=Err("stage: WrongProfile") mutated=false
+ROUTE window arithmetic exhausted                          REV2=WindowExhausted byte-identical=true | REF ok=false | OLD result=Err("window: TimelineOrdinalSpaceExhausted { frontier_ordinal: Ordinal(18446744073709551615), window_width: 2 }") mutated=false
+ROUTE frontier advance exhausted                           REV2=FrontierExhausted byte-identical=true | REF ok=false | OLD result=Err("fence: OrdinalSpaceExhausted(TimelineOrdinalSpaceExhausted { frontier_ordinal: Ordinal(18446744073709551615), window_width: 1 })") mutated=true
+ROUTE unexpected poisoned frontier slot                    REV2=UnexpectedStagingState(0, Poisoned) byte-identical=true | REF ok=false | OLD result=Err("stage: poisoned") mutated=true
+ROUTE unexpected different envelope staged at frontier     REV2=UnexpectedStagingState(0, Staged) byte-identical=true | REF ok=false | OLD result=Err("stage: poisoned") mutated=true
+ROUTE unexpected identical envelope staged at frontier     REV2=UnexpectedStagingState(0, Staged) byte-identical=true | REF ok=true | OLD result=Ok("ok") mutated=true
+ROUTE unexpected staged tail above an empty frontier       REV2=UnexpectedStagingState(1, Staged) byte-identical=true | REF ok=true | OLD result=Ok("ok") mutated=true
+SUCCESS REV2 == REF byte-identical; positive NewlyStaged ack preceded the one-ordinal fence; frontier 2
+FOLLOW-ON REV2: next distinct command finalized at ordinal 1 | OLD: Err("stage: poisoned"), ordinal 1 poisoned
+OLD composition mutated the live timeline on 6 of 11 routes that REV2 refuses byte-identically
+ALL REV2 FINALIZATION PROBES PASS
