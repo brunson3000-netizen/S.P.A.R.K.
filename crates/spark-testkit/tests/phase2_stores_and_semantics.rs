@@ -53,14 +53,27 @@ fn adder(id: &str, kind: &str, target: &str, v: i64) -> RuleSpec {
 }
 
 fn engine_with(b: DeclaredBudgets, rules: Vec<RuleSpec>, init: Vec<(&str, u64, &str)>) -> Engine {
+    engine_with_baselines(b, rules, init, vec![])
+}
+
+fn engine_with_baselines(
+    b: DeclaredBudgets,
+    rules: Vec<RuleSpec>,
+    init: Vec<(&str, u64, &str)>,
+    baselines: Vec<spark_engine::rules::BaselineDeclaration>,
+) -> Engine {
     let mut f = standard();
-    f.engine(
-        b,
-        rules,
-        init.into_iter()
-            .map(|(r, t, k)| initial(r, &bron(), t, k))
-            .collect(),
+    Engine::genesis(
+        f.genesis_with(
+            b,
+            rules,
+            baselines,
+            init.into_iter()
+                .map(|(r, t, k)| initial(r, &bron(), t, k))
+                .collect(),
+        ),
     )
+    .unwrap()
 }
 
 fn run(e: &mut Engine, t: u64) -> Vec<CohortReport> {
@@ -391,24 +404,18 @@ fn decay_engine(times: &[u64]) -> Engine {
         work_rule(
             "rule.decay",
             "work.decay",
-            vec![emit(
-                "d",
-                "state.stress",
-                Update::Decay {
-                    toward: lit(20),
-                    rate: lit(10),
-                    cadence: 10,
-                },
-            )],
+            vec![emit("d", "state.stress", decay(10, 10))],
         ),
     ];
-    let mut e = engine_with(
+    // The target is the declared baseline 20 (v1 Q7), not a rule operand.
+    let mut e = engine_with_baselines(
         budgets(4),
         rules,
         times
             .iter()
             .map(|t| ("rule.decay", *t, "work.decay"))
             .collect(),
+        vec![baseline("state.stress", 20)],
     );
     e.process(&command("cmd.seed", 0, 1, "cmd.seed", bron()));
     e
@@ -676,7 +683,10 @@ fn at_i30_at_i31_dormant_work_is_untouched() {
     let rb = run(&mut big, 10);
     assert_eq!(rs.len(), 1);
     assert_eq!(rb.len(), 1);
-    assert_eq!(rs[0].cohort_identity, rb[0].cohort_identity);
+    assert_eq!(
+        fixture::observation(&small).prewave[0].cohort_identity,
+        fixture::observation(&big).prewave[0].cohort_identity
+    );
     assert_eq!(rs[0].waves[0].committed, rb[0].waves[0].committed);
     assert_eq!(big.scheduled_work_count(), 500, "dormant work untouched");
     assert!(value(&big, "state.echo", &bron()).is_none());
@@ -815,7 +825,10 @@ fn at_i38_provenance_coverage_is_honest() {
 
 /// AT-I46(a): the canonical report field sets are pinned by exhaustive
 /// destructuring (a new field — e.g. a pre-wave digest, `F`, or
-/// `ActiveRequest` — fails to compile here).
+/// `ActiveRequest` — fails to compile here). Bounded revision (C2-07): the
+/// pinned set is the frozen one, **without** the `cohort_identity` field FINAL
+/// AT-I46(a) forbids; the probe suite separately asserts that field, a
+/// pre-wave field, `F`, and `ActiveRequest` are absent.
 #[test]
 fn at_i46_a_report_field_sets_are_pinned() {
     let mut e = engine_with(
@@ -826,7 +839,6 @@ fn at_i46_a_report_field_sets_are_pinned() {
     let r = run(&mut e, 1).remove(0);
     let CohortReport {
         kind,
-        cohort_identity,
         canonical_time,
         conflicts,
         ingress,
@@ -843,14 +855,7 @@ fn at_i46_a_report_field_sets_are_pinned() {
         depth_conversions,
         effect_batch_digest,
     } = waves[0].clone();
-    let _ = (
-        kind,
-        cohort_identity,
-        canonical_time,
-        conflicts,
-        ingress,
-        outcome,
-    );
+    let _ = (kind, canonical_time, conflicts, ingress, outcome);
     let _ = (
         wave_index,
         candidate_set_digest,

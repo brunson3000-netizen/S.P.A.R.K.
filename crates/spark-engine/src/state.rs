@@ -350,6 +350,35 @@ impl StateStore {
             .map(|(_, c)| c)
     }
 
+    /// Phase-2 decay/recovery (v1 Q7): materialize the rule set's declared
+    /// baseline into the **existing** `StateCell.baseline` field of one cell
+    /// the engine has just written, if the cell has none. It never overwrites
+    /// a baseline and never creates a cell; the `StateCell` encoding is
+    /// unchanged (it always carried the optional baseline).
+    pub(crate) fn materialize_baseline(
+        &mut self,
+        definition_id: &DefinitionId,
+        scope_id: &ScopeId,
+        raw: i64,
+    ) {
+        let fixed = self
+            .schema_of(&self.profile_id, definition_id)
+            .map(|d| d.value_constraint().value_type() == spark_core::value::ValueType::Fixed)
+            .unwrap_or(false);
+        if let Some(cell) = self
+            .cells
+            .get_mut(&(definition_id.clone(), scope_id.clone()))
+        {
+            if cell.baseline.is_none() {
+                cell.baseline = Some(if fixed {
+                    CanonicalValue::Fixed(spark_core::value::FixedPoint::from_raw(raw))
+                } else {
+                    CanonicalValue::Int(raw)
+                });
+            }
+        }
+    }
+
     /// Validates an evaluator effect without writing (the preflight half of
     /// validate-all-then-apply-all; v1 Q3). `validate_write` reads only the
     /// activated schema, never cell contents.

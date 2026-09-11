@@ -1,0 +1,80 @@
+# source: independent_counterexamples.rs sha256=3a3a26e658852659b916d699bf3aac3b41be55bcca9213f7e0fbc532c2b1197d
+# crate root: /tmp/spark-gate-c2-review
+$ cargo test --offline -- --nocapture --test-threads=1
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.11
+   Compiling arrayvec v0.7.8
+   Compiling constant_time_eq v0.4.2
+   Compiling cc v1.4.4
+   Compiling cfg-if v1.0.4
+   Compiling cpufeatures v0.3.0
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-gate-c2-review/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-gate-c2-review/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-gate-c2-review/crates/spark-testkit)
+   Compiling spark-c2-counterexamples v0.0.0 (/tmp/spark-c2-rev-corpus-iakwe09q)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 16.16s
+     Running unittests src/lib.rs (target/debug/deps/spark_c2_counterexamples-7cca470a73d8f5fd)
+
+running 10 tests
+test aggregate_keeps_i128_until_after_weighting ... aggregate outcome: [CohortReport { kind: Command, cohort_identity: Some(Digest(4e4ae816dfa9f4b60459b1d0e32aa46fdecbb009b56cf726e580a5ec77a9f4eb)), canonical_time: LogicalTime(1), conflicts: [], ingress: [], waves: [], outcome: Rejected { wave: 0, rejection: Arithmetic { what: "aggregate" } } }]
+
+thread 'aggregate_keeps_i128_until_after_weighting' (151150) panicked at src/lib.rs:54:5:
+assertion `left == right` failed: floor((MAX+MAX)*0.5) fits i64
+  left: None
+ right: Some(9223372036854775807)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+test decay_preserves_elapsed_cadence_remainder ... 
+thread 'decay_preserves_elapsed_cadence_remainder' (151151) panicked at src/lib.rs:111:5:
+assertion `left == right` failed: five units of remainder at 15 must survive to 20
+  left: 90
+ right: 80
+FAILED
+test derived_identity_binds_every_changed_eligibility_input ... 
+thread 'derived_identity_binds_every_changed_eligibility_input' (151152) panicked at src/lib.rs:86:5:
+assertion `left == right` failed: required union includes changed mood used to become eligible
+  left: Digest(852edb510792d688a6b5775891c816015d54208e4ca6207d4373b20717678803)
+ right: Digest(526d320ee581ff711ade630412c00ff603a7ac415a9792b6a25a32e35f906293)
+FAILED
+test epoch_activation_requires_reserved_command_kind ... epoch outcome: [CohortReport { kind: Command, cohort_identity: Some(Digest(6641355851c8947116df9bfa88b6b18f4762511de66cd7bdfa5c2253b0fff252)), canonical_time: LogicalTime(1), conflicts: [], ingress: [], waves: [], outcome: EpochActivated { behavior_epoch: 2 } }]
+
+thread 'epoch_activation_requires_reserved_command_kind' (151153) panicked at src/lib.rs:96:5:
+assertion `left == right` failed: ordinary command kind must not activate an epoch
+  left: 2
+ right: 1
+FAILED
+test fanout_must_count_scope_breadth ... 
+thread 'fanout_must_count_scope_breadth' (151154) panicked at src/lib.rs:21:5:
+door admitted two distinct target scopes with max_fan_out=1
+FAILED
+test materialized_subids_must_be_unique ... 
+thread 'materialized_subids_must_be_unique' (151155) panicked at src/lib.rs:34:5:
+door admitted duplicate emitting sub-IDs inside Materialize
+FAILED
+test new_decay_rate_must_not_apply_before_activation_barrier ... hot-tuned decay outcome: [CohortReport { kind: Scheduled, cohort_identity: Some(Digest(cda9118ab964f969fcc6d28b816fed3e6c5b27562232e9f0d9e1b8092b2c9065)), canonical_time: LogicalTime(60), conflicts: [], ingress: [], waves: [WaveReport { wave_index: 0, candidate_set_digest: Digest(15ee8ac9ec36c269cd19e73f68461118f35daf7346032b65e6b0fc9522c46595), committed: [CommittedEffect { definition: DefinitionId(state.stress), scope: actor:a, write_path: SparkEffect, value: Int(70), provenance: Provenance { retained: [Digest(ba3b2ccbe0d33a70d4bd0619dd2d48cb01cff77e63b99c20d958ea0fe952ca27)], omitted_source_count: 0, coverage_status: Complete, pruning_policy: "provenance_prune.v1" } }], obligations: [], cooldown_writes: [], cooldown_removals: [], depth_conversions: [], effect_batch_digest: Digest(ffc5871b51eb247f48d5a18fdc3d8a72b410f3d63dcaa8effad9bf900d6c2177) }], outcome: Committed }]
+
+thread 'new_decay_rate_must_not_apply_before_activation_barrier' (151156) panicked at src/lib.rs:136:5:
+assertion `left == right` failed: 5 steps at rate 1 before barrier 50, 1 step at rate 5 after; never six steps at rate 5
+  left: Some(70)
+ right: Some(90)
+FAILED
+test positive_command_active_encoding_has_kind_horizon_and_identity ... ok
+test positive_trailing_same_frontier_resets_replay_in_index_order ... ok
+test refusal_type_must_not_be_constructible_externally ... external construction succeeds: WrongProfile
+ok
+
+failures:
+
+failures:
+    aggregate_keeps_i128_until_after_weighting
+    decay_preserves_elapsed_cadence_remainder
+    derived_identity_binds_every_changed_eligibility_input
+    epoch_activation_requires_reserved_command_kind
+    fanout_must_count_scope_breadth
+    materialized_subids_must_be_unique
+    new_decay_rate_must_not_apply_before_activation_barrier
+
+test result: FAILED. 3 passed; 7 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+error: test failed, to rerun pass `--lib`

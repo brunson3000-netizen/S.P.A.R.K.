@@ -447,7 +447,10 @@ fn at_i43_h_command_finalization_happens_at_completion() {
         if r.outcome() == &Outcome::Paused {
             assert_eq!(timeline_before, paced.timeline_state_digest());
             assert_eq!(paced.timeline_frontier_ordinal(), Ordinal(0));
-            if r.diagnostics().unwrap().command_deferred {
+            // A command request pausing with no executable slice left in its
+            // horizon has its command deferred (A6) — derivable from the
+            // frozen diagnostic fields (C2-07 adjudication).
+            if r.diagnostics().unwrap().deferred_cohort_count == 0 {
                 seen_deferred = true;
             }
             results.push(r);

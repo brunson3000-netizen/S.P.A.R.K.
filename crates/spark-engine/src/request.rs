@@ -223,28 +223,41 @@ pub fn canonicalize_active_request(
 }
 
 /// One typed finalization refusal row (Revision-2 §4.4).
+///
+/// Every variant is `#[non_exhaustive]`, so a refusal is constructible only
+/// inside `spark_engine` (Revision-2 oracle §10): an external crate can match
+/// a refusal with `{ .. }` patterns and read its fields, but cannot build one.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FinalizationRefusal {
     /// P-1.
+    #[non_exhaustive]
     WrongProfile,
     /// P-2.
+    #[non_exhaustive]
     WrongTimelineEpoch,
     /// P-3 (unreachable under engine ownership; still checked).
+    #[non_exhaustive]
     NotActiveSequencer,
     /// P-4.
+    #[non_exhaustive]
     OrdinalSpaceExhaustedWindow,
     /// P-5.
+    #[non_exhaustive]
     OrdinalSpaceExhaustedFrontierAdvance,
     /// P-6 (unreachable under I-CS; fail closed).
+    #[non_exhaustive]
     UnexpectedStagingState { ordinal: Ordinal },
     /// P-7.
+    #[non_exhaustive]
     CommandIdentityConflict { command_id: CommandId },
     /// P-8.
+    #[non_exhaustive]
     SourceSequenceConflict {
         source_id: SourceId,
         source_sequence: u64,
     },
     /// P-9.
+    #[non_exhaustive]
     SourceSequenceNotIncreasing {
         source_id: SourceId,
         previously_finalized: u64,
@@ -271,6 +284,16 @@ pub enum Outcome {
     /// refusal. No stable boundary or snapshot is published; every later call
     /// returns this until the host restores the last committed snapshot.
     FinalizationEntailmentViolated,
+    /// Sticky fail-stop (the same D-8 discipline, D-C2-11 revised): the
+    /// engine-owned cross-store extraction found the scheduler and the
+    /// `ObligationStore` in disagreement — an implementation or tampering
+    /// defect, unreachable through the facade. The typed refusal is carried,
+    /// never discarded; the extraction attempt mutated nothing, but
+    /// `ActiveRequest` was set and any cohort committed earlier in this call
+    /// stays committed. No stable boundary or snapshot is published; every
+    /// later call returns this until the last committed snapshot is restored.
+    /// Not dequeue-eligible.
+    StoreInvariantViolated(crate::engine::ExtractionRefusal),
 }
 
 /// A request-bound result (Revision-2 §5.1): it always names the presented

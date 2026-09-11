@@ -23,8 +23,9 @@ use spark_engine::request::{
     CommandPayload, CommandRequest, Observation, Outcome, ProcessResult, Request,
 };
 use spark_engine::rules::{
-    ActivatedRuleSet, CmpOp, Condition, DeclaredBudgets, EmitOp, Expr, Input, RuleSetError,
-    RuleSetSpec, RuleSpec, ScheduleMode, ScheduleOp, ScopeRef, Trigger, Update,
+    ActivatedRuleSet, BaselineDeclaration, CmpOp, Condition, DeclaredBudgets, EmitOp, Expr, Input,
+    Param, RuleSetError, RuleSetSpec, RuleSpec, ScheduleMode, ScheduleOp, ScopeRef, Trigger,
+    Update,
 };
 use std::collections::BTreeSet;
 
@@ -147,12 +148,23 @@ impl Fixture {
         budgets: DeclaredBudgets,
         rules: Vec<RuleSpec>,
     ) -> Result<ActivatedRuleSet, Vec<RuleSetError>> {
+        self.rule_set_with(budgets, rules, vec![])
+    }
+
+    /// A rule set that also declares baseline semantics (v1 Q7).
+    pub fn rule_set_with(
+        &mut self,
+        budgets: DeclaredBudgets,
+        rules: Vec<RuleSpec>,
+        baselines: Vec<BaselineDeclaration>,
+    ) -> Result<ActivatedRuleSet, Vec<RuleSetError>> {
         self.registry.activate_rule_set(
             &self.profile,
             &RuleSetSpec {
                 profile_id: profile_id(),
                 budgets,
                 rules,
+                baselines,
             },
         )
     }
@@ -163,7 +175,18 @@ impl Fixture {
         rules: Vec<RuleSpec>,
         initial_work: Vec<InitialWork>,
     ) -> EngineGenesis {
-        let rule_set = self.rule_set(budgets, rules).unwrap();
+        self.genesis_with(budgets, rules, vec![], initial_work)
+    }
+
+    /// Genesis with declared baselines.
+    pub fn genesis_with(
+        &mut self,
+        budgets: DeclaredBudgets,
+        rules: Vec<RuleSpec>,
+        baselines: Vec<BaselineDeclaration>,
+        initial_work: Vec<InitialWork>,
+    ) -> EngineGenesis {
+        let rule_set = self.rule_set_with(budgets, rules, baselines).unwrap();
         EngineGenesis {
             profile: self.profile.clone(),
             rule_set,
@@ -216,6 +239,30 @@ pub fn cell(definition: &str) -> Input {
 
 pub fn param(index: u8) -> Expr {
     Expr::Input(Input::Param { index })
+}
+
+/// A declared baseline (v1 Q7).
+pub fn baseline(definition: &str, value: i64) -> BaselineDeclaration {
+    BaselineDeclaration {
+        definition: def(definition),
+        value,
+    }
+}
+
+/// A decay/recovery update with literal rate and cadence.
+pub fn decay(rate: i64, cadence: i64) -> Update {
+    Update::Decay {
+        rate: Param::Literal(rate),
+        cadence: Param::Literal(cadence),
+    }
+}
+
+/// A decay/recovery update whose rate is a hot-tunable config key.
+pub fn decay_config_rate(key: &str, cadence: i64) -> Update {
+    Update::Decay {
+        rate: Param::Config { key: def(key) },
+        cadence: Param::Literal(cadence),
+    }
 }
 
 pub fn emit(sub: &str, target: &str, update: Update) -> EmitOp {

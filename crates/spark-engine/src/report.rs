@@ -5,8 +5,11 @@
 //! unbudgeted execution over one canonical input history, and the
 //! **noncanonical** [`PacingDiagnostics`], which truthfully differs, appears in
 //! no digest, and is never given to evaluation. No report field carries a
-//! pre-wave digest, a cohort-identity observation seam, `F`, or `ActiveRequest`
-//! (AT-I46(a)); those are observed only through `test-support`.
+//! pre-wave digest, a `cohort_identity`, `F`, or `ActiveRequest` (FINAL
+//! AT-I46(a), which controls over the earlier v3 §3.4 content list); cohort
+//! identity remains bound into every emission identity and every
+//! `effect_batch_digest` the report does carry, and is observed directly only
+//! through `test-support`.
 
 use crate::obligation::ObligationRecord;
 use crate::rules::{ResultFamily, TransformFamily};
@@ -19,7 +22,10 @@ use spark_core::scope::ScopeId;
 use spark_core::value::CanonicalValue;
 use std::collections::BTreeSet;
 
-/// Noncanonical, causally inert pacing telemetry (v3 §3.4 frozen fields).
+/// Noncanonical, causally inert pacing telemetry: exactly the v3 §3.4 frozen
+/// field list. A deferred command is not a separate field: a command request
+/// that returns `Paused` with `deferred_cohort_count == 0` has its command
+/// deferred (FINAL/Revision-2 A6), which is derivable from the frozen fields.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct PacingDiagnostics {
     pub declared_max_due_per_cycle: u32,
@@ -30,8 +36,6 @@ pub struct PacingDiagnostics {
     pub overrun_cohort_identity: Option<Digest>,
     pub deferred_cohort_count: u64,
     pub earliest_deferred_due_time: Option<LogicalTime>,
-    /// True when the call paused with the command itself deferred.
-    pub command_deferred: bool,
 }
 
 /// ADR-0006 coverage status for bounded provenance.
@@ -165,8 +169,16 @@ pub enum ObligationRefusal {
     /// A `MaterializedEffect` target's current fingerprint differs (or the
     /// definition no longer exists).
     TargetFingerprintDrift { key: WorkKey, target: DefinitionId },
-    /// A `RuleReEvaluation` rule/ruleset did not resolve exactly.
+    /// A `RuleReEvaluation` record's exact originating artifact did not
+    /// resolve in the retained activation lineage: no activated rule set with
+    /// the recorded `ruleset_content_hash`, no rule with the recorded
+    /// fingerprint inside it, or no epoch record equal to the creator artifact.
     RuleResolutionFailed { key: WorkKey, rule_id: DefinitionId },
+    /// The originating rule resolved, but the current behavior epoch no
+    /// longer carries a bit-identical rule under that ID: executing it would
+    /// run superseded behavior, so it refuses explicitly (ADR-0006; no
+    /// reinterpretation, no migration in Phase 2).
+    RuleSuperseded { key: WorkKey, rule_id: DefinitionId },
 }
 
 /// The canonical report of one wave.
@@ -221,8 +233,6 @@ pub enum CohortOutcome {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CohortReport {
     pub kind: CohortKind,
-    /// Scheduled or command cohort identity; `None` for a conflict-only slice.
-    pub cohort_identity: Option<Digest>,
     pub canonical_time: LogicalTime,
     /// The conflict section, ascending by `WorkKey`, reported before any
     /// cohort outcome (V2-10).

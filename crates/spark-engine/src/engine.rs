@@ -19,9 +19,10 @@
 
 use crate::activation::ActivatedProfile;
 use crate::effects::{
-    candidate_set_digest, canonicalize_candidates, command_cohort_identity, curve, decay,
-    emission_identity, provenance_of, reduce, scale, scheduled_cohort_identity, weighted_sum,
-    Candidate, EmissionContext, Intent, ParentContext,
+    candidate_set_digest, canonicalize_candidates, command_cohort_identity, curve,
+    emission_identity, move_toward, provenance_of, reduce, scale, scale_wide,
+    scheduled_cohort_identity, to_i64, weighted_aggregate, weighted_sum, Candidate,
+    EmissionContext, Intent, ParentContext,
 };
 use crate::epoch::{ActivatingBarrier, EpochRecord, EpochRegistry};
 use crate::ledger::{CooldownLedger, OccurrenceLedger, OccurrenceLedgerKey};
@@ -39,8 +40,8 @@ use crate::request::{
     ProcessResult, Request, RequestDiscriminator,
 };
 use crate::rules::{
-    ActivatedRule, ActivatedRuleSet, Condition, Expr, Input, ScheduleMode, ScopeRef, Trigger,
-    Update,
+    ActivatedRule, ActivatedRuleSet, Condition, Expr, Input, Param, ScheduleMode, ScopeRef,
+    Trigger, Update,
 };
 use crate::state::{StateStore, StateWriteError};
 use spark_core::authority::Authority;
@@ -110,6 +111,9 @@ pub enum GenesisError {
     UnknownInitialRule(DefinitionId),
     InitialWorkExceedsAdmission,
     OccurrenceExhausted,
+    /// A config key read as a decay rate (must be `>= 0`) or cadence (must be
+    /// `>= 1`) is missing, non-numeric, or out of range.
+    InvalidDecayParameter(DefinitionId),
 }
 
 impl fmt::Display for GenesisError {
@@ -164,6 +168,10 @@ pub enum RestoreError {
     TimelineStagingPresent,
     /// Derived private indexes are validated, not trusted.
     DerivedIndexesInconsistent,
+    /// The retained per-epoch artifact lineage disagrees with the
+    /// digest-committed `EpochRegistry` or with the finalized activating
+    /// command of an epoch (a derived index, validated like the timeline's).
+    EpochLineageInvalid,
     BidirectionalInvariantBroken,
     /// Step 3.
     DigestMismatch,
@@ -199,6 +207,7 @@ pub struct EngineSnapshot {
     pub(crate) cooldowns: CooldownLedger,
     pub(crate) rule_set: ActivatedRuleSet,
     pub(crate) config: ConfigRevision,
+    pub(crate) lineage: Vec<EpochArtifacts>,
     pub(crate) frontier: LogicalTime,
     pub(crate) active: Option<RequestDiscriminator>,
     pub(crate) recorded_stable_boundary_digest: Digest,
@@ -228,6 +237,97 @@ pub struct CompletedHistory {
     pub frontier: LogicalTime,
     pub recorded_history_digest: Digest,
     pub recorded_stable_boundary_digest: Digest,
+}
+
+// ================================================================ epoch lineage
+
+/// One behavior epoch's activated artifacts, retained for the life of the
+/// engine (the v1 §8 "immutable activation artifact" class, content-addressed).
+///
+/// Two frozen requirements need them: a re-evaluation obligation resolves its
+/// **exact originating** rule set by hash in the activation lineage (v1 §5,
+/// ADR-0006), and decay/recovery integrates each elapsed interval under the
+/// epoch in effect over it, so a hot-tuned rate applies only from its
+/// activating barrier (v1 Q7 + AT-I23). The lineage adds no canonical content:
+/// each rule set and config is identified by the hash the digest-committed
+/// `EpochRegistry` record already binds, and each activation time is the
+/// effective time of the finalized command whose semantic hash that record
+/// binds. It is therefore a derived index over committed state and is
+/// validated at restore, never trusted.
+#[derive(Debug, Clone)]
+pub(crate) struct EpochArtifacts {
+    pub(crate) rule_set: ActivatedRuleSet,
+    pub(crate) config: ConfigRevision,
+    /// The activating command's effective time; `None` for genesis.
+    pub(crate) activated_at: Option<LogicalTime>,
+}
+
+/// One decay/recovery operation, identified the way every emitting operation
+/// is: its rule, its qualified sub-ID, its target, and its scope mapping.
+struct DecayOp<'a> {
+    rule_id: &'a DefinitionId,
+    sub_id: &'a CanonicalTag,
+    target: &'a DefinitionId,
+    scope: &'a ScopeRef,
+}
+
+impl EpochArtifacts {
+    /// The rate and cadence of `op` in this epoch's rule set, if this epoch
+    /// carries that operation.
+    fn decay_parameters(&self, op: &DecayOp<'_>) -> Option<(&Param, &Param)> {
+        let rule = self.rule_set.rule(op.rule_id)?;
+        rule.spec().emits.iter().find_map(|e| match &e.update {
+            Update::Decay { rate, cadence }
+                if &e.sub_id == op.sub_id && &e.target == op.target && &e.scope == op.scope =>
+            {
+                Some((rate, cadence))
+            }
+            _ => None,
+        })
+    }
+
+    fn resolve(&self, p: &Param) -> Option<i64> {
+        match p {
+            Param::Literal(v) => Some(*v),
+            Param::Config { key } => self.config.get(key).and_then(numeric),
+        }
+    }
+}
+
+/// Why an engine is fail-stopped (sticky until a committed snapshot is
+/// restored).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) enum FailStop {
+    FinalizationEntailment,
+    StoreInvariant(ExtractionRefusal),
+}
+
+impl FailStop {
+    fn outcome(&self) -> Outcome {
+        match self {
+            FailStop::FinalizationEntailment => Outcome::FinalizationEntailmentViolated,
+            FailStop::StoreInvariant(r) => Outcome::StoreInvariantViolated(r.clone()),
+        }
+    }
+}
+
+/// Config keys read as decay parameters must carry valid values in the
+/// epoch's config: rate `>= 0`, cadence `>= 1` (checked at genesis and at
+/// every activation, so evaluation never meets an invalid parameter).
+fn decay_parameters_valid(
+    rule_set: &ActivatedRuleSet,
+    config: &ConfigRevision,
+) -> Result<(), DefinitionId> {
+    let (rates, cadences) = rule_set.decay_parameter_keys();
+    for (keys, min) in [(rates, 0), (cadences, 1)] {
+        for k in keys {
+            match config.get(&k).and_then(numeric) {
+                Some(v) if v >= min => {}
+                _ => return Err(k),
+            }
+        }
+    }
+    Ok(())
 }
 
 // ================================================================ observation seam
@@ -300,13 +400,21 @@ pub struct Engine {
     pub(crate) cooldowns: CooldownLedger,
     pub(crate) rule_set: ActivatedRuleSet,
     pub(crate) config: ConfigRevision,
+    pub(crate) lineage: Vec<EpochArtifacts>,
     pub(crate) frontier: LogicalTime,
     pub(crate) active: Option<RequestDiscriminator>,
-    pub(crate) fail_stopped: bool,
+    pub(crate) fail_stop: Option<FailStop>,
     #[cfg(any(test, feature = "test-support"))]
     pub(crate) observation: Observation,
     #[cfg(any(test, feature = "test-support"))]
     pub(crate) disabled_row: Option<PreflightRow>,
+    /// AT-I6a/AT-I6c(d) seam: evaluate every seed twice, exactly (`false`)
+    /// or with an altered parameter payload under the same identity (`true`).
+    #[cfg(any(test, feature = "test-support"))]
+    pub(crate) seed_duplication: Option<bool>,
+    /// AT-I6c(f) seam: forge empty parent sets for derived seeds.
+    #[cfg(any(test, feature = "test-support"))]
+    pub(crate) forge_empty_parents: bool,
 }
 
 /// A numeric view of a canonical value (`Int` value or `Fixed` raw).
@@ -356,7 +464,7 @@ enum Seed {
         params: Vec<i64>,
     },
     Materialized {
-        record: ObligationRecord,
+        record: Box<ObligationRecord>,
     },
 }
 
@@ -366,6 +474,7 @@ struct EnqueueClaim {
     ledger_key: OccurrenceLedgerKey,
     due_time: LogicalTime,
     creator_rule: DefinitionId,
+    creator_fingerprint: Digest,
     mode: ObligationMode,
 }
 
@@ -386,6 +495,7 @@ struct EvalView<'a> {
     cooldowns: &'a CooldownLedger,
     rule_set: &'a ActivatedRuleSet,
     config: &'a ConfigRevision,
+    lineage: &'a [EpochArtifacts],
     behavior_epoch: u64,
     artifact: Digest,
     root_seed: u64,
@@ -443,20 +553,98 @@ impl EvalView<'_> {
         }
     }
 
-    fn aggregate(&self, source: &DefinitionId, weight: &FixedPoint) -> Result<i64, WaveRejection> {
-        let values: Vec<i64> = self
-            .store
-            .cells_of(source)
-            .filter_map(|c| numeric(&c.value))
-            .collect();
-        let mut acc: i128 = 0;
-        for v in values {
-            acc = acc
-                .checked_add(i128::from(v))
-                .ok_or(arithmetic("aggregate"))?;
+    /// The widened aggregate (C2-04): accumulation and weighting in checked
+    /// `i128`, one floor; the caller converts once.
+    fn aggregate(&self, source: &DefinitionId, weight: &FixedPoint) -> Result<i128, WaveRejection> {
+        weighted_aggregate(
+            self.store
+                .cells_of(source)
+                .filter_map(|c| numeric(&c.value)),
+            weight.raw(),
+        )
+    }
+
+    /// The decay/recovery target of one cell (v1 Q7): its `StateCell.baseline`
+    /// field. Engine writes materialize the rule set's declaration into that
+    /// field; a cell last written before its definition's baseline was
+    /// declared takes the current declaration, which this operation's commit
+    /// then materializes. There is no rule-supplied substitute target.
+    fn baseline_of(
+        &self,
+        target: &DefinitionId,
+        cell: Option<&crate::state::StateCell>,
+    ) -> Result<i128, WaveRejection> {
+        cell.and_then(|c| c.baseline.as_ref())
+            .and_then(numeric)
+            .or_else(|| self.rule_set.baseline(target))
+            .map(i128::from)
+            .ok_or(arithmetic("decay_baseline_absent"))
+    }
+
+    /// The v1 Q7 closed-form catch-up from `anchor` (the cell's `updated_at`)
+    /// to `now`, integrated epoch by epoch (C2-05, AT-I23).
+    ///
+    /// For each behavior epoch overlapping `(t, now]`: if that epoch carries
+    /// this operation, take the whole cadence steps that fit before the
+    /// epoch's end (the next activation time, or `now`) at that epoch's rate,
+    /// and advance `t` by exactly those steps; a partial step carries into the
+    /// next epoch and completes at its parameters — each whole step is
+    /// integrated at the parameters in effect at its end, which is exactly
+    /// what separate evaluations at every step boundary would do (a boundary
+    /// at an activation time belongs to the old epoch, as scheduled work at
+    /// that time runs before the activating command). An epoch that does not
+    /// carry the operation integrates nothing and `t` moves to its end.
+    ///
+    /// Returns the moved value and the end of the last whole step, which is
+    /// the commit time: the partial remainder `now - t` survives to the next
+    /// evaluation. `None` when no whole step elapsed.
+    fn decay_walk(
+        &self,
+        op: &DecayOp<'_>,
+        start: i128,
+        anchor: LogicalTime,
+        baseline: i128,
+        now: LogicalTime,
+    ) -> Result<Option<(i128, LogicalTime)>, WaveRejection> {
+        let mut value = start;
+        let mut t = anchor.0;
+        let mut stepped = false;
+        let mut epochs = self.lineage.iter().peekable();
+        while let Some(epoch) = epochs.next() {
+            let end = epochs
+                .peek()
+                .and_then(|next| next.activated_at)
+                .map_or(now.0, |a| a.0.min(now.0));
+            if end <= t {
+                continue;
+            }
+            let Some((rate, cadence)) = epoch.decay_parameters(op) else {
+                t = end;
+                continue;
+            };
+            let rate = epoch
+                .resolve(rate)
+                .filter(|r| *r >= 0)
+                .ok_or(arithmetic("decay_rate"))?;
+            let cadence = epoch
+                .resolve(cadence)
+                .and_then(|c| u64::try_from(c).ok())
+                .filter(|c| *c >= 1)
+                .ok_or(arithmetic("decay_cadence"))?;
+            let steps = end
+                .checked_sub(t)
+                .and_then(|span| span.checked_div(cadence))
+                .ok_or(arithmetic("decay"))?;
+            if steps > 0 {
+                value = move_toward(value, baseline, steps, rate)?;
+                t = steps
+                    .checked_mul(cadence)
+                    .and_then(|d| t.checked_add(d))
+                    .ok_or(arithmetic("decay"))?;
+                stepped = true;
+            }
         }
-        let clamped = i64::try_from(acc).map_err(|_| arithmetic("aggregate"))?;
-        scale(clamped, weight.raw())
+        Ok(stepped.then_some((value, LogicalTime(t))))
     }
 
     /// Evaluates one rule at `subject` into `draft`. Pure over the view.
@@ -610,6 +798,7 @@ impl EvalView<'_> {
                 },
                 due_time,
                 creator_rule: spec.rule_id.clone(),
+                creator_fingerprint: rule.fingerprint().clone(),
                 mode,
             });
         }
@@ -632,8 +821,8 @@ impl EvalView<'_> {
         subject: &ScopeId,
         ctx: &EvalCtx<'_>,
     ) -> Result<Option<Intent>, WaveRejection> {
-        let current = self.cell(target, scope);
         let cell = self.store.get(self.profile_id, target, scope);
+        let current = cell.and_then(|c| numeric(&c.value));
         let op_fp = |family_tag: &str| {
             let mut enc = CanonicalEncoder::new();
             enc.push_str("operation_fingerprint_v1");
@@ -648,19 +837,22 @@ impl EvalView<'_> {
             .iter()
             .all(|o| matches!(o.update, Update::Add(_) | Update::Subtract(_)));
         if all_additive {
-            let mut total: i64 = 0;
+            // One composed emission (D-C2-8): its delta is summed in checked
+            // `i128` and converted once (v1 Q1, C2-04), so a body such as
+            // `+MAX, +MAX, -MAX` is its exact `+MAX`, never a premature
+            // intermediate overflow.
+            let mut total: i128 = 0;
             for o in ops {
                 let v = match &o.update {
-                    Update::Add(x) => self.expr(x, subject, ctx)?,
-                    Update::Subtract(x) => self
-                        .expr(x, subject, ctx)?
+                    Update::Add(x) => i128::from(self.expr(x, subject, ctx)?),
+                    Update::Subtract(x) => i128::from(self.expr(x, subject, ctx)?)
                         .checked_neg()
                         .ok_or(arithmetic("subtract_negation"))?,
                     _ => 0,
                 };
                 total = total.checked_add(v).ok_or(arithmetic("rule_body_delta"))?;
             }
-            return Ok(Some(Intent::AddDelta(total)));
+            return Ok(Some(Intent::AddDelta(to_i64(total, "rule_body_delta")?)));
         }
         if let [only] = ops {
             return Ok(match &only.update {
@@ -669,101 +861,87 @@ impl EvalView<'_> {
                     family: x.result_family(),
                 }),
                 Update::Aggregate { source, weight } => Some(Intent::Result {
-                    value: self.aggregate(source, weight)?,
+                    value: to_i64(self.aggregate(source, weight)?, "aggregate")?,
                     family: crate::rules::ResultFamily::Aggregate,
                 }),
                 Update::Scale(f) => Some(Intent::Transform {
                     family: crate::rules::TransformFamily::Scale,
                     op_fingerprint: op_fp("scale"),
                     resolved: scale(current.unwrap_or(0), f.raw())?,
+                    commit_at: None,
                 }),
                 Update::Clamp { min, max } => Some(Intent::Transform {
                     family: crate::rules::TransformFamily::Clamp,
                     op_fingerprint: op_fp("clamp"),
                     resolved: current.unwrap_or(0).max(*min).min(*max),
+                    commit_at: None,
                 }),
-                Update::Decay {
-                    toward,
-                    rate,
-                    cadence,
-                } => {
-                    let Some(cell) = cell else {
+                Update::Decay { .. } => {
+                    let (Some(cell), Some(value)) = (cell, current) else {
                         return Ok(None);
                     };
-                    let Some(value) = numeric(&cell.value) else {
-                        return Ok(None);
+                    let start = i128::from(value);
+                    let op = DecayOp {
+                        rule_id: rule.rule_id(),
+                        sub_id: &only.sub_id,
+                        target,
+                        scope: &only.scope,
                     };
-                    let elapsed = ctx
-                        .now
-                        .0
-                        .checked_sub(cell.updated_at.0)
-                        .ok_or(arithmetic("decay_backwards"))?;
-                    let target_value = match cell.baseline.as_ref().and_then(numeric) {
-                        Some(b) => b,
-                        None => self.expr(toward, subject, ctx)?,
-                    };
-                    decay(
-                        value,
-                        target_value,
-                        self.expr(rate, subject, ctx)?,
-                        elapsed,
-                        *cadence,
-                    )?
-                    .map(|resolved| Intent::Transform {
-                        family: crate::rules::TransformFamily::Decay,
-                        op_fingerprint: op_fp("decay"),
-                        resolved,
-                    })
+                    let baseline = self.baseline_of(target, Some(cell))?;
+                    match self.decay_walk(&op, start, cell.updated_at, baseline, ctx.now)? {
+                        // No movement (no whole step, rate 0, or at the
+                        // baseline): no candidate, so nothing is re-anchored.
+                        Some((moved, at)) if moved != start => Some(Intent::Transform {
+                            family: crate::rules::TransformFamily::Decay,
+                            op_fingerprint: op_fp("decay"),
+                            resolved: to_i64(moved, "decay")?,
+                            commit_at: Some(at),
+                        }),
+                        _ => None,
+                    }
                 }
                 Update::Add(_) | Update::Subtract(_) => None,
             });
         }
         // Several operations of one rule on one target: the rule body is the
-        // declared reducer, composed in declared stage order (v2 §4.2).
-        let mut v = current.unwrap_or(0);
+        // declared reducer, composed in declared stage order (v2 §4.2). Every
+        // intermediate stays in checked `i128`; one conversion at the end (v1
+        // Q1, C2-04). A body commits at the cohort's canonical time: any
+        // non-decay stage is an instantaneous write that re-anchors decay.
+        let mut v = i128::from(current.unwrap_or(0));
         for o in ops {
             v = match &o.update {
                 Update::Add(x) => v
-                    .checked_add(self.expr(x, subject, ctx)?)
+                    .checked_add(i128::from(self.expr(x, subject, ctx)?))
                     .ok_or(arithmetic("rule_body"))?,
                 Update::Subtract(x) => v
-                    .checked_sub(self.expr(x, subject, ctx)?)
+                    .checked_sub(i128::from(self.expr(x, subject, ctx)?))
                     .ok_or(arithmetic("rule_body"))?,
-                Update::Assign(x) => self.expr(x, subject, ctx)?,
-                Update::Scale(f) => scale(v, f.raw())?,
-                Update::Clamp { min, max } => v.max(*min).min(*max),
+                Update::Assign(x) => i128::from(self.expr(x, subject, ctx)?),
+                Update::Scale(f) => scale_wide(v, f.raw())?,
+                Update::Clamp { min, max } => v.max(i128::from(*min)).min(i128::from(*max)),
                 Update::Aggregate { source, weight } => self.aggregate(source, weight)?,
-                Update::Decay {
-                    toward,
-                    rate,
-                    cadence,
-                } => {
-                    let updated_at = cell.map(|c| c.updated_at.0).unwrap_or(ctx.now.0);
-                    let elapsed = ctx
-                        .now
-                        .0
-                        .checked_sub(updated_at)
-                        .ok_or(arithmetic("decay_backwards"))?;
-                    let target_value =
-                        match cell.and_then(|c| c.baseline.as_ref()).and_then(numeric) {
-                            Some(b) => b,
-                            None => self.expr(toward, subject, ctx)?,
-                        };
-                    decay(
-                        v,
-                        target_value,
-                        self.expr(rate, subject, ctx)?,
-                        elapsed,
-                        *cadence,
-                    )?
-                    .unwrap_or(v)
+                Update::Decay { .. } => {
+                    let op = DecayOp {
+                        rule_id: rule.rule_id(),
+                        sub_id: &o.sub_id,
+                        target,
+                        scope: &o.scope,
+                    };
+                    let anchor = cell.map(|c| c.updated_at).unwrap_or(ctx.now);
+                    let baseline = self.baseline_of(target, cell)?;
+                    match self.decay_walk(&op, v, anchor, baseline, ctx.now)? {
+                        Some((moved, _)) => moved,
+                        None => v,
+                    }
                 }
             };
         }
         Ok(Some(Intent::Transform {
             family: crate::rules::TransformFamily::RuleBody,
             op_fingerprint: op_fp("rule_body"),
-            resolved: v,
+            resolved: to_i64(v, "rule_body")?,
+            commit_at: None,
         }))
     }
 }
@@ -815,6 +993,7 @@ impl Engine {
         {
             return Err(GenesisError::MissingConfigKey(missing));
         }
+        decay_parameters_valid(&rule_set, &config).map_err(GenesisError::InvalidDecayParameter)?;
         let profile_id = profile.profile_id().clone();
         let tl = TimelineIngress::new(
             profile_id.clone(),
@@ -838,6 +1017,11 @@ impl Engine {
             .append(record)
             .map_err(|_| GenesisError::OccurrenceExhausted)?;
         let budgets = *rule_set.budgets();
+        let lineage = vec![EpochArtifacts {
+            rule_set: rule_set.clone(),
+            config: config.clone(),
+            activated_at: None,
+        }];
         let mut engine = Engine {
             profile_id,
             store: profile.into_state_store(),
@@ -850,13 +1034,18 @@ impl Engine {
             cooldowns: CooldownLedger::default(),
             rule_set,
             config,
+            lineage,
             frontier: start_time,
             active: None,
-            fail_stopped: false,
+            fail_stop: None,
             #[cfg(any(test, feature = "test-support"))]
             observation: Observation::default(),
             #[cfg(any(test, feature = "test-support"))]
             disabled_row: None,
+            #[cfg(any(test, feature = "test-support"))]
+            seed_duplication: None,
+            #[cfg(any(test, feature = "test-support"))]
+            forge_empty_parents: false,
         };
         let mut sorted = initial_work;
         sorted.sort_by(|a, b| {
@@ -900,6 +1089,7 @@ impl Engine {
             let record = ObligationRecord {
                 key: key.clone(),
                 creator_rule_id: w.rule_id.clone(),
+                creator_rule_fingerprint: rule.fingerprint().clone(),
                 creator_behavior_epoch: 1,
                 creator_behavior_artifact_hash: engine.artifact(),
                 creator_emission_identity: enc.finish(),
@@ -941,7 +1131,7 @@ impl Engine {
     }
 
     pub fn is_fail_stopped(&self) -> bool {
-        self.fail_stopped
+        self.fail_stop.is_some()
     }
 
     pub fn rule_set(&self) -> &ActivatedRuleSet {
@@ -1088,6 +1278,7 @@ impl Engine {
             cooldowns: &self.cooldowns,
             rule_set: &self.rule_set,
             config: &self.config,
+            lineage: &self.lineage,
             behavior_epoch: self.behavior_epoch(),
             artifact: self.artifact(),
             root_seed: self.root_seed(),
@@ -1101,10 +1292,10 @@ impl Engine {
     pub fn process(&mut self, request: &Request) -> ProcessResult {
         let presented = request.discriminator();
         let horizon = request.horizon();
-        if self.fail_stopped {
+        if let Some(stop) = &self.fail_stop {
             return ProcessResult {
                 presented,
-                outcome: Outcome::FinalizationEntailmentViolated,
+                outcome: stop.outcome(),
                 reports: Vec::new(),
                 diagnostics: None,
             };
@@ -1162,11 +1353,11 @@ impl Engine {
             // A3.
             if executable > 0 {
                 if exception_fired {
-                    return self.pause(presented, reports, diagnostics, horizon, false);
+                    return self.pause(presented, reports, diagnostics, horizon);
                 }
                 let admit = executable <= remaining || admitted_executable == 0;
                 if !admit {
-                    return self.pause(presented, reports, diagnostics, horizon, false);
+                    return self.pause(presented, reports, diagnostics, horizon);
                 }
                 if executable > remaining {
                     exception_fired = true;
@@ -1176,15 +1367,25 @@ impl Engine {
             // A4.
             let extraction = match self.extract_least_due_slice(horizon) {
                 Ok(e) => e,
-                Err(_) => {
+                Err(refusal) => {
                     // Unreachable through the facade (the bidirectional
-                    // invariant holds at every stable boundary); reachable only
-                    // through test-support tampering. Nothing was mutated; the
-                    // call stops with the request still active.
-                    return self.pause(presented, reports, diagnostics, horizon, false);
+                    // invariant holds at every stable boundary); reachable
+                    // only through test-support tampering. The typed refusal
+                    // is returned, never discarded, and the engine
+                    // fail-stops (D-C2-11 revised): repeating the request
+                    // cannot help, so it must not look like a pause. This
+                    // extraction attempt mutated nothing; `ActiveRequest` and
+                    // any cohort committed earlier in this call did change.
+                    self.fail_stop = Some(FailStop::StoreInvariant(refusal.clone()));
+                    return ProcessResult {
+                        presented,
+                        outcome: Outcome::StoreInvariantViolated(refusal),
+                        reports,
+                        diagnostics: None,
+                    };
                 }
             };
-            let report = self.run_scheduled_cohort(extraction);
+            let (report, cohort_identity) = self.run_scheduled_cohort(extraction);
             // A5: stable boundary.
             if executable > 0 {
                 admitted_executable = admitted_executable.saturating_add(1);
@@ -1192,7 +1393,7 @@ impl Engine {
                 diagnostics.admitted_work_key_count = diagnostics
                     .admitted_work_key_count
                     .saturating_add(executable);
-                if let Some(id) = &report.cohort_identity {
+                if let Some(id) = &cohort_identity {
                     diagnostics.admitted_cohort_identities.push(id.clone());
                     if exception_fired && diagnostics.overrun_cohort_identity.is_none() {
                         diagnostics.overrun_cohort_identity = Some(id.clone());
@@ -1210,7 +1411,9 @@ impl Engine {
         let mut outcome = Outcome::Completed;
         if let Request::Command(command) = request {
             if !(remaining >= 1 || admitted_executable == 0) {
-                return self.pause(presented, reports, diagnostics, horizon, true);
+                // The command is deferred (A6): `Paused` with no executable
+                // slice left in the horizon.
+                return self.pause(presented, reports, diagnostics, horizon);
             }
             match self.finalize_command(command) {
                 Ok(barrier) => reports.push(self.run_command_cohort(command, barrier)),
@@ -1218,7 +1421,7 @@ impl Engine {
                     outcome = Outcome::CompletedCommandNotFinalized(refusal);
                 }
                 Err(FinalizeFailure::EntailmentViolated) => {
-                    self.fail_stopped = true;
+                    self.fail_stop = Some(FailStop::FinalizationEntailment);
                     return ProcessResult {
                         presented,
                         outcome: Outcome::FinalizationEntailmentViolated,
@@ -1251,10 +1454,8 @@ impl Engine {
         reports: Vec<crate::report::CohortReport>,
         mut diagnostics: PacingDiagnostics,
         horizon: LogicalTime,
-        command_deferred: bool,
     ) -> ProcessResult {
         self.finish_diagnostics(&mut diagnostics, horizon);
-        diagnostics.command_deferred = command_deferred;
         ProcessResult {
             presented,
             outcome: Outcome::Paused,
@@ -1340,25 +1541,27 @@ impl Engine {
 
     // ------------------------------------------------------------ cohorts
 
+    /// Runs one extracted slice; returns its canonical report and, for an
+    /// executable cohort, its identity (noncanonical telemetry only).
     fn run_scheduled_cohort(
         &mut self,
         extraction: CohortExtraction,
-    ) -> crate::report::CohortReport {
+    ) -> (crate::report::CohortReport, Option<Digest>) {
         let conflicts: Vec<ConflictEntry> = extraction
             .conflicted
             .iter()
             .map(|(c, _)| ConflictEntry::from(c))
             .collect();
         if extraction.executable.is_empty() {
-            return crate::report::CohortReport {
+            let report = crate::report::CohortReport {
                 kind: CohortKind::ConflictOnly,
-                cohort_identity: None,
                 canonical_time: extraction.due_time,
                 conflicts,
                 ingress: Vec::new(),
                 waves: Vec::new(),
                 outcome: CohortOutcome::ConflictOnly,
             };
+            return (report, None);
         }
         let keys: Vec<WorkKey> = extraction
             .executable
@@ -1366,6 +1569,16 @@ impl Engine {
             .map(|(i, _)| i.key.clone())
             .collect();
         let cohort = scheduled_cohort_identity(&self.profile_id, extraction.due_time, &keys);
+        let refused = |conflicts: Vec<ConflictEntry>, refusal: ObligationRefusal| {
+            crate::report::CohortReport {
+                kind: CohortKind::Scheduled,
+                canonical_time: extraction.due_time,
+                conflicts,
+                ingress: Vec::new(),
+                waves: Vec::new(),
+                outcome: CohortOutcome::ObligationRefused(refusal),
+            }
+        };
         // R-7: resolve every record before evaluating anything.
         let mut seeds = Vec::new();
         for (item, record) in &extraction.executable {
@@ -1380,24 +1593,18 @@ impl Engine {
                             .schema_of(&self.profile_id, target)
                             .map(|d| d.fingerprint().clone());
                         if current.as_ref() != Some(fp) {
-                            return crate::report::CohortReport {
-                                kind: CohortKind::Scheduled,
-                                cohort_identity: Some(cohort),
-                                canonical_time: extraction.due_time,
+                            let report = refused(
                                 conflicts,
-                                ingress: Vec::new(),
-                                waves: Vec::new(),
-                                outcome: CohortOutcome::ObligationRefused(
-                                    ObligationRefusal::TargetFingerprintDrift {
-                                        key: item.key.clone(),
-                                        target: target.clone(),
-                                    },
-                                ),
-                            };
+                                ObligationRefusal::TargetFingerprintDrift {
+                                    key: item.key.clone(),
+                                    target: target.clone(),
+                                },
+                            );
+                            return (report, Some(cohort));
                         }
                     }
                     seeds.push(Seed::Materialized {
-                        record: record.clone(),
+                        record: Box::new(record.clone()),
                     });
                 }
                 ObligationMode::RuleReEvaluation {
@@ -1405,31 +1612,58 @@ impl Engine {
                     rule_fingerprint,
                     ruleset_content_hash,
                 } => {
-                    let resolves = self
+                    // D-C2-7, the compatibility rule stated exactly:
+                    // (1) the exact originating artifact resolves in the
+                    //     retained activation lineage — an activated rule set
+                    //     with the recorded content hash containing the rule
+                    //     with the recorded fingerprint — and the creator's
+                    //     artifact hash is an epoch record of this registry;
+                    // (2) the current epoch carries that rule bit-identically
+                    //     (same ID, same fingerprint), so executing it is
+                    //     exactly the originating logic and never superseded
+                    //     behavior; otherwise the record refuses explicitly;
+                    // (3) config inputs are ADR-0004 class-1 hot-tunable and
+                    //     are read barrier-scoped: a point read uses the
+                    //     config of the epoch in effect at the evaluation
+                    //     time, and decay integrates each elapsed interval
+                    //     under the config of the epoch in effect over it.
+                    //     Every config read is therefore an exact,
+                    //     hash-identified artifact of the lineage, never an
+                    //     ambient value.
+                    let originating = self
+                        .lineage
+                        .iter()
+                        .find(|a| a.rule_set.content_hash() == ruleset_content_hash)
+                        .and_then(|a| a.rule_set.rule(rule_id))
+                        .is_some_and(|r| r.fingerprint() == rule_fingerprint);
+                    let creator_known = self
+                        .epochs
+                        .records()
+                        .iter()
+                        .any(|e| &e.record_hash() == record.creator_behavior_artifact_hash());
+                    if !(originating && creator_known) {
+                        let report = refused(
+                            conflicts,
+                            ObligationRefusal::RuleResolutionFailed {
+                                key: item.key.clone(),
+                                rule_id: rule_id.clone(),
+                            },
+                        );
+                        return (report, Some(cohort));
+                    }
+                    let current_identical = self
                         .rule_set
                         .rule(rule_id)
-                        .map(|r| r.fingerprint() == rule_fingerprint)
-                        .unwrap_or(false)
-                        && self
-                            .epochs
-                            .records()
-                            .iter()
-                            .any(|e| e.ruleset_content_hash() == ruleset_content_hash);
-                    if !resolves {
-                        return crate::report::CohortReport {
-                            kind: CohortKind::Scheduled,
-                            cohort_identity: Some(cohort),
-                            canonical_time: extraction.due_time,
+                        .is_some_and(|r| r.fingerprint() == rule_fingerprint);
+                    if !current_identical {
+                        let report = refused(
                             conflicts,
-                            ingress: Vec::new(),
-                            waves: Vec::new(),
-                            outcome: CohortOutcome::ObligationRefused(
-                                ObligationRefusal::RuleResolutionFailed {
-                                    key: item.key.clone(),
-                                    rule_id: rule_id.clone(),
-                                },
-                            ),
-                        };
+                            ObligationRefusal::RuleSuperseded {
+                                key: item.key.clone(),
+                                rule_id: rule_id.clone(),
+                            },
+                        );
+                        return (report, Some(cohort));
                     }
                     seeds.push(Seed::Rule {
                         rule_id: rule_id.clone(),
@@ -1442,15 +1676,15 @@ impl Engine {
             }
         }
         let (waves, outcome) = self.run_waves(&cohort, extraction.due_time, seeds);
-        crate::report::CohortReport {
+        let report = crate::report::CohortReport {
             kind: CohortKind::Scheduled,
-            cohort_identity: Some(cohort),
             canonical_time: extraction.due_time,
             conflicts,
             ingress: Vec::new(),
             waves,
             outcome,
-        }
+        };
+        (report, Some(cohort))
     }
 
     fn run_command_cohort(
@@ -1467,16 +1701,31 @@ impl Engine {
         let now = command.effective_time;
         let mut report = crate::report::CohortReport {
             kind: CohortKind::Command,
-            cohort_identity: Some(cohort.clone()),
             canonical_time: now,
             conflicts: Vec::new(),
             ingress: Vec::new(),
             waves: Vec::new(),
             outcome: CohortOutcome::Committed,
         };
+        // v1 Q5 (C2-06): the reserved epoch-activation kind and the
+        // activation payload are bound in both directions. A mismatch is an
+        // ordinary finalized command whose cohort activates nothing, applies
+        // no ingress, and runs no rule; Phase-1 admission and finalization
+        // are unchanged.
+        let reserved = command.command_kind.as_str() == EPOCH_ACTIVATION_COMMAND_KIND.as_str();
         match &command.payload {
+            CommandPayload::ActivateEpoch { .. } if !reserved => {
+                report.outcome = CohortOutcome::EpochActivationRejected {
+                    reason: "activation_payload_requires_reserved_kind",
+                };
+            }
+            CommandPayload::Host { .. } if reserved => {
+                report.outcome = CohortOutcome::EpochActivationRejected {
+                    reason: "reserved_kind_requires_activation_payload",
+                };
+            }
             CommandPayload::ActivateEpoch { rule_set, config } => {
-                report.outcome = match self.activate_epoch(rule_set, config, &barrier) {
+                report.outcome = match self.activate_epoch(rule_set, config, &barrier, now) {
                     Ok(epoch) => CohortOutcome::EpochActivated {
                         behavior_epoch: epoch,
                     },
@@ -1557,6 +1806,7 @@ impl Engine {
         rule_set: &ActivatedRuleSet,
         config: &ConfigRevision,
         barrier: &Barrier,
+        activated_at: LogicalTime,
     ) -> Result<u64, &'static str> {
         if rule_set.profile_id() != &self.profile_id
             || rule_set.manifest_content_hash() != self.store.manifest_content_hash()
@@ -1573,6 +1823,9 @@ impl Engine {
             .any(|k| config.get(k).is_none())
         {
             return Err("missing_config_key");
+        }
+        if decay_parameters_valid(rule_set, config).is_err() {
+            return Err("invalid_decay_parameter");
         }
         let (epoch, previous) = self.epochs.successor().map_err(|_| "epoch_exhausted")?;
         let record = EpochRecord::new(
@@ -1593,6 +1846,11 @@ impl Engine {
         self.epochs.append(record).map_err(|_| "epoch_chain")?;
         self.rule_set = rule_set.clone();
         self.config = config.clone();
+        self.lineage.push(EpochArtifacts {
+            rule_set: rule_set.clone(),
+            config: config.clone(),
+            activated_at: Some(activated_at),
+        });
         Ok(epoch)
     }
 
@@ -1662,6 +1920,12 @@ impl Engine {
     ) -> Result<WavePlan, WaveRejection> {
         let view = self.view();
         let mut draft = Draft::default();
+        #[cfg(any(test, feature = "test-support"))]
+        let duplicated = self
+            .seed_duplication
+            .map(|altered| duplicate_seeds(pending, altered));
+        #[cfg(any(test, feature = "test-support"))]
+        let pending: &[Seed] = duplicated.as_deref().unwrap_or(pending);
         for seed in pending {
             match seed {
                 Seed::Rule {
@@ -1691,15 +1955,15 @@ impl Engine {
                 }
                 Seed::Materialized { record } => {
                     let parent = ParentContext::WorkKey(record.key().identity_digest()).digest();
-                    let mut rfp = CanonicalEncoder::new();
-                    rfp.push_str("materialized_obligation_v1");
-                    rfp.push_digest(&record.record_hash());
-                    let record_fp = rfp.finish();
+                    // D-C2-13: the creator rule's fingerprint — the v3 §4.4
+                    // rule-fingerprint component, carried verbatim from the
+                    // originating rule — never a hash over the record, which
+                    // contains the resolved numeric payload.
                     let ctx = EmissionContext {
                         cohort_identity: cohort,
                         wave_index: wave,
                         parent_context: &parent,
-                        rule_fingerprint: &record_fp,
+                        rule_fingerprint: record.creator_rule_fingerprint(),
                         producer_scope: &record.key().scope_id,
                         behavior_artifact_hash: &view.artifact,
                     };
@@ -1749,7 +2013,9 @@ impl Engine {
         let reduced = reduce(&canonical, &|d, s| view.cell(d, s))?;
         // Committed effects, validated (authority, type, bounds, scope).
         let mut committed = Vec::new();
+        let mut commit_times = Vec::new();
         for r in &reduced {
+            commit_times.push(r.at.unwrap_or(now));
             let Some(def) = self.store.schema_of(&self.profile_id, &r.definition) else {
                 return Err(WaveRejection::InvalidEffect {
                     definition: r.definition.clone(),
@@ -1801,6 +2067,18 @@ impl Engine {
         }
         // Threshold / propagation, only after complete reduction: previously
         // committed value -> fully reduced result.
+        //
+        // C2-01, v3 §4.3 rules 1/2/5: a derived seed's parent set is the union,
+        // over **every** reduction group it reads to become eligible — its
+        // watched trigger group and every condition read — of that group's
+        // canonicalized candidate identities. A read group with no candidates
+        // this wave contributes nothing (background state is committed by the
+        // next wave's pre-wave digest instead); the set deduplicates; no
+        // parent is ever selected.
+        let changed: BTreeMap<(&DefinitionId, &ScopeId), &Vec<Digest>> = reduced
+            .iter()
+            .map(|r| ((&r.definition, &r.scope), &r.contributing))
+            .collect();
         let mut triggers: BTreeMap<(DefinitionId, ScopeId), BTreeSet<Digest>> = BTreeMap::new();
         for r in &reduced {
             for watcher in self.rule_set.rules_watching(&r.definition) {
@@ -1817,10 +2095,16 @@ impl Engine {
                     _ => false,
                 };
                 if fire {
-                    triggers
+                    let parents = triggers
                         .entry((watcher.rule_id().clone(), r.scope.clone()))
-                        .or_default()
-                        .extend(r.contributing.iter().cloned());
+                        .or_default();
+                    parents.extend(r.contributing.iter().cloned());
+                    for (definition, scope) in watcher.spec().condition_cell_reads() {
+                        let scope = EvalView::resolve(scope, &r.scope);
+                        if let Some(read) = changed.get(&(definition, &scope)) {
+                            parents.extend(read.iter().cloned());
+                        }
+                    }
                 }
             }
         }
@@ -1828,6 +2112,12 @@ impl Engine {
         let mut next: Vec<Seed> = Vec::new();
         let mut conversions: Vec<EnqueueClaim> = Vec::new();
         for ((rule_id, subject), parents) in triggers {
+            #[cfg(any(test, feature = "test-support"))]
+            let parents = if self.forge_empty_parents {
+                BTreeSet::new()
+            } else {
+                parents
+            };
             let parent = ParentContext::Emissions(parents);
             let parent_digest = parent.digest();
             if wave >= budgets.max_wave_depth {
@@ -1856,6 +2146,7 @@ impl Engine {
                     },
                     due_time: advance_time(now, 1, "delayed_time")?,
                     creator_rule: rule_id.clone(),
+                    creator_fingerprint: rule.fingerprint().clone(),
                     mode: ObligationMode::RuleReEvaluation {
                         rule_id: rule_id.clone(),
                         rule_fingerprint: rule.fingerprint().clone(),
@@ -1910,6 +2201,7 @@ impl Engine {
                     ObligationRecord {
                         key: work_key,
                         creator_rule_id: claim.creator_rule.clone(),
+                        creator_rule_fingerprint: claim.creator_fingerprint.clone(),
                         creator_behavior_epoch: view.behavior_epoch,
                         creator_behavior_artifact_hash: view.artifact.clone(),
                         creator_emission_identity: claim.identity.clone(),
@@ -1933,10 +2225,16 @@ impl Engine {
             }
             let status = self.scheduler.slot_status(&r.key);
             let store = self.obligations.get(&r.key);
+            // Full commitment consistency of every touched key, not only its
+            // slot shape (AT-I8): the scheduler's slot must hold exactly the
+            // commitment the store's claim set implies. Both stores then take
+            // the same commutative insertion, so consistency carries into the
+            // post-state.
             let consistent = match (status, store) {
                 (WorkSlotStatus::Empty, None) => true,
-                (WorkSlotStatus::Scheduled, Some(s)) => !s.is_contested(),
-                (WorkSlotStatus::Conflicted, Some(s)) => s.is_contested(),
+                (WorkSlotStatus::Scheduled | WorkSlotStatus::Conflicted, Some(s)) => {
+                    self.scheduler.slot_commitment(&r.key) == Some(s.expected_commitment())
+                }
                 _ => false,
             };
             if !consistent {
@@ -1974,6 +2272,7 @@ impl Engine {
         Ok(WavePlan {
             candidate_set_digest: set_digest,
             committed,
+            commit_times,
             records: records.into_iter().map(|(_, r)| r).collect(),
             ledger_updates,
             cooldown_writes: draft.cooldown_writes,
@@ -1998,14 +2297,15 @@ impl Engine {
         plan: WavePlan,
     ) -> WaveReport {
         let epoch = self.behavior_epoch();
-        for e in &plan.committed {
+        let _ = now;
+        for (e, at) in plan.committed.iter().zip(&plan.commit_times) {
             let _ = match e.write_path {
                 WritePath::SparkEffect => self.store.apply_spark_effect(
                     self.profile_id.clone(),
                     e.definition.clone(),
                     e.scope.clone(),
                     e.value.clone(),
-                    now,
+                    *at,
                     epoch,
                 ),
                 WritePath::CommitDerived => self.store.commit_derived(
@@ -2013,10 +2313,17 @@ impl Engine {
                     e.definition.clone(),
                     e.scope.clone(),
                     e.value.clone(),
-                    now,
+                    *at,
                     epoch,
                 ),
             };
+            // v1 Q7: the declared baseline lives in the existing
+            // `StateCell.baseline` field, materialized at the first engine
+            // write under a declaring artifact and never overwritten.
+            if let Some(baseline) = self.rule_set.baseline(&e.definition) {
+                self.store
+                    .materialize_baseline(&e.definition, &e.scope, baseline);
+            }
         }
         for (rule, scope) in &plan.cooldown_removals {
             self.cooldowns.remove(rule, scope);
@@ -2236,7 +2543,7 @@ impl Engine {
         new_epoch: TimelineEpoch,
         new_sequencer: SourceId,
     ) -> Result<EpochResetRecord, ResetRefusal> {
-        if self.fail_stopped {
+        if self.fail_stop.is_some() {
             return Err(ResetRefusal::FailStopped);
         }
         let record = self
@@ -2250,7 +2557,7 @@ impl Engine {
     /// A committed snapshot of the current stable boundary. Refused from a
     /// fail-stopped instance.
     pub fn snapshot(&self) -> Result<EngineSnapshot, SnapshotRefused> {
-        if self.fail_stopped {
+        if self.fail_stop.is_some() {
             return Err(SnapshotRefused::FailStopped);
         }
         Ok(EngineSnapshot {
@@ -2265,6 +2572,7 @@ impl Engine {
             cooldowns: self.cooldowns.clone(),
             rule_set: self.rule_set.clone(),
             config: self.config.clone(),
+            lineage: self.lineage.clone(),
             frontier: self.frontier,
             active: self.active.clone(),
             recorded_stable_boundary_digest: self.stable_boundary_digest(),
@@ -2315,13 +2623,18 @@ impl Engine {
             cooldowns: s.cooldowns,
             rule_set: s.rule_set,
             config: s.config,
+            lineage: s.lineage,
             frontier: s.frontier,
             active: s.active,
-            fail_stopped: false,
+            fail_stop: None,
             #[cfg(any(test, feature = "test-support"))]
             observation: Observation::default(),
             #[cfg(any(test, feature = "test-support"))]
             disabled_row: None,
+            #[cfg(any(test, feature = "test-support"))]
+            seed_duplication: None,
+            #[cfg(any(test, feature = "test-support"))]
+            forge_empty_parents: false,
         };
         // Step 2b.
         if !engine.staging_is_clean() {
@@ -2332,6 +2645,9 @@ impl Engine {
         {
             return Err(RestoreError::DerivedIndexesInconsistent);
         }
+        if !engine.lineage_is_valid() {
+            return Err(RestoreError::EpochLineageInvalid);
+        }
         if !engine.bidirectional_invariant_holds() {
             return Err(RestoreError::BidirectionalInvariantBroken);
         }
@@ -2340,6 +2656,59 @@ impl Engine {
             return Err(RestoreError::DigestMismatch);
         }
         Ok(engine)
+    }
+
+    /// The per-epoch artifact lineage is an exact function of committed
+    /// state: one entry per `EpochRegistry` record, each rule set and config
+    /// hashing to the values that record binds, each activation time equal to
+    /// the effective time of the finalized command that record's barrier
+    /// names (by ordinal, epoch, and semantic hash), and the last entry equal
+    /// to the current artifacts (AT-I28 pattern for the engine's one derived
+    /// index).
+    fn lineage_is_valid(&self) -> bool {
+        let records = self.epochs.records();
+        if records.len() != self.lineage.len() {
+            return false;
+        }
+        for (record, artifacts) in records.iter().zip(&self.lineage) {
+            if artifacts.rule_set.content_hash() != record.ruleset_content_hash()
+                || &artifacts.config.config_revision_hash() != record.config_revision_hash()
+                || artifacts.rule_set.profile_id() != &self.profile_id
+                || artifacts.config.profile_id() != &self.profile_id
+            {
+                return false;
+            }
+            let time_ok = match (record.activating_barrier(), artifacts.activated_at) {
+                (ActivatingBarrier::Genesis, None) => true,
+                (
+                    ActivatingBarrier::Command {
+                        timeline_epoch,
+                        input_ordinal,
+                        semantic_hash,
+                        ..
+                    },
+                    Some(t),
+                ) => {
+                    let finalized = self.timeline.finalized_commands();
+                    finalized
+                        .binary_search_by_key(input_ordinal, |c| c.ordinal.0)
+                        .ok()
+                        .and_then(|i| finalized.get(i))
+                        .is_some_and(|c| {
+                            &c.semantic_envelope_hash == semantic_hash
+                                && c.envelope.timeline_epoch.0 == *timeline_epoch
+                                && c.envelope.effective_time == t
+                        })
+                }
+                _ => false,
+            };
+            if !time_ok {
+                return false;
+            }
+        }
+        self.lineage
+            .last()
+            .is_some_and(|l| l.rule_set == self.rule_set && l.config == self.config)
     }
 
     /// The v1 §8 scheduler ↔ `ObligationStore` bidirectional invariant, checked
@@ -2435,10 +2804,34 @@ fn conversion_pending(_next: &[Seed]) -> bool {
     false
 }
 
+/// Test-support: every seed twice — exactly, or with an altered parameter
+/// payload that does not enter emission identity.
+#[cfg(any(test, feature = "test-support"))]
+fn duplicate_seeds(pending: &[Seed], altered: bool) -> Vec<Seed> {
+    let mut out = Vec::new();
+    for s in pending {
+        out.push(s.clone());
+        let mut copy = s.clone();
+        if altered {
+            if let Seed::Rule { params, .. } = &mut copy {
+                match params.first_mut() {
+                    Some(p) => *p = p.saturating_add(1),
+                    None => params.push(1),
+                }
+            }
+        }
+        out.push(copy);
+    }
+    out
+}
+
 #[derive(Debug)]
 struct WavePlan {
     candidate_set_digest: Digest,
     committed: Vec<CommittedEffect>,
+    /// Per committed effect: the logical time its value holds at (the cohort
+    /// time, or a decay transform's last whole step).
+    commit_times: Vec<LogicalTime>,
     records: Vec<ObligationRecord>,
     ledger_updates: Vec<(OccurrenceLedgerKey, u64)>,
     cooldown_writes: BTreeMap<(DefinitionId, ScopeId), LogicalTime>,

@@ -319,23 +319,27 @@ fn at_i22_at_i24_one_reducer_per_target() {
             vec![emit(
                 "d",
                 "state.stress",
-                Update::Decay {
-                    toward: lit(0),
-                    rate: lit(1),
-                    cadence: 10,
-                },
+                spark_testkit::phase2::decay(1, 10),
             )],
         )
     };
     let mut f = standard();
-    assert!(f
-        .rule_set(
+    // The baseline is declared, so the defect is the second reducer (the two
+    // same-trigger transforms are also a statically provable mixture), never
+    // a missing baseline.
+    let errors = f
+        .rule_set_with(
             budgets(4),
-            vec![decay("rule.decay.a"), decay("rule.decay.b")]
+            vec![decay("rule.decay.a"), decay("rule.decay.b")],
+            vec![baseline("state.stress", 0)],
         )
-        .unwrap_err()
+        .unwrap_err();
+    assert!(errors.contains(&RuleSetError::SecondDecayReducer {
+        target: def("state.stress")
+    }));
+    assert!(!errors
         .iter()
-        .any(|e| matches!(e, RuleSetError::SecondDecayReducer { .. })));
+        .any(|e| matches!(e, RuleSetError::DecayWithoutBaseline { .. })));
     let agg = |id: &str| {
         on_command(
             id,

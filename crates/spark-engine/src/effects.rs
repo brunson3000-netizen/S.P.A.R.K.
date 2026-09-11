@@ -137,6 +137,11 @@ pub(crate) enum Intent {
         family: TransformFamily,
         op_fingerprint: Digest,
         resolved: i64,
+        /// The logical time the resolved value holds at, when it is not the
+        /// cohort's canonical time: a pure decay/recovery transform commits
+        /// at the end of its last whole elapsed cadence step, so the partial
+        /// remainder survives to the next evaluation (v1 Q7, C2-05).
+        commit_at: Option<LogicalTime>,
     },
 }
 
@@ -156,11 +161,21 @@ impl Intent {
                 family,
                 op_fingerprint,
                 resolved,
+                commit_at,
             } => {
                 enc.push_str("intent.transform");
                 enc.push_str(family.tag());
                 enc.push_digest(op_fingerprint);
                 enc.push_i64(*resolved);
+                match commit_at {
+                    Some(t) => {
+                        enc.push_bool(true);
+                        t.canonicalize(enc);
+                    }
+                    None => {
+                        enc.push_bool(false);
+                    }
+                }
             }
         }
     }
@@ -228,6 +243,8 @@ pub(crate) struct Reduced {
     pub write_path: WritePath,
     pub raw: i64,
     pub contributing: Vec<Digest>,
+    /// A singleton transform's commit time, if not the cohort time.
+    pub at: Option<LogicalTime>,
 }
 
 /// The typed target-local reducer (v2 §4.2). Groups are reduced in canonical
@@ -262,15 +279,19 @@ pub(crate) fn reduce(
                 _ => None,
             })
             .collect();
-        let transforms: Vec<(TransformFamily, i64)> = members
+        let transforms: Vec<(TransformFamily, i64, Option<LogicalTime>)> = members
             .iter()
             .filter_map(|c| match c.intent {
                 Intent::Transform {
-                    family, resolved, ..
-                } => Some((family, resolved)),
+                    family,
+                    resolved,
+                    commit_at,
+                    ..
+                } => Some((family, resolved, commit_at)),
                 _ => None,
             })
             .collect();
+        let mut at = None;
         let raw = if additive.len() == members.len() {
             // ADDITIVE: checked i128 fold, applied once to the pre-wave value.
             let mut total: i128 = 0;
@@ -308,12 +329,15 @@ pub(crate) fn reduce(
             }
         } else if transforms.len() == members.len() {
             match transforms.as_slice() {
-                [(_, resolved)] => *resolved,
+                [(_, resolved, commit_at)] => {
+                    at = *commit_at;
+                    *resolved
+                }
                 _ => {
                     return Err(WaveRejection::MultipleTransforms {
                         definition,
                         scope,
-                        families: transforms.iter().map(|(f, _)| *f).collect(),
+                        families: transforms.iter().map(|(f, _, _)| *f).collect(),
                     })
                 }
             }
@@ -326,6 +350,7 @@ pub(crate) fn reduce(
             write_path,
             raw,
             contributing,
+            at,
         });
     }
     Ok(out)
@@ -367,12 +392,36 @@ pub(crate) fn to_i64(v: i128, what: &'static str) -> Result<i64, WaveRejection> 
 
 /// `floor(v · factor_raw / FIXED_SCALE)`.
 pub(crate) fn scale(v: i64, factor_raw: i64) -> Result<i64, WaveRejection> {
-    let p = i128::from(v)
+    to_i64(scale_wide(i128::from(v), factor_raw)?, "scale")
+}
+
+/// `floor(v · factor_raw / FIXED_SCALE)` over a widened intermediate: the
+/// result stays `i128` for a later stage (v1 Q1).
+pub(crate) fn scale_wide(v: i128, factor_raw: i64) -> Result<i128, WaveRejection> {
+    let p = v
         .checked_mul(i128::from(factor_raw))
         .ok_or(WaveRejection::Arithmetic { what: "scale" })?;
-    let q =
-        floor_div(p, i128::from(FIXED_SCALE)).ok_or(WaveRejection::Arithmetic { what: "scale" })?;
-    to_i64(q, "scale")
+    floor_div(p, i128::from(FIXED_SCALE)).ok_or(WaveRejection::Arithmetic { what: "scale" })
+}
+
+/// Aggregation (v1 Q1/§7, AT-I24): `floor(Σ values · weight_raw /
+/// FIXED_SCALE)` with the accumulation **and** the weighting in checked `i128`
+/// and exactly one floor; the caller converts the result once.
+pub(crate) fn weighted_aggregate(
+    values: impl Iterator<Item = i64>,
+    weight_raw: i64,
+) -> Result<i128, WaveRejection> {
+    let mut acc: i128 = 0;
+    for v in values {
+        acc = acc
+            .checked_add(i128::from(v))
+            .ok_or(WaveRejection::Arithmetic { what: "aggregate" })?;
+    }
+    let weighted = acc
+        .checked_mul(i128::from(weight_raw))
+        .ok_or(WaveRejection::Arithmetic { what: "aggregate" })?;
+    floor_div(weighted, i128::from(FIXED_SCALE))
+        .ok_or(WaveRejection::Arithmetic { what: "aggregate" })
 }
 
 /// `floor(Σ wᵢ·xᵢ / FIXED_SCALE)` with one floor at the end.
@@ -434,37 +483,32 @@ pub(crate) fn curve(x: i64, points: &[(i64, i64)]) -> Result<i64, WaveRejection>
     Err(WaveRejection::Arithmetic { what: "curve" })
 }
 
-/// Closed-form decay/recovery (v1 Q7): move `value` toward `target` by `rate`
-/// per whole elapsed `cadence` step, never overshooting. Returns `None` when no
-/// whole step elapsed (no candidate is emitted, so the remainder is kept).
-pub(crate) fn decay(
-    value: i64,
-    target: i64,
+/// One closed-form decay/recovery segment (v1 Q7): move `value` toward
+/// `baseline` by `rate` per whole step, `steps` whole steps, linear and never
+/// overshooting the baseline, in checked `i128`. Composing segments is exact:
+/// `move(move(v, a), b) == move(v, a + b)` for one baseline, which is the
+/// chunk invariance the frozen formula promises.
+pub(crate) fn move_toward(
+    value: i128,
+    baseline: i128,
+    steps: u64,
     rate: i64,
-    elapsed: u64,
-    cadence: u64,
-) -> Result<Option<i64>, WaveRejection> {
-    let steps = elapsed
-        .checked_div(cadence)
-        .ok_or(WaveRejection::Arithmetic { what: "decay" })?;
-    if steps == 0 || rate <= 0 || value == target {
-        return Ok(None);
-    }
-    let distance = i128::from(value)
-        .checked_sub(i128::from(target))
-        .and_then(i128::checked_abs)
-        .ok_or(WaveRejection::Arithmetic { what: "decay" })?;
+) -> Result<i128, WaveRejection> {
+    let err = || WaveRejection::Arithmetic { what: "decay" };
     let movement = i128::from(steps)
-        .checked_mul(i128::from(rate))
-        .ok_or(WaveRejection::Arithmetic { what: "decay" })?;
+        .checked_mul(i128::from(rate.max(0)))
+        .ok_or_else(err)?;
+    let distance = value
+        .checked_sub(baseline)
+        .and_then(i128::checked_abs)
+        .ok_or_else(err)?;
     let moved = distance.min(movement);
-    let next = if value > target {
-        i128::from(value).checked_sub(moved)
+    if value > baseline {
+        value.checked_sub(moved)
     } else {
-        i128::from(value).checked_add(moved)
+        value.checked_add(moved)
     }
-    .ok_or(WaveRejection::Arithmetic { what: "decay" })?;
-    Ok(Some(to_i64(next, "decay")?))
+    .ok_or_else(err)
 }
 
 #[cfg(test)]
@@ -515,6 +559,7 @@ mod tests {
                     family: TransformFamily::Scale,
                     op_fingerprint: hash_bytes(b"scale"),
                     resolved: 30,
+                    commit_at: None,
                 },
             )
         };
@@ -550,10 +595,28 @@ mod tests {
         assert_eq!(curve(5, &[(0, 0), (10, 3)]).unwrap(), 1);
         assert_eq!(curve(-5, &[(0, 0), (10, 3)]).unwrap(), 0);
         assert_eq!(curve(50, &[(0, 0), (10, 3)]).unwrap(), 3);
-        assert_eq!(decay(100, 20, 10, 30, 10).unwrap(), Some(70));
-        assert_eq!(decay(25, 20, 10, 30, 10).unwrap(), Some(20));
-        assert_eq!(decay(10, 20, 3, 20, 10).unwrap(), Some(16));
-        assert_eq!(decay(100, 20, 10, 9, 10).unwrap(), None);
+        assert_eq!(move_toward(100, 20, 3, 10).unwrap(), 70);
+        assert_eq!(move_toward(25, 20, 3, 10).unwrap(), 20, "never overshoots");
+        assert_eq!(
+            move_toward(10, 20, 2, 3).unwrap(),
+            16,
+            "recovery from below"
+        );
+        assert_eq!(move_toward(100, 20, 0, 10).unwrap(), 100);
+        // Segment composition is exact (chunk invariance of the frozen formula).
+        let once = move_toward(100, 20, 7, 10).unwrap();
+        let split = move_toward(move_toward(100, 20, 3, 10).unwrap(), 20, 4, 10).unwrap();
+        assert_eq!(once, split);
         assert!(scale(i64::MAX, 2_000_000).is_err());
+        // Widened aggregate: floor((MAX + MAX) · 0.5) = MAX, no premature narrowing.
+        assert_eq!(
+            weighted_aggregate([i64::MAX, i64::MAX].into_iter(), 500_000).unwrap(),
+            i128::from(i64::MAX)
+        );
+        assert_eq!(
+            weighted_aggregate([-3].into_iter(), 500_000).unwrap(),
+            -2,
+            "one floor toward negative infinity"
+        );
     }
 }

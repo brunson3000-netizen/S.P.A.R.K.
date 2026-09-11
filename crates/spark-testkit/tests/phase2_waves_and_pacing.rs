@@ -60,14 +60,29 @@ fn engine_with(
     rules: Vec<RuleSpec>,
     init: Vec<(&str, u64, &str)>,
 ) -> Engine {
+    engine_with_baselines(budget, rules, init, vec![])
+}
+
+/// As `engine_with`, with declared baselines (v1 Q7: a decay rule's target
+/// must have declared baseline semantics).
+fn engine_with_baselines(
+    budget: DeclaredBudgets,
+    rules: Vec<RuleSpec>,
+    init: Vec<(&str, u64, &str)>,
+    baselines: Vec<spark_engine::rules::BaselineDeclaration>,
+) -> Engine {
     let mut f = standard();
-    f.engine(
-        budget,
-        rules,
-        init.into_iter()
-            .map(|(r, t, k)| initial(r, &bron(), t, k))
-            .collect(),
+    Engine::genesis(
+        f.genesis_with(
+            budget,
+            rules,
+            baselines,
+            init.into_iter()
+                .map(|(r, t, k)| initial(r, &bron(), t, k))
+                .collect(),
+        ),
     )
+    .unwrap()
 }
 
 /// Seeds `state.stress = 20` at `t = 1` through a command, then advances to `t`.
@@ -77,7 +92,9 @@ fn seeded(
     init: Vec<(&str, u64, &str)>,
 ) -> Engine {
     rules.push(seeding("rule.seed", "state.stress", 20));
-    let mut e = engine_with(budget, rules, init);
+    // `state.stress` declares baseline 0 so the pair table's decay rule is
+    // admissible (v1 Q7); a baseline changes no other pair's result.
+    let mut e = engine_with_baselines(budget, rules, init, vec![baseline("state.stress", 0)]);
     let r = e.process(&command("cmd.seed", 1, 1, "cmd.seed", bron()));
     assert_eq!(r.outcome(), &Outcome::Completed);
     assert_eq!(value(&e, "state.stress", &bron()), Some(20));
@@ -218,16 +235,7 @@ fn at_i37_runtime_pair_table_is_frozen() {
             None,
         ),
         ("result/add", Update::Assign(lit(30)), add(10), None),
-        (
-            "decay/add",
-            Update::Decay {
-                toward: lit(0),
-                rate: lit(1),
-                cadence: 1,
-            },
-            add(5),
-            None,
-        ),
+        ("decay/add", decay(1, 1), add(5), None),
     ];
     for (name, ua, ub, expected) in cases {
         for flip in [false, true] {
@@ -714,9 +722,15 @@ fn at_i20c_oversized_first_cohort_progresses_without_split() {
         );
         if n > u64::from(budget) {
             assert_eq!(d.admitted_work_key_count, n, "admitted whole, exactly once");
+            // Cohort identity is no report field (FINAL AT-I46(a)); it is
+            // observed through the test-support seam.
             assert_eq!(
                 d.overrun_cohort_identity,
-                first.reports()[0].cohort_identity
+                Some(
+                    fixture::observation(&paced).prewave[0]
+                        .cohort_identity
+                        .clone()
+                )
             );
             assert_eq!(first.outcome(), &Outcome::Paused);
             assert_eq!(
@@ -901,7 +915,11 @@ fn at_i40_e_conflicted_members_enter_neither_identity_nor_state() {
     assert_ne!(a.scheduler_digest(), b.scheduler_digest());
     let ra = run(&mut a, 101);
     let rb = run(&mut b, 101);
-    assert_eq!(ra[0].cohort_identity, rb[0].cohort_identity);
+    assert_eq!(
+        fixture::observation(&a).prewave[0].cohort_identity,
+        fixture::observation(&b).prewave[0].cohort_identity,
+        "equal cohort identity (observed through the test-support seam)"
+    );
     assert_eq!(
         ra[0].waves, rb[0].waves,
         "equal emission identities, pre-wave and batch digests"
@@ -1179,6 +1197,7 @@ fn at_i21_depth_overflow_converts_to_strictly_later_work() {
                 profile_id: profile_id(),
                 budgets: shallow,
                 rules: rules.clone(),
+                baselines: vec![],
             },
         )
         .unwrap();

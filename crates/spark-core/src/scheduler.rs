@@ -564,6 +564,19 @@ impl Scheduler {
     // owns its `Scheduler` and exposes none of these to a host.
     // ------------------------------------------------------------------
 
+    /// **X-5 (additive, read-only; Gate C2 bounded revision).** The
+    /// commitment of the one occupied slot under `key`, or `None` when the
+    /// slot is empty. A bounded map lookup; like [`SlotCommitment`] it
+    /// exposes neither a payload nor conflict evidence. The engine's wave
+    /// enqueue preflight compares it against the commitment its own claim set
+    /// implies, so a touched key's stores are checked for full commitment
+    /// consistency, not only slot shape (AT-I8).
+    pub fn slot_commitment(&self, key: &WorkKey) -> Option<SlotCommitment> {
+        self.slots
+            .get(key)
+            .map(|slot| SlotCommitment(slot_block(key, slot).finish()))
+    }
+
     /// **X-1.** A borrowed handle on the single least resident
     /// `(due_time, profile_id)` slice with `due_time <= horizon`, or `None`.
     ///

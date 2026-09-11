@@ -18,17 +18,26 @@
 //! - every referenced definition exists in the activated profile; every effect
 //!   target is `spark_owned` or `derived` (a `host_owned` target is rejected —
 //!   AT-I10) and numeric;
-//! - every emitting operation and probability gate carries a stable dotted
-//!   sub-ID unique within its rule (v2 §3.2);
+//! - every emitting operation — including every effect nested in a
+//!   `Materialize` schedule — and every probability gate carries a stable
+//!   dotted sub-ID unique within its rule and valid when qualified (v2 §3.2);
 //! - clamp bounds coherent, curves strictly increasing, cadences, delays, and
 //!   cooldowns at least one (delayed work is strictly later, v2 §11);
 //! - declared budgets: `max_due_per_cycle >= 1` (v3 §3.2(a)); every semantic cap
 //!   at least one; `max_wave_depth` may be zero;
-//! - per-rule static fan-out within `max_fan_out`; no zero-delay cycle; the
-//!   longest zero-delay propagation chain within `max_wave_depth` (v1 Q4);
-//! - at most one aggregation rule and at most one decay/recovery rule per
-//!   target definition (v2 §4.3); statically provable incompatible co-targeting
-//!   between rules that share a trigger is rejected (v2 §4.2, AT-I37).
+//! - per-rule static fan-out — distinct target definitions × declared scope
+//!   mapping breadth, plus each declared delay edge, and separately each
+//!   materialized schedule's own expansion — within `max_fan_out`; no
+//!   zero-delay cycle; the longest zero-delay propagation chain within
+//!   `max_wave_depth` (v1 Q4);
+//! - at most one aggregation rule and at most one decay/recovery rule (and one
+//!   decay operation) per target definition (v2 §4.3); statically provable
+//!   incompatible co-targeting between rules that share a trigger is rejected
+//!   (v2 §4.2, AT-I37);
+//! - a decay/recovery operation targets a definition whose baseline semantics
+//!   the rule set declares (v1 Q7); its rate and cadence are rule parameters —
+//!   a literal or a `ConfigRevision` key;
+//! - no rule is triggered by the reserved epoch-activation command kind (v1 Q5).
 
 use crate::activation::ActivatedProfile;
 use spark_core::authority::Authority;
@@ -112,6 +121,51 @@ impl ScopeRef {
             }
         }
     }
+}
+
+/// A decay/recovery rule parameter (v1 Q7: "rule parameters, referencing
+/// `ConfigRevision` keys where hot-tunable"): a literal, or a numeric config
+/// key. A config parameter is read under the behavior epoch in effect over each
+/// integrated interval, so a hot-tuned value applies only from its activating
+/// barrier (AT-I23).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Param {
+    Literal(i64),
+    Config { key: DefinitionId },
+}
+
+impl Param {
+    fn canonicalize(&self, enc: &mut CanonicalEncoder) {
+        match self {
+            Param::Literal(v) => {
+                enc.push_str("param.literal");
+                enc.push_i64(*v);
+            }
+            Param::Config { key } => {
+                enc.push_str("param.config");
+                key.canonicalize(enc);
+            }
+        }
+    }
+
+    pub(crate) fn config_key(&self) -> Option<&DefinitionId> {
+        match self {
+            Param::Literal(_) => None,
+            Param::Config { key } => Some(key),
+        }
+    }
+}
+
+/// A declared baseline for one definition (v1 Q7). The value is materialized
+/// into the existing `StateCell.baseline` field of that definition's cells by
+/// engine writes, and a decay/recovery operation moves toward the cell's
+/// baseline. `DefinitionSpec`, `StateCell`, and every Phase-1 encoding are
+/// unchanged; the declaration lives in the Phase-2 rule-set artifact and is
+/// part of its content hash.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BaselineDeclaration {
+    pub definition: DefinitionId,
+    pub value: i64,
 }
 
 /// A named input read from the stable pre-wave snapshot.
@@ -305,14 +359,11 @@ pub enum Update {
     Scale(FixedPoint),
     /// TRANSFORM: clamp into `[min, max]`.
     Clamp { min: i64, max: i64 },
-    /// TRANSFORM: closed-form decay/recovery toward the cell's `baseline`, or
-    /// `toward` when the cell has no baseline, by `rate` per whole elapsed
-    /// `cadence` step (v1 Q7).
-    Decay {
-        toward: Expr,
-        rate: Expr,
-        cadence: u64,
-    },
+    /// TRANSFORM: closed-form decay/recovery of the target cell toward its
+    /// `StateCell.baseline` by `rate` per whole elapsed `cadence` step (v1 Q7).
+    /// The target definition's baseline semantics must be declared by the
+    /// rule set; there is no substitute target.
+    Decay { rate: Param, cadence: Param },
     /// RESULT (family `aggregate`): `floor(Σ over every cell of source ·
     /// weight / FIXED_SCALE)`, stable BTree order, no accumulator (v1 §7).
     Aggregate {
@@ -345,15 +396,10 @@ impl Update {
                 enc.push_i64(*min);
                 enc.push_i64(*max);
             }
-            Update::Decay {
-                toward,
-                rate,
-                cadence,
-            } => {
+            Update::Decay { rate, cadence } => {
                 enc.push_str("update.decay");
-                toward.canonicalize(enc);
                 rate.canonicalize(enc);
-                enc.push_u64(*cadence);
+                cadence.canonicalize(enc);
             }
             Update::Aggregate { source, weight } => {
                 enc.push_str("update.aggregate");
@@ -366,12 +412,10 @@ impl Update {
     fn inputs(&self) -> Vec<&Input> {
         match self {
             Update::Add(e) | Update::Subtract(e) | Update::Assign(e) => e.inputs(),
-            Update::Decay { toward, rate, .. } => {
-                let mut v = toward.inputs();
-                v.extend(rate.inputs());
-                v
-            }
-            Update::Scale(_) | Update::Clamp { .. } | Update::Aggregate { .. } => Vec::new(),
+            Update::Decay { .. }
+            | Update::Scale(_)
+            | Update::Clamp { .. }
+            | Update::Aggregate { .. } => Vec::new(),
         }
     }
 
@@ -648,6 +692,27 @@ impl RuleSpec {
         v
     }
 
+    /// Every committed cell this rule reads **to become eligible** — its
+    /// condition reads — as declared `(definition, scope mapping)` pairs.
+    /// With the watched trigger group, these are the reduction groups whose
+    /// candidates form a derived emission's parent set (v3 §4.3).
+    pub(crate) fn condition_cell_reads(&self) -> Vec<(&DefinitionId, &ScopeRef)> {
+        let mut reads = Vec::new();
+        for c in &self.conditions {
+            if let Condition::Compare { left, right, .. } = c {
+                for i in left.inputs().into_iter().chain(right.inputs()) {
+                    if let Input::Cell {
+                        definition, scope, ..
+                    } = i
+                    {
+                        reads.push((definition, scope));
+                    }
+                }
+            }
+        }
+        reads
+    }
+
     /// Groups of this rule's emitting operations by `(target, scope)`, in
     /// first-declaration order: each group yields at most one candidate.
     pub(crate) fn target_groups(&self) -> Vec<((DefinitionId, ScopeRef), Vec<&EmitOp>)> {
@@ -670,6 +735,8 @@ pub struct RuleSetSpec {
     pub profile_id: ProfileId,
     pub budgets: DeclaredBudgets,
     pub rules: Vec<RuleSpec>,
+    /// Declared baseline semantics (v1 Q7), at most one per definition.
+    pub baselines: Vec<BaselineDeclaration>,
 }
 
 /// One rule inside an activated rule set: the spec plus its door-computed
@@ -703,10 +770,34 @@ pub struct ActivatedRuleSet {
     activation_hash: Digest,
     budgets: DeclaredBudgets,
     rules: BTreeMap<DefinitionId, ActivatedRule>,
+    baselines: BTreeMap<DefinitionId, i64>,
     content_hash: Digest,
 }
 
 impl ActivatedRuleSet {
+    /// The declared baseline of `definition`, if the rule set gives it
+    /// baseline semantics (v1 Q7).
+    pub fn baseline(&self, definition: &DefinitionId) -> Option<i64> {
+        self.baselines.get(definition).copied()
+    }
+
+    /// Config keys read as decay rates and as decay cadences; activation
+    /// checks that an epoch's config gives each a valid value (rate `>= 0`,
+    /// cadence `>= 1`).
+    pub(crate) fn decay_parameter_keys(&self) -> (BTreeSet<DefinitionId>, BTreeSet<DefinitionId>) {
+        let mut rates = BTreeSet::new();
+        let mut cadences = BTreeSet::new();
+        for r in self.rules.values() {
+            for e in &r.spec.emits {
+                if let Update::Decay { rate, cadence } = &e.update {
+                    rates.extend(rate.config_key().cloned());
+                    cadences.extend(cadence.config_key().cloned());
+                }
+            }
+        }
+        (rates, cadences)
+    }
+
     pub fn profile_id(&self) -> &ProfileId {
         &self.profile_id
     }
@@ -770,6 +861,9 @@ impl ActivatedRuleSet {
                 }
             }
         }
+        let (rates, cadences) = self.decay_parameter_keys();
+        keys.extend(rates);
+        keys.extend(cadences);
         keys
     }
 }
@@ -867,6 +961,37 @@ pub enum RuleSetError {
         target: DefinitionId,
         rules: Vec<DefinitionId>,
     },
+    /// A materialized schedule whose frozen effects expand beyond the
+    /// per-rule fan-out bound when it executes (v1 Q4, C2-02).
+    MaterializedFanOutExceeded {
+        rule_id: DefinitionId,
+        sub_id: CanonicalTag,
+        fan_out: u64,
+        bound: u32,
+    },
+    /// v1 Q5: only the reserved epoch-activation command activates an epoch;
+    /// no rule may be triggered by that kind.
+    ReservedCommandKind {
+        rule_id: DefinitionId,
+    },
+    /// v1 Q7: a decay/recovery operation on a definition without declared
+    /// baseline semantics.
+    DecayWithoutBaseline {
+        rule_id: DefinitionId,
+        target: DefinitionId,
+    },
+    /// A negative literal decay rate.
+    InvalidDecayParameter {
+        rule_id: DefinitionId,
+    },
+    /// A baseline declaration for an unknown, non-numeric, host-owned, or
+    /// out-of-bounds definition.
+    BaselineInvalid {
+        definition: DefinitionId,
+    },
+    DuplicateBaseline {
+        definition: DefinitionId,
+    },
 }
 
 impl fmt::Display for RuleSetError {
@@ -912,6 +1037,30 @@ pub(crate) fn validate_and_mint(
         }
     }
 
+    let mut baselines: BTreeMap<DefinitionId, i64> = BTreeMap::new();
+    for decl in &spec.baselines {
+        let valid = profile.definition(&decl.definition).is_some_and(|d| {
+            d.authority() != Authority::HostOwned
+                && is_numeric(d.value_constraint().value_type())
+                && d.value_constraint().accepts(&numeric_value(
+                    d.value_constraint().value_type(),
+                    decl.value,
+                ))
+        });
+        if !valid {
+            errors.push(RuleSetError::BaselineInvalid {
+                definition: decl.definition.clone(),
+            });
+        }
+        if baselines
+            .insert(decl.definition.clone(), decl.value)
+            .is_some()
+        {
+            errors.push(RuleSetError::DuplicateBaseline {
+                definition: decl.definition.clone(),
+            });
+        }
+    }
     let mut rules: BTreeMap<DefinitionId, ActivatedRule> = BTreeMap::new();
     for rule in &spec.rules {
         if rules.contains_key(&rule.rule_id) {
@@ -929,7 +1078,7 @@ pub(crate) fn validate_and_mint(
         );
     }
     for rule in rules.values() {
-        validate_rule(profile, &rules, &rule.spec, b, &mut errors);
+        validate_rule(profile, &rules, &baselines, &rule.spec, b, &mut errors);
     }
     validate_reducers(&rules, &mut errors);
     validate_static_mixtures(&rules, &mut errors);
@@ -938,21 +1087,30 @@ pub(crate) fn validate_and_mint(
     if !errors.is_empty() {
         return Err(errors);
     }
-    let content_hash = ruleset_content_hash(profile, b, &rules);
+    let content_hash = ruleset_content_hash(profile, b, &rules, &baselines);
     Ok(ActivatedRuleSet {
         profile_id: profile.profile_id().clone(),
         manifest_content_hash: profile.manifest_content_hash().clone(),
         activation_hash: profile.activation_hash().clone(),
         budgets: *b,
         rules,
+        baselines,
         content_hash,
     })
+}
+
+fn numeric_value(t: ValueType, raw: i64) -> spark_core::value::CanonicalValue {
+    match t {
+        ValueType::Fixed => spark_core::value::CanonicalValue::Fixed(FixedPoint::from_raw(raw)),
+        _ => spark_core::value::CanonicalValue::Int(raw),
+    }
 }
 
 fn ruleset_content_hash(
     profile: &ActivatedProfile,
     budgets: &DeclaredBudgets,
     rules: &BTreeMap<DefinitionId, ActivatedRule>,
+    baselines: &BTreeMap<DefinitionId, i64>,
 ) -> Digest {
     let mut enc = CanonicalEncoder::new();
     enc.push_str("ruleset_content_v1");
@@ -966,6 +1124,12 @@ fn ruleset_content_hash(
         r.spec.rule_id.canonicalize(&mut inner);
         inner.push_digest(&r.fingerprint);
         enc.push_block(&inner);
+    }
+    enc.push_str("baselines");
+    enc.push_u64(baselines.len() as u64);
+    for (d, v) in baselines {
+        d.canonicalize(&mut enc);
+        enc.push_i64(*v);
     }
     enc.finish()
 }
@@ -1033,6 +1197,7 @@ fn check_expr(
 
 fn check_emit(
     profile: &ActivatedProfile,
+    baselines: &BTreeMap<DefinitionId, i64>,
     rule_id: &DefinitionId,
     e: &EmitOp,
     materialized: bool,
@@ -1078,16 +1243,21 @@ fn check_emit(
                 });
             }
         }
-        Update::Decay {
-            toward,
-            rate,
-            cadence,
-        } => {
-            check_expr(profile, rule_id, toward, errors);
-            check_expr(profile, rule_id, rate, errors);
-            if *cadence == 0 {
+        Update::Decay { rate, cadence } => {
+            if matches!(rate, Param::Literal(r) if *r < 0) {
+                errors.push(RuleSetError::InvalidDecayParameter {
+                    rule_id: rule_id.clone(),
+                });
+            }
+            if matches!(cadence, Param::Literal(c) if *c < 1) {
                 errors.push(RuleSetError::ZeroCadence {
                     rule_id: rule_id.clone(),
+                });
+            }
+            if !baselines.contains_key(&e.target) {
+                errors.push(RuleSetError::DecayWithoutBaseline {
+                    rule_id: rule_id.clone(),
+                    target: e.target.clone(),
                 });
             }
         }
@@ -1100,6 +1270,7 @@ fn check_emit(
 fn validate_rule(
     profile: &ActivatedProfile,
     all: &BTreeMap<DefinitionId, ActivatedRule>,
+    baselines: &BTreeMap<DefinitionId, i64>,
     rule: &RuleSpec,
     budgets: &DeclaredBudgets,
     errors: &mut Vec<RuleSetError>,
@@ -1107,6 +1278,13 @@ fn validate_rule(
     let rule_id = &rule.rule_id;
     if let Some(w) = rule.trigger.watched() {
         check_definition(profile, rule_id, w, true, errors);
+    }
+    if let Trigger::Command(k) = &rule.trigger {
+        if k.as_str() == crate::engine::EPOCH_ACTIVATION_COMMAND_KIND.as_str() {
+            errors.push(RuleSetError::ReservedCommandKind {
+                rule_id: rule_id.clone(),
+            });
+        }
     }
     let mut sub_ids: BTreeSet<CanonicalTag> = BTreeSet::new();
     let mut claim = |sub: &CanonicalTag, errors: &mut Vec<RuleSetError>| {
@@ -1141,7 +1319,7 @@ fn validate_rule(
     }
     for e in &rule.emits {
         claim(&e.sub_id, errors);
-        check_emit(profile, rule_id, e, false, errors);
+        check_emit(profile, baselines, rule_id, e, false, errors);
     }
     for s in &rule.schedules {
         claim(&s.sub_id, errors);
@@ -1165,8 +1343,27 @@ fn validate_rule(
                         rule_id: rule_id.clone(),
                     });
                 }
+                // Every nested emitting operation claims its sub-ID in the
+                // rule's one namespace (v2 §3.2, AT-I17): at execution the
+                // sub-ID is an emission-identity input, so two same-target
+                // effects sharing one would collide (unequal payloads) or
+                // fold into one (equal payloads).
                 for e in effects {
-                    check_emit(profile, rule_id, e, true, errors);
+                    claim(&e.sub_id, errors);
+                    check_emit(profile, baselines, rule_id, e, true, errors);
+                }
+                // The materialized expansion executes as one later seed; its
+                // declared scope breadth is bounded like the rule's own.
+                let expansion: BTreeSet<(&DefinitionId, &ScopeRef)> =
+                    effects.iter().map(|e| (&e.target, &e.scope)).collect();
+                let expansion = expansion.len() as u64;
+                if expansion > u64::from(budgets.max_fan_out) {
+                    errors.push(RuleSetError::MaterializedFanOutExceeded {
+                        rule_id: rule_id.clone(),
+                        sub_id: s.sub_id.clone(),
+                        fan_out: expansion,
+                        bound: budgets.max_fan_out,
+                    });
                 }
             }
         }
@@ -1176,7 +1373,11 @@ fn validate_rule(
             rule_id: rule_id.clone(),
         });
     }
-    let targets: BTreeSet<&DefinitionId> = rule.emits.iter().map(|e| &e.target).collect();
+    // v1 Q4: distinct target definitions × declared scope-mapping breadth,
+    // i.e. every distinct declared (target, scope mapping) pair, plus one per
+    // declared delay edge.
+    let targets: BTreeSet<(&DefinitionId, &ScopeRef)> =
+        rule.emits.iter().map(|e| (&e.target, &e.scope)).collect();
     let fan_out = (targets.len() as u64).saturating_add(rule.schedules.len() as u64);
     if fan_out > u64::from(budgets.max_fan_out) {
         errors.push(RuleSetError::FanOutExceeded {
@@ -1184,6 +1385,15 @@ fn validate_rule(
             fan_out,
             bound: budgets.max_fan_out,
         });
+    }
+    // One decay operation per target inside a rule body, too (v2 §4.3).
+    let mut decayed: BTreeSet<&DefinitionId> = BTreeSet::new();
+    for e in &rule.emits {
+        if matches!(e.update, Update::Decay { .. }) && !decayed.insert(&e.target) {
+            errors.push(RuleSetError::SecondDecayReducer {
+                target: e.target.clone(),
+            });
+        }
     }
 }
 

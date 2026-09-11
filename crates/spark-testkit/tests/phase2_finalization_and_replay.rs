@@ -129,13 +129,20 @@ fn at_i48_b_f_source_sequence_regression_is_refused_byte_identically() {
     e.process(&Request::Command(cmd("first", 20, 10)));
     let before = (full_state(&e), e.engine_state_digest());
     let r = e.process(&Request::Command(cmd("distinct", 20, 9)));
-    assert_eq!(
-        r.outcome(),
-        &Outcome::CompletedCommandNotFinalized(FinalizationRefusal::SourceSequenceNotIncreasing {
-            source_id: SourceId::new(SOURCE).unwrap(),
-            previously_finalized: 10,
-            attempted: 9
-        })
+    // `FinalizationRefusal` is not constructible outside the engine (C2-08);
+    // every field is still checked.
+    assert!(
+        matches!(
+            r.outcome(),
+            Outcome::CompletedCommandNotFinalized(FinalizationRefusal::SourceSequenceNotIncreasing {
+                source_id,
+                previously_finalized: 10,
+                attempted: 9,
+                ..
+            }) if source_id == &SourceId::new(SOURCE).unwrap()
+        ),
+        "{:?}",
+        r.outcome()
     );
     assert_eq!(before, (full_state(&e), e.engine_state_digest()));
     assert_eq!(e.timeline_slot_status(Ordinal(1)), SlotStatus::Empty);
@@ -151,13 +158,16 @@ fn at_i48_b_f_source_sequence_regression_is_refused_byte_identically() {
 #[test]
 fn at_i48_c_every_refusal_route_is_byte_identical() {
     type Setup = Box<dyn Fn() -> (Engine, CommandRequest)>;
+    // Refusals are matched, not constructed (C2-08): each matcher checks the
+    // variant and every field.
+    type Expect = Box<dyn Fn(&FinalizationRefusal) -> bool>;
     let prior = || {
         let mut e = engine(4, vec![]);
         e.process(&Request::Command(cmd("first", 20, 10)));
         e
     };
     let x = || cmd("x", 20, 11);
-    let routes: Vec<(&str, Setup, FinalizationRefusal)> = vec![
+    let routes: Vec<(&str, Setup, Expect)> = vec![
         (
             "P-1",
             Box::new(move || {
@@ -165,7 +175,7 @@ fn at_i48_c_every_refusal_route_is_byte_identical() {
                 c.profile_id = ProfileId::new("elsewhere").unwrap();
                 (prior(), c)
             }),
-            FinalizationRefusal::WrongProfile,
+            Box::new(|r| matches!(r, FinalizationRefusal::WrongProfile { .. })),
         ),
         (
             "P-2",
@@ -174,7 +184,7 @@ fn at_i48_c_every_refusal_route_is_byte_identical() {
                 c.timeline_epoch = TimelineEpoch(1);
                 (prior(), c)
             }),
-            FinalizationRefusal::WrongTimelineEpoch,
+            Box::new(|r| matches!(r, FinalizationRefusal::WrongTimelineEpoch { .. })),
         ),
         (
             "P-3",
@@ -183,7 +193,7 @@ fn at_i48_c_every_refusal_route_is_byte_identical() {
                 fixture::set_grant(&mut e, SourceId::new("other.sequencer").unwrap());
                 (e, x())
             }),
-            FinalizationRefusal::NotActiveSequencer,
+            Box::new(|r| matches!(r, FinalizationRefusal::NotActiveSequencer { .. })),
         ),
         (
             "P-4",
@@ -192,7 +202,7 @@ fn at_i48_c_every_refusal_route_is_byte_identical() {
                 fixture::resume_timeline_at(&mut e, u64::MAX, 2);
                 (e, x())
             }),
-            FinalizationRefusal::OrdinalSpaceExhaustedWindow,
+            Box::new(|r| matches!(r, FinalizationRefusal::OrdinalSpaceExhaustedWindow { .. })),
         ),
         (
             "P-5",
@@ -201,7 +211,12 @@ fn at_i48_c_every_refusal_route_is_byte_identical() {
                 fixture::resume_timeline_at(&mut e, u64::MAX, 1);
                 (e, x())
             }),
-            FinalizationRefusal::OrdinalSpaceExhaustedFrontierAdvance,
+            Box::new(|r| {
+                matches!(
+                    r,
+                    FinalizationRefusal::OrdinalSpaceExhaustedFrontierAdvance { .. }
+                )
+            }),
         ),
         (
             "P-6 poisoned",
@@ -211,9 +226,9 @@ fn at_i48_c_every_refusal_route_is_byte_identical() {
                 fixture::stage_raw(&mut e, cmd("p2", 20, 2).envelope_at(Ordinal(0)));
                 (e, x())
             }),
-            FinalizationRefusal::UnexpectedStagingState {
-                ordinal: Ordinal(0),
-            },
+            Box::new(
+                |r| matches!(r, FinalizationRefusal::UnexpectedStagingState { ordinal, .. } if *ordinal == Ordinal(0)),
+            ),
         ),
         (
             "P-6 different staged",
@@ -222,9 +237,9 @@ fn at_i48_c_every_refusal_route_is_byte_identical() {
                 fixture::stage_raw(&mut e, cmd("p1", 20, 1).envelope_at(Ordinal(0)));
                 (e, x())
             }),
-            FinalizationRefusal::UnexpectedStagingState {
-                ordinal: Ordinal(0),
-            },
+            Box::new(
+                |r| matches!(r, FinalizationRefusal::UnexpectedStagingState { ordinal, .. } if *ordinal == Ordinal(0)),
+            ),
         ),
         (
             "P-6 identical staged",
@@ -233,9 +248,9 @@ fn at_i48_c_every_refusal_route_is_byte_identical() {
                 fixture::stage_raw(&mut e, x().envelope_at(Ordinal(0)));
                 (e, x())
             }),
-            FinalizationRefusal::UnexpectedStagingState {
-                ordinal: Ordinal(0),
-            },
+            Box::new(
+                |r| matches!(r, FinalizationRefusal::UnexpectedStagingState { ordinal, .. } if *ordinal == Ordinal(0)),
+            ),
         ),
         (
             "P-6 staged tail",
@@ -244,44 +259,42 @@ fn at_i48_c_every_refusal_route_is_byte_identical() {
                 fixture::stage_raw(&mut e, cmd("tail", 20, 1).envelope_at(Ordinal(1)));
                 (e, x())
             }),
-            FinalizationRefusal::UnexpectedStagingState {
-                ordinal: Ordinal(1),
-            },
+            Box::new(
+                |r| matches!(r, FinalizationRefusal::UnexpectedStagingState { ordinal, .. } if *ordinal == Ordinal(1)),
+            ),
         ),
         (
             "P-7",
             Box::new(move || (prior(), cmd("first", 20, 11))),
-            FinalizationRefusal::CommandIdentityConflict {
-                command_id: CommandId::new("first").unwrap(),
-            },
+            Box::new(
+                |r| matches!(r, FinalizationRefusal::CommandIdentityConflict { command_id, .. } if command_id == &CommandId::new("first").unwrap()),
+            ),
         ),
         (
             "P-8",
             Box::new(move || (prior(), cmd("other", 20, 10))),
-            FinalizationRefusal::SourceSequenceConflict {
-                source_id: SourceId::new(SOURCE).unwrap(),
-                source_sequence: 10,
-            },
+            Box::new(
+                |r| matches!(r, FinalizationRefusal::SourceSequenceConflict { source_id, source_sequence: 10, .. } if source_id == &SourceId::new(SOURCE).unwrap()),
+            ),
         ),
         (
             "P-9",
             Box::new(move || (prior(), cmd("other", 20, 9))),
-            FinalizationRefusal::SourceSequenceNotIncreasing {
-                source_id: SourceId::new(SOURCE).unwrap(),
-                previously_finalized: 10,
-                attempted: 9,
-            },
+            Box::new(
+                |r| matches!(r, FinalizationRefusal::SourceSequenceNotIncreasing { source_id, previously_finalized: 10, attempted: 9, .. } if source_id == &SourceId::new(SOURCE).unwrap()),
+            ),
         ),
     ];
     for (name, setup, expected) in routes {
         let (mut e, c) = setup();
         let before = full_state(&e);
         let r = e.process(&Request::Command(c));
-        assert_eq!(
-            r.outcome(),
-            &Outcome::CompletedCommandNotFinalized(expected),
-            "{name}"
-        );
+        match r.outcome() {
+            Outcome::CompletedCommandNotFinalized(refusal) => {
+                assert!(expected(refusal), "{name}: {refusal:?}")
+            }
+            other => panic!("{name}: {other:?}"),
+        }
         assert_eq!(
             before,
             full_state(&e),
@@ -802,7 +815,9 @@ fn at_i23_at_i14_epoch_bound_rates_and_exact_rule_resolution() {
     let r = reports(&drive(&mut s, &advance(60)));
     assert!(matches!(
         r.last().unwrap().outcome,
-        CohortOutcome::ObligationRefused(ObligationRefusal::RuleResolutionFailed { .. })
+        // The originating rule resolves in the lineage, but the current
+        // epoch carries a changed rule under that ID (D-C2-7): superseded.
+        CohortOutcome::ObligationRefused(ObligationRefusal::RuleSuperseded { .. })
     ));
     assert_eq!(value(&s, "state.stress", &bron()), Some(1));
 }

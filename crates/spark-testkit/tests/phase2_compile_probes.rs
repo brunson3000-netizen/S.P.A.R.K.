@@ -149,7 +149,7 @@ fn build() -> Engine {
         max_scheduled_work: 10, max_fan_out: 4,
     };
     let rule_set = registry
-        .activate_rule_set(&activated, &RuleSetSpec { profile_id: profile.clone(), budgets, rules: vec![rule] })
+        .activate_rule_set(&activated, &RuleSetSpec { profile_id: profile.clone(), budgets, rules: vec![rule], baselines: vec![] })
         .unwrap();
     let config = ConfigRevision::build(profile, BoundedText::new("c").unwrap(), vec![]).unwrap();
     Engine::genesis(EngineGenesis {
@@ -187,6 +187,11 @@ const POSITIVE_BODY: &str = r#"
     let snapshot = engine.snapshot().unwrap();
     let _ = snapshot.recorded_stable_boundary_digest();
     let _ = engine.reset_timeline_epoch(TimelineEpoch(1), SourceId::new("sequencer").unwrap());
+    // C2-08 companion: an external crate may still *match* a refusal.
+    if let spark_engine::request::Outcome::CompletedCommandNotFinalized(
+        spark_engine::request::FinalizationRefusal::WrongProfile { .. },
+    ) = result.outcome() {}
+    let _ = result.reports().first().map(|r| (&r.kind, &r.canonical_time, &r.waves));
 "#;
 
 struct Forbidden {
@@ -213,7 +218,7 @@ fn forbidden() -> Vec<Forbidden> {
         Forbidden { name: "AT-I29 mid-cohort inter-wave points are unreachable", body: "let mut e = build(); let _ = e.run_waves(todo!(), LogicalTime(0), vec![]);", expected_fragment: "run_waves" },
         Forbidden { name: "AT-I32 ActivatedRuleSet cannot be forged", body: "let _ = spark_engine::rules::ActivatedRuleSet { content_hash: spark_core::hash::Digest::ZERO };", expected_fragment: "ActivatedRuleSet" },
         Forbidden { name: "AT-I32 epoch records are engine-minted", body: "let _ = spark_engine::epoch::EpochRecord::new(todo!(), 1, todo!(), todo!(), todo!(), todo!(), todo!(), todo!());", expected_fragment: "new" },
-        Forbidden { name: "AT-I32 obligation records cannot be forged", body: "let _ = spark_engine::obligation::ObligationRecord { key: todo!(), creator_rule_id: todo!(), creator_behavior_epoch: 1, creator_behavior_artifact_hash: todo!(), creator_emission_identity: todo!(), mode: todo!() };", expected_fragment: "ObligationRecord" },
+        Forbidden { name: "AT-I32 obligation records cannot be forged", body: "let _ = spark_engine::obligation::ObligationRecord { key: todo!(), creator_rule_id: todo!(), creator_rule_fingerprint: todo!(), creator_behavior_epoch: 1, creator_behavior_artifact_hash: todo!(), creator_emission_identity: todo!(), mode: todo!() };", expected_fragment: "ObligationRecord" },
         Forbidden { name: "AT-I32 no ledger forgery", body: "let mut l = spark_engine::ledger::OccurrenceLedger::default(); l.set_next(todo!(), 0);", expected_fragment: "set_next" },
         Forbidden { name: "AT-I6d parent sets are not constructible outside the evaluator", body: "let _ = spark_engine::effects::ParentContext::Emissions(Default::default());", expected_fragment: "ParentContext" },
         Forbidden { name: "AT-I32 emission identities cannot be forged", body: "let _ = spark_engine::effects::emission_identity;", expected_fragment: "emission_identity" },
@@ -223,7 +228,21 @@ fn forbidden() -> Vec<Forbidden> {
         Forbidden { name: "AT-I21 the depth-bound seam is absent without test-support", body: "let mut r = ActivationRegistry::new(); let _ = r.activate_rule_set_without_depth_bound(todo!(), todo!());", expected_fragment: "activate_rule_set_without_depth_bound" },
         Forbidden { name: "AT-I32 no evaluator write path on StateStore", body: "let e = build(); let _ = e.state().validate_effect(todo!(), todo!(), todo!(), todo!());", expected_fragment: "validate_effect" },
         Forbidden { name: "AT-I32 snapshots expose no scheduler", body: "let e = build(); let s = e.snapshot().unwrap(); let _ = &s.scheduler;", expected_fragment: "scheduler" },
-        Forbidden { name: "AT-I32 the engine cannot be built as a literal", body: "let _ = Engine { fail_stopped: false };", expected_fragment: "Engine" },
+        Forbidden { name: "AT-I32 the engine cannot be built as a literal", body: "let _ = Engine { fail_stop: None };", expected_fragment: "Engine" },
+        // ---- Gate C2 bounded revision (C2-07, C2-08, D-C2-7, D-C2-11)
+        Forbidden { name: "C2-08 Rev2 §10 a unit FinalizationRefusal is not constructible", body: "let _ = spark_engine::request::FinalizationRefusal::WrongProfile;", expected_fragment: "WrongProfile" },
+        Forbidden { name: "C2-08 Rev2 §10 a struct FinalizationRefusal is not constructible", body: "let _ = spark_engine::request::FinalizationRefusal::CommandIdentityConflict { command_id: todo!() };", expected_fragment: "non-exhaustive" },
+        Forbidden { name: "C2-08 Rev2 §10 no FinalizationRecord exists to construct", body: "let _: Option<spark_engine::request::FinalizationRecord> = None;", expected_fragment: "FinalizationRecord" },
+        Forbidden { name: "C2-07 AT-I46(a) no cohort_identity report field", body: "let mut e = build(); let r = e.process(&Request::Advance(LogicalTime(5))); let _ = &r.reports()[0].cohort_identity;", expected_fragment: "cohort_identity" },
+        Forbidden { name: "C2-07 AT-I46(a) no pre-wave digest report field", body: "let mut e = build(); let r = e.process(&Request::Advance(LogicalTime(5))); let _ = &r.reports()[0].pre_wave_engine_digest;", expected_fragment: "pre_wave_engine_digest" },
+        Forbidden { name: "C2-07 AT-I46(a) no F report field", body: "let mut e = build(); let r = e.process(&Request::Advance(LogicalTime(5))); let _ = &r.reports()[0].frontier;", expected_fragment: "frontier" },
+        Forbidden { name: "C2-07 AT-I46(a) no ActiveRequest report field", body: "let mut e = build(); let r = e.process(&Request::Advance(LogicalTime(5))); let _ = &r.reports()[0].active_request;", expected_fragment: "active_request" },
+        Forbidden { name: "C2-07 PacingDiagnostics carries exactly the frozen v3 §3.4 fields", body: "let mut e = build(); let r = e.process(&Request::Advance(LogicalTime(5))); let _ = r.diagnostics().unwrap().command_deferred;", expected_fragment: "command_deferred" },
+        Forbidden { name: "D-C2-11 a host cannot clear a fail-stop", body: "let mut e = build(); e.fail_stop = None;", expected_fragment: "fail_stop" },
+        Forbidden { name: "D-C2-7 the epoch artifact lineage is engine-internal", body: "let e = build(); let _ = &e.lineage;", expected_fragment: "lineage" },
+        Forbidden { name: "D-C2-7 snapshots expose no lineage", body: "let e = build(); let s = e.snapshot().unwrap(); let _ = &s.lineage;", expected_fragment: "lineage" },
+        Forbidden { name: "C2-05 the decay walk is not a host surface", body: "let e = build(); let _ = e.decay_walk;", expected_fragment: "decay_walk" },
+        Forbidden { name: "C2-05 baselines are not materialized by a host", body: "let mut e = build(); let _ = e.state().materialize_baseline(todo!(), todo!(), 0);", expected_fragment: "materialize_baseline" },
     ]
 }
 

@@ -73,6 +73,11 @@ pub enum ObligationMode {
 pub struct ObligationRecord {
     pub(crate) key: WorkKey,
     pub(crate) creator_rule_id: DefinitionId,
+    /// The creating rule's fingerprint (v1 §5 `creator_definition_fingerprint`).
+    /// A materialized record's later emissions use it as their rule-fingerprint
+    /// component, so their identity never depends on the frozen payload
+    /// (v3 §4.4, D-C2-13).
+    pub(crate) creator_rule_fingerprint: Digest,
     pub(crate) creator_behavior_epoch: u64,
     pub(crate) creator_behavior_artifact_hash: Digest,
     /// The creating emission's complete identity (a function of its parent
@@ -103,12 +108,21 @@ impl ObligationRecord {
         &self.creator_emission_identity
     }
 
+    pub fn creator_rule_fingerprint(&self) -> &Digest {
+        &self.creator_rule_fingerprint
+    }
+
+    pub fn creator_behavior_artifact_hash(&self) -> &Digest {
+        &self.creator_behavior_artifact_hash
+    }
+
     /// The canonical record hash (the scheduled payload hash).
     pub fn record_hash(&self) -> Digest {
         let mut enc = CanonicalEncoder::new();
         enc.push_str("obligation_record_v1");
         self.key.canonicalize(&mut enc);
         self.creator_rule_id.canonicalize(&mut enc);
+        enc.push_digest(&self.creator_rule_fingerprint);
         enc.push_u64(self.creator_behavior_epoch);
         enc.push_digest(&self.creator_behavior_artifact_hash);
         enc.push_digest(&self.creator_emission_identity);

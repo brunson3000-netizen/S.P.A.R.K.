@@ -168,6 +168,7 @@ pub fn reevaluation_record(
     ObligationRecord {
         key,
         creator_rule_id: rule_id.clone(),
+        creator_rule_fingerprint: rule_fingerprint.clone(),
         creator_behavior_epoch: 1,
         creator_behavior_artifact_hash: behavior_artifact_hash,
         creator_emission_identity,
@@ -245,6 +246,42 @@ pub fn snapshot_reseal(snapshot: &mut EngineSnapshot) {
 /// restore test).
 pub fn snapshot_drop_obligation(snapshot: &mut EngineSnapshot, key: &WorkKey) {
     snapshot.obligations.tamper(key, None);
+}
+
+/// AT-I6a / AT-I6c(d): evaluate every wave seed twice — exactly
+/// (`Some(false)`: identical identity and payload, a redelivery that must
+/// fold) or with an altered parameter payload under the same identity
+/// (`Some(true)`: a contested emission that must reject). `None` disables.
+pub fn set_seed_duplication(engine: &mut Engine, mode: Option<bool>) {
+    engine.seed_duplication = mode;
+}
+
+/// AT-I6c(f): forge an empty parent set for every derived (wave `N >= 1`)
+/// seed, which the next wave must reject as a typed evaluator defect.
+pub fn forge_empty_parents(engine: &mut Engine, forge: bool) {
+    engine.forge_empty_parents = forge;
+}
+
+/// AT-I28: overwrite one lineage entry's activation time inside a snapshot
+/// (the engine's derived per-epoch index), to prove restore validates it.
+pub fn snapshot_set_activation_time(
+    snapshot: &mut EngineSnapshot,
+    epoch_index: usize,
+    at: Option<LogicalTime>,
+) {
+    if let Some(entry) = snapshot.lineage.get_mut(epoch_index) {
+        entry.activated_at = at;
+    }
+}
+
+/// AT-I28: drop the newest lineage entry inside a snapshot.
+pub fn snapshot_truncate_lineage(snapshot: &mut EngineSnapshot) {
+    snapshot.lineage.pop();
+}
+
+/// The number of retained per-epoch artifact entries (one per epoch record).
+pub fn lineage_len(engine: &Engine) -> usize {
+    engine.lineage.len()
 }
 
 /// Set one occurrence-ledger sequence (AT-I8 exhaustion fixtures; `u64`
