@@ -1,0 +1,54 @@
+# mutant C2R-03-skip-unmoved: emit no decay candidate when the value does not move (saturated, rate 0, or no whole step)
+# tree: 5ae506adf13ddf1d610595c59202c52b7ddee81a
+
+$ kills phase2_decay_oracle_revision::c2r_03_saturation_preserves_value_and_commit_time_chunk_invariance
+
+running 1 test
+test c2r_03_saturation_preserves_value_and_commit_time_chunk_invariance ... FAILED
+
+failures:
+
+---- c2r_03_saturation_preserves_value_and_commit_time_chunk_invariance stdout ----
+
+thread 'c2r_03_saturation_preserves_value_and_commit_time_chunk_invariance' (336214) panicked at crates/spark-testkit/tests/phase2_decay_oracle_revision.rs:621:13:
+assertion `left == right` failed: 100 [100, 150]
+  left: (0, LogicalTime(100))
+ right: (0, LogicalTime(150))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c2r_03_saturation_preserves_value_and_commit_time_chunk_invariance
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.10s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-rev2-mutants-gwostxrj/C2R-03-skip-unmoved/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-rev2-mutants-gwostxrj/C2R-03-skip-unmoved/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.77s
+     Running tests/phase2_decay_oracle_revision.rs (/tmp/spark-c2-rev2-mutants-gwostxrj/target/debug/deps/phase2_decay_oracle_revision-a7d0621d0871a9e4)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_oracle_revision`
+
+$ kills phase2_decay_oracle_revision::c2r_03_every_evaluation_commits_at_its_canonical_time
+
+running 1 test
+test c2r_03_every_evaluation_commits_at_its_canonical_time ... FAILED
+
+failures:
+
+---- c2r_03_every_evaluation_commits_at_its_canonical_time stdout ----
+
+thread 'c2r_03_every_evaluation_commits_at_its_canonical_time' (336225) panicked at crates/spark-testkit/tests/phase2_decay_oracle_revision.rs:661:9:
+assertion `left == right` failed
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c2r_03_every_evaluation_commits_at_its_canonical_time
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests/phase2_decay_oracle_revision.rs (/tmp/spark-c2-rev2-mutants-gwostxrj/target/debug/deps/phase2_decay_oracle_revision-a7d0621d0871a9e4)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_oracle_revision`

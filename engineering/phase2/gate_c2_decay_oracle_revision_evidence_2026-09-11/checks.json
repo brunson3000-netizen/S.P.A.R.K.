@@ -1,0 +1,97 @@
+{
+  "tree": "5ae506adf13ddf1d610595c59202c52b7ddee81a",
+  "checks": [
+    {
+      "name": "fmt",
+      "command": "cargo fmt --all --check",
+      "exit_code": 0,
+      "seconds": 0.845
+    },
+    {
+      "name": "workspace-tests",
+      "command": "cargo test --workspace --all-features --no-fail-fast",
+      "exit_code": 0,
+      "seconds": 60.075
+    },
+    {
+      "name": "clippy",
+      "command": "cargo clippy --workspace --all-targets --all-features -- -D warnings",
+      "exit_code": 0,
+      "seconds": 3.8
+    },
+    {
+      "name": "strict",
+      "command": "cargo clippy -p spark-core -p spark-engine --lib --all-features -- -D warnings -D clippy::unwrap_used -D clippy::expect_used -D clippy::panic -D clippy::indexing_slicing -D clippy::arithmetic_side_effects",
+      "exit_code": 0,
+      "seconds": 2.008
+    },
+    {
+      "name": "metadata",
+      "command": "cargo metadata --format-version 1 > /dev/null",
+      "exit_code": 0,
+      "seconds": 0.08
+    },
+    {
+      "name": "whitespace-candidate-range",
+      "command": "git diff --check 3a0b51463e1874ad8b02dd3a3261933fcd2e22f4 HEAD",
+      "exit_code": 0,
+      "seconds": 0.011
+    },
+    {
+      "name": "whitespace-production-range",
+      "command": "git diff --check 7e3a0aae069a8bf840e4dfb74221cdf2687b1db5 HEAD",
+      "exit_code": 0,
+      "seconds": 0.029
+    },
+    {
+      "name": "x86_64-pc-windows-gnu",
+      "command": "cargo check --workspace --all-targets --target x86_64-pc-windows-gnu",
+      "exit_code": 0,
+      "seconds": 10.691
+    },
+    {
+      "name": "x86_64-pc-windows-msvc",
+      "command": "cargo check --workspace --all-targets --target x86_64-pc-windows-msvc",
+      "exit_code": 0,
+      "seconds": 6.852
+    },
+    {
+      "name": "aarch64-linux-android",
+      "command": "cargo check --workspace --all-targets --target aarch64-linux-android",
+      "exit_code": 0,
+      "seconds": 8.852
+    },
+    {
+      "name": "armv7-linux-androideabi",
+      "command": "cargo check --workspace --all-targets --target armv7-linux-androideabi",
+      "exit_code": 0,
+      "seconds": 8.198
+    },
+    {
+      "name": "x86_64-linux-android",
+      "command": "cargo check --workspace --all-targets --target x86_64-linux-android",
+      "exit_code": 0,
+      "seconds": 8.155
+    },
+    {
+      "name": "preservation",
+      "command": "python3 /home/chromikey/Projects/SPARK-gate-c2-rev2/engineering/phase2/gate_c2_decay_oracle_revision_evidence_2026-09-11/check_preservation.py",
+      "exit_code": 1,
+      "seconds": 0.208,
+      "note": "checker defect: compared the Gate C2-added derived_indexes_consistent with production, where it does not exist; see preservation-first-run-checker-defect.txt"
+    },
+    {
+      "name": "workload",
+      "command": "cargo run --release --offline -p spark-testkit --example gate_c2_workload",
+      "exit_code": 0,
+      "seconds": 171.626
+    },
+    {
+      "name": "preservation-corrected",
+      "command": "python3 check_preservation.py (corrected: derived_indexes_consistent compared with the review commit 3a0b514)",
+      "exit_code": 0,
+      "seconds": null,
+      "note": "no source changed between the runs; output in preservation.txt"
+    }
+  ]
+}

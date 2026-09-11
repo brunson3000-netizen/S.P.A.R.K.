@@ -1,0 +1,55 @@
+# mutant C2-05-relative-steps: count whole steps from updated_at ((now - updated_at) / cadence) while committing at now: the original lost remainder
+# tree: 5ae506adf13ddf1d610595c59202c52b7ddee81a
+
+$ kills phase2_decay_oracle_revision::c2r_02_03_grid_matches_the_reference_model_under_every_partition
+
+running 1 test
+test c2r_02_03_grid_matches_the_reference_model_under_every_partition ... FAILED
+
+failures:
+
+---- c2r_02_03_grid_matches_the_reference_model_under_every_partition stdout ----
+
+thread 'c2r_02_03_grid_matches_the_reference_model_under_every_partition' (333974) panicked at crates/spark-testkit/tests/phase2_decay_oracle_revision.rs:686:9:
+assertion `left == right` failed: scenario 0: Scenario { initial: 24, genesis: (9, 11), epochs: [(31, Some((9, 11))), (66, Some((9, 11))), (81, Some((9, 19)))], evals: [7, 8, 16, 23, 30, 34, 39, 53, 61, 85, 86, 87, 88, 99, 100] }
+  left: (6, LogicalTime(100))
+ right: (0, LogicalTime(100))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c2r_02_03_grid_matches_the_reference_model_under_every_partition
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.03s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-rev2-mutants-gwostxrj/C2-05-relative-steps/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-rev2-mutants-gwostxrj/C2-05-relative-steps/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.59s
+     Running tests/phase2_decay_oracle_revision.rs (/tmp/spark-c2-rev2-mutants-gwostxrj/target/debug/deps/phase2_decay_oracle_revision-a7d0621d0871a9e4)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_oracle_revision`
+
+$ kills phase2_bounded_revision::c2_05_decay_preserves_elapsed_cadence_remainder_converted
+
+running 1 test
+test c2_05_decay_preserves_elapsed_cadence_remainder_converted ... FAILED
+
+failures:
+
+---- c2_05_decay_preserves_elapsed_cadence_remainder_converted stdout ----
+
+thread 'c2_05_decay_preserves_elapsed_cadence_remainder_converted' (334097) panicked at crates/spark-testkit/tests/phase2_bounded_revision.rs:718:5:
+assertion `left == right` failed: five units of remainder at 15 survive to 20
+  left: 90
+ right: 80
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c2_05_decay_preserves_elapsed_cadence_remainder_converted
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.01s
+
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-rev2-mutants-gwostxrj/C2-05-relative-steps/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.52s
+     Running tests/phase2_bounded_revision.rs (/tmp/spark-c2-rev2-mutants-gwostxrj/target/debug/deps/phase2_bounded_revision-c80270445e53bfba)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_bounded_revision`

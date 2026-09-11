@@ -1,0 +1,54 @@
+# mutant C2R-02-absolute-grid: one grid from logical time 0 for every segment: a new rate/cadence step may contain pre-barrier time
+# tree: 5ae506adf13ddf1d610595c59202c52b7ddee81a
+
+$ kills phase2_decay_oracle_revision::c2r_02_lengthened_cadence_and_residual_interval
+
+running 1 test
+test c2r_02_lengthened_cadence_and_residual_interval ... FAILED
+
+failures:
+
+---- c2r_02_lengthened_cadence_and_residual_interval stdout ----
+
+thread 'c2r_02_lengthened_cadence_and_residual_interval' (334616) panicked at crates/spark-testkit/tests/phase2_decay_oracle_revision.rs:479:13:
+assertion `left == right` failed: 1 [150]
+  left: (90, LogicalTime(150))
+ right: (95, LogicalTime(150))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c2r_02_lengthened_cadence_and_residual_interval
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.00s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-rev2-mutants-gwostxrj/C2R-02-absolute-grid/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-rev2-mutants-gwostxrj/C2R-02-absolute-grid/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.92s
+     Running tests/phase2_decay_oracle_revision.rs (/tmp/spark-c2-rev2-mutants-gwostxrj/target/debug/deps/phase2_decay_oracle_revision-a7d0621d0871a9e4)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_oracle_revision`
+
+$ kills phase2_decay_oracle_revision::c2r_02_rate_only_change_at_an_unaligned_barrier
+
+running 1 test
+test c2r_02_rate_only_change_at_an_unaligned_barrier ... FAILED
+
+failures:
+
+---- c2r_02_rate_only_change_at_an_unaligned_barrier stdout ----
+
+thread 'c2r_02_rate_only_change_at_an_unaligned_barrier' (334625) panicked at crates/spark-testkit/tests/phase2_decay_oracle_revision.rs:510:9:
+assertion `left == right` failed
+  left: (-90, LogicalTime(60))
+ right: (-95, LogicalTime(60))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c2r_02_rate_only_change_at_an_unaligned_barrier
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/phase2_decay_oracle_revision.rs (/tmp/spark-c2-rev2-mutants-gwostxrj/target/debug/deps/phase2_decay_oracle_revision-a7d0621d0871a9e4)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_oracle_revision`

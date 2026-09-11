@@ -1,0 +1,4 @@
+# tree: 5ae506adf13ddf1d610595c59202c52b7ddee81a
+# whitespace-normalized
+$ python3 /home/chromikey/Projects/SPARK-gate-c2-rev2/engineering/phase2/gate_c2_decay_oracle_revision_evidence_2026-09-11/check_preservation.py
+{"failures": ["protected function changed: crates/spark-core/src/timeline.rs pub fn derived_indexes_consistent("], "inline_modules_checked": 17}

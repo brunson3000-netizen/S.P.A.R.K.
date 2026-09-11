@@ -1,0 +1,40 @@
+# mutant AT-I8-deferred-obligation-insert: insert each wave's obligation records into the ObligationStore only at the end of the cohort
+# tree: 5ae506adf13ddf1d610595c59202c52b7ddee81a
+
+$ kills phase2_decay_oracle_revision::at_i8_invariant_holds_after_each_intermediate_committed_wave
+
+running 1 test
+test at_i8_invariant_holds_after_each_intermediate_committed_wave ... FAILED
+
+failures:
+
+---- at_i8_invariant_holds_after_each_intermediate_committed_wave stdout ----
+
+thread 'at_i8_invariant_holds_after_each_intermediate_committed_wave' (337500) panicked at crates/spark-testkit/tests/phase2_decay_oracle_revision.rs:766:5:
+assertion `left == right` failed
+  left: [(0, 1, 2), (1, 1, 3), (2, 1, 3)]
+ right: [(0, 2, 2), (1, 3, 3), (2, 3, 3)]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    at_i8_invariant_holds_after_each_intermediate_committed_wave
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-rev2-mutants-gwostxrj/AT-I8-deferred-obligation-insert/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-rev2-mutants-gwostxrj/AT-I8-deferred-obligation-insert/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.42s
+     Running tests/phase2_decay_oracle_revision.rs (/tmp/spark-c2-rev2-mutants-gwostxrj/target/debug/deps/phase2_decay_oracle_revision-a7d0621d0871a9e4)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_oracle_revision`
+
+$ survives phase2_oracle_completion::at_i8_invariant_holds_after_every_committed_wave
+
+running 1 test
+test at_i8_invariant_holds_after_every_committed_wave ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.01s
+
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-rev2-mutants-gwostxrj/AT-I8-deferred-obligation-insert/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.28s
+     Running tests/phase2_oracle_completion.rs (/tmp/spark-c2-rev2-mutants-gwostxrj/target/debug/deps/phase2_oracle_completion-b51363dc72467a6c)

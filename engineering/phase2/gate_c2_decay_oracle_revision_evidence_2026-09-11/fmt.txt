@@ -1,0 +1,4 @@
+# tree: 5ae506adf13ddf1d610595c59202c52b7ddee81a
+# whitespace-normalized
+$ cargo fmt --all --check
+

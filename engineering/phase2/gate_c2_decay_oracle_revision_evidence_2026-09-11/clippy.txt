@@ -1,0 +1,7 @@
+# tree: 5ae506adf13ddf1d610595c59202c52b7ddee81a
+# whitespace-normalized
+$ cargo clippy --workspace --all-targets --all-features -- -D warnings
+    Checking spark-core v0.1.0 (/home/chromikey/Projects/SPARK-gate-c2-rev2/crates/spark-core)
+    Checking spark-engine v0.1.0 (/home/chromikey/Projects/SPARK-gate-c2-rev2/crates/spark-engine)
+    Checking spark-testkit v0.1.0 (/home/chromikey/Projects/SPARK-gate-c2-rev2/crates/spark-testkit)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.74s

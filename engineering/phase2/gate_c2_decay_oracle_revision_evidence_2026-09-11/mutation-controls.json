@@ -1,0 +1,245 @@
+{
+  "tree": "5ae506adf13ddf1d610595c59202c52b7ddee81a",
+  "baseline": [
+    {
+      "test": "phase2_bounded_revision::c2_05_decay_preserves_elapsed_cadence_remainder_converted",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "test": "phase2_decay_oracle_revision::at_i20b_rejected_producer_retries_under_its_next_occurrence",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "test": "phase2_decay_oracle_revision::at_i8_invariant_holds_after_each_intermediate_committed_wave",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "test": "phase2_decay_oracle_revision::c2r_01_decay_reapplied_at_canonical_time_reproduces_the_state",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "test": "phase2_decay_oracle_revision::c2r_02_03_grid_matches_the_reference_model_under_every_partition",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "test": "phase2_decay_oracle_revision::c2r_02_lengthened_cadence_and_residual_interval",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "test": "phase2_decay_oracle_revision::c2r_02_rate_only_change_at_an_unaligned_barrier",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "test": "phase2_decay_oracle_revision::c2r_02_unchanged_parameters_do_not_move_the_grid",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "test": "phase2_decay_oracle_revision::c2r_03_every_evaluation_commits_at_its_canonical_time",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "test": "phase2_decay_oracle_revision::c2r_03_saturation_preserves_value_and_commit_time_chunk_invariance",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "test": "phase2_oracle_completion::at_i20b_every_semantic_cap_is_atomic_terminal_replayable_and_retryable",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "test": "phase2_oracle_completion::at_i8_invariant_holds_after_every_committed_wave",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    }
+  ],
+  "mutants": [
+    {
+      "id": "C2R-01-backdated-commit",
+      "wrong": "commit at the end of the last whole step (instantiated for the cadence-10 fixtures by flooring the write time to a multiple of 10)",
+      "kills": [
+        {
+          "test": "phase2_decay_oracle_revision::c2r_01_decay_reapplied_at_canonical_time_reproduces_the_state",
+          "exit_code": 101,
+          "compiled": true,
+          "passed": false,
+          "assertion_failure": true,
+          "killed": true
+        }
+      ],
+      "survives": [],
+      "verdict": "KILLED"
+    },
+    {
+      "id": "C2-05-relative-steps",
+      "wrong": "count whole steps from updated_at ((now - updated_at) / cadence) while committing at now: the original lost remainder",
+      "kills": [
+        {
+          "test": "phase2_decay_oracle_revision::c2r_02_03_grid_matches_the_reference_model_under_every_partition",
+          "exit_code": 101,
+          "compiled": true,
+          "passed": false,
+          "assertion_failure": true,
+          "killed": true
+        },
+        {
+          "test": "phase2_bounded_revision::c2_05_decay_preserves_elapsed_cadence_remainder_converted",
+          "exit_code": 101,
+          "compiled": true,
+          "passed": false,
+          "assertion_failure": true,
+          "killed": true
+        }
+      ],
+      "survives": [],
+      "verdict": "KILLED"
+    },
+    {
+      "id": "C2R-02-absolute-grid",
+      "wrong": "one grid from logical time 0 for every segment: a new rate/cadence step may contain pre-barrier time",
+      "kills": [
+        {
+          "test": "phase2_decay_oracle_revision::c2r_02_lengthened_cadence_and_residual_interval",
+          "exit_code": 101,
+          "compiled": true,
+          "passed": false,
+          "assertion_failure": true,
+          "killed": true
+        },
+        {
+          "test": "phase2_decay_oracle_revision::c2r_02_rate_only_change_at_an_unaligned_barrier",
+          "exit_code": 101,
+          "compiled": true,
+          "passed": false,
+          "assertion_failure": true,
+          "killed": true
+        }
+      ],
+      "survives": [],
+      "verdict": "KILLED"
+    },
+    {
+      "id": "C2R-02-reset-every-activation",
+      "wrong": "restart the grid at every activation, even one leaving the parameters unchanged",
+      "kills": [
+        {
+          "test": "phase2_decay_oracle_revision::c2r_02_unchanged_parameters_do_not_move_the_grid",
+          "exit_code": 101,
+          "compiled": true,
+          "passed": false,
+          "assertion_failure": true,
+          "killed": true
+        }
+      ],
+      "survives": [],
+      "verdict": "KILLED"
+    },
+    {
+      "id": "C2R-03-skip-unmoved",
+      "wrong": "emit no decay candidate when the value does not move (saturated, rate 0, or no whole step)",
+      "kills": [
+        {
+          "test": "phase2_decay_oracle_revision::c2r_03_saturation_preserves_value_and_commit_time_chunk_invariance",
+          "exit_code": 101,
+          "compiled": true,
+          "passed": false,
+          "assertion_failure": true,
+          "killed": true
+        },
+        {
+          "test": "phase2_decay_oracle_revision::c2r_03_every_evaluation_commits_at_its_canonical_time",
+          "exit_code": 101,
+          "compiled": true,
+          "passed": false,
+          "assertion_failure": true,
+          "killed": true
+        }
+      ],
+      "survives": [],
+      "verdict": "KILLED"
+    },
+    {
+      "id": "AT-I8-deferred-obligation-insert",
+      "wrong": "insert each wave's obligation records into the ObligationStore only at the end of the cohort",
+      "kills": [
+        {
+          "test": "phase2_decay_oracle_revision::at_i8_invariant_holds_after_each_intermediate_committed_wave",
+          "exit_code": 101,
+          "compiled": true,
+          "passed": false,
+          "assertion_failure": true,
+          "killed": true
+        }
+      ],
+      "survives": [
+        {
+          "test": "phase2_oracle_completion::at_i8_invariant_holds_after_every_committed_wave",
+          "exit_code": 0,
+          "compiled": true,
+          "passed": true,
+          "assertion_failure": false
+        }
+      ],
+      "verdict": "KILLED"
+    },
+    {
+      "id": "AT-I20b-tombstone-producer",
+      "wrong": "after a semantic-cap rejection, exhaust the rejected producers' occurrence sequences (the producer can never be rescheduled)",
+      "kills": [
+        {
+          "test": "phase2_decay_oracle_revision::at_i20b_rejected_producer_retries_under_its_next_occurrence",
+          "exit_code": 101,
+          "compiled": true,
+          "passed": false,
+          "assertion_failure": true,
+          "killed": true
+        }
+      ],
+      "survives": [
+        {
+          "test": "phase2_oracle_completion::at_i20b_every_semantic_cap_is_atomic_terminal_replayable_and_retryable",
+          "exit_code": 0,
+          "compiled": true,
+          "passed": true,
+          "assertion_failure": false
+        }
+      ],
+      "verdict": "KILLED"
+    }
+  ],
+  "baseline_all_pass": true,
+  "all_killed_as_claimed": true
+}
