@@ -1,0 +1,40 @@
+# mutant AT-I20b-tombstone-producer: after a semantic-cap rejection, exhaust the rejected producers' occurrence sequences (the producer can never be rescheduled)
+# tree: 244c54b66a9c5bdfe8dd49e28b05cc0f5c255637
+
+$ kills phase2_decay_oracle_revision::at_i20b_rejected_producer_retries_under_its_next_occurrence
+
+running 1 test
+test at_i20b_rejected_producer_retries_under_its_next_occurrence ... FAILED
+
+failures:
+
+---- at_i20b_rejected_producer_retries_under_its_next_occurrence stdout ----
+
+thread 'at_i20b_rejected_producer_retries_under_its_next_occurrence' (438317) panicked at crates/spark-testkit/tests/phase2_decay_oracle_revision.rs:866:9:
+assertion `left == right` failed: max_effects_per_wave
+  left: Digest(63b3806628e9cf0d5c8a0a3a187a9cdab000f1a04793ce1f2af5f5bfaca14f63)
+ right: Digest(b5b6f850688131a4cc0a86bcb78836c9a2ffe68fb81deb419a7a768fa96e2308)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    at_i20b_rejected_producer_retries_under_its_next_occurrence
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-adjudication-mutants-96u9dh1u/AT-I20b-tombstone-producer/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-adjudication-mutants-96u9dh1u/AT-I20b-tombstone-producer/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 6.18s
+     Running tests/phase2_decay_oracle_revision.rs (/tmp/spark-c2-adjudication-mutants-96u9dh1u/target/debug/deps/phase2_decay_oracle_revision-000401f3a8d7e51d)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_oracle_revision`
+
+$ survives phase2_oracle_completion::at_i20b_every_semantic_cap_is_atomic_terminal_replayable_and_retryable
+
+running 1 test
+test at_i20b_every_semantic_cap_is_atomic_terminal_replayable_and_retryable ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.01s
+
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-adjudication-mutants-96u9dh1u/AT-I20b-tombstone-producer/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 1.46s
+     Running tests/phase2_oracle_completion.rs (/tmp/spark-c2-adjudication-mutants-96u9dh1u/target/debug/deps/phase2_oracle_completion-ea2a542a9650059c)

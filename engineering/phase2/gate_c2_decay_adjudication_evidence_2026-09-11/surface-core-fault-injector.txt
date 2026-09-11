@@ -1,0 +1,12 @@
+# source:
+pub fn probe(t: &mut spark_core::timeline::TimelineIngress) { t.inject_derived_index_fault(()); }
+$ cargo check --offline
+    Checking independent-surfaces v0.0.0 (/tmp/spark-c2-independent-surfaces-mq681k4p)
+error[E0599]: no method named `inject_derived_index_fault` found for mutable reference `&mut TimelineIngress` in the current scope
+ --> src/lib.rs:1:65
+  |
+1 | pub fn probe(t: &mut spark_core::timeline::TimelineIngress) { t.inject_derived_index_fault(()); }
+  |                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^ method not found in `&mut TimelineIngress`
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `independent-surfaces` (lib) due to 1 previous error

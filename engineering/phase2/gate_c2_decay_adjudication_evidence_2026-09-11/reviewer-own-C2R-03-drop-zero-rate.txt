@@ -1,0 +1,25 @@
+# tree: 244c54b66a9c5bdfe8dd49e28b05cc0f5c255637
+$ cargo test --offline -- --exact r03_unmoved_writes_fire_watchers_and_reject_shocks --nocapture
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-adjudication-reviewer-mutants-961de6zg/tree/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-adjudication-reviewer-mutants-961de6zg/tree/crates/spark-testkit)
+   Compiling reviewer-decay-probes v0.0.0 (/tmp/spark-c2-adjudication-reviewer-mutants-961de6zg/probe)
+    Finished `test` profile [unoptimized] target(s) in 5.92s
+     Running unittests src/lib.rs (target/debug/deps/reviewer_decay_probes-f231565eff33e57f)
+
+running 1 test
+
+thread 'r03_unmoved_writes_fire_watchers_and_reject_shocks' (436427) panicked at src/lib.rs:98:9:
+assertion `left == right` failed
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test r03_unmoved_writes_fire_watchers_and_reject_shocks ... FAILED
+
+failures:
+
+failures:
+    r03_unmoved_writes_fire_watchers_and_reject_shocks
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--lib`

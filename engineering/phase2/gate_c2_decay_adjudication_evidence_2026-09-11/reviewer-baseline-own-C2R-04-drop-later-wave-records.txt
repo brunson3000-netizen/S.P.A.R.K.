@@ -1,0 +1,15 @@
+# tree: 244c54b66a9c5bdfe8dd49e28b05cc0f5c255637
+$ cargo test --offline -- --exact r04_per_wave_store_and_index_discriminator --nocapture
+    Finished `test` profile [unoptimized] target(s) in 0.04s
+     Running unittests src/lib.rs (target/debug/deps/reviewer_decay_probes-f231565eff33e57f)
+
+running 1 test
+test r04_per_wave_store_and_index_discriminator ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.01s
+
+   Doc-tests reviewer_decay_probes
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

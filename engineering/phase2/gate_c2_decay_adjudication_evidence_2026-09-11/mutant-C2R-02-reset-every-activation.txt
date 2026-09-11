@@ -1,0 +1,55 @@
+# mutant C2R-02-reset-every-activation: restart the grid at every activation, even one leaving the parameters unchanged
+# tree: 244c54b66a9c5bdfe8dd49e28b05cc0f5c255637
+
+$ kills phase2_decay_oracle_revision::c2r_02_unchanged_parameters_do_not_move_the_grid
+
+running 1 test
+test c2r_02_unchanged_parameters_do_not_move_the_grid ... FAILED
+
+failures:
+
+---- c2r_02_unchanged_parameters_do_not_move_the_grid stdout ----
+
+thread 'c2r_02_unchanged_parameters_do_not_move_the_grid' (437647) panicked at crates/spark-testkit/tests/phase2_decay_oracle_revision.rs:527:5:
+assertion `left == right` failed
+  left: (95, LogicalTime(60))
+ right: (94, LogicalTime(60))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c2r_02_unchanged_parameters_do_not_move_the_grid
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-adjudication-mutants-96u9dh1u/C2R-02-reset-every-activation/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-adjudication-mutants-96u9dh1u/C2R-02-reset-every-activation/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 7.03s
+     Running tests/phase2_decay_oracle_revision.rs (/tmp/spark-c2-adjudication-mutants-96u9dh1u/target/debug/deps/phase2_decay_oracle_revision-000401f3a8d7e51d)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_oracle_revision`
+
+$ kills phase2_decay_adjudication::d3_d5_lengthened_cadence_starts_a_new_grid_at_the_barrier
+
+running 1 test
+test d3_d5_lengthened_cadence_starts_a_new_grid_at_the_barrier ... FAILED
+
+failures:
+
+---- d3_d5_lengthened_cadence_starts_a_new_grid_at_the_barrier stdout ----
+
+thread 'd3_d5_lengthened_cadence_starts_a_new_grid_at_the_barrier' (437780) panicked at crates/spark-testkit/tests/phase2_decay_adjudication.rs:383:9:
+assertion `left == right` failed: engine, sign 1: Timeline { genesis: (1, 10), commands: [(0, Assign(100)), (55, Activate(1, 10))], evals: [60], kicks: [], kick: 0 }
+  left: [Some((95, LogicalTime(60)))]
+ right: [Some((94, LogicalTime(60)))]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    d3_d5_lengthened_cadence_starts_a_new_grid_at_the_barrier
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.04s
+
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-adjudication-mutants-96u9dh1u/C2R-02-reset-every-activation/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 1.29s
+     Running tests/phase2_decay_adjudication.rs (/tmp/spark-c2-adjudication-mutants-96u9dh1u/target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_adjudication`

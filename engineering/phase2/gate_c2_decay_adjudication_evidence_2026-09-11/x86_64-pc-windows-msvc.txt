@@ -1,0 +1,17 @@
+# tree: 244c54b66a9c5bdfe8dd49e28b05cc0f5c255637
+# whitespace-normalized
+$ cargo check --workspace --all-targets --target x86_64-pc-windows-msvc
+   Compiling blake3 v1.8.7
+    Checking constant_time_eq v0.4.2
+    Checking arrayvec v0.7.8
+    Checking cfg-if v1.0.4
+    Checking cpufeatures v0.3.0
+   Compiling zmij v1.0.23
+   Compiling serde_core v1.0.229
+   Compiling serde_json v1.0.151
+    Checking spark-core v0.1.0 (/home/chromikey/Projects/SPARK-gate-c2-adjudication/crates/spark-core)
+    Checking spark-engine v0.1.0 (/home/chromikey/Projects/SPARK-gate-c2-adjudication/crates/spark-engine)
+    Checking memchr v2.8.3
+    Checking itoa v1.0.18
+    Checking spark-testkit v0.1.0 (/home/chromikey/Projects/SPARK-gate-c2-adjudication/crates/spark-testkit)
+    Finished `dev` profile [unoptimized] target(s) in 25.87s

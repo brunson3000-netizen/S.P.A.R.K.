@@ -1,0 +1,20 @@
+# source:
+pub fn probe() { let _ = spark_engine::request::FinalizationRefusal::NotActiveSequencer; }
+$ cargo check --offline
+    Checking independent-surfaces v0.0.0 (/tmp/spark-c2-independent-surfaces-mq681k4p)
+error[E0603]: unit variant `NotActiveSequencer` is private
+   --> src/lib.rs:1:70
+    |
+  1 | pub fn probe() { let _ = spark_engine::request::FinalizationRefusal::NotActiveSequencer; }
+    |                                                                      ^^^^^^^^^^^^^^^^^^ private unit variant
+    |
+note: the unit variant `NotActiveSequencer` is defined here
+   --> /home/chromikey/Projects/SPARK-gate-c2-adjudication/crates/spark-engine/src/request.rs:240:5
+    |
+239 |     #[non_exhaustive]
+    |     ----------------- cannot be constructed because it is `#[non_exhaustive]`
+240 |     NotActiveSequencer,
+    |     ^^^^^^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0603`.
+error: could not compile `independent-surfaces` (lib) due to 1 previous error

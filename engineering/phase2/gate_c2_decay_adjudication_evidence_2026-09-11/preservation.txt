@@ -1,0 +1,4 @@
+# tree: 244c54b66a9c5bdfe8dd49e28b05cc0f5c255637
+# whitespace-normalized
+$ python3 /home/chromikey/Projects/SPARK-gate-c2-adjudication/engineering/phase2/gate_c2_decay_adjudication_evidence_2026-09-11/check_preservation.py
+{"failures": [], "inline_modules_checked": 17, "comment_only_files": 4}

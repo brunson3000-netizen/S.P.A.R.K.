@@ -1,0 +1,105 @@
+# mutant C2R-03-skip-unmoved: emit no decay candidate when the value does not move (saturated, rate 0, or no whole step)
+# tree: 244c54b66a9c5bdfe8dd49e28b05cc0f5c255637
+
+$ kills phase2_decay_oracle_revision::c2r_03_saturation_preserves_value_and_commit_time_chunk_invariance
+
+running 1 test
+test c2r_03_saturation_preserves_value_and_commit_time_chunk_invariance ... FAILED
+
+failures:
+
+---- c2r_03_saturation_preserves_value_and_commit_time_chunk_invariance stdout ----
+
+thread 'c2r_03_saturation_preserves_value_and_commit_time_chunk_invariance' (437914) panicked at crates/spark-testkit/tests/phase2_decay_oracle_revision.rs:621:13:
+assertion `left == right` failed: 100 [100, 150]
+  left: (0, LogicalTime(100))
+ right: (0, LogicalTime(150))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c2r_03_saturation_preserves_value_and_commit_time_chunk_invariance
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.04s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-adjudication-mutants-96u9dh1u/C2R-03-skip-unmoved/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-adjudication-mutants-96u9dh1u/C2R-03-skip-unmoved/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 5.91s
+     Running tests/phase2_decay_oracle_revision.rs (/tmp/spark-c2-adjudication-mutants-96u9dh1u/target/debug/deps/phase2_decay_oracle_revision-000401f3a8d7e51d)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_oracle_revision`
+
+$ kills phase2_decay_oracle_revision::c2r_03_every_evaluation_commits_at_its_canonical_time
+
+running 1 test
+test c2r_03_every_evaluation_commits_at_its_canonical_time ... FAILED
+
+failures:
+
+---- c2r_03_every_evaluation_commits_at_its_canonical_time stdout ----
+
+thread 'c2r_03_every_evaluation_commits_at_its_canonical_time' (437923) panicked at crates/spark-testkit/tests/phase2_decay_oracle_revision.rs:661:9:
+assertion `left == right` failed
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c2r_03_every_evaluation_commits_at_its_canonical_time
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_oracle_revision.rs (/tmp/spark-c2-adjudication-mutants-96u9dh1u/target/debug/deps/phase2_decay_oracle_revision-000401f3a8d7e51d)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_oracle_revision`
+
+$ kills phase2_decay_adjudication::d2_fresh_assignment_keeps_the_fixed_grid
+
+running 1 test
+test d2_fresh_assignment_keeps_the_fixed_grid ... FAILED
+
+failures:
+
+---- d2_fresh_assignment_keeps_the_fixed_grid stdout ----
+
+thread 'd2_fresh_assignment_keeps_the_fixed_grid' (437963) panicked at crates/spark-testkit/tests/phase2_decay_adjudication.rs:383:9:
+assertion `left == right` failed: engine, sign 1: Timeline { genesis: (10, 10), commands: [(9, Assign(100))], evals: [10, 19, 20, 30], kicks: [], kick: 0 }
+  left: [Some((100, LogicalTime(9))), Some((90, LogicalTime(10))), Some((90, LogicalTime(10))), Some((80, LogicalTime(20))), Some((70, LogicalTime(30)))]
+ right: [Some((100, LogicalTime(9))), Some((90, LogicalTime(10))), Some((90, LogicalTime(19))), Some((80, LogicalTime(20))), Some((70, LogicalTime(30)))]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    d2_fresh_assignment_keeps_the_fixed_grid
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.01s
+
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-adjudication-mutants-96u9dh1u/C2R-03-skip-unmoved/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 1.24s
+     Running tests/phase2_decay_adjudication.rs (/tmp/spark-c2-adjudication-mutants-96u9dh1u/target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_adjudication`
+
+$ kills phase2_decay_adjudication::d6_d7_saturation_and_unmoved_evaluations_commit_at_canonical_time
+
+running 1 test
+test d6_d7_saturation_and_unmoved_evaluations_commit_at_canonical_time ... FAILED
+
+failures:
+
+---- d6_d7_saturation_and_unmoved_evaluations_commit_at_canonical_time stdout ----
+
+thread 'd6_d7_saturation_and_unmoved_evaluations_commit_at_canonical_time' (437972) panicked at crates/spark-testkit/tests/phase2_decay_adjudication.rs:383:9:
+assertion `left == right` failed: engine, sign 1: Timeline { genesis: (5, 10), commands: [(0, Assign(12)), (25, Activate(4, 3))], evals: [10, 20, 25, 26, 28, 31, 40], kicks: [], kick: 0 }
+  left: [Some((7, LogicalTime(10))), Some((2, LogicalTime(20))), Some((2, LogicalTime(20))), Some((2, LogicalTime(20))), Some((0, LogicalTime(28))), Some((0, LogicalTime(28))), Some((0, LogicalTime(28)))]
+ right: [Some((7, LogicalTime(10))), Some((2, LogicalTime(20))), Some((2, LogicalTime(25))), Some((2, LogicalTime(26))), Some((0, LogicalTime(28))), Some((0, LogicalTime(31))), Some((0, LogicalTime(40)))]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    d6_d7_saturation_and_unmoved_evaluations_commit_at_canonical_time
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_adjudication.rs (/tmp/spark-c2-adjudication-mutants-96u9dh1u/target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_adjudication`

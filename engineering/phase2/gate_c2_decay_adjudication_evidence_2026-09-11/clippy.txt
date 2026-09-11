@@ -1,0 +1,4 @@
+# tree: 244c54b66a9c5bdfe8dd49e28b05cc0f5c255637
+# whitespace-normalized
+$ cargo clippy --workspace --all-targets --all-features -- -D warnings
+    Finished `dev` profile [unoptimized] target(s) in 4.73s
