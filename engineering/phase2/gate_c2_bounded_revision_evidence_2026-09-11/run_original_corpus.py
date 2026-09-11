@@ -9,6 +9,10 @@ documented mechanically-adapted variant); the original is always recorded first.
 `--test-support` enables spark-engine's test-support feature in the disposable
 crate, exactly as spark-testkit's dev-dependency edge does; it is used only for
 the adapted variant (adaptation A4) and never for the original run.
+
+The captured log is whitespace-normalized for Git hygiene (trailing spaces on
+libtest progress lines and trailing blank lines are removed); the header says
+so. Command output is otherwise byte-for-byte what cargo printed.
 """
 import json, subprocess, sys, tempfile, hashlib
 from pathlib import Path
@@ -27,6 +31,7 @@ with tempfile.TemporaryDirectory(prefix='spark-c2-rev-corpus-') as temp:
     (p / 'Cargo.toml').write_text('[package]\nname="spark-c2-counterexamples"\nversion="0.0.0"\nedition="2021"\n[workspace]\n[dependencies]\n' + ''.join(f'{n} = {{ path = "{root}/crates/{n}"' + (', features = ["test-support"]' if test_support and n == 'spark-engine' else '') + ' }\n' for n in ['spark-core', 'spark-engine', 'spark-testkit']))
     cmd = ['cargo', 'test', '--offline', '--', '--nocapture', '--test-threads=1']
     with (out / (log_name + '.txt')).open('w') as log:
-        log.write(f'# source: {source.name} sha256={hashlib.sha256(text.encode()).hexdigest()}\n# crate root: {root}\n# spark-engine test-support: {test_support}\n$ ' + ' '.join(cmd) + '\n'); log.flush()
-        r = subprocess.run(cmd, cwd=p, stdout=log, stderr=subprocess.STDOUT)
+        log.write(f'# source: {source.name} sha256={hashlib.sha256(text.encode()).hexdigest()}\n# crate root: {root}\n# spark-engine test-support: {test_support}\n# whitespace-normalized: trailing spaces and trailing blank lines removed\n$ ' + ' '.join(cmd) + '\n'); log.flush()
+        r = subprocess.run(cmd, cwd=p, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        log.write('\n'.join(line.rstrip() for line in r.stdout.rstrip().splitlines()) + '\n')
 print(json.dumps({'log': log_name, 'source': source.name, 'root': str(root), 'test_support': test_support, 'exit_code': r.returncode}))

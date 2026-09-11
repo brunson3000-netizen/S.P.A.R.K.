@@ -1,0 +1,5 @@
+# tree: 19930f3c17a923c873b55cd5afb58692589d0681
+$ cargo clippy -p spark-core -p spark-engine --lib --all-features -- -D warnings -D clippy::unwrap_used -D clippy::expect_used -D clippy::panic -D clippy::indexing_slicing -D clippy::arithmetic_side_effects
+    Checking spark-core v0.1.0 (/home/chromikey/Projects/SPARK-gate-c2-rev/crates/spark-core)
+    Checking spark-engine v0.1.0 (/home/chromikey/Projects/SPARK-gate-c2-rev/crates/spark-engine)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.25s

@@ -1,18 +1,20 @@
 # source: independent_counterexamples.rs sha256=3a3a26e658852659b916d699bf3aac3b41be55bcca9213f7e0fbc532c2b1197d
 # crate root: /home/chromikey/Projects/SPARK-gate-c2-rev
+# spark-engine test-support: False
+# whitespace-normalized: trailing spaces and trailing blank lines removed
 $ cargo test --offline -- --nocapture --test-threads=1
-   Compiling find-msvc-tools v0.1.11
    Compiling shlex v2.0.1
-   Compiling cpufeatures v0.3.0
+   Compiling find-msvc-tools v0.1.11
    Compiling constant_time_eq v0.4.2
+   Compiling cpufeatures v0.3.0
    Compiling arrayvec v0.7.8
-   Compiling cc v1.4.4
    Compiling cfg-if v1.0.4
+   Compiling cc v1.4.4
    Compiling blake3 v1.8.7
    Compiling spark-core v0.1.0 (/home/chromikey/Projects/SPARK-gate-c2-rev/crates/spark-core)
    Compiling spark-engine v0.1.0 (/home/chromikey/Projects/SPARK-gate-c2-rev/crates/spark-engine)
    Compiling spark-testkit v0.1.0 (/home/chromikey/Projects/SPARK-gate-c2-rev/crates/spark-testkit)
-   Compiling spark-c2-counterexamples v0.0.0 (/tmp/spark-c2-rev-corpus-4zmutkua)
+   Compiling spark-c2-counterexamples v0.0.0 (/tmp/spark-c2-rev-corpus-zi85s366)
 error[E0603]: unit variant `WrongProfile` is private
    --> src/lib.rs:117:60
     |

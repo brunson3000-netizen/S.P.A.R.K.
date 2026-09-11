@@ -1,0 +1,3 @@
+# tree: 19930f3c17a923c873b55cd5afb58692589d0681
+$ cargo clippy --workspace --all-targets --all-features -- -D warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.09s

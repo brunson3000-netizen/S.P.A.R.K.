@@ -1,0 +1,5 @@
+# staged final tree (documentation/evidence commit); code tree = 19930f3
+$ git diff --cached --check 00d647e6c3581d1dfbaeccf31c6b8d1966f8bfd0
+exit 0
+$ git diff --cached --check 7e3a0aae069a8bf840e4dfb74221cdf2687b1db5
+exit 0

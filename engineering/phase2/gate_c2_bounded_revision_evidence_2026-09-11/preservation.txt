@@ -1,0 +1,3 @@
+# tree: 19930f3c17a923c873b55cd5afb58692589d0681
+$ python3 /home/chromikey/Projects/SPARK-gate-c2-rev/engineering/phase2/gate_c2_bounded_revision_evidence_2026-09-11/check_preservation.py
+{"failures": [], "inline_modules_checked": 17}

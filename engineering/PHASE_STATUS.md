@@ -16,7 +16,7 @@ The active cross-project operating record is:
 
 `engineering/SPARK_GAME_CONVERGENCE_PROTOCOL_V1.md`
 
-The Operator has now accepted and frozen the independently reviewed V3-F01 Revision-2 correction. V3-F01 is CLOSED. S.P.A.R.K. Gate C1 is satisfied. The Operator authorized Gate C2 (Phase-2 implementation) on 2026-09-11; its writer candidate awaits independent review and is not promoted to production. Phase 3 remains unauthorized. G.A.M.E. integration requirements and test fixtures may be prepared within the existing protocol; no joint integration readiness or G.A.M.E. state change is claimed.
+The Operator has now accepted and frozen the independently reviewed V3-F01 Revision-2 correction. V3-F01 is CLOSED. S.P.A.R.K. Gate C1 is satisfied. The Operator authorized Gate C2 (Phase-2 implementation) on 2026-09-11; its writer candidate was independently reviewed (bounded revision required), and the bounded-revision candidate awaits a fresh independent review; nothing is promoted to production. Phase 3 remains unauthorized. G.A.M.E. integration requirements and test fixtures may be prepared within the existing protocol; no joint integration readiness or G.A.M.E. state change is claimed.
 
 ## Phase 0
 
@@ -49,7 +49,7 @@ No Phase-1 semantic identity, encoding, conflict, authority, or determinism inva
 
 ## Phase 2
 
-**ARCHITECTURE CORRECTION ACCEPTED AND FROZEN. V3-F01 CLOSED. GATE C2 IMPLEMENTATION CANDIDATE AWAITING INDEPENDENT REVIEW.**
+**ARCHITECTURE CORRECTION ACCEPTED AND FROZEN. V3-F01 CLOSED. GATE C2 BOUNDED-REVISION CANDIDATE AWAITING INDEPENDENT REVIEW.**
 
 The controlling Operator acceptance is
 `engineering/phase2/SPARK_PHASE_2_V3_F01_OPERATOR_ACCEPTANCE_FREEZE_2026-09-10.md`.
@@ -101,6 +101,29 @@ interpretations for review, and one inherited performance limit (whole finalizat
 `O(history)` through Phase-1 `submit_fence`). Nothing is accepted or promoted; production is
 unchanged. Durable storage, crash recovery, GAME integration, performance evidence, and
 executable Windows/Android parity remain later gates. Phase 3 remains unauthorized.
+
+### Gate C2 — independent review and bounded revision (2026-09-11)
+
+Independent Codex review of the writer candidate (`053d1dc`) at
+`00d647e6c3581d1dfbaeccf31c6b8d1966f8bfd0` returned `GATE_C2_BOUNDED_REVISION_REQUIRED`
+(C2-01 … C2-08; D-C2-3/5/7/11/13 revisions). The separated correction writer's bounded
+revision is on `candidate/phase2-gate-c2-bounded-revision-20260911`, based exactly on that
+review commit (code-and-test checkpoint `19930f3`; exact candidate hash in the publication
+receipt). Writer verdict: `GATE_C2_BOUNDED_REVISION_READY_FOR_INDEPENDENT_REVIEW`.
+
+- Mission: `engineering/phase2/SPARK_PHASE_2_GATE_C2_BOUNDED_REVISION_MISSION_2026-09-11.md`
+- Report: `engineering/phase2/SPARK_PHASE_2_GATE_C2_BOUNDED_REVISION_REPORT_2026-09-11.md`
+- Evidence: `engineering/phase2/gate_c2_bounded_revision_evidence_2026-09-11/`
+- Independent review mission:
+  `engineering/phase2/SPARK_PHASE_2_GATE_C2_REVISION_INDEPENDENT_REVIEW_MISSION_2026-09-11.md`
+
+Every finding is corrected, the review's counterexamples are repository tests, and the
+partial oracle rows are completed with negative controls (one further defect found and
+fixed: obligation emissions now canonicalize by emission identity). Workspace: 374 tests
+passed, 0 failed, 0 ignored (232 inherited unmodified); formatting, all-target clippy,
+strict lint, metadata, five static targets and 45 external compile probes pass. Nine
+representation choices are flagged for review. Nothing is accepted or promoted;
+production is unchanged; Phase 3 remains unauthorized.
 
 ### Historical Gate C1 chronology — superseded status statements
 

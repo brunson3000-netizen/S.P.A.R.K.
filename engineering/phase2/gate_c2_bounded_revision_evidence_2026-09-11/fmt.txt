@@ -1,0 +1,2 @@
+# tree: 19930f3c17a923c873b55cd5afb58692589d0681
+$ cargo fmt --all --check
