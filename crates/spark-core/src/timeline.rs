@@ -974,6 +974,20 @@ pub struct TimelineIngress {
     epoch_resets: Vec<EpochResetRecord>,
 }
 
+/// One corruption of a derived finalized-history index, for AT-I28 fault
+/// injection only (test builds; see
+/// [`TimelineIngress::inject_derived_index_fault`]).
+#[cfg(any(test, feature = "test-support"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DerivedIndexFault {
+    /// Remove one finalized command-identity claim (the P-7 index).
+    DropFinalizedCommandIdentity(CommandId),
+    /// Remove one finalized `(source, sequence)` claim (the P-8 index).
+    DropFinalizedSourceSequence(SourceId, u64),
+    /// Overwrite one source's last finalized sequence (the P-9 index).
+    SetLastFinalizedSourceSequence(SourceId, u64),
+}
+
 fn genesis_fence_hash(
     profile_id: &ProfileId,
     epoch: TimelineEpoch,
@@ -1102,6 +1116,31 @@ impl TimelineIngress {
             window_width,
             starting_frontier,
         )
+    }
+
+    /// Overwrites or removes one entry of a **derived** finalized-history
+    /// index without touching the finalized history it is derived from, so
+    /// that the derived-index recomputation check
+    /// ([`TimelineIngress::derived_indexes_consistent`]) and every validator
+    /// that relies on it can be shown to detect a real corruption (AT-I28
+    /// fault injection). Gated exactly like
+    /// [`TimelineIngress::resume_at_frontier`]: it does not exist on the
+    /// production surface.
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn inject_derived_index_fault(&mut self, fault: DerivedIndexFault) {
+        match fault {
+            DerivedIndexFault::DropFinalizedCommandIdentity(command_id) => {
+                self.finalized_command_identity.remove(&command_id);
+            }
+            DerivedIndexFault::DropFinalizedSourceSequence(source_id, sequence) => {
+                self.finalized_source_sequence_identity
+                    .remove(&(source_id, sequence));
+            }
+            DerivedIndexFault::SetLastFinalizedSourceSequence(source_id, sequence) => {
+                self.last_finalized_source_sequence
+                    .insert(source_id, sequence);
+            }
+        }
     }
 
     fn at_frontier(

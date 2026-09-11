@@ -1,0 +1,65 @@
+# source: independent_revision_probes.rs sha256=ea9e3dab3e5b154d3e6c168194903e610012b64d39fcf38e79498a5f9eaa7247
+# crate root: /home/chromikey/Projects/SPARK-gate-c2-rev2
+# spark-engine test-support: True
+# whitespace-normalized: trailing spaces and trailing blank lines removed
+$ cargo test --offline -- --nocapture --test-threads=1
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.11
+   Compiling cfg-if v1.0.4
+   Compiling arrayvec v0.7.8
+   Compiling cpufeatures v0.3.0
+   Compiling constant_time_eq v0.4.2
+   Compiling cc v1.4.4
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/home/chromikey/Projects/SPARK-gate-c2-rev2/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/home/chromikey/Projects/SPARK-gate-c2-rev2/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/home/chromikey/Projects/SPARK-gate-c2-rev2/crates/spark-testkit)
+   Compiling spark-c2-counterexamples v0.0.0 (/tmp/spark-c2-rev2-corpus-2rvimvb4)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.01s
+     Running unittests src/lib.rs (target/debug/deps/spark_c2_counterexamples-4878d4ed691f05a4)
+
+running 14 tests
+test c2_01_fixed_scope_condition_reads_join_parent_union_once ... ok
+test c2_02_scope_fanout_and_materialized_edge_controls ... ok
+test c2_03_nested_ids_share_namespace_across_schedules ... ok
+test c2_04_negative_widened_aggregate_and_staged_cancellation ... ok
+test c2_05_effect_reapplication_at_frozen_cohort_time_must_reproduce_state ... actual=(90, LogicalTime(10)); frozen-at reapplication=(90, LogicalTime(15))
+
+thread 'c2_05_effect_reapplication_at_frozen_cohort_time_must_reproduce_state' (300964) panicked at src/lib.rs:172:5:
+assertion `left == right` failed: FINAL §4 and AT-I1: resolved effects at canonical cohort time reproduce the wave
+  left: Digest(d1352aa1d636beec0e9cc1bfb43f7602175067333d69e4e2460615f8e606c8e2)
+ right: Digest(97b3ef3267899ed5f4c5f19b6f42e0c4d3d6e44aaf45e2ae1d88ca2a38d78d56)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+test c2_05_recovery_and_unsaturated_remainders_positive ... ok
+test c2_05_saturation_must_preserve_claimed_value_and_commit_time_chunk_invariance ... saturation single=(0, LogicalTime(150)) chunks=(0, LogicalTime(100))
+
+thread 'c2_05_saturation_must_preserve_claimed_value_and_commit_time_chunk_invariance' (300966) panicked at src/lib.rs:94:5:
+assertion `left == right` failed: R-2 claims value AND commit-time invariance for arbitrary evaluation times
+  left: (0, LogicalTime(150))
+ right: (0, LogicalTime(100))
+FAILED
+test c2_05_shorter_cadence_must_not_bill_steps_ending_before_activation ... shortened cadence result=(70, LogicalTime(60)); new-rate step ends must be after barrier 50
+
+thread 'c2_05_shorter_cadence_must_not_bill_steps_ending_before_activation' (300967) panicked at src/lib.rs:152:5:
+assertion `left == right` failed: only the step ending at 60 belongs to the new epoch; 10,20,30,40,50 cannot use its rate
+  left: 70
+ right: 95
+FAILED
+test c2_06_both_kind_payload_mismatches_leave_artifacts_unchanged ... ok
+test d_c2_11_mismatch_before_first_cohort_is_sticky_without_boundary ... ok
+test d_c2_13_materialized_creator_fingerprint_survives_epoch_replacement ... ok
+test d_c2_7_exact_rule_identity_and_barrier_config_controls ... ok
+test r3_lineage_restore_binds_multiple_activations_across_reset ... ok
+test r8_enqueue_redelivery_folds_and_contested_payload_rejects_atomically ... ok
+
+failures:
+
+failures:
+    c2_05_effect_reapplication_at_frozen_cohort_time_must_reproduce_state
+    c2_05_saturation_must_preserve_claimed_value_and_commit_time_chunk_invariance
+    c2_05_shorter_cadence_must_not_bill_steps_ending_before_activation
+
+test result: FAILED. 11 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+error: test failed, to rerun pass `--lib`

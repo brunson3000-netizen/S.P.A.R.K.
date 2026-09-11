@@ -1252,8 +1252,15 @@ fn at_i22_sanctioned_compositions_and_cross_family_rejection() {
         (CanonicalValue::Int(75), LogicalTime(30))
     );
     // (2) Separate scheduled boundaries: decay at 30 (70, committed at 30),
-    //     shock at 31 (75, re-anchored at 31), decay at 40 (no whole step
-    //     since 31), decay at 41 (one step: 65).
+    //     shock at 31 (75, committed at 31), decay at 40 (the grid step ending
+    //     at 40 elapsed since 31: 65), decay at 41 (no grid step in (40, 41]:
+    //     65, committed at 41).
+    //
+    //     Adapted by the second correction (C2R-01): the former expectation
+    //     (75 at 40, 65 at 41) required the shock to re-phase the cadence
+    //     clock, which is representable only by a backdated or extra
+    //     per-cell phase — rejected by FINAL §4 and the frozen `StateCell`
+    //     encoding. Both compositions remain deterministic and declared.
     let mut separate = decay_engine(
         vec![
             work_rule(
@@ -1270,12 +1277,16 @@ fn at_i22_sanctioned_compositions_and_cross_family_rejection() {
             ("rule.decay", 41, "work.decay"),
         ],
     );
-    for (t, expected) in [(30, 70), (31, 75), (40, 75), (41, 65)] {
+    for (t, expected) in [(30, 70), (31, 75), (40, 65), (41, 65)] {
         run(&mut separate, t);
+        let c = separate
+            .state()
+            .get(&profile_id(), &def("state.stress"), &bron())
+            .unwrap();
         assert_eq!(
-            value(&separate, "state.stress", &bron()),
-            Some(expected),
-            "t={t}"
+            (c.value.clone(), c.updated_at),
+            (CanonicalValue::Int(expected), LogicalTime(t)),
+            "t={t}: value and canonical commit time"
         );
     }
     // (3) Coincident decay and shock in one wave: cross-family, rejected with

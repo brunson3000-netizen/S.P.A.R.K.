@@ -449,11 +449,20 @@ fn at_i22_decay_catch_up_is_chunk_invariant() {
         Some(20),
         "stops exactly at the target"
     );
-    // A cadence remainder is kept: no candidate when no whole step elapsed.
-    let mut early = decay_engine(&[9]);
+    // A cadence remainder is kept. Adapted by the second correction (C2R-03):
+    // an evaluation with no whole step elapsed still commits its unchanged
+    // value at the cohort's canonical time (so the cell tuple is the same
+    // under every evaluation partition), and the remainder survives that
+    // commit: the step ending at 10 is still taken at 10. (The former
+    // assertion pinned "no candidate", which left `updated_at` depending on
+    // which evaluations happened to move the value.)
+    let mut early = decay_engine(&[9, 10]);
     let r = run(&mut early, 9);
-    assert!(r[0].waves[0].committed.is_empty());
-    assert_eq!(value(&early, "state.stress", &bron()), Some(100));
+    assert_eq!(r[0].waves[0].committed.len(), 1);
+    assert_eq!(cell(&early).value, CanonicalValue::Int(100));
+    assert_eq!(cell(&early).updated_at, LogicalTime(9));
+    run(&mut early, 10);
+    assert_eq!(value(&early, "state.stress", &bron()), Some(90));
 }
 
 /// AT-I24: aggregation is a pure stable-order recomputation: child write order

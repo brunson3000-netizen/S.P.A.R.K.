@@ -745,11 +745,17 @@ fn c2_05_chunk_invariance_holds_for_every_evaluation_subset() {
         drive(&mut e, &advance(40));
         assert_eq!(stress_cell(&e), reference, "evaluations at {times:?}");
     }
-    // The commit time is the end of the last whole step, so the remainder is
-    // visible: one evaluation at 15 moves one step and commits at 10.
-    let mut e = decay_fixture(&[15], decay(10, 10), 0);
+    // Adapted by the second correction (C2R-01): the commit time is the
+    // cohort's canonical time (FINAL §4), never the end of the last whole
+    // step; the remainder survives in the cadence grid instead. One evaluation
+    // at 15 moves one step and commits at 15; the next at 20 still takes the
+    // step ending at 20. (The former assertion pinned the rejected backdated
+    // commit `(90, 10)`.)
+    let mut e = decay_fixture(&[15, 20], decay(10, 10), 0);
     drive(&mut e, &advance(15));
-    assert_eq!(stress_cell(&e), (90, LogicalTime(10)));
+    assert_eq!(stress_cell(&e), (90, LogicalTime(15)));
+    drive(&mut e, &advance(20));
+    assert_eq!(stress_cell(&e), (80, LogicalTime(20)));
 }
 
 fn activate_request(
@@ -837,25 +843,34 @@ fn c2_05_new_decay_rate_must_not_apply_before_activation_barrier_converted() {
 
 /// AT-I23 chunk invariance across the barrier, and an unaligned barrier: a
 /// pre-barrier evaluation at the barrier time (scheduled work at 50 runs
-/// before the activating command at 50) composes with the later one; with the
-/// barrier at 55 the step ending at 60 takes the rate in effect at its end.
+/// before the activating command at 50) composes with the later one.
+///
+/// Adapted by the second correction (C2R-02): with the barrier at 55 the new
+/// rate's segment starts at 55, so its first whole step ends at 65 and none
+/// has elapsed by 60 — 95, not 90. The former expectation billed the step
+/// `(50, 60]` at the new rate although half of it precedes the barrier (the
+/// residual interval the review requires excluded). A later evaluation at 65
+/// takes exactly that first new-rate step.
 #[test]
 fn c2_05_epoch_bound_rates_compose_across_the_barrier() {
-    for (times, barrier) in [
-        (vec![60], 50),
-        (vec![50, 60], 50),
-        (vec![30, 60], 50),
-        (vec![60], 55),
-        (vec![55, 60], 55),
+    for (times, barrier, expected) in [
+        (vec![60], 50, 90),
+        (vec![50, 60], 50, 90),
+        (vec![30, 60], 50, 90),
+        (vec![60], 55, 95),
+        (vec![55, 60], 55, 95),
     ] {
         let mut e = rate_fixture(&times, barrier);
         drive(&mut e, &advance(60));
         assert_eq!(
             stress_cell(&e),
-            (90, LogicalTime(60)),
+            (expected, LogicalTime(60)),
             "{times:?} / {barrier}"
         );
     }
+    let mut e = rate_fixture(&[60, 65], 55);
+    drive(&mut e, &advance(65));
+    assert_eq!(stress_cell(&e), (90, LogicalTime(65)));
 }
 
 /// C2-05 / AT-I23: an interval in which the executing decay operation was not

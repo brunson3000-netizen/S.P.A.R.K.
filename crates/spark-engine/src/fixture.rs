@@ -348,6 +348,42 @@ pub fn lineage_len(engine: &Engine) -> usize {
     engine.lineage.len()
 }
 
+/// AT-I8: record the scheduler ↔ `ObligationStore` bidirectional invariant
+/// after **every committed wave** (into [`Observation::committed_waves`]).
+/// Off by default: the exhaustive check is `O(n log n)` per wave.
+pub fn probe_wave_invariants(engine: &mut Engine, enabled: bool) {
+    engine.probe_wave_invariants = enabled;
+}
+
+/// AT-I28: the engine's per-epoch artifact lineage equals the value
+/// recomputed from committed state (the registry and finalized commands) —
+/// the same check restore runs.
+pub fn lineage_recomputes(engine: &Engine) -> bool {
+    engine.lineage_is_valid()
+}
+
+/// AT-I28: the timeline's derived finalized-history indexes equal the values
+/// recomputed from the finalized history — the same check restore runs.
+pub fn timeline_indexes_recompute(engine: &Engine) -> bool {
+    engine.timeline.derived_indexes_consistent()
+}
+
+/// AT-I28 fault injection into a live engine's timeline index.
+pub fn inject_timeline_index_fault(
+    engine: &mut Engine,
+    fault: spark_core::timeline::DerivedIndexFault,
+) {
+    engine.timeline.inject_derived_index_fault(fault);
+}
+
+/// AT-I28 fault injection into a snapshot's timeline index.
+pub fn snapshot_inject_timeline_index_fault(
+    snapshot: &mut EngineSnapshot,
+    fault: spark_core::timeline::DerivedIndexFault,
+) {
+    snapshot.timeline.inject_derived_index_fault(fault);
+}
+
 /// Set one occurrence-ledger sequence (AT-I8 exhaustion fixtures; `u64`
 /// exhaustion is otherwise unreachable in a test's lifetime).
 pub fn set_occurrence_next(

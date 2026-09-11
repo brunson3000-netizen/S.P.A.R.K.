@@ -136,12 +136,11 @@ pub(crate) enum Intent {
     Transform {
         family: TransformFamily,
         op_fingerprint: Digest,
+        /// The resolved value, committed at the cohort's canonical time like
+        /// every effect (FINAL §4). Decay/recovery keeps its cadence
+        /// remainder on the operation's parameter-segment grid, not in a
+        /// backdated commit time (C2R-01).
         resolved: i64,
-        /// The logical time the resolved value holds at, when it is not the
-        /// cohort's canonical time: a pure decay/recovery transform commits
-        /// at the end of its last whole elapsed cadence step, so the partial
-        /// remainder survives to the next evaluation (v1 Q7, C2-05).
-        commit_at: Option<LogicalTime>,
     },
 }
 
@@ -161,21 +160,11 @@ impl Intent {
                 family,
                 op_fingerprint,
                 resolved,
-                commit_at,
             } => {
                 enc.push_str("intent.transform");
                 enc.push_str(family.tag());
                 enc.push_digest(op_fingerprint);
                 enc.push_i64(*resolved);
-                match commit_at {
-                    Some(t) => {
-                        enc.push_bool(true);
-                        t.canonicalize(enc);
-                    }
-                    None => {
-                        enc.push_bool(false);
-                    }
-                }
             }
         }
     }
@@ -243,8 +232,6 @@ pub(crate) struct Reduced {
     pub write_path: WritePath,
     pub raw: i64,
     pub contributing: Vec<Digest>,
-    /// A singleton transform's commit time, if not the cohort time.
-    pub at: Option<LogicalTime>,
 }
 
 /// The typed target-local reducer (v2 §4.2). Groups are reduced in canonical
@@ -279,19 +266,15 @@ pub(crate) fn reduce(
                 _ => None,
             })
             .collect();
-        let transforms: Vec<(TransformFamily, i64, Option<LogicalTime>)> = members
+        let transforms: Vec<(TransformFamily, i64)> = members
             .iter()
             .filter_map(|c| match c.intent {
                 Intent::Transform {
-                    family,
-                    resolved,
-                    commit_at,
-                    ..
-                } => Some((family, resolved, commit_at)),
+                    family, resolved, ..
+                } => Some((family, resolved)),
                 _ => None,
             })
             .collect();
-        let mut at = None;
         let raw = if additive.len() == members.len() {
             // ADDITIVE: checked i128 fold, applied once to the pre-wave value.
             let mut total: i128 = 0;
@@ -329,15 +312,12 @@ pub(crate) fn reduce(
             }
         } else if transforms.len() == members.len() {
             match transforms.as_slice() {
-                [(_, resolved, commit_at)] => {
-                    at = *commit_at;
-                    *resolved
-                }
+                [(_, resolved)] => *resolved,
                 _ => {
                     return Err(WaveRejection::MultipleTransforms {
                         definition,
                         scope,
-                        families: transforms.iter().map(|(f, _, _)| *f).collect(),
+                        families: transforms.iter().map(|(f, _)| *f).collect(),
                     })
                 }
             }
@@ -350,7 +330,6 @@ pub(crate) fn reduce(
             write_path,
             raw,
             contributing,
-            at,
         });
     }
     Ok(out)
@@ -559,7 +538,6 @@ mod tests {
                     family: TransformFamily::Scale,
                     op_fingerprint: hash_bytes(b"scale"),
                     resolved: 30,
-                    commit_at: None,
                 },
             )
         };

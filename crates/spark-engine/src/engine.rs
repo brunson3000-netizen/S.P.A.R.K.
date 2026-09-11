@@ -375,6 +375,19 @@ pub enum PreflightRow {
     P9,
 }
 
+/// One committed-wave observation point (AT-I8): the state immediately after a
+/// wave's apply, before the next wave is planned — the intermediate point a
+/// whole-cohort check cannot see.
+#[cfg(any(test, feature = "test-support"))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CommittedWaveObservation {
+    pub cohort_identity: Digest,
+    pub wave_index: u32,
+    pub obligation_count: usize,
+    pub scheduled_work_count: usize,
+    pub bidirectional_invariant: bool,
+}
+
 #[cfg(any(test, feature = "test-support"))]
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Observation {
@@ -382,6 +395,8 @@ pub struct Observation {
     /// X-1 selections at the outer-loop seam A2 only (AT-I39(C)).
     pub outer_selections: u64,
     pub finalize_ops: Vec<FinalizeOp>,
+    /// Recorded only while `fixture::probe_wave_invariants` is enabled.
+    pub committed_waves: Vec<CommittedWaveObservation>,
 }
 
 // ================================================================ the engine
@@ -415,6 +430,10 @@ pub struct Engine {
     /// AT-I6c(f) seam: forge empty parent sets for derived seeds.
     #[cfg(any(test, feature = "test-support"))]
     pub(crate) forge_empty_parents: bool,
+    /// AT-I8 seam: record the bidirectional invariant after every committed
+    /// wave.
+    #[cfg(any(test, feature = "test-support"))]
+    pub(crate) probe_wave_invariants: bool,
 }
 
 /// A numeric view of a canonical value (`Int` value or `Fixed` raw).
@@ -582,22 +601,38 @@ impl EvalView<'_> {
     }
 
     /// The v1 Q7 closed-form catch-up from `anchor` (the cell's `updated_at`)
-    /// to `now`, integrated epoch by epoch (C2-05, AT-I23).
+    /// to `now`, counted on the operation's **parameter-segment grid**
+    /// (C2-05; C2R-01, C2R-02, C2R-03).
     ///
-    /// For each behavior epoch overlapping `(t, now]`: if that epoch carries
-    /// this operation, take the whole cadence steps that fit before the
-    /// epoch's end (the next activation time, or `now`) at that epoch's rate,
-    /// and advance `t` by exactly those steps; a partial step carries into the
-    /// next epoch and completes at its parameters — each whole step is
-    /// integrated at the parameters in effect at its end, which is exactly
-    /// what separate evaluations at every step boundary would do (a boundary
-    /// at an activation time belongs to the old epoch, as scheduled work at
-    /// that time runs before the activating command). An epoch that does not
-    /// carry the operation integrates nothing and `t` moves to its end.
+    /// A *parameter segment* is a maximal run of consecutive behavior epochs
+    /// in which this operation exists with the same resolved `(rate,
+    /// cadence)`. Its *origin* is the activation time of its first epoch
+    /// (genesis: logical time 0), and its whole cadence steps end at
+    /// `origin + k·cadence` (`k >= 1`) up to the next activation that changes
+    /// the parameters; a step ending exactly at that activation belongs to the
+    /// segment it closes. The whole cadence steps elapsed between `anchor` and
+    /// `now` are the grid points in `(anchor, now]`, each moving the value by
+    /// its segment's rate toward the baseline (linear, floor-exact, clamped at
+    /// the baseline by `move_toward`).
     ///
-    /// Returns the moved value and the end of the last whole step, which is
-    /// the commit time: the partial remainder `now - t` survives to the next
-    /// evaluation. `None` when no whole step elapsed.
+    /// Why this representation (flagged for review as R-2′):
+    /// - the count is additive over every partition of `(anchor, now]`, so
+    ///   one catch-up equals any sequence of evaluations, and every result is
+    ///   committed at the cohort's canonical time (FINAL §4) with no remainder
+    ///   lost — the remainder lives in the grid, never in a backdated
+    ///   `updated_at` (C2R-01, C2R-03);
+    /// - no step of a new segment contains pre-barrier time, so a new rate or
+    ///   cadence applies only to whole steps lying after its activation
+    ///   barrier; the closed segment's incomplete last step is never billed
+    ///   at either rate, because Q7 integrates whole steps only (C2R-02,
+    ///   AT-I23);
+    /// - the grid is a function of committed state alone (the activation
+    ///   lineage, validated at restore), because `StateCell` has no phase
+    ///   field and canonical-time commits overwrite `updated_at`; an
+    ///   activation that leaves this operation's parameters unchanged does not
+    ///   move the grid;
+    /// - an epoch whose artifact lacks the operation integrates nothing and
+    ///   closes the segment.
     fn decay_walk(
         &self,
         op: &DecayOp<'_>,
@@ -605,46 +640,57 @@ impl EvalView<'_> {
         anchor: LogicalTime,
         baseline: i128,
         now: LogicalTime,
-    ) -> Result<Option<(i128, LogicalTime)>, WaveRejection> {
+    ) -> Result<i128, WaveRejection> {
         let mut value = start;
-        let mut t = anchor.0;
-        let mut stepped = false;
+        // (rate, cadence, origin) of the segment the current epoch belongs to.
+        let mut segment: Option<(i64, u64, u64)> = None;
         let mut epochs = self.lineage.iter().peekable();
         while let Some(epoch) = epochs.next() {
+            let begin = epoch.activated_at.map_or(0, |a| a.0);
             let end = epochs
                 .peek()
                 .and_then(|next| next.activated_at)
                 .map_or(now.0, |a| a.0.min(now.0));
-            if end <= t {
-                continue;
-            }
-            let Some((rate, cadence)) = epoch.decay_parameters(op) else {
-                t = end;
+            let parameters = match epoch.decay_parameters(op) {
+                None => None,
+                Some((rate, cadence)) => Some((
+                    epoch
+                        .resolve(rate)
+                        .filter(|r| *r >= 0)
+                        .ok_or(arithmetic("decay_rate"))?,
+                    epoch
+                        .resolve(cadence)
+                        .and_then(|c| u64::try_from(c).ok())
+                        .filter(|c| *c >= 1)
+                        .ok_or(arithmetic("decay_cadence"))?,
+                )),
+            };
+            segment = match (parameters, segment) {
+                (None, _) => None,
+                (Some((rate, cadence)), Some((r, c, origin))) if (rate, cadence) == (r, c) => {
+                    Some((rate, cadence, origin))
+                }
+                (Some((rate, cadence)), _) => Some((rate, cadence, begin)),
+            };
+            let Some((rate, cadence, origin)) = segment else {
                 continue;
             };
-            let rate = epoch
-                .resolve(rate)
-                .filter(|r| *r >= 0)
-                .ok_or(arithmetic("decay_rate"))?;
-            let cadence = epoch
-                .resolve(cadence)
-                .and_then(|c| u64::try_from(c).ok())
-                .filter(|c| *c >= 1)
-                .ok_or(arithmetic("decay_cadence"))?;
-            let steps = end
-                .checked_sub(t)
-                .and_then(|span| span.checked_div(cadence))
-                .ok_or(arithmetic("decay"))?;
-            if steps > 0 {
-                value = move_toward(value, baseline, steps, rate)?;
-                t = steps
-                    .checked_mul(cadence)
-                    .and_then(|d| t.checked_add(d))
-                    .ok_or(arithmetic("decay"))?;
-                stepped = true;
+            let from = anchor.0.max(begin);
+            if end <= from {
+                continue;
             }
+            // Grid points `origin + k·cadence` in `(from, end]`.
+            let index = |t: u64| {
+                t.checked_sub(origin)
+                    .and_then(|span| span.checked_div(cadence))
+            };
+            let steps = index(end)
+                .zip(index(from))
+                .and_then(|(e, f)| e.checked_sub(f))
+                .ok_or(arithmetic("decay"))?;
+            value = move_toward(value, baseline, steps, rate)?;
         }
-        Ok(stepped.then_some((value, LogicalTime(t))))
+        Ok(value)
     }
 
     /// Evaluates one rule at `subject` into `draft`. Pure over the view.
@@ -868,19 +914,16 @@ impl EvalView<'_> {
                     family: crate::rules::TransformFamily::Scale,
                     op_fingerprint: op_fp("scale"),
                     resolved: scale(current.unwrap_or(0), f.raw())?,
-                    commit_at: None,
                 }),
                 Update::Clamp { min, max } => Some(Intent::Transform {
                     family: crate::rules::TransformFamily::Clamp,
                     op_fingerprint: op_fp("clamp"),
                     resolved: current.unwrap_or(0).max(*min).min(*max),
-                    commit_at: None,
                 }),
                 Update::Decay { .. } => {
                     let (Some(cell), Some(value)) = (cell, current) else {
                         return Ok(None);
                     };
-                    let start = i128::from(value);
                     let op = DecayOp {
                         rule_id: rule.rule_id(),
                         sub_id: &only.sub_id,
@@ -888,17 +931,25 @@ impl EvalView<'_> {
                         scope: &only.scope,
                     };
                     let baseline = self.baseline_of(target, Some(cell))?;
-                    match self.decay_walk(&op, start, cell.updated_at, baseline, ctx.now)? {
-                        // No movement (no whole step, rate 0, or at the
-                        // baseline): no candidate, so nothing is re-anchored.
-                        Some((moved, at)) if moved != start => Some(Intent::Transform {
-                            family: crate::rules::TransformFamily::Decay,
-                            op_fingerprint: op_fp("decay"),
-                            resolved: to_i64(moved, "decay")?,
-                            commit_at: Some(at),
-                        }),
-                        _ => None,
-                    }
+                    let moved = self.decay_walk(
+                        &op,
+                        i128::from(value),
+                        cell.updated_at,
+                        baseline,
+                        ctx.now,
+                    )?;
+                    // Every decay evaluation of an existing cell commits at the
+                    // cohort's canonical time — moved, saturated at the
+                    // baseline, at rate zero, or with no whole step elapsed —
+                    // so the committed cell after catching up to `T` is
+                    // `(value(T), T)` under every evaluation partition
+                    // (C2R-03). The cadence remainder is not lost by this
+                    // commit: it lives in the segment grid (`decay_walk`).
+                    Some(Intent::Transform {
+                        family: crate::rules::TransformFamily::Decay,
+                        op_fingerprint: op_fp("decay"),
+                        resolved: to_i64(moved, "decay")?,
+                    })
                 }
                 Update::Add(_) | Update::Subtract(_) => None,
             });
@@ -906,8 +957,9 @@ impl EvalView<'_> {
         // Several operations of one rule on one target: the rule body is the
         // declared reducer, composed in declared stage order (v2 §4.2). Every
         // intermediate stays in checked `i128`; one conversion at the end (v1
-        // Q1, C2-04). A body commits at the cohort's canonical time: any
-        // non-decay stage is an instantaneous write that re-anchors decay.
+        // Q1, C2-04). A body commits at the cohort's canonical time like every
+        // effect; a decay stage counts the same segment grid, so the body's
+        // non-decay stages never re-phase the cadence.
         let mut v = i128::from(current.unwrap_or(0));
         for o in ops {
             v = match &o.update {
@@ -930,10 +982,7 @@ impl EvalView<'_> {
                     };
                     let anchor = cell.map(|c| c.updated_at).unwrap_or(ctx.now);
                     let baseline = self.baseline_of(target, cell)?;
-                    match self.decay_walk(&op, v, anchor, baseline, ctx.now)? {
-                        Some((moved, _)) => moved,
-                        None => v,
-                    }
+                    self.decay_walk(&op, v, anchor, baseline, ctx.now)?
                 }
             };
         }
@@ -941,7 +990,6 @@ impl EvalView<'_> {
             family: crate::rules::TransformFamily::RuleBody,
             op_fingerprint: op_fp("rule_body"),
             resolved: to_i64(v, "rule_body")?,
-            commit_at: None,
         }))
     }
 }
@@ -1046,6 +1094,8 @@ impl Engine {
             seed_duplication: None,
             #[cfg(any(test, feature = "test-support"))]
             forge_empty_parents: false,
+            #[cfg(any(test, feature = "test-support"))]
+            probe_wave_invariants: false,
         };
         let mut sorted = initial_work;
         sorted.sort_by(|a, b| {
@@ -1882,6 +1932,17 @@ impl Engine {
                 Ok(plan) => {
                     let next = plan.next.clone();
                     let report = self.apply_wave(cohort, now, wave, &prewave, plan);
+                    #[cfg(any(test, feature = "test-support"))]
+                    if self.probe_wave_invariants {
+                        let point = CommittedWaveObservation {
+                            cohort_identity: cohort.clone(),
+                            wave_index: wave,
+                            obligation_count: self.obligations.len(),
+                            scheduled_work_count: self.scheduler.len(),
+                            bidirectional_invariant: self.bidirectional_invariant_holds(),
+                        };
+                        self.observation.committed_waves.push(point);
+                    }
                     let converted = !report.depth_conversions.is_empty();
                     waves.push(report);
                     if next.is_empty() || converted {
@@ -2010,9 +2071,7 @@ impl Engine {
         let reduced = reduce(&canonical, &|d, s| view.cell(d, s))?;
         // Committed effects, validated (authority, type, bounds, scope).
         let mut committed = Vec::new();
-        let mut commit_times = Vec::new();
         for r in &reduced {
-            commit_times.push(r.at.unwrap_or(now));
             let Some(def) = self.store.schema_of(&self.profile_id, &r.definition) else {
                 return Err(WaveRejection::InvalidEffect {
                     definition: r.definition.clone(),
@@ -2293,7 +2352,6 @@ impl Engine {
         Ok(WavePlan {
             candidate_set_digest: set_digest,
             committed,
-            commit_times,
             records: records.into_iter().map(|(_, r)| r).collect(),
             ledger_updates,
             cooldown_writes: draft.cooldown_writes,
@@ -2318,15 +2376,17 @@ impl Engine {
         plan: WavePlan,
     ) -> WaveReport {
         let epoch = self.behavior_epoch();
-        let _ = now;
-        for (e, at) in plan.committed.iter().zip(&plan.commit_times) {
+        // Every committed effect is written at the cohort's canonical time
+        // (FINAL §4): `now` is the scheduled cohort's due time or the command
+        // cohort's effective time, with no per-effect exception (C2R-01).
+        for e in &plan.committed {
             let _ = match e.write_path {
                 WritePath::SparkEffect => self.store.apply_spark_effect(
                     self.profile_id.clone(),
                     e.definition.clone(),
                     e.scope.clone(),
                     e.value.clone(),
-                    *at,
+                    now,
                     epoch,
                 ),
                 WritePath::CommitDerived => self.store.commit_derived(
@@ -2334,7 +2394,7 @@ impl Engine {
                     e.definition.clone(),
                     e.scope.clone(),
                     e.value.clone(),
-                    *at,
+                    now,
                     epoch,
                 ),
             };
@@ -2656,6 +2716,8 @@ impl Engine {
             seed_duplication: None,
             #[cfg(any(test, feature = "test-support"))]
             forge_empty_parents: false,
+            #[cfg(any(test, feature = "test-support"))]
+            probe_wave_invariants: false,
         };
         // Step 2b.
         if !engine.staging_is_clean() {
@@ -2686,7 +2748,7 @@ impl Engine {
     /// names (by ordinal, epoch, and semantic hash), and the last entry equal
     /// to the current artifacts (AT-I28 pattern for the engine's one derived
     /// index).
-    fn lineage_is_valid(&self) -> bool {
+    pub(crate) fn lineage_is_valid(&self) -> bool {
         let records = self.epochs.records();
         if records.len() != self.lineage.len() {
             return false;
@@ -2850,9 +2912,6 @@ fn duplicate_seeds(pending: &[Seed], altered: bool) -> Vec<Seed> {
 struct WavePlan {
     candidate_set_digest: Digest,
     committed: Vec<CommittedEffect>,
-    /// Per committed effect: the logical time its value holds at (the cohort
-    /// time, or a decay transform's last whole step).
-    commit_times: Vec<LogicalTime>,
     records: Vec<ObligationRecord>,
     ledger_updates: Vec<(OccurrenceLedgerKey, u64)>,
     cooldown_writes: BTreeMap<(DefinitionId, ScopeId), LogicalTime>,
