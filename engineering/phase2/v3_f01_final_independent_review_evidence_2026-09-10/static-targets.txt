@@ -1,0 +1,14 @@
+aarch64-linux-android
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.09s
+
+armv7-linux-androideabi
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s
+
+x86_64-linux-android
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s
+
+x86_64-pc-windows-gnu
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.11s
+
+x86_64-pc-windows-msvc
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.13s

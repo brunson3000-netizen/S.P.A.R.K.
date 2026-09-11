@@ -253,6 +253,28 @@ as a proposal while preserving them unchanged. **V3-F01 remains OPEN.** Nothing 
 accepted, frozen, or canonical; Phase-2 production Rust and Phase 3 remain unauthorized;
 Phase 1 remains closed; no Rust or Rust test was written or run by this pass.
 
+#### V3-F01 final independent review (2026-09-10)
+
+Independent Codex review of candidate `74d044ddd2b59c3c2eff558beeeeb515390dbe0f`
+(parent `772e38da0d130d7a1225ba2eb60a75b3999336fe`) returned
+`V3_F01_BOUNDED_REVISION_REQUIRED`:
+
+`engineering/phase2/SPARK_PHASE_2_CODEX_V3_F01_FINAL_INDEPENDENT_REVIEW_2026-09-10.md`
+
+Confirmed: stage-then-fence can leave a staged slot after source-sequence regression
+refusal; ActiveRequest mismatch must not pop the actual active FIFO head; finalized
+history plus `F` cannot reconstruct paused progress. The authorized ActiveRequest design
+and earlier V2 corrections remain the basis for a bounded correction. Fresh validation:
+34 model checks and 232 Rust tests passed; isolated probes confirmed the defects;
+formatting, strict lint, and five Windows/Android static target checks passed.
+
+The canonical separated-writer mission is
+`engineering/phase2/SPARK_PHASE_2_V3_F01_BOUNDED_CORRECTION_WRITER_MISSION_REV2_2026-09-10.md`.
+**No new Operator decision is required merely to run this bounded correction writer
+pass.** V3-F01 remains OPEN, not accepted or frozen; Phase 1 remains closed; Phase-2
+production implementation and Phase 3 remain unauthorized. The review branch is
+`review/v3-f01-final-20260910`; production is not merged or advanced.
+
 ## Phase 3
 
 **NOT AUTHORIZED.**
