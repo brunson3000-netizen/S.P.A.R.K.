@@ -1,0 +1,25 @@
+# disposable mutation: CommandPayload::ActivateEpoch { .. } if !reserved => {
+# replaced by: CommandPayload::ActivateEpoch { .. } if false && !reserved => {
+$ cargo test --offline -p spark-testkit --all-features --test phase2_bounded_revision c2_06_epoch_activation -- --nocapture
+
+running 1 test
+test c2_06_epoch_activation_requires_reserved_command_kind_converted ... FAILED
+
+failures:
+
+failures:
+    c2_06_epoch_activation_requires_reserved_command_kind_converted
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.00s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-review-mutants-z7m6qyvn/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-review-mutants-z7m6qyvn/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.28s
+     Running tests/phase2_bounded_revision.rs (target/debug/deps/phase2_bounded_revision-c80270445e53bfba)
+
+thread 'c2_06_epoch_activation_requires_reserved_command_kind_converted' (2720) panicked at crates/spark-testkit/tests/phase2_bounded_revision.rs:1152:5:
+assertion `left == right` failed: ordinary command kind must not activate an epoch
+  left: 2
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p spark-testkit --test phase2_bounded_revision`

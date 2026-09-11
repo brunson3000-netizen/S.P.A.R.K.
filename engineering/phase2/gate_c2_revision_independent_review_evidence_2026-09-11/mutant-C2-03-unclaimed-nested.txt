@@ -1,0 +1,24 @@
+# disposable mutation:                     claim(&e.sub_id, errors);
+                    check_emit(profile, baselines, rule_id, e, true, errors);
+# replaced by:                     check_emit(profile, baselines, rule_id, e, true, errors);
+$ cargo test --offline -p spark-testkit --all-features --test phase2_bounded_revision c2_03_materialized_subids -- --nocapture
+
+running 1 test
+test c2_03_materialized_subids_must_be_unique_converted ... FAILED
+
+failures:
+
+failures:
+    c2_03_materialized_subids_must_be_unique_converted
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.00s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-review-mutants-z7m6qyvn/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-review-mutants-z7m6qyvn/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.82s
+     Running tests/phase2_bounded_revision.rs (target/debug/deps/phase2_bounded_revision-c80270445e53bfba)
+
+thread 'c2_03_materialized_subids_must_be_unique_converted' (1988) panicked at crates/spark-testkit/tests/phase2_bounded_revision.rs:469:46:
+called `Result::unwrap_err()` on an `Ok` value: ActivatedRuleSet { profile_id: ProfileId(game-world), manifest_content_hash: Digest(231cb7f2240eb751c634bea958966a649f49a56fb8e9c23db11dbf4716b763ca), activation_hash: Digest(950319d4bd86d148ca0c40d65b54c4ed71119008d3496e36753edb90f9d9da67), budgets: DeclaredBudgets { max_due_per_cycle: 10, max_cohort_candidates: 1000, max_effects_per_wave: 1000, max_wave_depth: 8, max_enqueue_per_wave: 1000, max_obligations: 100000, max_scheduled_work: 100000, max_fan_out: 32 }, rules: {DefinitionId(rule.delay): ActivatedRule { spec: RuleSpec { rule_id: DefinitionId(rule.delay), trigger: Command(CommandKind(CanonicalTag(cmd.go))), conditions: [], emits: [], schedules: [ScheduleOp { sub_id: CanonicalTag(delay), delay: 1, work_kind: WorkKind(CanonicalTag(work.one)), scope: Subject, mode: Materialize { effects: [EmitOp { sub_id: CanonicalTag(same), target: DefinitionId(state.stress), scope: Subject, update: Add(Input(Literal(10))) }, EmitOp { sub_id: CanonicalTag(same), target: DefinitionId(state.stress), scope: Subject, update: Add(Input(Literal(15))) }] } }], cooldown: None }, fingerprint: Digest(db835c46121385713da74f12a0c1dbdbdfbd60c0fc8acfc963efdf8962aac4b2) }}, baselines: {}, content_hash: Digest(ae190655d01b72aaf1e98cd6766ca4762ad02f356dd623451199b03f4f76afcf) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p spark-testkit --test phase2_bounded_revision`

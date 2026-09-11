@@ -1,0 +1,3 @@
+# tree: 5b7fcf50161a65dc83b4806b513f01c0a4943ea5
+$ python3 /tmp/spark-gate-c2-revision-review/engineering/phase2/gate_c2_revision_independent_review_evidence_2026-09-11/check_preservation.py
+{"failures": [], "inline_modules_checked": 17}

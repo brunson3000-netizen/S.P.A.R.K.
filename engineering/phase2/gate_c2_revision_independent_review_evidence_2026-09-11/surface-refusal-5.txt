@@ -1,0 +1,12 @@
+# source:
+pub fn probe() { let _ = spark_engine::request::FinalizationRefusal::UnexpectedStagingState { ordinal: spark_core::timeline::Ordinal(0) }; }
+$ cargo check --offline
+    Checking independent-surfaces v0.0.0 (/tmp/spark-c2-independent-surfaces-jyuztvzr)
+error[E0639]: cannot create non-exhaustive variant using struct expression
+ --> src/lib.rs:1:26
+  |
+1 | ... let _ = spark_engine::request::FinalizationRefusal::UnexpectedStagingState { ordinal: spark_core::timeline::Ordinal(0) }; }
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0639`.
+error: could not compile `independent-surfaces` (lib) due to 1 previous error

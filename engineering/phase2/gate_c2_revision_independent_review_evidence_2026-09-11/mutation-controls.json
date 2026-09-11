@@ -1,0 +1,128 @@
+[
+  {
+    "name": "C2-01-watched-only",
+    "file": "crates/spark-engine/src/engine.rs",
+    "before": "for (definition, scope) in watcher.spec().condition_cell_reads() {",
+    "after": "for (definition, scope) in watcher.spec().condition_cell_reads().into_iter().take(0) {",
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "-p",
+      "spark-testkit",
+      "--all-features",
+      "--test",
+      "phase2_bounded_revision",
+      "c2_01_derived_identity",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "killed": true
+  },
+  {
+    "name": "C2-02-definition-only",
+    "file": "crates/spark-engine/src/rules.rs",
+    "before": "let targets: BTreeSet<(&DefinitionId, &ScopeRef)> =\n        rule.emits.iter().map(|e| (&e.target, &e.scope)).collect();",
+    "after": "let targets: BTreeSet<&DefinitionId> =\n        rule.emits.iter().map(|e| &e.target).collect();",
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "-p",
+      "spark-testkit",
+      "--all-features",
+      "--test",
+      "phase2_bounded_revision",
+      "c2_02_fanout",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "killed": true
+  },
+  {
+    "name": "C2-03-unclaimed-nested",
+    "file": "crates/spark-engine/src/rules.rs",
+    "before": "                    claim(&e.sub_id, errors);\n                    check_emit(profile, baselines, rule_id, e, true, errors);",
+    "after": "                    check_emit(profile, baselines, rule_id, e, true, errors);",
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "-p",
+      "spark-testkit",
+      "--all-features",
+      "--test",
+      "phase2_bounded_revision",
+      "c2_03_materialized_subids",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "killed": true
+  },
+  {
+    "name": "C2-04-narrow-before-weight",
+    "file": "crates/spark-engine/src/effects.rs",
+    "before": "    let weighted = acc\n        .checked_mul(i128::from(weight_raw))",
+    "after": "    let acc = i128::from(to_i64(acc, \"aggregate\")?);\n    let weighted = acc\n        .checked_mul(i128::from(weight_raw))",
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "-p",
+      "spark-testkit",
+      "--all-features",
+      "--test",
+      "phase2_bounded_revision",
+      "c2_04_aggregate_keeps",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "killed": true
+  },
+  {
+    "name": "C2-06-payload-only",
+    "file": "crates/spark-engine/src/engine.rs",
+    "before": "CommandPayload::ActivateEpoch { .. } if !reserved => {",
+    "after": "CommandPayload::ActivateEpoch { .. } if false && !reserved => {",
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "-p",
+      "spark-testkit",
+      "--all-features",
+      "--test",
+      "phase2_bounded_revision",
+      "c2_06_epoch_activation",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "killed": true
+  },
+  {
+    "name": "R9-shape-only",
+    "file": "crates/spark-engine/src/engine.rs",
+    "before": "self.scheduler.slot_commitment(&r.key) == Some(s.expected_commitment())",
+    "after": "(status == WorkSlotStatus::Scheduled && !s.is_contested()) || (status == WorkSlotStatus::Conflicted && s.is_contested())",
+    "command": [
+      "cargo",
+      "test",
+      "--offline",
+      "-p",
+      "spark-testkit",
+      "--all-features",
+      "--test",
+      "phase2_oracle_completion",
+      "at_i8_enqueue_preflight",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "killed": true
+  }
+]

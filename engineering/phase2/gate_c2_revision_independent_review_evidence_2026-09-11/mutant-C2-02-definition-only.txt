@@ -1,0 +1,25 @@
+# disposable mutation: let targets: BTreeSet<(&DefinitionId, &ScopeRef)> =
+        rule.emits.iter().map(|e| (&e.target, &e.scope)).collect();
+# replaced by: let targets: BTreeSet<&DefinitionId> =
+        rule.emits.iter().map(|e| &e.target).collect();
+$ cargo test --offline -p spark-testkit --all-features --test phase2_bounded_revision c2_02_fanout -- --nocapture
+
+running 1 test
+test c2_02_fanout_counts_scope_breadth_converted ... FAILED
+
+failures:
+
+failures:
+    c2_02_fanout_counts_scope_breadth_converted
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.00s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-review-mutants-z7m6qyvn/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-review-mutants-z7m6qyvn/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.49s
+     Running tests/phase2_bounded_revision.rs (target/debug/deps/phase2_bounded_revision-c80270445e53bfba)
+
+thread 'c2_02_fanout_counts_scope_breadth_converted' (1622) panicked at crates/spark-testkit/tests/phase2_bounded_revision.rs:384:48:
+called `Result::unwrap_err()` on an `Ok` value: ActivatedRuleSet { profile_id: ProfileId(game-world), manifest_content_hash: Digest(231cb7f2240eb751c634bea958966a649f49a56fb8e9c23db11dbf4716b763ca), activation_hash: Digest(950319d4bd86d148ca0c40d65b54c4ed71119008d3496e36753edb90f9d9da67), budgets: DeclaredBudgets { max_due_per_cycle: 10, max_cohort_candidates: 1000, max_effects_per_wave: 1000, max_wave_depth: 8, max_enqueue_per_wave: 1000, max_obligations: 100000, max_scheduled_work: 100000, max_fan_out: 1 }, rules: {DefinitionId(rule.spread): ActivatedRule { spec: RuleSpec { rule_id: DefinitionId(rule.spread), trigger: Command(CommandKind(CanonicalTag(cmd.go))), conditions: [], emits: [EmitOp { sub_id: CanonicalTag(a), target: DefinitionId(state.stress), scope: Fixed(actor:a), update: Add(Input(Literal(1))) }, EmitOp { sub_id: CanonicalTag(b), target: DefinitionId(state.stress), scope: Fixed(actor:b), update: Add(Input(Literal(1))) }], schedules: [], cooldown: None }, fingerprint: Digest(fd0c97ab2cd2697c0080263710ede054011619470cd9b9293057b851b36da70b) }}, baselines: {}, content_hash: Digest(6d38000ced04f53ffb586ed99548df16f340909487533e9ebe0207fbb9cfc807) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p spark-testkit --test phase2_bounded_revision`

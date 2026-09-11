@@ -1,0 +1,92 @@
+# source: independent_counterexamples.rs sha256=3a3a26e658852659b916d699bf3aac3b41be55bcca9213f7e0fbc532c2b1197d
+# crate root: /tmp/spark-gate-c2-revision-review
+# spark-engine test-support: False
+# whitespace-normalized: trailing spaces and trailing blank lines removed
+$ cargo test --offline -- --nocapture --test-threads=1
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling constant_time_eq v0.4.2
+   Compiling cfg-if v1.0.4
+   Compiling arrayvec v0.7.8
+   Compiling cc v1.4.4
+   Compiling cpufeatures v0.3.0
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-gate-c2-revision-review/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-gate-c2-revision-review/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-gate-c2-revision-review/crates/spark-testkit)
+   Compiling spark-c2-counterexamples v0.0.0 (/tmp/spark-c2-rev-corpus-t91t5cma)
+error[E0603]: unit variant `WrongProfile` is private
+   --> src/lib.rs:117:60
+    |
+117 |     let forged=spark_engine::request::FinalizationRefusal::WrongProfile;
+    |                                                            ^^^^^^^^^^^^ private unit variant
+    |
+note: the unit variant `WrongProfile` is defined here
+   --> /tmp/spark-gate-c2-revision-review/crates/spark-engine/src/request.rs:234:5
+    |
+233 |     #[non_exhaustive]
+    |     ----------------- cannot be constructed because it is `#[non_exhaustive]`
+234 |     WrongProfile,
+    |     ^^^^^^^^^^^^
+
+error[E0609]: no field `cohort_identity` on type `&CohortReport`
+  --> src/lib.rs:83:23
+   |
+83 |     let cohort=report.cohort_identity.as_ref().unwrap();
+   |                       ^^^^^^^^^^^^^^^ unknown field
+   |
+   = note: available fields are: `kind`, `canonical_time`, `conflicts`, `ingress`, `waves`, `outcome`
+
+error[E0559]: variant `spark_engine::rules::Update::Decay` has no field named `toward`
+   --> src/lib.rs:104:100
+    |
+104 | ...state.stress",Update::Decay { toward:lit(0),rate:lit(10),cadence:10 })]);
+    |                                  ^^^^^^ `spark_engine::rules::Update::Decay` does not have this field
+    |
+    = note: all struct fields are already assigned
+
+error[E0308]: mismatched types
+   --> src/lib.rs:104:119
+    |
+104 | ...e.stress",Update::Decay { toward:lit(0),rate:lit(10),cadence:10 })]);
+    |                                                 ^^^^^^^ expected `Param`, found `Expr`
+
+error[E0308]: mismatched types
+   --> src/lib.rs:104:135
+    |
+104 | ...te::Decay { toward:lit(0),rate:lit(10),cadence:10 })]);
+    |                                                   ^^ expected `Param`, found integer
+    |
+help: try wrapping the expression in `spark_engine::rules::Param::Literal`
+    |
+104 |         let decay=work_rule("rule.decay","work.decay",vec![emit("x","state.stress",Update::Decay { toward:lit(0),rate:lit(10),cadence:spark_engine::rules::Param::Literal(10) })]);
+    |                                                                                                                                       ++++++++++++++++++++++++++++++++++++  +
+
+error[E0559]: variant `spark_engine::rules::Update::Decay` has no field named `toward`
+   --> src/lib.rs:126:9
+    |
+126 |         toward:lit(0), rate:Expr::Input(Input::Config { key:def("tune.rate") }), cadence:10 })]);
+    |         ^^^^^^ `spark_engine::rules::Update::Decay` does not have this field
+    |
+    = note: all struct fields are already assigned
+
+error[E0308]: mismatched types
+   --> src/lib.rs:126:29
+    |
+126 |         toward:lit(0), rate:Expr::Input(Input::Config { key:def("tune.rate") }), cadence:10 })]);
+    |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Param`, found `Expr`
+
+error[E0308]: mismatched types
+   --> src/lib.rs:126:90
+    |
+126 |         toward:lit(0), rate:Expr::Input(Input::Config { key:def("tune.rate") }), cadence:10 })]);
+    |                                                                                          ^^ expected `Param`, found integer
+    |
+help: try wrapping the expression in `spark_engine::rules::Param::Literal`
+    |
+126 |         toward:lit(0), rate:Expr::Input(Input::Config { key:def("tune.rate") }), cadence:spark_engine::rules::Param::Literal(10) })]);
+    |                                                                                          ++++++++++++++++++++++++++++++++++++  +
+
+Some errors have detailed explanations: E0308, E0559, E0603, E0609.
+For more information about an error, try `rustc --explain E0308`.
+error: could not compile `spark-c2-counterexamples` (lib test) due to 8 previous errors

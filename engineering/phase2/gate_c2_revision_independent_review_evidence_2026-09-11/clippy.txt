@@ -1,0 +1,16 @@
+# tree: 5b7fcf50161a65dc83b4806b513f01c0a4943ea5
+$ cargo clippy --workspace --all-targets --all-features -- -D warnings
+    Checking arrayvec v0.7.8
+    Checking cfg-if v1.0.4
+    Checking cpufeatures v0.3.0
+    Checking constant_time_eq v0.4.2
+    Checking serde_core v1.0.229
+    Checking zmij v1.0.23
+    Checking itoa v1.0.18
+    Checking memchr v2.8.3
+    Checking blake3 v1.8.7
+    Checking spark-core v0.1.0 (/tmp/spark-gate-c2-revision-review/crates/spark-core)
+    Checking spark-engine v0.1.0 (/tmp/spark-gate-c2-revision-review/crates/spark-engine)
+    Checking serde_json v1.0.151
+    Checking spark-testkit v0.1.0 (/tmp/spark-gate-c2-revision-review/crates/spark-testkit)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.72s

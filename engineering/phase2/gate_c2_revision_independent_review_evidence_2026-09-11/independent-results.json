@@ -1,0 +1,42 @@
+{
+  "candidate": "5b7fcf50161a65dc83b4806b513f01c0a4943ea5",
+  "captured_runs": {
+    "original_corpus_pre_correction": {
+      "cargo_exit_code": 101,
+      "passed": 3,
+      "failed": 7
+    },
+    "adapted_corpus_post_correction": {
+      "cargo_exit_code": 0,
+      "passed": 9,
+      "failed": 0
+    },
+    "independent-probes": {
+      "cargo_exit_code": 101,
+      "passed": 11,
+      "failed": 3
+    },
+    "original_corpus_post_correction": {
+      "cargo_exit_code": 101,
+      "compilation_only": true,
+      "changed_surfaces": [
+        "FinalizationRefusal construction",
+        "CohortReport.cohort_identity",
+        "Update::Decay shape and Param types"
+      ]
+    }
+  },
+  "candidate_contract_failures": [
+    "c2_05_effect_reapplication_at_frozen_cohort_time_must_reproduce_state",
+    "c2_05_saturation_must_preserve_claimed_value_and_commit_time_chunk_invariance",
+    "c2_05_shorter_cadence_must_not_bill_steps_ending_before_activation"
+  ],
+  "surface_expectations_passed": 14,
+  "compiled_mutants_killed": 6,
+  "workspace": {
+    "passed": 374,
+    "failed": 0,
+    "ignored": 0
+  },
+  "probe_source_sha256": "ea9e3dab3e5b154d3e6c168194903e610012b64d39fcf38e79498a5f9eaa7247"
+}

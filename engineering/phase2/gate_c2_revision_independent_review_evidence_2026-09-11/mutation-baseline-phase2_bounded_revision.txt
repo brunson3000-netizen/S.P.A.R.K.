@@ -1,0 +1,49 @@
+$ cargo test --offline -p spark-testkit --all-features --test phase2_bounded_revision
+
+running 25 tests
+test c2_01_derived_identity_binds_every_changed_eligibility_input_converted ... ok
+test c2_01_multi_target_operation_takes_the_union ... ok
+test c2_02_materialized_expansion_is_bounded ... ok
+test c2_02_fanout_counts_scope_breadth_converted ... ok
+test c2_03_distinct_nested_subids_keep_both_contributions ... ok
+test c2_04_aggregate_i128_overflow_is_typed ... ok
+test c2_01_unchanged_background_contributes_no_parent ... ok
+test c2_03_materialized_subids_must_be_unique_converted ... ok
+test c2_04_aggregate_keeps_i128_until_after_weighting_converted ... ok
+test c2_04_rule_body_intermediates_are_widened ... ok
+test c2_05_decay_moves_toward_the_cells_baseline_field ... ok
+test c2_05_decay_integrates_only_under_an_artifact_carrying_it ... ok
+test c2_05_baseline_semantics_and_parameters_are_validated ... ok
+test c2_05_new_decay_rate_must_not_apply_before_activation_barrier_converted ... ok
+test c2_05_decay_preserves_elapsed_cadence_remainder_converted ... ok
+test c2_06_epoch_activation_requires_reserved_command_kind_converted ... ok
+test c2_05_recovery_moves_up_to_the_baseline ... ok
+test c2_06_reserved_kind_binds_the_activation_payload_both_ways ... ok
+test d_c2_11_store_invariant_violation_is_typed_and_sticky ... ok
+test c2_05_epoch_bound_rates_compose_across_the_barrier ... ok
+test d_c2_13_materialized_identity_is_payload_independent ... ok
+test d_c2_7_config_reads_are_barrier_scoped ... ok
+test d_c2_7_reevaluation_resolves_the_exact_originating_artifact ... ok
+test lineage_is_validated_at_restore ... ok
+test c2_05_chunk_invariance_holds_for_every_evaluation_subset ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling cpufeatures v0.3.0
+   Compiling arrayvec v0.7.8
+   Compiling constant_time_eq v0.4.2
+   Compiling cfg-if v1.0.4
+   Compiling cc v1.4.4
+   Compiling zmij v1.0.23
+   Compiling serde_core v1.0.229
+   Compiling serde_json v1.0.151
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-c2-review-mutants-z7m6qyvn/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-review-mutants-z7m6qyvn/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-review-mutants-z7m6qyvn/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 17.84s
+     Running tests/phase2_bounded_revision.rs (target/debug/deps/phase2_bounded_revision-c80270445e53bfba)

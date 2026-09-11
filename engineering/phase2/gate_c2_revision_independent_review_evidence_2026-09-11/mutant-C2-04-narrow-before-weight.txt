@@ -1,0 +1,28 @@
+# disposable mutation:     let weighted = acc
+        .checked_mul(i128::from(weight_raw))
+# replaced by:     let acc = i128::from(to_i64(acc, "aggregate")?);
+    let weighted = acc
+        .checked_mul(i128::from(weight_raw))
+$ cargo test --offline -p spark-testkit --all-features --test phase2_bounded_revision c2_04_aggregate_keeps -- --nocapture
+
+running 1 test
+test c2_04_aggregate_keeps_i128_until_after_weighting_converted ... FAILED
+
+failures:
+
+failures:
+    c2_04_aggregate_keeps_i128_until_after_weighting_converted
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.00s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-review-mutants-z7m6qyvn/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-review-mutants-z7m6qyvn/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.05s
+     Running tests/phase2_bounded_revision.rs (target/debug/deps/phase2_bounded_revision-c80270445e53bfba)
+
+thread 'c2_04_aggregate_keeps_i128_until_after_weighting_converted' (2354) panicked at crates/spark-testkit/tests/phase2_bounded_revision.rs:569:5:
+assertion `left == right` failed
+  left: Rejected { wave: 0, rejection: Arithmetic { what: "aggregate" } }
+ right: Committed
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p spark-testkit --test phase2_bounded_revision`

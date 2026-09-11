@@ -1,0 +1,25 @@
+# disposable mutation: for (definition, scope) in watcher.spec().condition_cell_reads() {
+# replaced by: for (definition, scope) in watcher.spec().condition_cell_reads().into_iter().take(0) {
+$ cargo test --offline -p spark-testkit --all-features --test phase2_bounded_revision c2_01_derived_identity -- --nocapture
+
+running 1 test
+test c2_01_derived_identity_binds_every_changed_eligibility_input_converted ... FAILED
+
+failures:
+
+failures:
+    c2_01_derived_identity_binds_every_changed_eligibility_input_converted
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.00s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-review-mutants-z7m6qyvn/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-review-mutants-z7m6qyvn/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.04s
+     Running tests/phase2_bounded_revision.rs (target/debug/deps/phase2_bounded_revision-c80270445e53bfba)
+
+thread 'c2_01_derived_identity_binds_every_changed_eligibility_input_converted' (1256) panicked at crates/spark-testkit/tests/phase2_bounded_revision.rs:209:5:
+assertion `left == right` failed: required union includes the changed mood group read to become eligible
+  left: Digest(8b9ed663a35e38436f20a546d28e274f7a21020b4afc2b176eeecb7ff5d77d10)
+ right: Digest(0b6b811e3bdb006129d9ff597cdf8e8b2415b828e3e3c2c76538240200650873)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p spark-testkit --test phase2_bounded_revision`

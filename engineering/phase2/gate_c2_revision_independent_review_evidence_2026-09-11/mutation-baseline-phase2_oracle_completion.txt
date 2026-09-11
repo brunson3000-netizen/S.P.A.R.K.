@@ -1,0 +1,38 @@
+$ cargo test --offline -p spark-testkit --all-features --test phase2_oracle_completion
+
+running 29 tests
+test at_i1_wave_result_is_the_snapshot_plus_its_effects ... ok
+test at_i16_derived_competing_claims_allocate_by_emission_identity ... ok
+test at_i15_contested_records_from_derived_emissions_stay_discriminated ... ok
+test at_i20b_every_semantic_cap_is_atomic_terminal_replayable_and_retryable ... ok
+test at_i20c_f_oversized_cohort_with_co_target_and_threshold_inputs ... ok
+test at_i21_interference_is_deterministic_prioritized_and_exact ... ok
+test at_i22_sanctioned_compositions_and_cross_family_rejection ... ok
+test at_i26_each_store_alone_moves_the_engine_digest ... ok
+test at_i24_i128_boundary_corpus ... ok
+test at_i27_equal_digests_respond_identically_across_epoch_and_reset ... ok
+test at_i31_dormant_aggregate_updates_only_at_its_cadence ... ok
+test at_i35_golden_active_request_and_boundary_vectors ... ok
+test at_i38_parent_set_is_not_the_provenance_presentation ... ok
+test at_i41_batch_digest_recomputes_and_heartbeat_is_absent ... ok
+test at_i44_c_prime_mixed_slice_whose_scheduled_part_rejects ... ok
+test at_i4_every_workkey_field_moves_cohort_identity ... ok
+test at_i50_d_replay_requires_the_exact_payload ... ok
+test at_i5_renaming_never_changes_classification_or_results ... ok
+test at_i33_maximal_parent_set_is_exact_and_total ... ok
+test at_i6a_exact_duplicate_folds_and_reused_identity_rejects ... ok
+test at_i6c_d_derived_redelivery ... ok
+test at_i6c_e_depth_two_parents_are_wave_one_identities ... ok
+test at_i6c_f_forged_empty_parent_set_rejects_as_a_defect ... ok
+test at_i7e_i128_accumulation_overflow_is_typed_and_atomic ... ok
+test at_i6d_renaming_a_parent_never_makes_it_the_identity ... ok
+test at_i8_enqueue_preflight_checks_full_commitment_consistency ... ok
+test at_i8_invariant_holds_after_every_committed_wave ... ok
+test at_i3_declaration_permutations_are_digest_identical ... ok
+test at_i30_dormant_scopes_are_not_touched_by_active_work ... ok
+
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.21s
+
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-review-mutants-z7m6qyvn/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.67s
+     Running tests/phase2_oracle_completion.rs (target/debug/deps/phase2_oracle_completion-b51363dc72467a6c)
