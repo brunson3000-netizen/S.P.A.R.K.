@@ -1,0 +1,7 @@
+# cargo run --release --offline -p spark-testkit --example gate_c2_workload
+# host: Linux 7.0.0-31-generic x86_64; rustc 1.98.0 (88d9e12ae 2026-08-18)
+# cpus: 4
+history_len,build_s,preflight_ns_per_call,scan_reference_ns_per_call,finalize_ns_per_call
+1000,0.350,2060,6077,846777
+4000,7.464,2380,35529,3773965
+16000,123.355,2434,1135395,14572049

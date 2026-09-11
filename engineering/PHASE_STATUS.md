@@ -1,6 +1,6 @@
 # S.P.A.R.K. Engineering Status
 
-**Updated:** 2026-09-10
+**Updated:** 2026-09-11
 **Branch:** `phase1-refoundation-v2`  
 **Status basis:** Operator acceptance of candidate `5ecc95c033bf3a7744bb7862bf959066e6561670`, independently reviewed at `e55b1da1c9049b1de58fcb06c65eea59939f2a57`
 
@@ -16,7 +16,7 @@ The active cross-project operating record is:
 
 `engineering/SPARK_GAME_CONVERGENCE_PROTOCOL_V1.md`
 
-The Operator has now accepted and frozen the independently reviewed V3-F01 Revision-2 correction. V3-F01 is CLOSED. S.P.A.R.K. Gate C1 is satisfied; Gate C2 awaits explicit Phase-2 implementation authorization. Phase 3 remains unauthorized. G.A.M.E. integration requirements and test fixtures may be prepared within the existing protocol; no joint integration readiness or G.A.M.E. state change is claimed.
+The Operator has now accepted and frozen the independently reviewed V3-F01 Revision-2 correction. V3-F01 is CLOSED. S.P.A.R.K. Gate C1 is satisfied. The Operator authorized Gate C2 (Phase-2 implementation) on 2026-09-11; its writer candidate awaits independent review and is not promoted to production. Phase 3 remains unauthorized. G.A.M.E. integration requirements and test fixtures may be prepared within the existing protocol; no joint integration readiness or G.A.M.E. state change is claimed.
 
 ## Phase 0
 
@@ -49,7 +49,7 @@ No Phase-1 semantic identity, encoding, conflict, authority, or determinism inva
 
 ## Phase 2
 
-**ARCHITECTURE CORRECTION ACCEPTED AND FROZEN. V3-F01 CLOSED. IMPLEMENTATION NOT AUTHORIZED.**
+**ARCHITECTURE CORRECTION ACCEPTED AND FROZEN. V3-F01 CLOSED. GATE C2 IMPLEMENTATION CANDIDATE AWAITING INDEPENDENT REVIEW.**
 
 The controlling Operator acceptance is
 `engineering/phase2/SPARK_PHASE_2_V3_F01_OPERATOR_ACCEPTANCE_FREEZE_2026-09-10.md`.
@@ -77,9 +77,30 @@ lint, metadata, whitespace and five static Windows/Android target builds. Crash 
 durable snapshots/mailboxes, GAME integration, performance evidence and executable
 Windows/Android parity remain future gates.
 
-**Next authorization:** explicit Operator release of Gate C2 to implement the frozen
-Phase-2 rule/effect runtime and acceptance oracle, including both precision pins, with
-independent review. Phase-2 implementation and Phase 3 remain unauthorized.
+### Gate C2 — Phase-2 implementation candidate (writer pass, 2026-09-11)
+
+The Operator authorized the Phase-2 implementation writer pass
+(`engineering/phase2/SPARK_PHASE_2_GATE_C2_IMPLEMENTATION_MISSION_2026-09-11.md`). The
+candidate is on `candidate/phase2-gate-c2-implementation-20260911`, based on production
+`7e3a0aae069a8bf840e4dfb74221cdf2687b1db5`; its last code-and-test checkpoint is
+`4997d56220000edef3a2b4cd987feff7900d2488`. Writer verdict:
+`GATE_C2_CANDIDATE_READY_FOR_INDEPENDENT_REVIEW`.
+
+- Report: `engineering/phase2/SPARK_PHASE_2_GATE_C2_IMPLEMENTATION_REPORT_2026-09-11.md`
+- Evidence: `engineering/phase2/gate_c2_evidence_2026-09-11/`
+- Independent review mission:
+  `engineering/phase2/SPARK_PHASE_2_GATE_C2_INDEPENDENT_REVIEW_MISSION_2026-09-11.md`
+
+It implements the frozen rule/effect runtime, cohort-granular scheduled processing, the
+serialized request boundary with `F` and `ActiveRequest`, atomic P-1 … P-9 finalization
+with both acceptance pins, and snapshot/restore/replay validation, with additive `spark-core`
+surfaces only. Workspace: 320 tests passed, 0 failed, 0 ignored (232 inherited unmodified);
+formatting, all-target clippy, strict core/engine lint, metadata, and five static
+Windows/Android checks pass. The report lists partial oracle sub-cases, writer
+interpretations for review, and one inherited performance limit (whole finalization is
+`O(history)` through Phase-1 `submit_fence`). Nothing is accepted or promoted; production is
+unchanged. Durable storage, crash recovery, GAME integration, performance evidence, and
+executable Windows/Android parity remain later gates. Phase 3 remains unauthorized.
 
 ### Historical Gate C1 chronology — superseded status statements
 
