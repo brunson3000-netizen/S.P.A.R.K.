@@ -1,0 +1,10 @@
+{
+  "id": "DAI-ENVELOPE-01",
+  "kind": "PROPERTY",
+  "property": "Incidental reversible observable behavior within the supplied Standing Design Discretion scope",
+  "status": "PROPOSED",
+  "scope": "governance/templates/STANDING_DESIGN_DISCRETION.md",
+  "source": "project_records/decisions/PROPOSED_ADOPTION_CHOICES.md (proposal; ratification pending)",
+  "setup_disposition": "PROPOSED_ADOPT",
+  "notes": "No adopted discretion is claimed. Exact source and status change only after Operator ratification."
+}

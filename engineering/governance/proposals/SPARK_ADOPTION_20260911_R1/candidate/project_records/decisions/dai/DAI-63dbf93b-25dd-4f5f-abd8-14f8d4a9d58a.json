@@ -1,0 +1,10 @@
+{
+  "id": "DAI-63dbf93b-25dd-4f5f-abd8-14f8d4a9d58a",
+  "kind": "PROPERTY",
+  "property": "Rust and cross-platform shared engine",
+  "status": "SETTLED",
+  "scope": "As established by the cited source and later scoped decisions",
+  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0001-rust-workspace-and-dependency-direction.md",
+  "notes": "Rust; common canonical implementation and external platform adapters",
+  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
+}

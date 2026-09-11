@@ -1,0 +1,10 @@
+{
+  "id": "DAI-a6ae9780-45e7-4579-b120-0de9ae00b921",
+  "kind": "PROPERTY",
+  "property": "Data-driven vocabulary and profile identity",
+  "status": "SETTLED",
+  "scope": "As established by the cited source and later scoped decisions",
+  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0004-profile-schema-validation-and-change-classes.md",
+  "notes": "Frozen grammar; editable declarative profiles, exact identities and explicit change classes",
+  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
+}

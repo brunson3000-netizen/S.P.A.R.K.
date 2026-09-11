@@ -1,0 +1,12 @@
+# Content identity is byte-exact (Constitution C9.5). Keep LF for governed text types only;
+# binary files are never marked as text.
+/governance/**/*.md          text eol=lf
+/governance/**/*.py          text eol=lf
+/governance/**/*.json        text eol=lf
+/governance/**/*.sha256      text eol=lf
+/project_records/**/*.md     text eol=lf
+/project_records/**/*.json   text eol=lf
+/project_records/**/*.jsonl  text eol=lf
+/AGENTS.md                   text eol=lf
+/CLAUDE.md                   text eol=lf
+/PROJECT_CONVENTIONS.md      text eol=lf

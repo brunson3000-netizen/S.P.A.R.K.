@@ -1,0 +1,10 @@
+{
+  "id": "DAI-c8c613dd-c21d-4c30-943d-18a746f91b0f",
+  "kind": "PROPERTY",
+  "property": "Replay and bounded provenance",
+  "status": "SETTLED",
+  "scope": "As established by the cited source and later scoped decisions",
+  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0006-persistence-versioning-and-bounded-provenance.md",
+  "notes": "Exact artifact binding and explicit replay support; no invented history",
+  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
+}

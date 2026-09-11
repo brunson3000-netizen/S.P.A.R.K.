@@ -1,0 +1,475 @@
+{
+  "case_count": 66,
+  "all_expected_results_observed": true,
+  "historical_ids_accounted_for": 258,
+  "current_ids": 276,
+  "root_agents_bytes": 1364,
+  "default_codex_budget_bytes": 32768,
+  "live_agent_loading": "not tested",
+  "actual_project_adoption": "not performed",
+  "test_scope": "disposable structural, configuration, entrypoint, record and accepted-content fixtures; no human authority authenticated",
+  "cases": [
+    {
+      "case": "Reset synthetic candidate hashes",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "Candidate hashes written. No adoption or source-authenticity claim.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Template structure from unrelated cwd",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Template not startup-ready",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: Unconfigured binding: project_id\n"
+    },
+    {
+      "case": "Candidate hash refresh before adoption",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "Candidate hashes written. No adoption or source-authenticity claim.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Three bindings alone insufficient",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: Select dependency_assurance: ALL, MATERIAL.\n"
+    },
+    {
+      "case": "Candidate with invalid dependency scope",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "Candidate hashes written. No adoption or source-authenticity claim.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Invalid dependency scope rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: Select dependency_assurance: ALL, MATERIAL.\n"
+    },
+    {
+      "case": "Candidate with removed dependency option",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "Candidate hashes written. No adoption or source-authenticity claim.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Removed middle dependency option rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: Select dependency_assurance: ALL, MATERIAL.\n"
+    },
+    {
+      "case": "Explicit manual-channel timing candidate",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "Candidate hashes written. No adoption or source-authenticity claim.\n",
+      "stderr": ""
+    },
+    {
+      "case": "No channel not ready",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: No recorded authorized, available challenge channel with a fresh instance.\n"
+    },
+    {
+      "case": "Channel without source refused",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: Channel lacks an actual authority source.\n"
+    },
+    {
+      "case": "No first grant not ready",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: Record first_mission_id from an actual mission folder.\n"
+    },
+    {
+      "case": "Mission scaffold creates no grant",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "MIS-445a9880-3f30-4b86-9fbb-508bf5e1635f\nCreated unconfigured records only; fill the actual grant. No authority granted.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Refresh configured candidate hashes",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "Candidate hashes written. No adoption or source-authenticity claim.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Empty grant refused",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: First mission missing: grant_source\n"
+    },
+    {
+      "case": "Grant without actors, duration and conditions refused",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: First mission missing: actors\n"
+    },
+    {
+      "case": "Discretion decision must match DAI",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: DAI setup row does not cite the discretion decision.\n"
+    },
+    {
+      "case": "Configured startup records pass",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\nREADY RECORDS PASS: explicit choices, channel, mission grant and discretion disposition populated.\nNo live channel call or grant authentication performed; actual required assurance remains to be completed.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Existing mission ID accepted without renumbering",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\nREADY RECORDS PASS: explicit choices, channel, mission grant and discretion disposition populated.\nNo live channel call or grant authentication performed; actual required assurance remains to be completed.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Existing mission ID appears in index",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n\n## Design Authority Index\n\n| ID | Property | Kind | Status | Source |\n|---|---|---|---|---|\n| DAI-472d454d-4469-4ad2-9144-dc4a44b3c84c | Cross-project convergence | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_GAME_CONVERGENCE_PROTOCOL_V1.md |\n| DAI-63dbf93b-25dd-4f5f-abd8-14f8d4a9d58a | Rust and cross-platform shared engine | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0001-rust-workspace-and-dependency-direction.md |\n| DAI-7f5236c2-15f7-4bb4-b722-c64177406650 | Durable conversation capture | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_DURABLE_CONVERSATION_CAPTURE_PRINCIPLE.md |\n| DAI-86114962-b0e5-4c8b-8ba2-624910f863ae | Mission and exclusions | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#1-executive-takeover-directive |\n| DAI-8dbd1cc7-6792-424e-b389-c64cf7aac93d | V3-F01 freeze and accepted supersession stack | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase2/SPARK_PHASE_2_V3_F01_OPERATOR_ACCEPTANCE_FREEZE_2026-09-10.md |\n| DAI-ENVELOPE-01 | Fixture discretion | PROPERTY | PROPOSED | Synthetic discretion decision |\n| DAI-a6ae9780-45e7-4579-b120-0de9ae00b921 | Data-driven vocabulary and profile identity | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0004-profile-schema-validation-and-change-classes.md |\n| DAI-c8c613dd-c21d-4c30-943d-18a746f91b0f | Replay and bounded provenance | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0006-persistence-versioning-and-bounded-provenance.md |\n| DAI-ddefa955-b7bb-423f-a71a-9146e423e2d4 | Existing engineer discretion | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#352-engineer-authority |\n| DAI-e2b52e57-2747-4746-a3b5-fae69d6592f5 | Deterministic admission and finality | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0003-deterministic-clock-rng-and-commit-order.md |\n| DAI-fd09c81e-e280-45f7-933f-fc8e4cfec9a7 | Host authority and MCI isolation | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0002-authority-and-host-acknowledgement.md |\n| DAI-fef82d1e-0410-4a1e-8161-317eeeb30cff | Service and embedded equivalence | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0005-service-and-embedded-semantic-equivalence.md |\n\n## Provisional review queue\n\nNone.\n\n## Missions\n\n| ID | Title | Duty holder | Grant recorded |\n|---|---|---|---|\n| MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466 | Prepare S.P.A.R.K. constitutional adoption package for review | Coordinating assistant in this thread | yes |\n| PHASE2-GATE-C2 | Fixture mission | Fixture owner | yes |\n\nThis view is generated from the records; it is a retrieval aid, not a second authority.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Mission pointer traversal refused",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: Record first_mission_id from an actual mission folder.\n"
+    },
+    {
+      "case": "Nonpositive operational deadline refused",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: Record a positive review limit: per_request_seconds\n"
+    },
+    {
+      "case": "Operational stage shorter than request refused",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: Stage duration is shorter than request duration.\n"
+    },
+    {
+      "case": "Proposed discretion cannot satisfy readiness",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: Declined discretion must remain unadopted and recorded as declined.\n"
+    },
+    {
+      "case": "Second creator gets distinct mission ID",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "MIS-72a35a58-7a2f-4a9c-805b-2ed04cc669f8\nCreated unconfigured records only; fill the actual grant. No authority granted.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Separate accepted identity matches",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Operational timing change preserves accepted governing identity",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Changed operational timing remains ready",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\nREADY RECORDS PASS: explicit choices, channel, mission grant and discretion disposition populated.\nNo live channel call or grant authentication performed; actual required assurance remains to be completed.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Fake governing rule rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "FAIL: Current member bytes differ from accepted content.\n"
+    },
+    {
+      "case": "Hash writer refuses adopted state",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "FAIL: Acceptance records/pointer exist: in-place hash regeneration refused.\n"
+    },
+    {
+      "case": "Manual member-list regeneration cannot bless rule",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "FAIL: Current member bytes differ from accepted content.\n"
+    },
+    {
+      "case": "Separate amendment candidate list allowed",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "Separate candidate hashes written; active member list and acceptance unchanged.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Candidate output cannot replace active list",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "FAIL: Candidate output cannot replace the active member list.\n"
+    },
+    {
+      "case": "CRLF drift reported without regeneration",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "FAIL: Expected LF bytes: governance/AGENT_RULES.md\n"
+    },
+    {
+      "case": "Restored accepted LF bytes pass",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Acceptance record drift rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "FAIL: Acceptance record digest mismatch.\n"
+    },
+    {
+      "case": "Trusted digest detects rewritten local record and pointer",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "FAIL: Acceptance record differs from independently supplied digest.\n"
+    },
+    {
+      "case": "Removing pointer leaves detectable acceptance history",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "FAIL: Acceptance records exist but no active pointer; reconcile, do not regenerate.\n"
+    },
+    {
+      "case": "History blocks hash regeneration",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "FAIL: Acceptance records/pointer exist: in-place hash regeneration refused.\n"
+    },
+    {
+      "case": "Ordinary conventions do not amend governing identity",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Entrypoint block removed from AGENTS.md rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "FAIL: Root AGENTS.md lacks the exact A6 entrypoint block; restore it from the manifest (C9.10).\n"
+    },
+    {
+      "case": "Altered entrypoint block rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "FAIL: Root AGENTS.md lacks the exact A6 entrypoint block; restore it from the manifest (C9.10).\n"
+    },
+    {
+      "case": "Missing AGENTS.md rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "FAIL: Root AGENTS.md is missing; restore it with the A6 entrypoint block (C9.10).\n"
+    },
+    {
+      "case": "Oversized AGENTS.md warns without failing",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "WARN: Root AGENTS.md is 27765 bytes, 84% of the default 32 KiB Codex instruction budget; move conventions to PROJECT_CONVENTIONS.md.\n"
+    },
+    {
+      "case": "CLAUDE.md missing required import rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "FAIL: CLAUDE.md does not import governance/AGENT_RULES.md (A6.2).\n"
+    },
+    {
+      "case": "CLAUDE.md unresolved import rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "",
+      "stderr": "FAIL: CLAUDE.md imports a missing file: docs/MISSING.md (A6.2).\n"
+    },
+    {
+      "case": "Absent CLAUDE.md allowed",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Readable index lists rows and missions",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n\n## Design Authority Index\n\n| ID | Property | Kind | Status | Source |\n|---|---|---|---|---|\n| DAI-472d454d-4469-4ad2-9144-dc4a44b3c84c | Cross-project convergence | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_GAME_CONVERGENCE_PROTOCOL_V1.md |\n| DAI-63dbf93b-25dd-4f5f-abd8-14f8d4a9d58a | Rust and cross-platform shared engine | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0001-rust-workspace-and-dependency-direction.md |\n| DAI-7f5236c2-15f7-4bb4-b722-c64177406650 | Durable conversation capture | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_DURABLE_CONVERSATION_CAPTURE_PRINCIPLE.md |\n| DAI-86114962-b0e5-4c8b-8ba2-624910f863ae | Mission and exclusions | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#1-executive-takeover-directive |\n| DAI-8dbd1cc7-6792-424e-b389-c64cf7aac93d | V3-F01 freeze and accepted supersession stack | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase2/SPARK_PHASE_2_V3_F01_OPERATOR_ACCEPTANCE_FREEZE_2026-09-10.md |\n| DAI-ENVELOPE-01 | Fixture discretion | PROPERTY | PROPOSED | Synthetic discretion decision |\n| DAI-a6ae9780-45e7-4579-b120-0de9ae00b921 | Data-driven vocabulary and profile identity | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0004-profile-schema-validation-and-change-classes.md |\n| DAI-c8c613dd-c21d-4c30-943d-18a746f91b0f | Replay and bounded provenance | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0006-persistence-versioning-and-bounded-provenance.md |\n| DAI-ddefa955-b7bb-423f-a71a-9146e423e2d4 | Existing engineer discretion | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#352-engineer-authority |\n| DAI-e2b52e57-2747-4746-a3b5-fae69d6592f5 | Deterministic admission and finality | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0003-deterministic-clock-rng-and-commit-order.md |\n| DAI-fd09c81e-e280-45f7-933f-fc8e4cfec9a7 | Host authority and MCI isolation | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0002-authority-and-host-acknowledgement.md |\n| DAI-fef82d1e-0410-4a1e-8161-317eeeb30cff | Service and embedded equivalence | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0005-service-and-embedded-semantic-equivalence.md |\n\n## Provisional review queue\n\nNone.\n\n## Missions\n\n| ID | Title | Duty holder | Grant recorded |\n|---|---|---|---|\n| MIS-445a9880-3f30-4b86-9fbb-508bf5e1635f | Fixture mission | Fixture owner | yes |\n| MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466 | Prepare S.P.A.R.K. constitutional adoption package for review | Coordinating assistant in this thread | yes |\n| MIS-72a35a58-7a2f-4a9c-805b-2ed04cc669f8 | \u2014 | \u2014 | no |\n\nThis view is generated from the records; it is a retrieval aid, not a second authority.\n",
+      "stderr": "WARN: MIS-72a35a58-7a2f-4a9c-805b-2ed04cc669f8: mission has no title (A2.5).\n"
+    },
+    {
+      "case": "Invalid DAI status rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: DAI-136d32c2-848a-4e56-9e74-6367cf9aacbf.json: status must be one of SETTLED, RESERVED, DEFERRED, PROVISIONAL-AGENT, PROPOSED, SUPERSEDED.\n"
+    },
+    {
+      "case": "SETTLED row without source rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: DAI-136d32c2-848a-4e56-9e74-6367cf9aacbf.json: SETTLED requires its authoritative source.\n"
+    },
+    {
+      "case": "Provisional row without containment fields rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: DAI-136d32c2-848a-4e56-9e74-6367cf9aacbf.json: provisional row missing containment.\n"
+    },
+    {
+      "case": "Complete provisional row enters review queue",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n\n## Design Authority Index\n\n| ID | Property | Kind | Status | Source |\n|---|---|---|---|---|\n| DAI-136d32c2-848a-4e56-9e74-6367cf9aacbf | Fixture retention period | PROPERTY | PROVISIONAL-AGENT | \u2014 |\n| DAI-472d454d-4469-4ad2-9144-dc4a44b3c84c | Cross-project convergence | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_GAME_CONVERGENCE_PROTOCOL_V1.md |\n| DAI-63dbf93b-25dd-4f5f-abd8-14f8d4a9d58a | Rust and cross-platform shared engine | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0001-rust-workspace-and-dependency-direction.md |\n| DAI-7f5236c2-15f7-4bb4-b722-c64177406650 | Durable conversation capture | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_DURABLE_CONVERSATION_CAPTURE_PRINCIPLE.md |\n| DAI-86114962-b0e5-4c8b-8ba2-624910f863ae | Mission and exclusions | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#1-executive-takeover-directive |\n| DAI-8dbd1cc7-6792-424e-b389-c64cf7aac93d | V3-F01 freeze and accepted supersession stack | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase2/SPARK_PHASE_2_V3_F01_OPERATOR_ACCEPTANCE_FREEZE_2026-09-10.md |\n| DAI-ENVELOPE-01 | Fixture discretion | PROPERTY | PROPOSED | Synthetic discretion decision |\n| DAI-a6ae9780-45e7-4579-b120-0de9ae00b921 | Data-driven vocabulary and profile identity | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0004-profile-schema-validation-and-change-classes.md |\n| DAI-c8c613dd-c21d-4c30-943d-18a746f91b0f | Replay and bounded provenance | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0006-persistence-versioning-and-bounded-provenance.md |\n| DAI-ddefa955-b7bb-423f-a71a-9146e423e2d4 | Existing engineer discretion | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#352-engineer-authority |\n| DAI-e2b52e57-2747-4746-a3b5-fae69d6592f5 | Deterministic admission and finality | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0003-deterministic-clock-rng-and-commit-order.md |\n| DAI-fd09c81e-e280-45f7-933f-fc8e4cfec9a7 | Host authority and MCI isolation | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0002-authority-and-host-acknowledgement.md |\n| DAI-fef82d1e-0410-4a1e-8161-317eeeb30cff | Service and embedded equivalence | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0005-service-and-embedded-semantic-equivalence.md |\n\n## Provisional review queue\n\n| ID | Property | Priority | Reassess | Hardening condition |\n|---|---|---|---|---|\n| DAI-136d32c2-848a-4e56-9e74-6367cf9aacbf | Fixture retention period | ROUTINE | 2026-10-01 | Operator sets retention |\n\n## Missions\n\n| ID | Title | Duty holder | Grant recorded |\n|---|---|---|---|\n| MIS-445a9880-3f30-4b86-9fbb-508bf5e1635f | Fixture mission | Fixture owner | yes |\n| MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466 | Prepare S.P.A.R.K. constitutional adoption package for review | Coordinating assistant in this thread | yes |\n| MIS-72a35a58-7a2f-4a9c-805b-2ed04cc669f8 | \u2014 | \u2014 | no |\n\nThis view is generated from the records; it is a retrieval aid, not a second authority.\n",
+      "stderr": "WARN: MIS-72a35a58-7a2f-4a9c-805b-2ed04cc669f8: mission has no title (A2.5).\n"
+    },
+    {
+      "case": "DAI id/filename mismatch rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: DAI-renamed.json: id does not match filename.\n"
+    },
+    {
+      "case": "Concrete JSON event validates",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\nPASS: 1 events; schema fields, mission identity and unique event IDs checked.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Distinct updates retain common issue",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\nPASS: 2 events; schema fields, mission identity and unique event IDs checked.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Duplicate event identities rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: Duplicate event ID across mission logs.\n"
+    },
+    {
+      "case": "Human labels are not JSON schema keys",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: $: missing required keys.\n"
+    },
+    {
+      "case": "Failure requires failure facts",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: FAILURE event lacks required failure fields.\n"
+    },
+    {
+      "case": "Complete failure event accepted",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\nPASS: 1 events; schema fields, mission identity and unique event IDs checked.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Cross-mission event rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: Event belongs to another mission.\n"
+    },
+    {
+      "case": "Timezone-free event rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: Timestamp needs a UTC offset.\n"
+    },
+    {
+      "case": "Branch reason for missing authority accepted (C11.2)",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\nPASS: 1 events; schema fields, mission identity and unique event IDs checked.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Branch reason for unresolved interpretation accepted (C11.2)",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\nPASS: 1 events; schema fields, mission identity and unique event IDs checked.\n",
+      "stderr": ""
+    },
+    {
+      "case": "Retired competing-courses branch reason rejected",
+      "expected_exit": 1,
+      "actual_exit": 1,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+      "stderr": "FAIL: $.branch_reason: invalid enum value.\n"
+    },
+    {
+      "case": "Existing mission ID telemetry validates",
+      "expected_exit": 0,
+      "actual_exit": 0,
+      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\nPASS: 2 events; schema fields, mission identity and unique event IDs checked.\n",
+      "stderr": ""
+    }
+  ]
+}

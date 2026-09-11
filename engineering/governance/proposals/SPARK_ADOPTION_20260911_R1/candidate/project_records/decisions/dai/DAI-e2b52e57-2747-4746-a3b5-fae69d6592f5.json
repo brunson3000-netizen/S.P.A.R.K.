@@ -1,0 +1,10 @@
+{
+  "id": "DAI-e2b52e57-2747-4746-a3b5-fae69d6592f5",
+  "kind": "PROPERTY",
+  "property": "Deterministic admission and finality",
+  "status": "SETTLED",
+  "scope": "As established by the cited source and later scoped decisions",
+  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0003-deterministic-clock-rng-and-commit-order.md",
+  "notes": "Retain as amended by the accepted V3-F01 stack, not in isolation",
+  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
+}

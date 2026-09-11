@@ -1,0 +1,10 @@
+{
+  "id": "DAI-86114962-b0e5-4c8b-8ba2-624910f863ae",
+  "kind": "PROPERTY",
+  "property": "Mission and exclusions",
+  "status": "SETTLED",
+  "scope": "As established by the cited source and later scoped decisions",
+  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#1-executive-takeover-directive",
+  "notes": "Self-contained deterministic causal-pressure/behavior engine; preserve complete mission and exclusions in source",
+  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
+}

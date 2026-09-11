@@ -1,0 +1,10 @@
+{
+  "id": "DAI-fd09c81e-e280-45f7-933f-fc8e4cfec9a7",
+  "kind": "PROPERTY",
+  "property": "Host authority and MCI isolation",
+  "status": "SETTLED",
+  "scope": "As established by the cited source and later scoped decisions",
+  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0002-authority-and-host-acknowledgement.md",
+  "notes": "Advisory intents; executed validated outcomes distinct from acceptance; immutable authority/write class and isolated MCI fiction",
+  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
+}

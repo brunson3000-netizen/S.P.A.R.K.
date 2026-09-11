@@ -1,0 +1,10 @@
+{
+  "id": "DAI-fef82d1e-0410-4a1e-8161-317eeeb30cff",
+  "kind": "PROPERTY",
+  "property": "Service and embedded equivalence",
+  "status": "SETTLED",
+  "scope": "As established by the cited source and later scoped decisions",
+  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0005-service-and-embedded-semantic-equivalence.md",
+  "notes": "Equivalent logical semantics; initial delivery selection remains subject to convergence scope",
+  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
+}

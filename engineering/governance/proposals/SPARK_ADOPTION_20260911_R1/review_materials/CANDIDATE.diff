@@ -1,0 +1,1253 @@
+--- upstream/PROJECT_CONVENTIONS.md
++++ candidate/PROJECT_CONVENTIONS.md
+@@ -1,25 +1,9 @@
+-# Project conventions
++# S.P.A.R.K. project conventions — proposed entrypoint integration
+ 
+-Record the project's actual package manager, commands, layout, coding conventions and working practices. No defaults are invented by this template. Ordinary updates within an authorized mission do not amend the governing framework; authority changes still follow C9. Entries create no project property. Preserve each entry's source here; index a convention in the Design Authority Index only when D.6 requires it.
++Repository: `brunson3000-netizen/S.P.A.R.K.`. Verified production branch: `phase1-refoundation-v2` at `7e3a0aae069a8bf840e4dfb74221cdf2687b1db5`.
+ 
+-Source values: `Operator: <locator>` for Operator direction, or `Agent-recorded` for an engineering fact an agent established.
++Source: pinned PHASE_STATUS and blueprint/ADRs in the source register. Current work: adoption-package preparation. This candidate contains no Rust workspace and must not be used to claim runtime test results.
+ 
+-## Commands
++On authorized integration, preserve the real repository's commands, entrypoints, worktrees and unowned work; incorporate the A6 block without overwriting existing instructions. Read the current phase status and accepted freeze stack. Preserve later Phase-2 authority separately from historical status. Runtime commands must come from the actual checkout and accepted test gates, not this template.
+ 
+-| Purpose | Command | Source |
+-|---|---|---|
+-| Setup / install | | |
+-| Build | | |
+-| Test | | |
+-| Lint / format | | |
+-| Run | | |
+-
+-## Layout
+-
+-| Path | Holds | Source |
+-|---|---|---|
+-
+-## Workspaces and integration
+-
+-| Convention | Detail | Source |
+-|---|---|---|
++Review-channel settings and availability require current evidence. Follow the convergence protocol's bounded diversity, separate writer/reviewer and limited Fable use. A catalog entry is not credential, economic or egress authority.
+--- upstream/governance/ACTIVATION_MANIFEST.md
++++ candidate/governance/ACTIVATION_MANIFEST.md
+@@ -2,9 +2,11 @@
+ 
+ Governed by [Project Agent Instructions](AGENT_RULES.md) and Constitution C9.
+ 
++This is S.P.A.R.K. candidate SPARK-ADOPTION-20260911-R1, derived from universal 1.1.2. Version 1.1.3 identifies this local proposal, not an upstream release. NOT ADOPTED. Configuration selections are proposals pending exact ratification.
++
+ ## A1 — Governing set and project binding
+ 
+-**A1.1** The seven files below, framework version 1.1.2, form this framework's complete governing set; paths in this inventory are relative to this manifest.
++**A1.1** The seven files below, framework version 1.1.3, form this framework's complete governing set; paths in this inventory are relative to this manifest.
+ 
+ | Member | File |
+ |---|---|
+@@ -37,6 +39,7 @@
+ | Design/Decision | Design Authority Index | `project_records/decisions/DESIGN_AUTHORITY_INDEX.md`; rows in `project_records/decisions/dai/<DAI-ID>.json` |
+ | Design/Decision | Preserved ambiguous Operator input (D.3) | `project_records/decisions/operator_input/<INP-ID>.md` |
+ | Design/Decision | Technical Decision Records | `project_records/decisions/tdr/<TDR-ID>.md` |
++| Mission Authority | Operational first-mission pointer | `project_records/missions/READINESS.json` |
+ | Mission Authority | Mission index and grants | `project_records/missions/MISSION_REGISTRY.md`; each mission's actual grant in `project_records/missions/<MISSION-ID>/mission.json` |
+ | Mission Authority | Review and challenge assignments | `project_records/missions/<MISSION-ID>/reviews/<REVIEW-ID>.md` |
+ | Mission Authority | Operator dispensations | `project_records/missions/<MISSION-ID>/dispensations/<DISPENSATION-ID>.md` |
+@@ -73,11 +76,11 @@
+ 
+ **A5.1** The Operator selects the library-dependency assurance scope: `ALL` covers each new external library; `MATERIAL` covers a library only through another I3.1 surface it affects, including expensive reversal. New external services remain covered under either choice.
+ 
+-**A5.2** The Operator records positive per-request and stage durations in seconds and a nonnegative replacement limit suitable for the approved review channels; stage duration is at least the request duration. I3.13 applies stricter mission or channel limits.
++**A5.2** The duty holder records finite positive per-request and stage durations in seconds and a nonnegative replacement limit in the referenced channel policy, within Operator-approved resource limits. Stage duration is at least request duration and includes retries and replacements. I3.13 applies stricter mission or channel limits.
+ 
+ **A5.3** The Operator records `ADOPT`, `NARROW` or `DECLINE` for Standing Design Discretion and cites the decision source; adoption or narrowing identifies the actual scope under D.9, while declining leaves I2 and I4 applicable.
+ 
+-**A5.4** Before claiming first-mission readiness, the duty holder records an actual first-mission grant and at least one authorized, available challenge channel with the needed fresh instances; a roundtable requires two under I3.7. These records do not grant authority themselves.
++**A5.4** The operational first-mission pointer is recorded in `project_records/missions/READINESS.json`; existing source-bound mission identifiers remain valid. Before claiming first-mission readiness, the duty holder records an actual first-mission grant and at least one authorized, available challenge channel with the needed fresh instances; a roundtable requires two under I3.7. These records do not grant authority themselves.
+ 
+ ## A6 — Agent entrypoints
+ 
+@@ -103,16 +106,12 @@
+ 
+ ```json
+ {
+-  "project_id": "UNCONFIGURED",
+-  "operator_authority": "UNCONFIGURED",
+-  "operator_source": "UNCONFIGURED",
+-  "scope": "UNCONFIGURED",
+-  "dependency_assurance": "UNCONFIGURED",
+-  "per_request_seconds": null,
+-  "stage_seconds": null,
+-  "replacement_limit": null,
+-  "standing_design_discretion": "UNCONFIGURED",
+-  "discretion_source": null,
+-  "first_mission_id": null
++  "project_id": "brunson3000-netizen/S.P.A.R.K.",
++  "operator_authority": "Michael Brunson, human project Operator",
++  "operator_source": "project_records/decisions/operator_input/RATIFICATION_PREPARATION_20260911.md (preparation authority only)",
++  "scope": "S.P.A.R.K. project governance; preserves source-established product requirements and grants; no authority over G.A.M.E. or S.W.A.R.M.",
++  "dependency_assurance": "MATERIAL",
++  "standing_design_discretion": "ADOPT",
++  "discretion_source": "project_records/decisions/PROPOSED_ADOPTION_CHOICES.md (proposal; ratification pending)"
+ }
+ ```
+--- upstream/governance/AGENT_RULES.md
++++ candidate/governance/AGENT_RULES.md
+@@ -117,7 +117,7 @@
+ 
+ **I5.2** Consequence assessment covers environment, blast radius, persistence, recovery difficulty, security, external effects, and silent failure separately from reversibility.
+ 
+-**I5.3** Agents preserve material decisions, grants, evidence, provisional state, and unfinished work in the C9.6 home appropriate to the subject before cross-session reliance or a foreseeable session end.
++**I5.3** Agents preserve material decisions, grants, evidence, provisional state, and unfinished work in the C9.6 home appropriate to the subject before cross-session reliance or a foreseeable session end. If durable capture is unavailable, the agent reports the custody gap before relying on the material beyond the current exchange.
+ 
+ **I5.4** Failed and invalid attempts retain their original identity and outcome through recovery.
+ 
+--- upstream/governance/CHANGES.md
++++ candidate/governance/CHANGES.md
+@@ -1,3 +1,7 @@
++# S.P.A.R.K. local candidate 1.1.3
++
++NON-OPERATIVE, derived from universal 1.1.2. See package change map and unified diff. Deferred status, capture gap, operational timing/pointer and legacy IDs are proposed corrections; prior entries below are upstream history.
++
+ # Changes
+ 
+ ## 1.1.2 — targeted drafting corrections
+--- upstream/governance/DESIGN_AUTHORITY_INDEX_SCHEMA.md
++++ candidate/governance/DESIGN_AUTHORITY_INDEX_SCHEMA.md
+@@ -34,7 +34,7 @@
+ |---|---|
+ | SETTLED | Operator established the property or selection, directly or through a valid C5.11 scope |
+ | RESERVED | Operator expressly retained the decision |
+-| DEFERRED | Operator committed in principle and deferred implementation |
++| DEFERRED | The Operator postponed a decision or its implementation; the source states which and what, if anything, is committed |
+ | PROVISIONAL-AGENT | Isolated representation of an unspecified property |
+ | PROPOSED | Agent suggestion with no authority |
+ | SUPERSEDED | Operator replaced the decision; identify its replacement |
+--- upstream/governance/GOVERNANCE_TELEMETRY_SCHEMA.md
++++ candidate/governance/GOVERNANCE_TELEMETRY_SCHEMA.md
+@@ -56,7 +56,7 @@
+     },
+     "mission_id": {
+       "type": "string",
+-      "pattern": "^MIS-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
++      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+     },
+     "actor": {
+       "type": "string",
+--- upstream/governance/OPERATIVE_SET.sha256
++++ candidate/governance/OPERATIVE_SET.sha256
+@@ -1,7 +1,7 @@
+ c58e04bc78b3f8c9b7cf0091a598231bb184f178cc13dbd6f59157bca88ebf81  governance/CONSTITUTION.md
+-68a4ae55c07f7d5f7a0d75ed7607b57aca70315a44b610692c7bdfe461028a52  governance/AGENT_RULES.md
++e007fd60a6100eb745a8ef8f30ec36e20a3d98110a0107c6a09b76132000d1ca  governance/AGENT_RULES.md
+ e2ce839a38aee306dd6344753225043996d8d09bba9de58ad0860853275a4898  governance/ROLE_OVERLAYS.md
+-3137529f9b00024dc405afb74343ebafbdb2e1652f4e8e8a8d28c2ce07335e88  governance/DESIGN_AUTHORITY_INDEX_SCHEMA.md
++d076f5886d076b51156955871c616cb8de4bb47b77d3ec7a1a7874223b5160cf  governance/DESIGN_AUTHORITY_INDEX_SCHEMA.md
+ f87872ae8a0a3db01b51dc0a0d2a3bb8457011a583999f8589238035bda2667a  governance/TECHNICAL_DECISION_RECORD_TEMPLATE.md
+-58e32e6a708932e31b1bc53356a804c15aa1dd1781b0b88a5e2bf410db325fae  governance/GOVERNANCE_TELEMETRY_SCHEMA.md
+-2bbb9ba4ed433551b49325c84aa76c6b192efa17c0b57ba51a6336dcda44b27a  governance/ACTIVATION_MANIFEST.md
++f4b553bb93e2682e261fc34665c4f29de07c9521d3a768501a18d4b06bc4429a  governance/GOVERNANCE_TELEMETRY_SCHEMA.md
++e2d2e074c8b502656780a7b29e23a5a42ce8b6af78e7a733738613e0bc29ac0a  governance/ACTIVATION_MANIFEST.md
+--- upstream/governance/README.md
++++ candidate/governance/README.md
+@@ -1,8 +1,8 @@
+-# Universal Project Constitutional Framework — 1.1.2
++# S.P.A.R.K. constitutional candidate — local 1.1.3
+ 
+ Reusable governance for agent-assisted software and technical-engineering projects with one designated human Operator. It is not a universal legal constitution or a co-owner decision model. Teams need an explicit authority arrangement before using its single-Operator model; this edition does not invent voting or tie-breaking rules.
+ 
+-Start with [SETUP.md](SETUP.md). The package supplies concrete record locations and explicit startup choices. It is ready to configure; no project permission or adoption is prefilled.
++Derived from universal 1.1.2. Start with [SETUP.md](SETUP.md). Project bindings and proposed choices are populated for review. No adoption is recorded; operational readiness is intentionally incomplete.
+ 
+ ## Layout
+ 
+@@ -14,7 +14,7 @@
+ 
+ ## Tools
+ 
+-`governance/tools/framework.py` runs `check`, `ready`, `index`, `check-events`, `new-mission`, `write-hashes` and `candidate-hashes`. `index` prints a readable table of decision rows, the provisional review queue and missions from the per-record files. Records carry collision-free UUID4 identifiers plus a short human-readable title, and agents cite both to the Operator (I12.9). The tooling uses Python 3.10+ and its standard library; it does not select the project's implementation language.
++`governance/tools/framework.py` runs `check`, `ready`, `index`, `check-events`, `new-mission`, `write-hashes` and `candidate-hashes`. `index` prints a readable table of decision rows, the provisional review queue and missions from the per-record files. New records use UUID4 identifiers plus a short human-readable title; existing source-bound identifiers remain valid, and agents cite both to the Operator (I12.9). The tooling uses Python 3.10+ and its standard library; it does not select the project's implementation language.
+ 
+ ## Clause identifiers
+ 
+--- upstream/governance/SETUP.md
++++ candidate/governance/SETUP.md
+@@ -1,38 +1,13 @@
+-# Configure and adopt
++# S.P.A.R.K. candidate setup and adoption
+ 
+-1. **Install.** Place the package in the project root. Merge the supplied root entrypoints and `.gitattributes` if files already exist, keeping the A6 block in `AGENTS.md` intact; preserve the project's README. Keep `governance/` intact so the tool finds the project root relative to its own location.
+-2. **Configure the manifest.** In the Activation Manifest JSON, supply project identity, Operator authority and source, and scope. Then make the A5 choices below and record the Standing Design Discretion decision.
+-3. **Record a channel.** In `RESOURCE_POLICY_REFERENCES.json`, record channels as objects with `id`, `source`, `available` (boolean) and `fresh_instances` (positive integer). These are actual-source references and observations, not invented grants or promises of availability. One channel may expose several fresh instances; a new session of the same model is fresh to work it has not authored, challenged or reviewed (C0.7). A roundtable requires two fresh challengers. Recheck eligibility at actual use.
+-4. **Create the first mission.** Run `python3 governance/tools/framework.py new-mission --title "<short title>"`. Fill `mission.json` with the actual `grant_source` and the grant's `objective`, `scope`, `actors`, `duty_holder`, `duration` and `conditions` (C0.2); `operator_wording`, `agent_interpretation`, `exclusions`, `role` and `delegated_from` are recorded when they apply. Put the generated ID into `first_mission_id`. The command creates no grant. The folder already contains `reviews/`, `dispensations/`, `evidence/`, `checkpoint.md`, `closeout.md` and an empty telemetry log.
+-5. **Check readiness.** Run `python3 governance/tools/framework.py write-hashes`, then `python3 governance/tools/framework.py ready`. Ready checks structural configuration, entrypoints, an available source-bound channel, the first grant record, the DAI setup disposition and member integrity. It does not prove genuine permission, provider access or completed required assurance.
+-6. **Adopt.** The Operator explicitly accepts the configured content. Preserve a separate acceptance JSON from the supplied template, containing the exact member hashes, source, time, prior-governance disposition and verification evidence. Store it under `adoptions/`, then set `ACTIVE_ADOPTION.json` to its project-relative path and SHA-256. Run `python3 governance/tools/framework.py check`. Keep a trusted copy or digest outside the editable project when stronger verification is required.
++This is a non-operative review candidate. Do not copy it over an existing repository before its integration and adoption are authorized.
+ 
+-Identity and configuration can be adopted before mission execution, but do not claim operational readiness until step 5 passes. Missing or unavailable resources hold only the required transition, not unrelated authorized work.
++1. Review the package change/disposition map and exact candidate identity. Reconcile changes to the production baseline since 7e3a0aae only where relevant.
++2. Preserve existing project files and entrypoints. Merge A6 entrypoints in an isolated work surface. The included source register points to controlling requirements and existing grants; this package grants no phase or cross-project expansion.
++3. Obtain independent review of the actual candidate and changed tooling. Preserve findings and verify their repairs with the assigned reviewer.
++4. Resolve the exact proposed adoption choices. Record an actual authorized review channel and finite timing/replacement values in `project_records/governance/RESOURCE_POLICY_REFERENCES.json`. Do not substitute example values for authority. Set the operational pointer in `project_records/missions/READINESS.json` to an actual complete mission. Existing IDs may be retained; new IDs use UUID4.
++5. Update the actual discretion source and row only after the Operator's decision. Until then the row remains PROPOSED; no readiness or adopted discretion claim is valid.
++6. Before adoption, compute candidate hashes with `python3 governance/tools/framework.py write-hashes`; run `check`, `index`, `check-events`, the replay suite and applicable focused checks. `ready` intentionally fails in the delivered package because actual channel/timing and ratified discretion are absent. Configuration may be adopted separately from operational readiness under A1/A5.
++7. Present exact content and dispositions for explicit Operator acceptance. Only then create the real acceptance record and active pointer. Run `check` against accepted identity; preserve a trusted receipt and verify the intended destination. Keep the historical grant and status records intact.
+ 
+-## Startup choices (A5)
+-
+-**Dependency assurance.** `ALL` challenges every new external library before its commitment point. `MATERIAL` challenges a library only through another I3.1 surface it affects, such as a persistent format, a trust boundary, the primary toolchain, or a reversal requiring data migration, cross-component changes or a broken interface; a library that becomes load-bearing is therefore still challenged before reversal becomes expensive. New external services are always covered. A new project adds many libraries early, so this choice largely sets early assurance volume.
+-
+-**Review timing.** No deadline is inherited. Choose per-request and stage durations that match how long one round actually takes on your channel. For reference only: the source framework used 180 seconds per request and 600 per stage for an automated harness, and the validation fixture uses 3,600 and 14,400 for hand-carried review. A hand-carried channel may use longer explicit durations; it does not get an unbounded stage.
+-
+-**Standing Design Discretion.** The proposal is in `governance/templates/STANDING_DESIGN_DISCRETION.md`; framework adoption does not adopt it. Without a covering scope, C5.3 makes every externally observable choice a project property, so incidental details such as message wording or default layout either go to the Operator under I2.3 or become provisional rows under I4. Choose `ADOPT` to let agents settle cheaply reversible incidental behavior under D.10, `NARROW` to limit it, or `DECLINE` when the Operator will specify observable behavior directly. Update DAI-ENVELOPE-01 to match: set `source` to `discretion_source` and `setup_disposition` to the choice; for `ADOPT` or `NARROW`, set `status` to `SETTLED` and `scope_source` to the actual D.9 scope; for `DECLINE`, keep `status` as `PROPOSED` and record the decline in its notes.
+-
+-## Entrypoints (A6)
+-
+-Root `AGENTS.md` must contain the block fixed in Activation Manifest A6, byte-for-byte. Add project commands and conventions around it or in `PROJECT_CONVENTIONS.md`. If a root `CLAUDE.md` exists, it must import `AGENTS.md` and the Constitution, agent rules and role overlays, and every import must resolve. Changing the block or the required imports is a governance amendment because A6 lives in a hashed member. Keep root `AGENTS.md` small; Codex shares a default 32 KiB instruction budget across the `AGENTS.md` files it discovers, and the check warns at three-quarters of it.
+-
+-## Hash and amendment workflow
+-
+-`check` compares current bytes with the member list and, when adopted, the separately accepted member hashes and accepted-record digest. It never writes. `write-hashes` is only for an unadopted candidate and refuses when any acceptance record is present. It cannot repair accepted drift.
+-
+-For an amendment, preserve the live accepted record and prepare an isolated proposal copy. Use `candidate-hashes --output <new-file>` to write a separately named candidate hash list without replacing the active one. Only explicit acceptance of the new exact content permits updating the active member list and pointer. A mismatch calls for source reconciliation under C9.10; record it and hold affected reliance, not the whole project. If only local line endings changed, restore the accepted LF bytes from the trusted source and recheck; do not accept different bytes merely to clear the error.
+-
+-Git users receive LF attributes scoped to governed text files; binary files are never marked as text. Existing repositories may need a deliberate normalization step before first adoption; do not blanket-renormalize unrelated work. Non-Git users preserve UTF-8 and LF through their editor or export settings. Content hashes cover exact bytes.
+-
+-## Records and concurrency
+-
+-The manifest is the single record-location map, grouped under the three homes of C9.6. New record identifiers use UUID4 so parallel creators need no shared sequence counter, and each record carries a short title so people can recognize it. The DAI and mission indexes point to directories of separate records; `framework.py index` renders them as readable tables and rejects malformed rows. Ambiguous Operator remarks are preserved verbatim under `project_records/decisions/operator_input/` (D.3), never asked back to the Operator (I2.7). The mission duty holder serializes its JSONL appends; workers retain event facts in their own evidence records for that append. There is no global lock service. `check-events` validates logs against the schema embedded in the hashed telemetry document. No runtime aggregation service is implemented.
+-
+-## Prior governance
+-
+-For a project with prior governance, reconcile precedence and working controls before replacement. For a genuinely new project, no fictitious prior constitution, migration record or legacy decision is required. A project not yet under version control satisfies I6.6 with destination and content identity.
++After adoption, never repair drift by regenerating active hashes. Work on a separately identified candidate. Acceptance identifies exact new content. Operational timing and first-mission pointer changes remain outside governing identity but inside the applicable authority envelope. No local structural tool authenticates human permission or enforces runtime authority.
+--- upstream/governance/VALIDATION.md
++++ candidate/governance/VALIDATION.md
+@@ -1,33 +1,7 @@
+-# Validation — 1.1.2
++# Candidate validation
+ 
+-All **56 command-level fixture checks produced their expected results** in an isolated copy. Reproduce them with `python3 governance/validation/replay_checks.py`; add `--write-results` to refresh [validation/RESULTS.json](validation/RESULTS.json), which holds each case's output. Positive results and intentional negative results are distinguished by expected exit status. The suite runs under whichever Python launches it, and was also run from `/` with only `python3` on the path.
++See `validation/RESULTS.json` for actual replay results and the package `VALIDATION_REPORT.md` for interpretation. Run `python3 governance/validation/replay_checks.py` from any working directory. All acceptance and channel fixtures are synthetic and create no real authority.
+ 
+-| Area | Verified |
+-|---|---|
+-| Structure and identifiers | Seven members, relative links and home entries, LF bytes and exact hashes; all 258 identifiers from 1.0.0 are present (the suite fails otherwise), 276 in total. Works when launched from an unrelated directory. |
+-| Startup | Three bindings alone fail readiness; an invalid dependency scope and the removed `NOT_CHEAPLY_REVERSIBLE` option fail; the explicit choices, channel source and availability, a first grant with actors, duration and conditions, and the DAI disposition are all required. A manual-review timing fixture passes. No provider or actual authority is verified. |
+-| Entrypoints | Ordinary edits around the A6 block pass. Removing or altering the block fails, and so does deleting `AGENTS.md`. A `CLAUDE.md` missing a required import or importing a missing file fails; an absent `CLAUDE.md` is allowed. An oversized `AGENTS.md` warns without failing. |
+-| Records | Mission scaffolds create distinct UUID4 folders with `checkpoint.md`, `closeout.md` and an empty log, and invent no grant. `index` renders rows and titled missions. It rejects an invalid status, a SETTLED row without a source, a provisional row missing containment fields, and an identifier/filename mismatch; a complete provisional row appears in the review queue. |
+-| Adoption fidelity | Exact accepted content passes. An appended fake assurance waiver fails. In-place hash regeneration is refused after acceptance. Manually regenerating the member list does not bypass the accepted-member comparison. |
+-| Acceptance drift | Changed acceptance bytes fail the pointer digest. Rewriting the pointer too still fails when the original trusted digest is supplied. Removing the pointer leaves detectable acceptance history. |
+-| Candidate editing | A separately named candidate hash file can be produced without changing active hashes or acceptance records. It cannot overwrite the active member list. |
+-| Line endings | CRLF conversion fails; restoring the accepted LF bytes passes. Outside the suite: a Git checkout with `core.autocrlf=true` verifies with the supplied attributes, and `git check-attr` shows governed text pinned to LF while a binary file under `governance/` is not marked as text. |
+-| JSONL | Valid hold and failure events and distinct updates to one issue pass. Duplicate event IDs, human-label keys, missing failure facts, cross-mission identity, timezone-free timestamps and the retired `COMPETING_COURSES` branch reason fail; the two new C11.2 branch reasons validate. |
++The suite preserves upstream positive/negative cases and adds coverage for operational timing, existing mission IDs, traversal refusal and proposed-discretion refusal. Historical identifiers require either retention or an explicit retirement disposition; no permanent all-identifiers-must-remain rule is imposed. No clause is actually retired in this candidate.
+ 
+-Live Codex and Claude loading, provider access, actual Operator authentication, runtime enforcement, co-owner governance and net productivity gains were not tested. Acceptance fixtures are explicitly synthetic, not real adoption.
+-
+-## Bounded workflow review
+-
+-Before adoption, I0.1 lets setup proceed on the direct instructions of the human directing the project. Routine work loads external rules through a fixed, checked entrypoint plus editable project conventions. First-mission readiness checks actual source records without granting work. Required assurance uses the explicit dependency choice and channel-appropriate finite limits. Provisional properties have a concrete DAI destination and a generated review queue. Ambiguous Operator input has a preserved home, and TDRs, reviews, dispensations and checkpoints have fixed homes under the three constitutional homes. The duty holder serializes mission event appends. Same-reviewer repair verification and bounded review rounds remain unchanged. Adoption binds exact configured members in a separate record; drift blocks affected reliance, and candidate editing does not update acceptance. Non-Git closeout uses destination and content identity. Each path retains an explicit completion or unresolved-state exit.
+-
+-Imports and read instructions are not a guarantee of agent adherence; Codex in particular reads the governing files only by following the entrypoint instruction. Entirely local editable tooling and records are not a tamper-resistant authority system; stronger fidelity requires a separately trusted acceptance digest or record.
+-
+-## Drafting corrections (1.1.2)
+-
+-The C11, I16, A5.1 and conventions changes were reviewed textually against representative tasks, not tested as agent behavior:
+-
+-- **Ordinary engineering:** an authorized implementation choice between defensible options stays with its owner; no branch arises unless authority, interpretation or required assurance is missing.
+-- **Routine convention update:** one source-bearing entry in the conventions record, with a DAI row only when D.6 applies.
+-- **Solution or amendment drafting:** the review scope is fixed first; repairs recheck only affected requirements.
+-- **Required assurance unavailable:** the dependent-transition hold remains a C11.2 branch, and nothing permits a self-waiver.
+-
++No independent review, live reviewer availability, agent compliance, project runtime behavior or productivity improvement is proven by these structural checks.
+--- upstream/governance/templates/adoption.json
++++ candidate/governance/templates/adoption.json
+@@ -1,7 +1,7 @@
+ {
+   "status": "PROPOSED",
+   "project_id": "UNCONFIGURED",
+-  "framework_version": "1.1.2",
++  "framework_version": "1.1.3",
+   "operator_source": "UNCONFIGURED",
+   "accepted_at": "UNCONFIGURED",
+   "prior_governance_disposition": "UNCONFIGURED",
+--- upstream/governance/tools/framework.py
++++ candidate/governance/tools/framework.py
+@@ -105,7 +105,7 @@
+                  'project_records/decisions/PROJECT_SOURCE_REGISTER.md',
+                  'project_records/decisions/DESIGN_AUTHORITY_INDEX.md',
+                  DAI_DIR + '/DAI-ENVELOPE-01.json',
+-                 MISSIONS + '/MISSION_REGISTRY.md'):
++                 MISSIONS + '/MISSION_REGISTRY.md', MISSIONS + '/READINESS.json'):
+         require(location(root, name).is_file(), f'Missing record-home entry: {name}')
+     for name in (ADOPTIONS, 'project_records/decisions/tdr', DAI_DIR, 'project_records/decisions/operator_input'):
+         require(location(root, name).is_dir(), f'Missing record directory: {name}')
+@@ -144,10 +144,6 @@
+         require(content(cfg.get(key)), f'Unconfigured binding: {key}')
+     require(cfg.get('dependency_assurance') in DEPENDENCY_SCOPES,
+             'Select dependency_assurance: ' + ', '.join(DEPENDENCY_SCOPES) + '.')
+-    for key in ('per_request_seconds', 'stage_seconds'):
+-        require(type(cfg.get(key)) is int and cfg[key] > 0, f'Select a positive integer: {key}')
+-    require(cfg['stage_seconds'] >= cfg['per_request_seconds'], 'Stage duration is shorter than request duration.')
+-    require(type(cfg.get('replacement_limit')) is int and cfg['replacement_limit'] >= 0, 'Select a nonnegative replacement_limit.')
+     require(cfg.get('standing_design_discretion') in ('ADOPT', 'NARROW', 'DECLINE'), 'Select ADOPT, NARROW or DECLINE for discretion.')
+     require(content(cfg.get('discretion_source')), 'Record the actual discretion decision source.')
+     return cfg
+@@ -201,6 +197,13 @@
+     cfg = configuration(root)
+     pool = read_json(root / 'project_records/governance/RESOURCE_POLICY_REFERENCES.json')
+     require(isinstance(pool, dict) and isinstance(pool.get('channels'), list), 'Resource policy needs a channels list.')
++    limits = pool.get('review_limits', {})
++    require(isinstance(limits, dict), 'Review limits must be an object.')
++    for key in ('per_request_seconds', 'stage_seconds'):
++        require(type(limits.get(key)) is int and limits[key] > 0, f'Record a positive review limit: {key}')
++    require(limits['stage_seconds'] >= limits['per_request_seconds'], 'Stage duration is shorter than request duration.')
++    require(type(limits.get('replacement_limit')) is int and limits['replacement_limit'] >= 0, 'Record a nonnegative replacement_limit.')
++    require(content(limits.get('source')), 'Review limits lack an actual authority source.')
+     eligible = []
+     names = set()
+     for ch in pool['channels']:
+@@ -213,9 +216,9 @@
+         if ch['available'] and ch['fresh_instances'] > 0:
+             eligible.append(ch)
+     require(eligible, 'No recorded authorized, available challenge channel with a fresh instance.')
+-    mid = cfg.get('first_mission_id')
+-    require(isinstance(mid, str) and re.fullmatch('MIS-' + UUID4, mid), 'Record first_mission_id from an actual mission folder.')
+-    folder = root / MISSIONS / mid
++    mid = read_json(root / MISSIONS / 'READINESS.json').get('first_mission_id')
++    require(isinstance(mid, str) and re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*', mid), 'Record first_mission_id from an actual mission folder.')
++    folder = location(root, MISSIONS + '/' + mid)
+     mission = read_json(folder / 'mission.json')
+     require(isinstance(mission, dict), 'Mission record must be an object.')
+     require(mission.get('id') == mid, 'Mission id/path mismatch.')
+@@ -281,7 +284,7 @@
+     schema = json_block(root / 'governance/GOVERNANCE_TELEMETRY_SCHEMA.md')
+     ids = set()
+     count = 0
+-    for log in sorted((root / MISSIONS).glob('MIS-*/governance_events.jsonl')):
++    for log in sorted((root / MISSIONS).glob('*/governance_events.jsonl')):
+         for number, line in enumerate(log.read_text(encoding='utf-8').splitlines(), 1):
+             require(bool(line.strip()), f'Blank JSONL line: {log}:{number}')
+             event = json.loads(line)
+@@ -321,7 +324,7 @@
+                 require(content(row.get(key)), f'{path.name}: provisional row missing {key}.')
+         rows.append(row)
+     missions = []
+-    for folder in sorted(p for p in (root / MISSIONS).iterdir() if p.is_dir() and p.name.startswith('MIS-')):
++    for folder in sorted(p for p in (root / MISSIONS).iterdir() if p.is_dir() and (p / 'mission.json').is_file()):
+         record = read_json(folder / 'mission.json')
+         require(isinstance(record, dict) and record.get('id') == folder.name, f'{folder.name}: mission id/path mismatch.')
+         if not content(record.get('title')):
+--- upstream/governance/validation/CLAUSE_INVENTORY.json
++++ candidate/governance/validation/CLAUSE_INVENTORY.json
+@@ -0,0 +1,281 @@
++{
++  "current": [
++    "A1.1",
++    "A1.2",
++    "A1.3",
++    "A1.4",
++    "A1.5",
++    "A2.1",
++    "A2.2",
++    "A2.3",
++    "A2.4",
++    "A2.5",
++    "A3.1",
++    "A3.2",
++    "A3.3",
++    "A5.1",
++    "A5.2",
++    "A5.3",
++    "A5.4",
++    "A6.1",
++    "A6.2",
++    "A6.3",
++    "C0.1",
++    "C0.10",
++    "C0.11",
++    "C0.2",
++    "C0.3",
++    "C0.4",
++    "C0.5",
++    "C0.6",
++    "C0.7",
++    "C0.8",
++    "C0.9",
++    "C1.1",
++    "C1.2",
++    "C1.3",
++    "C1.4",
++    "C1.5",
++    "C1.6",
++    "C10.1",
++    "C10.2",
++    "C10.3",
++    "C11.1",
++    "C11.2",
++    "C11.3",
++    "C11.4",
++    "C11.5",
++    "C2.1",
++    "C2.10",
++    "C2.11",
++    "C2.12",
++    "C2.2",
++    "C2.3",
++    "C2.4",
++    "C2.5",
++    "C2.6",
++    "C2.7",
++    "C2.8",
++    "C2.9",
++    "C3.1",
++    "C3.2",
++    "C3.3",
++    "C3.4",
++    "C3.5",
++    "C3.6",
++    "C3.7",
++    "C4.1",
++    "C4.2",
++    "C4.3",
++    "C4.4",
++    "C4.5",
++    "C5.1",
++    "C5.10",
++    "C5.11",
++    "C5.2",
++    "C5.3",
++    "C5.4",
++    "C5.5",
++    "C5.6",
++    "C5.7",
++    "C5.8",
++    "C5.9",
++    "C6.1",
++    "C6.10",
++    "C6.11",
++    "C6.2",
++    "C6.3",
++    "C6.4",
++    "C6.5",
++    "C6.6",
++    "C6.7",
++    "C6.8",
++    "C6.9",
++    "C7.1",
++    "C7.2",
++    "C7.3",
++    "C7.4",
++    "C7.5",
++    "C7.6",
++    "C8.1",
++    "C8.2",
++    "C8.3",
++    "C8.4",
++    "C8.5",
++    "C9.1",
++    "C9.10",
++    "C9.2",
++    "C9.3",
++    "C9.4",
++    "C9.5",
++    "C9.6",
++    "C9.7",
++    "C9.8",
++    "C9.9",
++    "D.1",
++    "D.10",
++    "D.11",
++    "D.12",
++    "D.2",
++    "D.3",
++    "D.4",
++    "D.5",
++    "D.6",
++    "D.7",
++    "D.8",
++    "D.9",
++    "G.1",
++    "G.2",
++    "G.3",
++    "G.4",
++    "G.5",
++    "G.6",
++    "G.7",
++    "G.8",
++    "G.9",
++    "I0.1",
++    "I1.1",
++    "I1.2",
++    "I10.1",
++    "I10.2",
++    "I10.3",
++    "I10.4",
++    "I11.1",
++    "I11.10",
++    "I11.11",
++    "I11.2",
++    "I11.4",
++    "I11.5",
++    "I11.6",
++    "I11.7",
++    "I11.8",
++    "I11.9",
++    "I12.1",
++    "I12.2",
++    "I12.3",
++    "I12.4",
++    "I12.5",
++    "I12.6",
++    "I12.7",
++    "I12.8",
++    "I12.9",
++    "I13.1",
++    "I13.2",
++    "I13.3",
++    "I14.1",
++    "I14.10",
++    "I14.11",
++    "I14.12",
++    "I14.13",
++    "I14.2",
++    "I14.3",
++    "I14.4",
++    "I14.5",
++    "I14.6",
++    "I14.7",
++    "I14.9",
++    "I15.1",
++    "I15.2",
++    "I15.3",
++    "I16.1",
++    "I16.10",
++    "I16.11",
++    "I16.12",
++    "I16.13",
++    "I16.14",
++    "I16.2",
++    "I16.3",
++    "I16.4",
++    "I16.5",
++    "I16.6",
++    "I16.7",
++    "I16.8",
++    "I16.9",
++    "I2.1",
++    "I2.10",
++    "I2.2",
++    "I2.3",
++    "I2.4",
++    "I2.5",
++    "I2.6",
++    "I2.7",
++    "I2.8",
++    "I2.9",
++    "I3.1",
++    "I3.10",
++    "I3.11",
++    "I3.12",
++    "I3.13",
++    "I3.14",
++    "I3.15",
++    "I3.16",
++    "I3.2",
++    "I3.3",
++    "I3.4",
++    "I3.5",
++    "I3.6",
++    "I3.7",
++    "I3.8",
++    "I3.9",
++    "I4.1",
++    "I4.2",
++    "I4.3",
++    "I4.4",
++    "I4.5",
++    "I4.6",
++    "I4.7",
++    "I5.1",
++    "I5.2",
++    "I5.3",
++    "I5.4",
++    "I6.1",
++    "I6.2",
++    "I6.3",
++    "I6.4",
++    "I6.5",
++    "I6.6",
++    "I6.7",
++    "I6.8",
++    "I6.9",
++    "I7.1",
++    "I7.2",
++    "I7.3",
++    "I7.4",
++    "I7.5",
++    "I7.6",
++    "I8.2",
++    "I8.3",
++    "I8.4",
++    "I8.5",
++    "I8.6",
++    "I8.7",
++    "I9.1",
++    "I9.2",
++    "I9.3",
++    "I9.4",
++    "I9.5",
++    "I9.6",
++    "O0.1",
++    "O0.2",
++    "O0.3",
++    "O0.4",
++    "OB.1",
++    "OB.2",
++    "OB.3",
++    "OB.4",
++    "OB.5",
++    "OP.2",
++    "OP.3",
++    "OP.4",
++    "OR.1",
++    "OR.2",
++    "OR.3",
++    "OR.4",
++    "OR.5",
++    "OR.6",
++    "T.1",
++    "T.3",
++    "T.4"
++  ],
++  "retired": {}
++}
+--- upstream/governance/validation/RESULTS.json
++++ candidate/governance/validation/RESULTS.json
+@@ -1,7 +1,7 @@
+ {
+-  "case_count": 56,
++  "case_count": 66,
+   "all_expected_results_observed": true,
+-  "old_ids_retained": 258,
++  "historical_ids_accounted_for": 258,
+   "current_ids": 276,
+   "root_agents_bytes": 1364,
+   "default_codex_budget_bytes": 32768,
+@@ -10,6 +10,13 @@
+   "test_scope": "disposable structural, configuration, entrypoint, record and accepted-content fixtures; no human authority authenticated",
+   "cases": [
+     {
++      "case": "Reset synthetic candidate hashes",
++      "expected_exit": 0,
++      "actual_exit": 0,
++      "stdout": "Candidate hashes written. No adoption or source-authenticity claim.\n",
++      "stderr": ""
++    },
++    {
+       "case": "Template structure from unrelated cwd",
+       "expected_exit": 0,
+       "actual_exit": 0,
+@@ -97,7 +104,7 @@
+       "case": "Mission scaffold creates no grant",
+       "expected_exit": 0,
+       "actual_exit": 0,
+-      "stdout": "MIS-45d7040f-82e2-4c71-abf6-a3a2dee5e584\nCreated unconfigured records only; fill the actual grant. No authority granted.\n",
++      "stdout": "MIS-445a9880-3f30-4b86-9fbb-508bf5e1635f\nCreated unconfigured records only; fill the actual grant. No authority granted.\n",
+       "stderr": ""
+     },
+     {
+@@ -136,10 +143,52 @@
+       "stderr": ""
+     },
+     {
++      "case": "Existing mission ID accepted without renumbering",
++      "expected_exit": 0,
++      "actual_exit": 0,
++      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\nREADY RECORDS PASS: explicit choices, channel, mission grant and discretion disposition populated.\nNo live channel call or grant authentication performed; actual required assurance remains to be completed.\n",
++      "stderr": ""
++    },
++    {
++      "case": "Existing mission ID appears in index",
++      "expected_exit": 0,
++      "actual_exit": 0,
++      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n\n## Design Authority Index\n\n| ID | Property | Kind | Status | Source |\n|---|---|---|---|---|\n| DAI-472d454d-4469-4ad2-9144-dc4a44b3c84c | Cross-project convergence | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_GAME_CONVERGENCE_PROTOCOL_V1.md |\n| DAI-63dbf93b-25dd-4f5f-abd8-14f8d4a9d58a | Rust and cross-platform shared engine | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0001-rust-workspace-and-dependency-direction.md |\n| DAI-7f5236c2-15f7-4bb4-b722-c64177406650 | Durable conversation capture | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_DURABLE_CONVERSATION_CAPTURE_PRINCIPLE.md |\n| DAI-86114962-b0e5-4c8b-8ba2-624910f863ae | Mission and exclusions | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#1-executive-takeover-directive |\n| DAI-8dbd1cc7-6792-424e-b389-c64cf7aac93d | V3-F01 freeze and accepted supersession stack | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase2/SPARK_PHASE_2_V3_F01_OPERATOR_ACCEPTANCE_FREEZE_2026-09-10.md |\n| DAI-ENVELOPE-01 | Fixture discretion | PROPERTY | PROPOSED | Synthetic discretion decision |\n| DAI-a6ae9780-45e7-4579-b120-0de9ae00b921 | Data-driven vocabulary and profile identity | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0004-profile-schema-validation-and-change-classes.md |\n| DAI-c8c613dd-c21d-4c30-943d-18a746f91b0f | Replay and bounded provenance | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0006-persistence-versioning-and-bounded-provenance.md |\n| DAI-ddefa955-b7bb-423f-a71a-9146e423e2d4 | Existing engineer discretion | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#352-engineer-authority |\n| DAI-e2b52e57-2747-4746-a3b5-fae69d6592f5 | Deterministic admission and finality | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0003-deterministic-clock-rng-and-commit-order.md |\n| DAI-fd09c81e-e280-45f7-933f-fc8e4cfec9a7 | Host authority and MCI isolation | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0002-authority-and-host-acknowledgement.md |\n| DAI-fef82d1e-0410-4a1e-8161-317eeeb30cff | Service and embedded equivalence | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0005-service-and-embedded-semantic-equivalence.md |\n\n## Provisional review queue\n\nNone.\n\n## Missions\n\n| ID | Title | Duty holder | Grant recorded |\n|---|---|---|---|\n| MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466 | Prepare S.P.A.R.K. constitutional adoption package for review | Coordinating assistant in this thread | yes |\n| PHASE2-GATE-C2 | Fixture mission | Fixture owner | yes |\n\nThis view is generated from the records; it is a retrieval aid, not a second authority.\n",
++      "stderr": ""
++    },
++    {
++      "case": "Mission pointer traversal refused",
++      "expected_exit": 1,
++      "actual_exit": 1,
++      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
++      "stderr": "FAIL: Record first_mission_id from an actual mission folder.\n"
++    },
++    {
++      "case": "Nonpositive operational deadline refused",
++      "expected_exit": 1,
++      "actual_exit": 1,
++      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
++      "stderr": "FAIL: Record a positive review limit: per_request_seconds\n"
++    },
++    {
++      "case": "Operational stage shorter than request refused",
++      "expected_exit": 1,
++      "actual_exit": 1,
++      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
++      "stderr": "FAIL: Stage duration is shorter than request duration.\n"
++    },
++    {
++      "case": "Proposed discretion cannot satisfy readiness",
++      "expected_exit": 1,
++      "actual_exit": 1,
++      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
++      "stderr": "FAIL: Declined discretion must remain unadopted and recorded as declined.\n"
++    },
++    {
+       "case": "Second creator gets distinct mission ID",
+       "expected_exit": 0,
+       "actual_exit": 0,
+-      "stdout": "MIS-d79c1f89-c985-4717-969d-de4d2177d553\nCreated unconfigured records only; fill the actual grant. No authority granted.\n",
++      "stdout": "MIS-72a35a58-7a2f-4a9c-805b-2ed04cc669f8\nCreated unconfigured records only; fill the actual grant. No authority granted.\n",
+       "stderr": ""
+     },
+     {
+@@ -150,6 +199,20 @@
+       "stderr": ""
+     },
+     {
++      "case": "Operational timing change preserves accepted governing identity",
++      "expected_exit": 0,
++      "actual_exit": 0,
++      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
++      "stderr": ""
++    },
++    {
++      "case": "Changed operational timing remains ready",
++      "expected_exit": 0,
++      "actual_exit": 0,
++      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\nREADY RECORDS PASS: explicit choices, channel, mission grant and discretion disposition populated.\nNo live channel call or grant authentication performed; actual required assurance remains to be completed.\n",
++      "stderr": ""
++    },
++    {
+       "case": "Fake governing rule rejected",
+       "expected_exit": 1,
+       "actual_exit": 1,
+@@ -286,36 +349,36 @@
+       "case": "Readable index lists rows and missions",
+       "expected_exit": 0,
+       "actual_exit": 0,
+-      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n\n## Design Authority Index\n\n| ID | Property | Kind | Status | Source |\n|---|---|---|---|---|\n| DAI-ENVELOPE-01 | Standing Design Discretion | PROPERTY | PROPOSED | Synthetic discretion decision |\n\n## Provisional review queue\n\nNone.\n\n## Missions\n\n| ID | Title | Duty holder | Grant recorded |\n|---|---|---|---|\n| MIS-45d7040f-82e2-4c71-abf6-a3a2dee5e584 | Fixture mission | Fixture owner | yes |\n| MIS-d79c1f89-c985-4717-969d-de4d2177d553 | \u2014 | \u2014 | no |\n\nThis view is generated from the records; it is a retrieval aid, not a second authority.\n",
+-      "stderr": "WARN: MIS-d79c1f89-c985-4717-969d-de4d2177d553: mission has no title (A2.5).\n"
++      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n\n## Design Authority Index\n\n| ID | Property | Kind | Status | Source |\n|---|---|---|---|---|\n| DAI-472d454d-4469-4ad2-9144-dc4a44b3c84c | Cross-project convergence | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_GAME_CONVERGENCE_PROTOCOL_V1.md |\n| DAI-63dbf93b-25dd-4f5f-abd8-14f8d4a9d58a | Rust and cross-platform shared engine | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0001-rust-workspace-and-dependency-direction.md |\n| DAI-7f5236c2-15f7-4bb4-b722-c64177406650 | Durable conversation capture | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_DURABLE_CONVERSATION_CAPTURE_PRINCIPLE.md |\n| DAI-86114962-b0e5-4c8b-8ba2-624910f863ae | Mission and exclusions | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#1-executive-takeover-directive |\n| DAI-8dbd1cc7-6792-424e-b389-c64cf7aac93d | V3-F01 freeze and accepted supersession stack | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase2/SPARK_PHASE_2_V3_F01_OPERATOR_ACCEPTANCE_FREEZE_2026-09-10.md |\n| DAI-ENVELOPE-01 | Fixture discretion | PROPERTY | PROPOSED | Synthetic discretion decision |\n| DAI-a6ae9780-45e7-4579-b120-0de9ae00b921 | Data-driven vocabulary and profile identity | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0004-profile-schema-validation-and-change-classes.md |\n| DAI-c8c613dd-c21d-4c30-943d-18a746f91b0f | Replay and bounded provenance | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0006-persistence-versioning-and-bounded-provenance.md |\n| DAI-ddefa955-b7bb-423f-a71a-9146e423e2d4 | Existing engineer discretion | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#352-engineer-authority |\n| DAI-e2b52e57-2747-4746-a3b5-fae69d6592f5 | Deterministic admission and finality | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0003-deterministic-clock-rng-and-commit-order.md |\n| DAI-fd09c81e-e280-45f7-933f-fc8e4cfec9a7 | Host authority and MCI isolation | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0002-authority-and-host-acknowledgement.md |\n| DAI-fef82d1e-0410-4a1e-8161-317eeeb30cff | Service and embedded equivalence | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0005-service-and-embedded-semantic-equivalence.md |\n\n## Provisional review queue\n\nNone.\n\n## Missions\n\n| ID | Title | Duty holder | Grant recorded |\n|---|---|---|---|\n| MIS-445a9880-3f30-4b86-9fbb-508bf5e1635f | Fixture mission | Fixture owner | yes |\n| MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466 | Prepare S.P.A.R.K. constitutional adoption package for review | Coordinating assistant in this thread | yes |\n| MIS-72a35a58-7a2f-4a9c-805b-2ed04cc669f8 | \u2014 | \u2014 | no |\n\nThis view is generated from the records; it is a retrieval aid, not a second authority.\n",
++      "stderr": "WARN: MIS-72a35a58-7a2f-4a9c-805b-2ed04cc669f8: mission has no title (A2.5).\n"
+     },
+     {
+       "case": "Invalid DAI status rejected",
+       "expected_exit": 1,
+       "actual_exit": 1,
+       "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+-      "stderr": "FAIL: DAI-5d5a08ec-4751-4bd4-a5df-8441746ac91b.json: status must be one of SETTLED, RESERVED, DEFERRED, PROVISIONAL-AGENT, PROPOSED, SUPERSEDED.\n"
++      "stderr": "FAIL: DAI-136d32c2-848a-4e56-9e74-6367cf9aacbf.json: status must be one of SETTLED, RESERVED, DEFERRED, PROVISIONAL-AGENT, PROPOSED, SUPERSEDED.\n"
+     },
+     {
+       "case": "SETTLED row without source rejected",
+       "expected_exit": 1,
+       "actual_exit": 1,
+       "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+-      "stderr": "FAIL: DAI-5d5a08ec-4751-4bd4-a5df-8441746ac91b.json: SETTLED requires its authoritative source.\n"
++      "stderr": "FAIL: DAI-136d32c2-848a-4e56-9e74-6367cf9aacbf.json: SETTLED requires its authoritative source.\n"
+     },
+     {
+       "case": "Provisional row without containment fields rejected",
+       "expected_exit": 1,
+       "actual_exit": 1,
+       "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+-      "stderr": "FAIL: DAI-5d5a08ec-4751-4bd4-a5df-8441746ac91b.json: provisional row missing containment.\n"
++      "stderr": "FAIL: DAI-136d32c2-848a-4e56-9e74-6367cf9aacbf.json: provisional row missing containment.\n"
+     },
+     {
+       "case": "Complete provisional row enters review queue",
+       "expected_exit": 0,
+       "actual_exit": 0,
+-      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n\n## Design Authority Index\n\n| ID | Property | Kind | Status | Source |\n|---|---|---|---|---|\n| DAI-5d5a08ec-4751-4bd4-a5df-8441746ac91b | Fixture retention period | PROPERTY | PROVISIONAL-AGENT | \u2014 |\n| DAI-ENVELOPE-01 | Standing Design Discretion | PROPERTY | PROPOSED | Synthetic discretion decision |\n\n## Provisional review queue\n\n| ID | Property | Priority | Reassess | Hardening condition |\n|---|---|---|---|---|\n| DAI-5d5a08ec-4751-4bd4-a5df-8441746ac91b | Fixture retention period | ROUTINE | 2026-10-01 | Operator sets retention |\n\n## Missions\n\n| ID | Title | Duty holder | Grant recorded |\n|---|---|---|---|\n| MIS-45d7040f-82e2-4c71-abf6-a3a2dee5e584 | Fixture mission | Fixture owner | yes |\n| MIS-d79c1f89-c985-4717-969d-de4d2177d553 | \u2014 | \u2014 | no |\n\nThis view is generated from the records; it is a retrieval aid, not a second authority.\n",
+-      "stderr": "WARN: MIS-d79c1f89-c985-4717-969d-de4d2177d553: mission has no title (A2.5).\n"
++      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n\n## Design Authority Index\n\n| ID | Property | Kind | Status | Source |\n|---|---|---|---|---|\n| DAI-136d32c2-848a-4e56-9e74-6367cf9aacbf | Fixture retention period | PROPERTY | PROVISIONAL-AGENT | \u2014 |\n| DAI-472d454d-4469-4ad2-9144-dc4a44b3c84c | Cross-project convergence | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_GAME_CONVERGENCE_PROTOCOL_V1.md |\n| DAI-63dbf93b-25dd-4f5f-abd8-14f8d4a9d58a | Rust and cross-platform shared engine | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0001-rust-workspace-and-dependency-direction.md |\n| DAI-7f5236c2-15f7-4bb4-b722-c64177406650 | Durable conversation capture | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_DURABLE_CONVERSATION_CAPTURE_PRINCIPLE.md |\n| DAI-86114962-b0e5-4c8b-8ba2-624910f863ae | Mission and exclusions | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#1-executive-takeover-directive |\n| DAI-8dbd1cc7-6792-424e-b389-c64cf7aac93d | V3-F01 freeze and accepted supersession stack | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase2/SPARK_PHASE_2_V3_F01_OPERATOR_ACCEPTANCE_FREEZE_2026-09-10.md |\n| DAI-ENVELOPE-01 | Fixture discretion | PROPERTY | PROPOSED | Synthetic discretion decision |\n| DAI-a6ae9780-45e7-4579-b120-0de9ae00b921 | Data-driven vocabulary and profile identity | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0004-profile-schema-validation-and-change-classes.md |\n| DAI-c8c613dd-c21d-4c30-943d-18a746f91b0f | Replay and bounded provenance | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0006-persistence-versioning-and-bounded-provenance.md |\n| DAI-ddefa955-b7bb-423f-a71a-9146e423e2d4 | Existing engineer discretion | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#352-engineer-authority |\n| DAI-e2b52e57-2747-4746-a3b5-fae69d6592f5 | Deterministic admission and finality | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0003-deterministic-clock-rng-and-commit-order.md |\n| DAI-fd09c81e-e280-45f7-933f-fc8e4cfec9a7 | Host authority and MCI isolation | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0002-authority-and-host-acknowledgement.md |\n| DAI-fef82d1e-0410-4a1e-8161-317eeeb30cff | Service and embedded equivalence | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0005-service-and-embedded-semantic-equivalence.md |\n\n## Provisional review queue\n\n| ID | Property | Priority | Reassess | Hardening condition |\n|---|---|---|---|---|\n| DAI-136d32c2-848a-4e56-9e74-6367cf9aacbf | Fixture retention period | ROUTINE | 2026-10-01 | Operator sets retention |\n\n## Missions\n\n| ID | Title | Duty holder | Grant recorded |\n|---|---|---|---|\n| MIS-445a9880-3f30-4b86-9fbb-508bf5e1635f | Fixture mission | Fixture owner | yes |\n| MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466 | Prepare S.P.A.R.K. constitutional adoption package for review | Coordinating assistant in this thread | yes |\n| MIS-72a35a58-7a2f-4a9c-805b-2ed04cc669f8 | \u2014 | \u2014 | no |\n\nThis view is generated from the records; it is a retrieval aid, not a second authority.\n",
++      "stderr": "WARN: MIS-72a35a58-7a2f-4a9c-805b-2ed04cc669f8: mission has no title (A2.5).\n"
+     },
+     {
+       "case": "DAI id/filename mismatch rejected",
+@@ -400,6 +463,13 @@
+       "actual_exit": 1,
+       "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+       "stderr": "FAIL: $.branch_reason: invalid enum value.\n"
++    },
++    {
++      "case": "Existing mission ID telemetry validates",
++      "expected_exit": 0,
++      "actual_exit": 0,
++      "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; ACCEPTED BY REFERENCED RECORD.\nSource assertions and human authority are not authenticated by a local structural check.\nPASS: 2 events; schema fields, mission identity and unique event IDs checked.\n",
++      "stderr": ""
+     }
+   ]
+ }
+--- upstream/governance/validation/replay_checks.py
++++ candidate/governance/validation/replay_checks.py
+@@ -16,7 +16,7 @@
+ import uuid
+ 
+ PACKAGE = Path(__file__).resolve().parents[2]
+-# Clause identifiers of universal edition 1.0.0; every one must survive.
++# Historical identifiers require retention or an explicit retirement disposition.
+ IDS_1_0_0 = 'C0:1,2,3,4,5,6,7,8,9,10,11 C1:1,2,3,4,5,6 C2:1,2,3,4,5,6,7,8,9,10,11,12 C3:1,2,3,4,5,6,7 C4:1,2,3,4,5 C5:1,2,3,4,5,6,7,8,9,10,11 C6:1,2,3,4,5,6,7,8,9,10,11 C7:1,2,3,4,5,6 C10:1,2,3 C11:1,2,3,4,5 C8:1,2,3,4,5 C9:1,2,3,4,5,6,7,8,9 I1:1,2 I2:1,2,3,4,5,6,7,8,9,10 I3:1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 I4:1,2,3,4,5,6,7 I5:1,2,3,4 I6:1,2,3,4,5,6,7,8,9 I7:1,2,3,4,5 I8:2,3,4,5,6,7 I9:1,2,3,4,5,6 I10:1,2,3,4 I11:1,2,4,5,6,7,8,9,10,11 I12:1,2,3,4,5,6,7,8 I13:1,2 I14:1,2,3,4,5,6,7,9,10,11,12,13 I15:1,2,3 I16:1,2,3,4,5,6,7,8,9,10,11,12,13,14 O0:1,2,3,4 OP:2,3,4 OB:1,2,3,4,5 OR:1,2,3,4,5,6 D:1,2,3,4,5,6,7,8,9,10,11 T:1,3 G:1,2,3,4,5,6,7,8 A1:1,2,3,4,5 A2:1,2 A3:1,2,3'
+ MEMBER_FILES = ('CONSTITUTION.md', 'AGENT_RULES.md', 'ROLE_OVERLAYS.md', 'DESIGN_AUTHORITY_INDEX_SCHEMA.md',
+                 'TECHNICAL_DECISION_RECORD_TEMPLATE.md', 'GOVERNANCE_TELEMETRY_SCHEMA.md', 'ACTIVATION_MANIFEST.md')
+@@ -63,19 +63,40 @@
+     def cfg_update(**changes):
+         text = manifest.read_text()
+         cfg = json.loads(re.search(r'```json\n(.*?)\n```', text, re.S).group(1))
++        if 'first_mission_id' in changes:
++            writej(root / 'project_records/missions/READINESS.json', {'first_mission_id': changes.pop('first_mission_id')})
++        for key in ('per_request_seconds', 'stage_seconds', 'replacement_limit'):
++            changes.pop(key, None)
+         cfg.update(changes)
+         manifest.write_text(re.sub(r'```json\n.*?\n```', lambda _: '```json\n' + json.dumps(cfg, indent=2) + '\n```',
+                                    text, flags=re.S))
+ 
+     def writej(path, obj):
++        if path.name == 'RESOURCE_POLICY_REFERENCES.json':
++            obj.setdefault('review_limits', {'per_request_seconds': 3600, 'stage_seconds': 14400,
++                                            'replacement_limit': 1, 'source': 'Synthetic fixture only'})
+         path.write_text(json.dumps(obj, indent=2) + '\n')
+ 
+     def hashes():
+         lines = (root / 'governance/OPERATIVE_SET.sha256').read_text().splitlines()
+         return dict((n, h) for h, n in (line.split(maxsplit=1) for line in lines))
+ 
+-    missing = old_ids() - clause_ids(root)
+-    assert not missing, ('1.0.0 identifiers missing', sorted(missing))
++    inventory = json.loads((root / 'governance/validation/CLAUSE_INVENTORY.json').read_text())
++    assert set(inventory['current']) == clause_ids(root), 'Current clause inventory mismatch'
++    retired = inventory['retired']
++    assert not (set(retired) & clause_ids(root)), 'Retired clause identifier reused'
++    assert all(isinstance(v, str) and v.strip() for v in retired.values()), 'Retirement requires disposition'
++    assert old_ids() <= clause_ids(root) | set(retired), 'Historical identifier lacks disposition'
++    cfg_update(project_id='UNCONFIGURED', operator_authority='UNCONFIGURED', operator_source='UNCONFIGURED',
++               scope='UNCONFIGURED', dependency_assurance='UNCONFIGURED',
++               standing_design_discretion='UNCONFIGURED', discretion_source=None)
++    writej(root / 'project_records/missions/READINESS.json', {'first_mission_id': None})
++    writej(root / 'project_records/governance/RESOURCE_POLICY_REFERENCES.json', {'channels': []})
++    row_file = root / 'project_records/decisions/dai/DAI-ENVELOPE-01.json'
++    writej(row_file, {'id': 'DAI-ENVELOPE-01', 'kind': 'PROPERTY', 'property': 'Fixture discretion',
++                      'status': 'PROPOSED', 'scope': 'Fixture', 'source': None})
++    run('Reset synthetic candidate hashes', ['write-hashes'], 0)
++
+ 
+     # Structure and startup
+     run('Template structure from unrelated cwd', ['check'], 0, 'UNADOPTED')
+@@ -121,13 +142,44 @@
+     row.update(source='Synthetic discretion decision', setup_disposition='DECLINE')
+     writej(row_file, row)
+     run('Configured startup records pass', ['ready'], 0, 'READY RECORDS PASS')
++    # S.P.A.R.K. migration and operational-policy regression checks.
++    original_mid = mission
++    original_folder = folder
++    legacy_id = 'PHASE2-GATE-C2'
++    legacy_folder = folder.parent / legacy_id
++    folder.rename(legacy_folder)
++    record['id'] = legacy_id
++    writej(legacy_folder / 'mission.json', record)
++    cfg_update(first_mission_id=legacy_id)
++    run('Existing mission ID accepted without renumbering', ['ready'], 0, 'READY RECORDS PASS')
++    run('Existing mission ID appears in index', ['index'], 0, legacy_id)
++    cfg_update(first_mission_id='../outside')
++    run('Mission pointer traversal refused', ['ready'], 1, 'first_mission_id')
++    cfg_update(first_mission_id=original_mid)
++    legacy_folder.rename(original_folder)
++    record['id'] = original_mid
++    writej(original_folder / 'mission.json', record)
++    policy = json.loads(resource.read_text())
++    policy['review_limits']['per_request_seconds'] = 0
++    resource.write_text(json.dumps(policy))
++    run('Nonpositive operational deadline refused', ['ready'], 1, 'positive review limit')
++    policy['review_limits']['per_request_seconds'] = 3600
++    policy['review_limits']['stage_seconds'] = 1
++    resource.write_text(json.dumps(policy))
++    run('Operational stage shorter than request refused', ['ready'], 1, 'shorter than request')
++    policy['review_limits']['stage_seconds'] = 14400
++    resource.write_text(json.dumps(policy))
++    proposed = dict(row, setup_disposition='PROPOSED_ADOPT')
++    writej(row_file, proposed)
++    run('Proposed discretion cannot satisfy readiness', ['ready'], 1, 'Declined discretion')
++    writej(row_file, row)
+     second = run('Second creator gets distinct mission ID', ['new-mission'], 0).stdout.splitlines()[0]
+     assert second != mission
+ 
+     # Adoption fidelity
+     accepted_hashes = hashes()
+     rec = root / 'project_records/governance/adoptions/fixture.json'
+-    acceptance = {'status': 'ADOPTED', 'project_id': 'synthetic-fixture', 'framework_version': '1.1.2',
++    acceptance = {'status': 'ADOPTED', 'project_id': 'synthetic-fixture', 'framework_version': '1.1.3',
+                   'operator_source': 'Synthetic test data only; not a real adoption',
+                   'accepted_at': '2026-09-11T00:00:00Z', 'prior_governance_disposition': 'Synthetic fixture: none',
+                   'verification_evidence': 'This disposable test', 'member_hashes': accepted_hashes,
+@@ -138,6 +190,13 @@
+     writej(pointer, {'record': rec.relative_to(root).as_posix(), 'sha256': accepted_digest})
+     run('Separate accepted identity matches', ['check', '--expected-adoption-sha256', accepted_digest], 0,
+         'ACCEPTED BY REFERENCED RECORD')
++    policy = json.loads(resource.read_text())
++    policy['review_limits']['per_request_seconds'] = 7200
++    policy['review_limits']['stage_seconds'] = 28800
++    resource.write_text(json.dumps(policy))
++    run('Operational timing change preserves accepted governing identity',
++        ['check', '--expected-adoption-sha256', accepted_digest], 0, 'ACCEPTED BY REFERENCED RECORD')
++    run('Changed operational timing remains ready', ['ready'], 0, 'READY RECORDS PASS')
+     rules = root / 'governance/AGENT_RULES.md'
+     clean = rules.read_bytes()
+     original_list = (root / 'governance/OPERATIVE_SET.sha256').read_bytes()
+@@ -252,11 +311,17 @@
+     run('Branch reason for unresolved interpretation accepted (C11.2)', ['check-events'], 0)
+     events([dict(event, boundary_reached=True, branch_reason='COMPETING_COURSES')])
+     run('Retired competing-courses branch reason rejected', ['check-events'], 1, 'invalid enum value')
++    legacy_log_folder = folder.parent / 'PHASE2-GATE-C2'
++    legacy_log_folder.mkdir()
++    legacy_event = dict(event, mission_id='PHASE2-GATE-C2', event_id='EVT-' + str(uuid.uuid4()))
++    (legacy_log_folder / 'governance_events.jsonl').write_text(json.dumps(legacy_event) + '\n')
++    events([event])
++    run('Existing mission ID telemetry validates', ['check-events'], 0, '2 events')
+ 
+ summary = {
+     'case_count': len(results),
+     'all_expected_results_observed': True,
+-    'old_ids_retained': len(old_ids()),
++    'historical_ids_accounted_for': len(old_ids()),
+     'current_ids': len(clause_ids(PACKAGE)),
+     'root_agents_bytes': (PACKAGE / 'AGENTS.md').stat().st_size,
+     'default_codex_budget_bytes': 32768,
+--- upstream/project_records/decisions/DESIGN_AUTHORITY_INDEX.md
++++ candidate/project_records/decisions/DESIGN_AUTHORITY_INDEX.md
+@@ -1,5 +1,3 @@
+ # Design Authority Index
+ 
+-Decision rows live in [dai/](dai/), one JSON file per row. Run `python3 governance/tools/framework.py index` for a readable table of all rows and the provisional review queue; it also checks each row's identity, kind, status, source and provisional fields. This file and that output are retrieval aids, not a second authority. Missing index entries do not revoke source decisions.
+-
+-The supplied [DAI-ENVELOPE-01](dai/DAI-ENVELOPE-01.json) is PROPOSED. It changes status only from the actual setup decision under A5.3. New rows use A2.3 identifiers and the fields in D; creators preserve other actors' rows. Ambiguous Operator input is preserved separately in [operator_input/](operator_input/README.md).
++Rows under `dai/` refer to existing source decisions. Run `python3 governance/tools/framework.py index` to inspect them. DAI-ENVELOPE-01 alone proposes additional incidental discretion and remains PROPOSED. Original requirement-status meanings remain in blueprint §2.3; FUTURE and OUT OF SCOPE are not converted to implementation grants.
+--- upstream/project_records/decisions/PROJECT_SOURCE_REGISTER.md
++++ candidate/project_records/decisions/PROJECT_SOURCE_REGISTER.md
+@@ -1,8 +1,19 @@
+ # Project source register
+ 
+-Status: empty source index; no project properties are established by this starter.
++Baseline: `7e3a0aae069a8bf840e4dfb74221cdf2687b1db5`. These are retrieval references; the source and its scope establish authority. Apply later accepted deltas rather than treating older status text as current.
+ 
+-| Decision or property | Actual authoritative source | Scope and source-established status | Index or decision-record reference |
+-|---|---|---|---|
++| Source | Pinned location |
++|---|---|
++| engineering/PHASE_STATUS.md | [Pinned source](https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/PHASE_STATUS.md) |
++| engineering/SPARK_DURABLE_CONVERSATION_CAPTURE_PRINCIPLE.md | [Pinned source](https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_DURABLE_CONVERSATION_CAPTURE_PRINCIPLE.md) |
++| engineering/SPARK_GAME_CONVERGENCE_PROTOCOL_V1.md | [Pinned source](https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_GAME_CONVERGENCE_PROTOCOL_V1.md) |
++| engineering/phase0/ADR-0001-rust-workspace-and-dependency-direction.md | [Pinned source](https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0001-rust-workspace-and-dependency-direction.md) |
++| engineering/phase0/ADR-0002-authority-and-host-acknowledgement.md | [Pinned source](https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0002-authority-and-host-acknowledgement.md) |
++| engineering/phase0/ADR-0003-deterministic-clock-rng-and-commit-order.md | [Pinned source](https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0003-deterministic-clock-rng-and-commit-order.md) |
++| engineering/phase0/ADR-0004-profile-schema-validation-and-change-classes.md | [Pinned source](https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0004-profile-schema-validation-and-change-classes.md) |
++| engineering/phase0/ADR-0005-service-and-embedded-semantic-equivalence.md | [Pinned source](https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0005-service-and-embedded-semantic-equivalence.md) |
++| engineering/phase0/ADR-0006-persistence-versioning-and-bounded-provenance.md | [Pinned source](https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0006-persistence-versioning-and-bounded-provenance.md) |
++| engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md | [Pinned source](https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md) |
++| engineering/phase2/SPARK_PHASE_2_V3_F01_OPERATOR_ACCEPTANCE_FREEZE_2026-09-10.md | [Pinned source](https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase2/SPARK_PHASE_2_V3_F01_OPERATOR_ACCEPTANCE_FREEZE_2026-09-10.md) |
+ 
+-Preserve source wording separately from agent interpretation. Use the Design Authority Index Schema for indexed decisions. Missing rows do not revoke decisions. The optional Standing Design Discretion proposal remains unadopted unless a distinct source authorizes it.
++Additional source: current Agent Compliance Instrument supplied in this conversation; disposition mapped in the review package. The current preparation request and supplied earlier Phase-2 grant are preserved under `operator_input/`. The source snapshot contains retrieved text; it is not a complete repository checkout. The accepted Phase-2 stack retains its original pinned references and is not re-authored here.
+--- upstream/project_records/decisions/PROPOSED_ADOPTION_CHOICES.md
++++ candidate/project_records/decisions/PROPOSED_ADOPTION_CHOICES.md
+@@ -0,0 +1,11 @@
++# Proposed adoption choices
++
++Status: PROPOSED. None of these selections has been ratified by this document.
++
++1. Adopt the configured seven-member S.P.A.R.K. candidate only after independent review; apply the provision-disposition map. Preserve product requirements, valid grants, phase closures, explicit withdrawals and separate-project boundaries. The framework governs process; source-established product decisions retain their scope. A later Operator change to governing rules must have the explicit content and effect required by C9.1; ordinary direction within existing authority remains usable.
++2. Select MATERIAL library-dependency assurance. Preserve independent challenge on the other I3.1 surfaces and reuse previously assured decisions under I3.14.
++3. Adopt the supplied Standing Design Discretion scope for incidental cheaply reversible observable behavior, with all existing exclusions. Retain the earlier blueprint §35.2 engineering delegation by reference. No authority to redefine canonical semantics or deferred product choices is added.
++4. Adopt revised A5.2: the duty holder sets bounded operational review timing inside applicable Operator-approved resource limits. Timing changes do not amend governing identity. No actual review channel, duration or spending/egress authority is invented in this package; record these from the chosen authorized channel before required review.
++5. Accept the targeted DAI deferred-status, capture-gap, retained mission-ID, operational pointer and clause-retirement changes listed in the change map.
++
++Selection fields in the candidate manifest represent this proposal. DAI-ENVELOPE-01 remains PROPOSED. Readiness must not be reported until real source-backed operational settings and the accepted discretion record exist. Approval of package preparation is not approval of these choices.
+--- upstream/project_records/decisions/dai/DAI-472d454d-4469-4ad2-9144-dc4a44b3c84c.json
++++ candidate/project_records/decisions/dai/DAI-472d454d-4469-4ad2-9144-dc4a44b3c84c.json
+@@ -0,0 +1,10 @@
++{
++  "id": "DAI-472d454d-4469-4ad2-9144-dc4a44b3c84c",
++  "kind": "PROPERTY",
++  "property": "Cross-project convergence",
++  "status": "SETTLED",
++  "scope": "As established by the cited source and later scoped decisions",
++  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_GAME_CONVERGENCE_PROTOCOL_V1.md",
++  "notes": "Independent project authority, sequential gates, reserved deployment choices, resource and review constraints; current status updated by later sources",
++  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
++}
+--- upstream/project_records/decisions/dai/DAI-63dbf93b-25dd-4f5f-abd8-14f8d4a9d58a.json
++++ candidate/project_records/decisions/dai/DAI-63dbf93b-25dd-4f5f-abd8-14f8d4a9d58a.json
+@@ -0,0 +1,10 @@
++{
++  "id": "DAI-63dbf93b-25dd-4f5f-abd8-14f8d4a9d58a",
++  "kind": "PROPERTY",
++  "property": "Rust and cross-platform shared engine",
++  "status": "SETTLED",
++  "scope": "As established by the cited source and later scoped decisions",
++  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0001-rust-workspace-and-dependency-direction.md",
++  "notes": "Rust; common canonical implementation and external platform adapters",
++  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
++}
+--- upstream/project_records/decisions/dai/DAI-7f5236c2-15f7-4bb4-b722-c64177406650.json
++++ candidate/project_records/decisions/dai/DAI-7f5236c2-15f7-4bb4-b722-c64177406650.json
+@@ -0,0 +1,10 @@
++{
++  "id": "DAI-7f5236c2-15f7-4bb4-b722-c64177406650",
++  "kind": "PROPERTY",
++  "property": "Durable conversation capture",
++  "status": "SETTLED",
++  "scope": "As established by the cited source and later scoped decisions",
++  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_DURABLE_CONVERSATION_CAPTURE_PRINCIPLE.md",
++  "notes": "Preserve before future reliance and surface custody gaps; routine working capture authorized",
++  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
++}
+--- upstream/project_records/decisions/dai/DAI-86114962-b0e5-4c8b-8ba2-624910f863ae.json
++++ candidate/project_records/decisions/dai/DAI-86114962-b0e5-4c8b-8ba2-624910f863ae.json
+@@ -0,0 +1,10 @@
++{
++  "id": "DAI-86114962-b0e5-4c8b-8ba2-624910f863ae",
++  "kind": "PROPERTY",
++  "property": "Mission and exclusions",
++  "status": "SETTLED",
++  "scope": "As established by the cited source and later scoped decisions",
++  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#1-executive-takeover-directive",
++  "notes": "Self-contained deterministic causal-pressure/behavior engine; preserve complete mission and exclusions in source",
++  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
++}
+--- upstream/project_records/decisions/dai/DAI-8dbd1cc7-6792-424e-b389-c64cf7aac93d.json
++++ candidate/project_records/decisions/dai/DAI-8dbd1cc7-6792-424e-b389-c64cf7aac93d.json
+@@ -0,0 +1,10 @@
++{
++  "id": "DAI-8dbd1cc7-6792-424e-b389-c64cf7aac93d",
++  "kind": "PROPERTY",
++  "property": "V3-F01 freeze and accepted supersession stack",
++  "status": "SETTLED",
++  "scope": "As established by the cited source and later scoped decisions",
++  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase2/SPARK_PHASE_2_V3_F01_OPERATOR_ACCEPTANCE_FREEZE_2026-09-10.md",
++  "notes": "Retain both precision pins and explicit withdrawals; no repeat review without changed dependency",
++  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
++}
+--- upstream/project_records/decisions/dai/DAI-ENVELOPE-01.json
++++ candidate/project_records/decisions/dai/DAI-ENVELOPE-01.json
+@@ -1,13 +1,10 @@
+ {
+   "id": "DAI-ENVELOPE-01",
+   "kind": "PROPERTY",
+-  "property": "Standing Design Discretion",
++  "property": "Incidental reversible observable behavior within the supplied Standing Design Discretion scope",
+   "status": "PROPOSED",
+-  "scope": "See proposed scope",
+-  "source": null,
+-  "proposal": "governance/templates/STANDING_DESIGN_DISCRETION.md",
+-  "notes": "Not adopted by copying the framework.",
+-  "indexed_by": "framework-template",
+-  "indexed_at": "2026-09-11",
+-  "replacement": null
++  "scope": "governance/templates/STANDING_DESIGN_DISCRETION.md",
++  "source": "project_records/decisions/PROPOSED_ADOPTION_CHOICES.md (proposal; ratification pending)",
++  "setup_disposition": "PROPOSED_ADOPT",
++  "notes": "No adopted discretion is claimed. Exact source and status change only after Operator ratification."
+ }
+--- upstream/project_records/decisions/dai/DAI-a6ae9780-45e7-4579-b120-0de9ae00b921.json
++++ candidate/project_records/decisions/dai/DAI-a6ae9780-45e7-4579-b120-0de9ae00b921.json
+@@ -0,0 +1,10 @@
++{
++  "id": "DAI-a6ae9780-45e7-4579-b120-0de9ae00b921",
++  "kind": "PROPERTY",
++  "property": "Data-driven vocabulary and profile identity",
++  "status": "SETTLED",
++  "scope": "As established by the cited source and later scoped decisions",
++  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0004-profile-schema-validation-and-change-classes.md",
++  "notes": "Frozen grammar; editable declarative profiles, exact identities and explicit change classes",
++  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
++}
+--- upstream/project_records/decisions/dai/DAI-c8c613dd-c21d-4c30-943d-18a746f91b0f.json
++++ candidate/project_records/decisions/dai/DAI-c8c613dd-c21d-4c30-943d-18a746f91b0f.json
+@@ -0,0 +1,10 @@
++{
++  "id": "DAI-c8c613dd-c21d-4c30-943d-18a746f91b0f",
++  "kind": "PROPERTY",
++  "property": "Replay and bounded provenance",
++  "status": "SETTLED",
++  "scope": "As established by the cited source and later scoped decisions",
++  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0006-persistence-versioning-and-bounded-provenance.md",
++  "notes": "Exact artifact binding and explicit replay support; no invented history",
++  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
++}
+--- upstream/project_records/decisions/dai/DAI-ddefa955-b7bb-423f-a71a-9146e423e2d4.json
++++ candidate/project_records/decisions/dai/DAI-ddefa955-b7bb-423f-a71a-9146e423e2d4.json
+@@ -0,0 +1,10 @@
++{
++  "id": "DAI-ddefa955-b7bb-423f-a71a-9146e423e2d4",
++  "kind": "PROPERTY",
++  "property": "Existing engineer discretion",
++  "status": "SETTLED",
++  "scope": "As established by the cited source and later scoped decisions",
++  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#352-engineer-authority",
++  "notes": "Internal realization inside established meaning and authority; no new blanket property grant",
++  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
++}
+--- upstream/project_records/decisions/dai/DAI-e2b52e57-2747-4746-a3b5-fae69d6592f5.json
++++ candidate/project_records/decisions/dai/DAI-e2b52e57-2747-4746-a3b5-fae69d6592f5.json
+@@ -0,0 +1,10 @@
++{
++  "id": "DAI-e2b52e57-2747-4746-a3b5-fae69d6592f5",
++  "kind": "PROPERTY",
++  "property": "Deterministic admission and finality",
++  "status": "SETTLED",
++  "scope": "As established by the cited source and later scoped decisions",
++  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0003-deterministic-clock-rng-and-commit-order.md",
++  "notes": "Retain as amended by the accepted V3-F01 stack, not in isolation",
++  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
++}
+--- upstream/project_records/decisions/dai/DAI-fd09c81e-e280-45f7-933f-fc8e4cfec9a7.json
++++ candidate/project_records/decisions/dai/DAI-fd09c81e-e280-45f7-933f-fc8e4cfec9a7.json
+@@ -0,0 +1,10 @@
++{
++  "id": "DAI-fd09c81e-e280-45f7-933f-fc8e4cfec9a7",
++  "kind": "PROPERTY",
++  "property": "Host authority and MCI isolation",
++  "status": "SETTLED",
++  "scope": "As established by the cited source and later scoped decisions",
++  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0002-authority-and-host-acknowledgement.md",
++  "notes": "Advisory intents; executed validated outcomes distinct from acceptance; immutable authority/write class and isolated MCI fiction",
++  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
++}
+--- upstream/project_records/decisions/dai/DAI-fef82d1e-0410-4a1e-8161-317eeeb30cff.json
++++ candidate/project_records/decisions/dai/DAI-fef82d1e-0410-4a1e-8161-317eeeb30cff.json
+@@ -0,0 +1,10 @@
++{
++  "id": "DAI-fef82d1e-0410-4a1e-8161-317eeeb30cff",
++  "kind": "PROPERTY",
++  "property": "Service and embedded equivalence",
++  "status": "SETTLED",
++  "scope": "As established by the cited source and later scoped decisions",
++  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0005-service-and-embedded-semantic-equivalence.md",
++  "notes": "Equivalent logical semantics; initial delivery selection remains subject to convergence scope",
++  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
++}
+--- upstream/project_records/decisions/operator_input/PHASE2_GRANT_CAPTURE.md
++++ candidate/project_records/decisions/operator_input/PHASE2_GRANT_CAPTURE.md
+@@ -0,0 +1,7 @@
++# Earlier Phase-2 grant — conversation capture
++
++Source: visible project conversation history, Review Repository Next Steps. Personal-context retrieval dates the later grant to September 11; exact source message ID was not supplied. This is a preserved supplied quotation, not a fabricated repository-original record.
++
++> I authorize you to engage phase two end-to-end, stopping only to ask questions or ask your user to perform a task. You are authorized and given permission to not ask for authorization through the entire phase two. Proceed, engage.Skedaddle.
++
++The production status at 7e3a0aae predates this grant. Retain V3-F01 closure and update the current mission/status reference through integration; do not rewrite the earlier freeze record. Phase 3 and other projects are not added by this capture. Current implementation progress has not been verified.
+--- upstream/project_records/decisions/operator_input/RATIFICATION_PREPARATION_20260911.md
++++ candidate/project_records/decisions/operator_input/RATIFICATION_PREPARATION_20260911.md
+@@ -0,0 +1,12 @@
++# Operator direction — adoption preparation
++
++Source: current S.P.A.R.K. Development Shell conversation, 2026-09-11.
++Preserved wording:
++
++> Dig over the history of our project and figure out, deduce what needs to be added or taken out of this constitutional framework before we adopt it. We're entering a constitutional ratification and acceptance process, and you're in charge of implementation. Don't mess this up, pal.
++
++Follow-up:
++
++> Create the adoption package and set it aside for review. Send me a copy to download in a package.
++
++Interpretation: prepare and preserve the non-operative candidate for review. These instructions do not ratify its proposed content.
+--- upstream/project_records/governance/RESOURCE_POLICY_REFERENCES.json
++++ candidate/project_records/governance/RESOURCE_POLICY_REFERENCES.json
+@@ -1,3 +1,10 @@
+ {
+-  "channels": []
++  "channels": [],
++  "review_limits": {
++    "per_request_seconds": null,
++    "stage_seconds": null,
++    "replacement_limit": null,
++    "source": null
++  },
++  "notes": "No live review channel verified. Populate from actual authorization and channel evidence before required review. NIM resource use remains subject to the project-specific protocol and actual economic/egress limits."
+ }
+--- upstream/project_records/governance/adoptions/README.md
++++ candidate/project_records/governance/adoptions/README.md
+@@ -1,5 +1,3 @@
+ # Acceptance records
+ 
+-Store the Operator-authorized acceptance record here under a unique filename. Use the template in `governance/templates/adoption.json`, fill actual source evidence and exact member hashes, and preserve prior acceptance records. Point `ACTIVE_ADOPTION.json` to the accepted record and its SHA-256 only after authorization. The validator has no adoption command.
+-
+-An editable local pointer and acceptance file detect ordinary drift; they do not authenticate a human or resist a writer who can rewrite every record and tool. Keep the accepted record or its digest in an independently trusted location when stronger fidelity is needed; `check --expected-adoption-sha256` compares with that supplied digest.
++No adoption exists. Do not fill or activate an acceptance record before independent review and explicit Operator ratification of exact content. See package review_materials/ACCEPTANCE_DRAFT.md.
+--- upstream/project_records/missions/MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466/checkpoint.md
++++ candidate/project_records/missions/MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466/checkpoint.md
+@@ -0,0 +1,3 @@
++# Checkpoint
++
++Package prepared as a non-operative candidate. Next: independent review against the pinned baseline and proposed dispositions, then resolve exact adoption choices. No activation is authorized by this package.
+--- upstream/project_records/missions/MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466/closeout.md
++++ candidate/project_records/missions/MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466/closeout.md
+@@ -0,0 +1,3 @@
++# Preparation closeout
++
++See package VALIDATION_REPORT.md for actual checks and PACKAGE_MANIFEST.json for content identity. Preparation delivers a review candidate; independent review and ratification remain open.
+--- upstream/project_records/missions/MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466/dispensations/README.md
++++ candidate/project_records/missions/MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466/dispensations/README.md
+@@ -0,0 +1,3 @@
++# Record location
++
++No completed dispensations is asserted by this placeholder.
+--- upstream/project_records/missions/MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466/evidence/README.md
++++ candidate/project_records/missions/MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466/evidence/README.md
+@@ -0,0 +1,3 @@
++# Record location
++
++No completed evidence is asserted by this placeholder.
+--- upstream/project_records/missions/MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466/mission.json
++++ candidate/project_records/missions/MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466/mission.json
+@@ -0,0 +1,18 @@
++{
++  "id": "MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466",
++  "title": "Prepare S.P.A.R.K. constitutional adoption package for review",
++  "grant_source": "project_records/decisions/operator_input/RATIFICATION_PREPARATION_20260911.md",
++  "objective": "Prepare a separate non-operative adoption package and download copy",
++  "scope": "Historical fit assessment, proposed framework corrections, migration map, evidence and review handoff",
++  "actors": [
++    "Coordinating assistant in this thread"
++  ],
++  "duty_holder": "Coordinating assistant in this thread",
++  "duration": "Until review package delivery",
++  "conditions": "No adoption, production activation, or unrelated phase implementation",
++  "exclusions": [
++    "Independent approval is not claimed",
++    "No production branch merge",
++    "No G.A.M.E. or S.W.A.R.M. change"
++  ]
++}
+--- upstream/project_records/missions/MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466/reviews/README.md
++++ candidate/project_records/missions/MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466/reviews/README.md
+@@ -0,0 +1,3 @@
++# Record location
++
++No completed reviews is asserted by this placeholder.
+--- upstream/project_records/missions/MISSION_REGISTRY.md
++++ candidate/project_records/missions/MISSION_REGISTRY.md
+@@ -1,3 +1,4 @@
+ # Mission registry
+ 
+-Each `MIS-<UUID4>/mission.json` in this directory is a separate mission record. Run `python3 governance/tools/framework.py index` for a readable list; copying or indexing records does not grant authority. Use `python3 governance/tools/framework.py new-mission --title "<short title>"` to create a folder and templates, then record the actual grant before claiming readiness.
++- [MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466](MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466/mission.json): adoption-package preparation, from the actual current grant.
++- Earlier Phase-2 grant is preserved in `../decisions/operator_input/PHASE2_GRANT_CAPTURE.md`; it is not a grant to activate this framework.
+--- upstream/project_records/missions/READINESS.json
++++ candidate/project_records/missions/READINESS.json
+@@ -0,0 +1,3 @@
++{
++  "first_mission_id": "MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466"
++}

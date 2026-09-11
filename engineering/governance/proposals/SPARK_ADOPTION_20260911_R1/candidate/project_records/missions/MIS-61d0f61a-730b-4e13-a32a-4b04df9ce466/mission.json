@@ -1,0 +1,18 @@
+{
+  "id": "MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466",
+  "title": "Prepare S.P.A.R.K. constitutional adoption package for review",
+  "grant_source": "project_records/decisions/operator_input/RATIFICATION_PREPARATION_20260911.md",
+  "objective": "Prepare a separate non-operative adoption package and download copy",
+  "scope": "Historical fit assessment, proposed framework corrections, migration map, evidence and review handoff",
+  "actors": [
+    "Coordinating assistant in this thread"
+  ],
+  "duty_holder": "Coordinating assistant in this thread",
+  "duration": "Until review package delivery",
+  "conditions": "No adoption, production activation, or unrelated phase implementation",
+  "exclusions": [
+    "Independent approval is not claimed",
+    "No production branch merge",
+    "No G.A.M.E. or S.W.A.R.M. change"
+  ]
+}

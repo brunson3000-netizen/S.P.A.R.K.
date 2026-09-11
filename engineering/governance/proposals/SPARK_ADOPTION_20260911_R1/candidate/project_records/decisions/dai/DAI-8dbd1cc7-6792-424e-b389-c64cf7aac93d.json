@@ -1,0 +1,10 @@
+{
+  "id": "DAI-8dbd1cc7-6792-424e-b389-c64cf7aac93d",
+  "kind": "PROPERTY",
+  "property": "V3-F01 freeze and accepted supersession stack",
+  "status": "SETTLED",
+  "scope": "As established by the cited source and later scoped decisions",
+  "source": "https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase2/SPARK_PHASE_2_V3_F01_OPERATOR_ACCEPTANCE_FREEZE_2026-09-10.md",
+  "notes": "Retain both precision pins and explicit withdrawals; no repeat review without changed dependency",
+  "indexed_by": "Coordinating assistant, 2026-09-11; referential import, no new decision"
+}

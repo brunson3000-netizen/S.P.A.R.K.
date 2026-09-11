@@ -1,0 +1,10 @@
+{
+  "channels": [],
+  "review_limits": {
+    "per_request_seconds": null,
+    "stage_seconds": null,
+    "replacement_limit": null,
+    "source": null
+  },
+  "notes": "No live review channel verified. Populate from actual authorization and channel evidence before required review. NIM resource use remains subject to the project-specific protocol and actual economic/egress limits."
+}

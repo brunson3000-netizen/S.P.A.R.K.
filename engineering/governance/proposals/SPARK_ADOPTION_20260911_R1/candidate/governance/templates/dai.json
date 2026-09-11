@@ -1,0 +1,17 @@
+{
+  "id": "DAI-<UUID4>",
+  "kind": "PROPERTY",
+  "property": "UNCONFIGURED",
+  "status": "PROPOSED",
+  "scope": "UNCONFIGURED",
+  "source": null,
+  "indexed_by": "UNCONFIGURED",
+  "indexed_at": "UNCONFIGURED",
+  "notes": "UNCONFIGURED",
+  "replacement": null,
+  "containment": null,
+  "reversibility": null,
+  "reassessment_date": null,
+  "review_priority": null,
+  "hardening_condition": null
+}

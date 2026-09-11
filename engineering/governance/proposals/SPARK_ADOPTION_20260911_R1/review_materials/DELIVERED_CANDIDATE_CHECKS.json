@@ -1,0 +1,30 @@
+[
+  {
+    "command": "check",
+    "expected_exit": 0,
+    "actual_exit": 0,
+    "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+    "stderr": ""
+  },
+  {
+    "command": "index",
+    "expected_exit": 0,
+    "actual_exit": 0,
+    "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n\n## Design Authority Index\n\n| ID | Property | Kind | Status | Source |\n|---|---|---|---|---|\n| DAI-472d454d-4469-4ad2-9144-dc4a44b3c84c | Cross-project convergence | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_GAME_CONVERGENCE_PROTOCOL_V1.md |\n| DAI-63dbf93b-25dd-4f5f-abd8-14f8d4a9d58a | Rust and cross-platform shared engine | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0001-rust-workspace-and-dependency-direction.md |\n| DAI-7f5236c2-15f7-4bb4-b722-c64177406650 | Durable conversation capture | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/SPARK_DURABLE_CONVERSATION_CAPTURE_PRINCIPLE.md |\n| DAI-86114962-b0e5-4c8b-8ba2-624910f863ae | Mission and exclusions | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#1-executive-takeover-directive |\n| DAI-8dbd1cc7-6792-424e-b389-c64cf7aac93d | V3-F01 freeze and accepted supersession stack | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase2/SPARK_PHASE_2_V3_F01_OPERATOR_ACCEPTANCE_FREEZE_2026-09-10.md |\n| DAI-ENVELOPE-01 | Incidental reversible observable behavior within the supplied Standing Design Discretion scope | PROPERTY | PROPOSED | project_records/decisions/PROPOSED_ADOPTION_CHOICES.md (proposal; ratification pending) |\n| DAI-a6ae9780-45e7-4579-b120-0de9ae00b921 | Data-driven vocabulary and profile identity | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0004-profile-schema-validation-and-change-classes.md |\n| DAI-c8c613dd-c21d-4c30-943d-18a746f91b0f | Replay and bounded provenance | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0006-persistence-versioning-and-bounded-provenance.md |\n| DAI-ddefa955-b7bb-423f-a71a-9146e423e2d4 | Existing engineer discretion | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/CONTROLLING_BLUEPRINT_v0.2.md#352-engineer-authority |\n| DAI-e2b52e57-2747-4746-a3b5-fae69d6592f5 | Deterministic admission and finality | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0003-deterministic-clock-rng-and-commit-order.md |\n| DAI-fd09c81e-e280-45f7-933f-fc8e4cfec9a7 | Host authority and MCI isolation | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0002-authority-and-host-acknowledgement.md |\n| DAI-fef82d1e-0410-4a1e-8161-317eeeb30cff | Service and embedded equivalence | PROPERTY | SETTLED | https://github.com/brunson3000-netizen/S.P.A.R.K./blob/7e3a0aae069a8bf840e4dfb74221cdf2687b1db5/engineering/phase0/ADR-0005-service-and-embedded-semantic-equivalence.md |\n\n## Provisional review queue\n\nNone.\n\n## Missions\n\n| ID | Title | Duty holder | Grant recorded |\n|---|---|---|---|\n| MIS-61d0f61a-730b-4e13-a32a-4b04df9ce466 | Prepare S.P.A.R.K. constitutional adoption package for review | Coordinating assistant in this thread | yes |\n\nThis view is generated from the records; it is a retrieval aid, not a second authority.\n",
+    "stderr": ""
+  },
+  {
+    "command": "check-events",
+    "expected_exit": 0,
+    "actual_exit": 0,
+    "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\nPASS: 0 events; schema fields, mission identity and unique event IDs checked.\n",
+    "stderr": ""
+  },
+  {
+    "command": "ready",
+    "expected_exit": 1,
+    "actual_exit": 1,
+    "stdout": "PASS: 7 member identities; 276 unique clause IDs; entrypoints; UNADOPTED TEMPLATE/CANDIDATE.\nSource assertions and human authority are not authenticated by a local structural check.\n",
+    "stderr": "FAIL: Record a positive review limit: per_request_seconds\n"
+  }
+]
