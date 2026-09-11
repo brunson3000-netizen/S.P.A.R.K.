@@ -1,8 +1,8 @@
 # S.P.A.R.K. Engineering Status
 
-**Updated:** 2026-09-06  
+**Updated:** 2026-09-10
 **Branch:** `phase1-refoundation-v2`  
-**Status basis:** repository history through pre-convergence HEAD `5d45b29b1664018d44ca7f1130f703f95906969d`
+**Status basis:** Operator acceptance of candidate `5ecc95c033bf3a7744bb7862bf959066e6561670`, independently reviewed at `e55b1da1c9049b1de58fcb06c65eea59939f2a57`
 
 This file is a current-status summary. Detailed historical evidence remains in the phase reports, reviews, ADRs, Git history, and thread closeout records.
 
@@ -16,7 +16,7 @@ The active cross-project operating record is:
 
 `engineering/SPARK_GAME_CONVERGENCE_PROTOCOL_V1.md`
 
-Reactivation does not resolve V3-F01, authorize Phase-2 implementation, or authorize Phase 3. The immediate active action is the bounded V3-F01 architecture correction and independent acceptance/freeze. G.A.M.E. integration requirements and test fixtures may be prepared without prematurely implementing Phase-3 product protocol/service code.
+The Operator has now accepted and frozen the independently reviewed V3-F01 Revision-2 correction. V3-F01 is CLOSED. S.P.A.R.K. Gate C1 is satisfied; Gate C2 awaits explicit Phase-2 implementation authorization. Phase 3 remains unauthorized. G.A.M.E. integration requirements and test fixtures may be prepared within the existing protocol; no joint integration readiness or G.A.M.E. state change is claimed.
 
 ## Phase 0
 
@@ -45,39 +45,47 @@ Controlling evidence includes:
 - `engineering/phase1/PHASE_1_FINAL_CLOSURE_IMPLEMENTATION_REPORT_2026-08-26.md`
 - `engineering/phase1/SPARK_PHASE_1_CODEX_FINAL_CLOSURE_REVIEW_2026-08-26.md`
 
-No Phase-1 semantic identity, encoding, conflict, authority, or determinism invariant is reopened by the current Phase-2 blocker.
+No Phase-1 semantic identity, encoding, conflict, authority, or determinism invariant is reopened by the accepted Phase-2 correction.
 
 ## Phase 2
 
-**ARCHITECTURE V3 REQUIRES ONE BOUNDED REVISION. IMPLEMENTATION NOT AUTHORIZED. CONVERGENCE ACTIVE.**
+**ARCHITECTURE CORRECTION ACCEPTED AND FROZEN. V3-F01 CLOSED. IMPLEMENTATION NOT AUTHORIZED.**
 
-Phase-2 architecture went through the original freeze, Codex adversarial review, v2 correction, Codex v2 rereview, v3 correction, provenance correction, and final bounded Codex confirmation.
+The controlling Operator acceptance is
+`engineering/phase2/SPARK_PHASE_2_V3_F01_OPERATOR_ACCEPTANCE_FREEZE_2026-09-10.md`.
+The controlling independent review is
+`engineering/phase2/SPARK_PHASE_2_CODEX_V3_F01_REV2_INDEPENDENT_REVIEW_2026-09-10.md`
+at `e55b1da1c9049b1de58fcb06c65eea59939f2a57`, verdict
+`V3_F01_REV2_ACCEPTABLE_FOR_OPERATOR_ACCEPTANCE_AND_FREEZE`.
+Candidate `5ecc95c033bf3a7744bb7862bf959066e6561670` and its complete supersession
+stack are accepted under the review's two controlling pins:
 
-The latest controlling independent result is:
+- Replay epoch resets sharing a frozen frontier in ascending `reset_index`.
+- Production P-7 through P-9 use bounded indexed lookup; prefer PX-1's three read-only
+  accessors or an equivalent bounded private seam, without encoding, authority, identity
+  or admission-semantic changes.
 
-`PHASE_2_ARCHITECTURE_V3_REVISE`
+The frozen correction retains horizon expansion, cohort-local time, atomic least-slice
+scheduler/obligation extraction, exact ActiveRequest resume, atomic finalization refusal,
+request-bound dequeue and completed-versus-paused replay. All production Rust remains
+unchanged; Phase 0 and Phase 1 remain closed. Fable architecture-challenge research remains
+noncanonical and unmerged.
 
-recorded in:
+Fresh independent validation passes: 58 model checks, disposable Rust probes and negative
+controls, 2,496 additional differential cases, 232 workspace tests, formatting, strict
+lint, metadata, whitespace and five static Windows/Android target builds. Crash recovery,
+durable snapshots/mailboxes, GAME integration, performance evidence and executable
+Windows/Android parity remain future gates.
 
-`engineering/phase2/SPARK_PHASE_2_CODEX_FINAL_ARCHITECTURE_V3_CONFIRMATION_2026-08-26.md`
+**Next authorization:** explicit Operator release of Gate C2 to implement the frozen
+Phase-2 rule/effect runtime and acceptance oracle, including both precision pins, with
+independent review. Phase-2 implementation and Phase 3 remain unauthorized.
 
-All previously repaired Phase-2 areas remain closed. Exactly one known blocker remains:
+### Historical Gate C1 chronology — superseded status statements
 
-### V3-F01 — cohort extraction / pre-wave digest inconsistency
-
-The v3 pacing and catch-up equivalence rules require each admitted `(due_time, profile_id)` cohort to leave canonical scheduler state immediately before that cohort's pre-wave engine digest is captured, while deferred cohorts remain resident and unchanged. The inherited Phase-1 `Scheduler::drain_due(now)` removes the whole due prefix instead. Therefore equivalent pacing/catch-up partitions can produce different scheduler, pre-wave engine, and `effect_batch` digests.
-
-The independent review identifies the smallest safe bounded correction:
-
-- add an internal deterministic cohort-granular due-work extraction surface;
-- remove exactly the admitted current cohort immediately before its pre-wave digest;
-- leave later/deferred scheduler slots resident and byte-identical;
-- preserve existing Phase-1 `WorkKey`, slot, conflict, ordering, encoding, digest, `schedule`, and `drain_due` semantics;
-- correct the v3 acceptance oracle to permit that additive extraction surface and prove paced/unbudgeted and catch-up partition equivalence at every cohort boundary.
-
-This is an architecture correction only. It introduces no new causal primitive and does not authorize production Rust.
-
-**The correction is now the active convergence frontier. Phase-2 implementation writer remains unreleased until the correction is frozen and independently accepted.**
+The dated subsections below preserve the writer/reviewer history. Their OPEN, pending,
+not-accepted and not-frozen statements describe those earlier passes only. The current
+acceptance and freeze above control; withdrawn proposals remain withdrawn.
 
 #### V3-F01 correction candidate (Gate C1 writer pass, 2026-09-06)
 
