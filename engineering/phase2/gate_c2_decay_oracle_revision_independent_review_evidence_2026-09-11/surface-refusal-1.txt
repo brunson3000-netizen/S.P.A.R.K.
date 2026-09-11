@@ -1,0 +1,20 @@
+# source:
+pub fn probe() { let _ = spark_engine::request::FinalizationRefusal::WrongTimelineEpoch; }
+$ cargo check --offline
+    Checking independent-surfaces v0.0.0 (/tmp/spark-c2-independent-surfaces-wtno5q87)
+error[E0603]: unit variant `WrongTimelineEpoch` is private
+   --> src/lib.rs:1:70
+    |
+  1 | pub fn probe() { let _ = spark_engine::request::FinalizationRefusal::WrongTimelineEpoch; }
+    |                                                                      ^^^^^^^^^^^^^^^^^^ private unit variant
+    |
+note: the unit variant `WrongTimelineEpoch` is defined here
+   --> /tmp/spark-gate-c2-decay-oracle-review/crates/spark-engine/src/request.rs:237:5
+    |
+236 |     #[non_exhaustive]
+    |     ----------------- cannot be constructed because it is `#[non_exhaustive]`
+237 |     WrongTimelineEpoch,
+    |     ^^^^^^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0603`.
+error: could not compile `independent-surfaces` (lib) due to 1 previous error

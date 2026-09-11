@@ -1,0 +1,138 @@
+[
+  {
+    "name": "positive-match",
+    "source": "use spark_engine::request::FinalizationRefusal; pub fn inspect(r: &FinalizationRefusal)->bool { matches!(r, FinalizationRefusal::WrongProfile { .. }) }",
+    "expected_compile": true,
+    "exit_code": 0,
+    "expected_diagnostic": "",
+    "pass_": true
+  },
+  {
+    "name": "refusal-0",
+    "source": "pub fn probe() { let _ = spark_engine::request::FinalizationRefusal::WrongProfile; }",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "non_exhaustive",
+    "pass_": true
+  },
+  {
+    "name": "refusal-1",
+    "source": "pub fn probe() { let _ = spark_engine::request::FinalizationRefusal::WrongTimelineEpoch; }",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "non_exhaustive",
+    "pass_": true
+  },
+  {
+    "name": "refusal-2",
+    "source": "pub fn probe() { let _ = spark_engine::request::FinalizationRefusal::NotActiveSequencer; }",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "non_exhaustive",
+    "pass_": true
+  },
+  {
+    "name": "refusal-3",
+    "source": "pub fn probe() { let _ = spark_engine::request::FinalizationRefusal::OrdinalSpaceExhaustedWindow; }",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "non_exhaustive",
+    "pass_": true
+  },
+  {
+    "name": "refusal-4",
+    "source": "pub fn probe() { let _ = spark_engine::request::FinalizationRefusal::OrdinalSpaceExhaustedFrontierAdvance; }",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "non_exhaustive",
+    "pass_": true
+  },
+  {
+    "name": "refusal-5",
+    "source": "pub fn probe() { let _ = spark_engine::request::FinalizationRefusal::UnexpectedStagingState { ordinal: spark_core::timeline::Ordinal(0) }; }",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "non-exhaustive",
+    "pass_": true
+  },
+  {
+    "name": "refusal-6",
+    "source": "pub fn probe() { let _ = spark_engine::request::FinalizationRefusal::CommandIdentityConflict { command_id: spark_core::id::CommandId::new(\"cmd.one\").unwrap() }; }",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "non-exhaustive",
+    "pass_": true
+  },
+  {
+    "name": "refusal-7",
+    "source": "pub fn probe() { let _ = spark_engine::request::FinalizationRefusal::SourceSequenceConflict { source_id: spark_core::id::SourceId::new(\"source.one\").unwrap(), source_sequence: 1 }; }",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "non-exhaustive",
+    "pass_": true
+  },
+  {
+    "name": "refusal-8",
+    "source": "pub fn probe() { let _ = spark_engine::request::FinalizationRefusal::SourceSequenceNotIncreasing { source_id: spark_core::id::SourceId::new(\"source.one\").unwrap(), previously_finalized: 2, attempted: 1 }; }",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "non-exhaustive",
+    "pass_": true
+  },
+  {
+    "name": "cohort-field",
+    "source": "pub fn probe(r: &spark_engine::report::CohortReport) { let _ = &r.cohort_identity; }",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "no field",
+    "pass_": true
+  },
+  {
+    "name": "diagnostics-field",
+    "source": "pub fn probe(r: &spark_engine::report::PacingDiagnostics) { let _ = r.command_deferred; }",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "no field",
+    "pass_": true
+  },
+  {
+    "name": "evaluator-view",
+    "source": "pub fn probe(_: spark_engine::engine::EvalView) {}",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "private",
+    "pass_": true
+  },
+  {
+    "name": "fixture-hidden",
+    "source": "pub fn probe(e: &spark_engine::engine::Engine) { let _ = spark_engine::fixture::observation(e); }",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "could not find",
+    "pass_": true
+  },
+  {
+    "name": "core-fault-enum",
+    "source": "pub fn probe(_: spark_core::timeline::DerivedIndexFault) {}",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "could not find",
+    "pass_": false
+  },
+  {
+    "name": "core-fault-injector",
+    "source": "pub fn probe(t: &mut spark_core::timeline::TimelineIngress) { t.inject_derived_index_fault(()); }",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "no method",
+    "pass_": true
+  },
+  {
+    "name": "wave-observation",
+    "source": "pub fn probe(_: spark_engine::engine::CommittedWaveObservation) {}",
+    "expected_compile": false,
+    "exit_code": 101,
+    "expected_diagnostic": "could not find",
+    "pass_": false
+  }
+]

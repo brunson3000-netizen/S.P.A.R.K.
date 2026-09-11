@@ -1,0 +1,21 @@
+# source:
+pub fn probe(_: spark_core::timeline::DerivedIndexFault) {}
+$ cargo check --offline
+    Checking independent-surfaces v0.0.0 (/tmp/spark-c2-independent-surfaces-wtno5q87)
+error[E0425]: cannot find type `DerivedIndexFault` in module `spark_core::timeline`
+   --> src/lib.rs:1:39
+    |
+  1 | pub fn probe(_: spark_core::timeline::DerivedIndexFault) {}
+    |                                       ^^^^^^^^^^^^^^^^^ not found in `spark_core::timeline`
+    |
+note: found an item that was configured out
+   --> /tmp/spark-gate-c2-decay-oracle-review/crates/spark-core/src/timeline.rs:982:10
+    |
+980 | #[cfg(any(test, feature = "test-support"))]
+    |          -------------------------------- the item is gated here
+981 | #[derive(Debug, Clone, PartialEq, Eq)]
+982 | pub enum DerivedIndexFault {
+    |          ^^^^^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `independent-surfaces` (lib) due to 1 previous error

@@ -1,0 +1,87 @@
+{
+  "tree": "6968a4af917c9a32761be371c3e12ec12ba0f1bd",
+  "environment": {
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_INCREMENTAL": "0"
+  },
+  "baseline": [
+    {
+      "name": "r01_recovery_reapplication_and_timestamp",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "name": "r02_activation_endpoint_is_owned_by_closing_segment",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "name": "r03_unmoved_writes_fire_watchers_and_reject_shocks",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "name": "r04_per_wave_store_and_index_discriminator",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    }
+  ],
+  "mutants": [
+    {
+      "id": "own-C2R-01-next-tick",
+      "patch_file": "crates/spark-engine/src/engine.rs",
+      "old": "        let epoch = self.behavior_epoch();\n        // Every committed effect is written",
+      "new": "        let epoch = self.behavior_epoch();\n        let now = LogicalTime(now.0 + 1);\n        // Every committed effect is written",
+      "name": "r01_recovery_reapplication_and_timestamp",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    },
+    {
+      "id": "own-C2R-02-drop-closing-endpoint",
+      "patch_file": "crates/spark-engine/src/engine.rs",
+      "old": ".map_or(now.0, |a| a.0.min(now.0));",
+      "new": ".map_or(now.0, |a| a.0.saturating_sub(1).min(now.0));",
+      "name": "r02_activation_endpoint_is_owned_by_closing_segment",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    },
+    {
+      "id": "own-C2R-03-drop-zero-rate",
+      "patch_file": "crates/spark-engine/src/engine.rs",
+      "old": "                    Some(Intent::Transform {\n                        family: crate::rules::TransformFamily::Decay,",
+      "new": "                    if matches!(&only.update, Update::Decay { rate: Param::Literal(0), .. }) { return Ok(None); }\n                    Some(Intent::Transform {\n                        family: crate::rules::TransformFamily::Decay,",
+      "name": "r03_unmoved_writes_fire_watchers_and_reject_shocks",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    },
+    {
+      "id": "own-C2R-04-drop-later-wave-records",
+      "patch_file": "crates/spark-engine/src/engine.rs",
+      "old": "            self.obligations.insert(r.clone());\n        }\n        let batch",
+      "new": "            if wave == 0 { self.obligations.insert(r.clone()); }\n        }\n        let batch",
+      "name": "r04_per_wave_store_and_index_discriminator",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    }
+  ],
+  "probe_sha256": "2d7cba1a6a32508d0def1ec32644dfd1c001a2ade7a6b6e4375102a0d8c6ac69",
+  "all_killed": true
+}

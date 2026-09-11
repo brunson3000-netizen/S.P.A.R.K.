@@ -1,0 +1,24 @@
+# source: independent_revision_probes.rs sha256=ea9e3dab3e5b154d3e6c168194903e610012b64d39fcf38e79498a5f9eaa7247
+# crate root: /tmp/spark-gate-c2-decay-oracle-review
+# spark-engine test-support: True
+# whitespace-normalized: trailing spaces and trailing blank lines removed
+$ cargo test --offline -- --nocapture --test-threads=1
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.11
+   Compiling arrayvec v0.7.8
+   Compiling cfg-if v1.0.4
+   Compiling cpufeatures v0.3.0
+   Compiling constant_time_eq v0.4.2
+   Compiling cc v1.4.4
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-gate-c2-decay-oracle-review/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-gate-c2-decay-oracle-review/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-gate-c2-decay-oracle-review/crates/spark-testkit)
+   Compiling spark-c2-counterexamples v0.0.0 (/tmp/spark-c2-rev2-corpus-3u4o5fj8)
+error: failed to write file /tmp/spark-c2-rev2-corpus-3u4o5fj8/target/debug/incremental/spark_testkit-0re1qyaj3sks2/s-hm6qffs8l7-1ykafv3-working/dep-graph.part.bin: No space left on device (os error 28)"
+
+error: could not compile `spark-testkit` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: failed to write file /tmp/spark-c2-rev2-corpus-3u4o5fj8/target/debug/incremental/spark_engine-2weq49t2pf7jh/s-hm6qf7hg2b-19q7433-working/dep-graph.part.bin: No space left on device (os error 28)"
+
+error: could not compile `spark-engine` (lib) due to 1 previous error

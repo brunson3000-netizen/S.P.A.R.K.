@@ -1,0 +1,58 @@
+{
+  "candidate": "6968a4af917c9a32761be371c3e12ec12ba0f1bd",
+  "required_checks_passed": 14,
+  "workspace": {
+    "passed": 390,
+    "failed": 0,
+    "ignored": 0
+  },
+  "corpora": {
+    "adapted-corpus.txt": [
+      9,
+      0
+    ],
+    "prior-revision-probes.txt": [
+      13,
+      1
+    ],
+    "prior-revision-time-assertion-only.txt": [
+      14,
+      0
+    ],
+    "independent-probes.txt": [
+      7,
+      2
+    ]
+  },
+  "independent_contract_failures": [
+    "r2prime_frozen_q7_full_cadence_after_fresh_assignment",
+    "r2prime_frozen_q7_full_cadence_after_separate_shock"
+  ],
+  "writer_mutants_killed": 7,
+  "writer_old_test_survivors": 2,
+  "independent_mutants_killed": 4,
+  "default_feature_surface_controls": 17,
+  "oracle_rows": 60,
+  "oracle_R": [
+    "AT-I22"
+  ],
+  "oracle_P": [
+    "AT-I13"
+  ],
+  "oracle_qualified_S": [
+    "AT-I23 (nonretroactivity supported; residual/grid policy pending)",
+    "AT-I39 (per-profile)",
+    "AT-I40 (per-profile)"
+  ],
+  "environment": {
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_BUILD_JOBS": "2"
+  },
+  "reviewer_corrections": [
+    "storage-exhaustion rerun",
+    "two expected diagnostic substrings corrected; negatives already hidden"
+  ],
+  "preservation_passed": true
+}

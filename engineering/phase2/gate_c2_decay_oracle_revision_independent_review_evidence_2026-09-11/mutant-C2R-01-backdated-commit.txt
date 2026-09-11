@@ -1,0 +1,29 @@
+# mutant C2R-01-backdated-commit: commit at the end of the last whole step (instantiated for the cadence-10 fixtures by flooring the write time to a multiple of 10)
+# tree: 6968a4af917c9a32761be371c3e12ec12ba0f1bd
+
+$ kills phase2_decay_oracle_revision::c2r_01_decay_reapplied_at_canonical_time_reproduces_the_state
+
+running 1 test
+test c2r_01_decay_reapplied_at_canonical_time_reproduces_the_state ... FAILED
+
+failures:
+
+---- c2r_01_decay_reapplied_at_canonical_time_reproduces_the_state stdout ----
+
+thread 'c2r_01_decay_reapplied_at_canonical_time_reproduces_the_state' (523) panicked at crates/spark-testkit/tests/phase2_decay_oracle_revision.rs:404:9:
+assertion `left == right` failed
+  left: (100, LogicalTime(0))
+ right: (100, LogicalTime(1))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c2r_01_decay_reapplied_at_canonical_time_reproduces_the_state
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-rev2-mutants-_3azp73h/C2R-01-backdated-commit/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-rev2-mutants-_3azp73h/C2R-01-backdated-commit/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 8.85s
+     Running tests/phase2_decay_oracle_revision.rs (/tmp/spark-c2-rev2-mutants-_3azp73h/target/debug/deps/phase2_decay_oracle_revision-000401f3a8d7e51d)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_oracle_revision`

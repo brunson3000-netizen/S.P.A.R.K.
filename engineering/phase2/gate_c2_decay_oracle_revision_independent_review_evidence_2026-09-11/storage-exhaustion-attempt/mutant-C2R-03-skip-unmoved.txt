@@ -1,0 +1,36 @@
+# mutant C2R-03-skip-unmoved: emit no decay candidate when the value does not move (saturated, rate 0, or no whole step)
+# tree: 6968a4af917c9a32761be371c3e12ec12ba0f1bd
+
+$ kills phase2_decay_oracle_revision::c2r_03_saturation_preserves_value_and_commit_time_chunk_invariance
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-rev2-mutants-npavwpbb/C2R-03-skip-unmoved/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-rev2-mutants-npavwpbb/C2R-03-skip-unmoved/crates/spark-testkit)
+error: failed to build archive at `/tmp/spark-c2-rev2-mutants-npavwpbb/target/debug/deps/libspark_engine-8710d1864b590ccf.rlib`: No space left on device (os error 28)
+
+error: could not compile `spark-engine` (lib) due to 1 previous error
+
+$ kills phase2_decay_oracle_revision::c2r_03_every_evaluation_commits_at_its_canonical_time
+
+running 1 test
+test c2r_03_every_evaluation_commits_at_its_canonical_time ... FAILED
+
+failures:
+
+---- c2r_03_every_evaluation_commits_at_its_canonical_time stdout ----
+
+thread 'c2r_03_every_evaluation_commits_at_its_canonical_time' (3367) panicked at crates/spark-testkit/tests/phase2_decay_oracle_revision.rs:661:9:
+assertion `left == right` failed
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c2r_03_every_evaluation_commits_at_its_canonical_time
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-rev2-mutants-npavwpbb/C2R-03-skip-unmoved/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-rev2-mutants-npavwpbb/C2R-03-skip-unmoved/crates/spark-testkit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.08s
+     Running tests/phase2_decay_oracle_revision.rs (/tmp/spark-c2-rev2-mutants-npavwpbb/target/debug/deps/phase2_decay_oracle_revision-a7d0621d0871a9e4)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_oracle_revision`

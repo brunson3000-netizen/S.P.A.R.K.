@@ -1,0 +1,25 @@
+# tree: 6968a4af917c9a32761be371c3e12ec12ba0f1bd
+# whitespace-normalized
+$ cargo run --release --offline -p spark-testkit --example gate_c2_workload
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.11
+   Compiling cfg-if v1.0.4
+   Compiling cc v1.4.4
+   Compiling constant_time_eq v0.4.2
+   Compiling cpufeatures v0.3.0
+   Compiling arrayvec v0.7.8
+   Compiling blake3 v1.8.7
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+   Compiling spark-core v0.1.0 (/tmp/spark-gate-c2-decay-oracle-review/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-gate-c2-decay-oracle-review/crates/spark-engine)
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling spark-testkit v0.1.0 (/tmp/spark-gate-c2-decay-oracle-review/crates/spark-testkit)
+    Finished `release` profile [optimized] target(s) in 1m 37s
+     Running `target/release/examples/gate_c2_workload`
+history_len,build_s,preflight_ns_per_call,scan_reference_ns_per_call,finalize_ns_per_call
+1000,0.690,2434,5567,1175145
+4000,14.004,4768,150883,5810914
+16000,129.661,2456,1230374,15360327

@@ -1,0 +1,25 @@
+# source: independent_counterexamples.rs sha256=3a3a26e658852659b916d699bf3aac3b41be55bcca9213f7e0fbc532c2b1197d
+# crate root: /tmp/spark-gate-c2-decay-oracle-review
+# spark-engine test-support: False
+# whitespace-normalized: trailing spaces and trailing blank lines removed
+$ cargo test --offline -- --nocapture --test-threads=1
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling arrayvec v0.7.8
+   Compiling cfg-if v1.0.4
+   Compiling constant_time_eq v0.4.2
+   Compiling cpufeatures v0.3.0
+   Compiling cc v1.4.4
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-gate-c2-decay-oracle-review/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-gate-c2-decay-oracle-review/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-gate-c2-decay-oracle-review/crates/spark-testkit)
+   Compiling spark-c2-counterexamples v0.0.0 (/tmp/spark-c2-rev2-corpus-9a331rx4)
+rustc-LLVM ERROR: IO failure on output stream: No space left on device
+error: could not compile `spark-engine` (lib)
+
+Caused by:
+  No space left on device (os error 28)
+
+Caused by:
+  failed to parse process output: `/home/chromikey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name spark_engine --edition=2021 /tmp/spark-gate-c2-decay-oracle-review/crates/spark-engine/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debuginfo=2 '--deny=clippy::unwrap_used' --forbid=unsafe_code '--deny=clippy::panic' '--deny=clippy::indexing_slicing' '--deny=clippy::expect_used' '--deny=clippy::arithmetic_side_effects' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("test-support"))' -C metadata=c8b41378e7290a72 -C extra-filename=-baf8f26113204fe0 --out-dir /tmp/spark-c2-rev2-corpus-9a331rx4/target/debug/deps -C incremental=/tmp/spark-c2-rev2-corpus-9a331rx4/target/debug/incremental -L dependency=/tmp/spark-c2-rev2-corpus-9a331rx4/target/debug/deps --extern spark_core=/tmp/spark-c2-rev2-corpus-9a331rx4/target/debug/deps/libspark_core-85e76513376f976d.rmeta` (exit status: 101)

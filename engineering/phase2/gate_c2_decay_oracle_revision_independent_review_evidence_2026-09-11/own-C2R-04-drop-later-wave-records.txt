@@ -1,0 +1,25 @@
+# tree: 6968a4af917c9a32761be371c3e12ec12ba0f1bd
+$ cargo test --offline -- --exact r04_per_wave_store_and_index_discriminator --nocapture
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-own-mutants-dpv3v7xs/tree/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-own-mutants-dpv3v7xs/tree/crates/spark-testkit)
+   Compiling reviewer-decay-probes v0.0.0 (/tmp/spark-c2-own-mutants-dpv3v7xs/probe)
+    Finished `test` profile [unoptimized] target(s) in 12.03s
+     Running unittests src/lib.rs (target/debug/deps/reviewer_decay_probes-d0975a7f71dfc903)
+
+running 1 test
+
+thread 'r04_per_wave_store_and_index_discriminator' (524) panicked at src/lib.rs:134:5:
+assertion `left == right` failed
+  left: [(0, 1, 1, true), (1, 1, 2, false)]
+ right: [(0, 1, 1, true), (1, 2, 2, true)]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test r04_per_wave_store_and_index_discriminator ... FAILED
+
+failures:
+
+failures:
+    r04_per_wave_store_and_index_discriminator
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--lib`

@@ -1,0 +1,65 @@
+{
+  "tree": "6968a4af917c9a32761be371c3e12ec12ba0f1bd",
+  "checks": [
+    {
+      "name": "fmt",
+      "command": "cargo fmt --all --check",
+      "exit_code": 0,
+      "seconds": 0.396
+    },
+    {
+      "name": "workspace-tests",
+      "command": "cargo test --workspace --all-features --no-fail-fast",
+      "exit_code": 101,
+      "seconds": 128.401
+    },
+    {
+      "name": "clippy",
+      "command": "cargo clippy --workspace --all-targets --all-features -- -D warnings",
+      "exit_code": 0,
+      "seconds": 16.37
+    },
+    {
+      "name": "strict",
+      "command": "cargo clippy -p spark-core -p spark-engine --lib --all-features -- -D warnings -D clippy::unwrap_used -D clippy::expect_used -D clippy::panic -D clippy::indexing_slicing -D clippy::arithmetic_side_effects",
+      "exit_code": 0,
+      "seconds": 5.479
+    },
+    {
+      "name": "metadata",
+      "command": "cargo metadata --format-version 1 > /dev/null",
+      "exit_code": 0,
+      "seconds": 0.652
+    },
+    {
+      "name": "whitespace-candidate-range",
+      "command": "git diff --check 3a0b51463e1874ad8b02dd3a3261933fcd2e22f4 HEAD",
+      "exit_code": 0,
+      "seconds": 0.047
+    },
+    {
+      "name": "whitespace-production-range",
+      "command": "git diff --check 7e3a0aae069a8bf840e4dfb74221cdf2687b1db5 HEAD",
+      "exit_code": 0,
+      "seconds": 0.704
+    },
+    {
+      "name": "x86_64-pc-windows-gnu",
+      "command": "cargo check --workspace --all-targets --target x86_64-pc-windows-gnu",
+      "exit_code": 101,
+      "seconds": 16.622
+    },
+    {
+      "name": "x86_64-pc-windows-msvc",
+      "command": "cargo check --workspace --all-targets --target x86_64-pc-windows-msvc",
+      "exit_code": 101,
+      "seconds": 14.986
+    },
+    {
+      "name": "aarch64-linux-android",
+      "command": "cargo check --workspace --all-targets --target aarch64-linux-android",
+      "exit_code": 0,
+      "seconds": 16.134
+    }
+  ]
+}

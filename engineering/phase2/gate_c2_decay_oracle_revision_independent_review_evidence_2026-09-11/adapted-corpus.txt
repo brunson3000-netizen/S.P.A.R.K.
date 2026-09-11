@@ -1,0 +1,41 @@
+# source: independent_counterexamples_adapted.rs sha256=1adf3b6cbc9910febf110675010591d57d87d28af62901048b64e5e9de52833b
+# crate root: /tmp/spark-gate-c2-decay-oracle-review
+# spark-engine test-support: True
+# whitespace-normalized: trailing spaces and trailing blank lines removed
+$ cargo test --offline -- --nocapture --test-threads=1
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling cc v1.4.4
+   Compiling cpufeatures v0.3.0
+   Compiling cfg-if v1.0.4
+   Compiling arrayvec v0.7.8
+   Compiling constant_time_eq v0.4.2
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-gate-c2-decay-oracle-review/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-gate-c2-decay-oracle-review/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-gate-c2-decay-oracle-review/crates/spark-testkit)
+   Compiling spark-c2-counterexamples v0.0.0 (/tmp/spark-c2-rev2-corpus-69v1uul6)
+    Finished `test` profile [unoptimized] target(s) in 30.80s
+     Running unittests src/lib.rs (target/debug/deps/spark_c2_counterexamples-f078e570a67d258a)
+
+running 9 tests
+test aggregate_keeps_i128_until_after_weighting ... aggregate outcome: [CohortReport { kind: Command, canonical_time: LogicalTime(1), conflicts: [], ingress: [], waves: [WaveReport { wave_index: 0, candidate_set_digest: Digest(37c2ac7e90b61430e5cc3d95fb00df602cfbeb7a1171a94ce1b3e815d0a1ff8d), committed: [CommittedEffect { definition: DefinitionId(state.total), scope: actor:a, write_path: CommitDerived, value: Int(9223372036854775807), provenance: Provenance { retained: [Digest(03e592a5483eee9cfa65e1617c5602db81bc8dd0e8393bd1429a3afa23d2721c)], omitted_source_count: 0, coverage_status: Complete, pruning_policy: "provenance_prune.v1" } }], obligations: [], cooldown_writes: [], cooldown_removals: [], depth_conversions: [], effect_batch_digest: Digest(64ad29d60d40744380b4baaf8ac64fe4e4686975dff69b26a2ef57513f5aa800) }], outcome: Committed }]
+ok
+test decay_preserves_elapsed_cadence_remainder ... ok
+test derived_identity_binds_every_changed_eligibility_input ... ok
+test epoch_activation_requires_reserved_command_kind ... epoch outcome: [CohortReport { kind: Command, canonical_time: LogicalTime(1), conflicts: [], ingress: [], waves: [], outcome: EpochActivationRejected { reason: "activation_payload_requires_reserved_kind" } }]
+ok
+test fanout_must_count_scope_breadth ... ok
+test materialized_subids_must_be_unique ... ok
+test new_decay_rate_must_not_apply_before_activation_barrier ... hot-tuned decay outcome: [CohortReport { kind: Scheduled, canonical_time: LogicalTime(60), conflicts: [], ingress: [], waves: [WaveReport { wave_index: 0, candidate_set_digest: Digest(3f32bcfb00aa03ffa8baf717fff7e0fbaf13aba5bbae8dd476a3d2a38293da1b), committed: [CommittedEffect { definition: DefinitionId(state.stress), scope: actor:a, write_path: SparkEffect, value: Int(90), provenance: Provenance { retained: [Digest(2db8f10883e33397ab7ff39eadb2dea7e13bea5216a478627d818b21a6a200c7)], omitted_source_count: 0, coverage_status: Complete, pruning_policy: "provenance_prune.v1" } }], obligations: [], cooldown_writes: [], cooldown_removals: [], depth_conversions: [], effect_batch_digest: Digest(0fe63a45a173102deef0530cb4f61eb880824c0cab7d2cb02b2c1e0a76eb0d30) }], outcome: Committed }]
+ok
+test positive_command_active_encoding_has_kind_horizon_and_identity ... ok
+test positive_trailing_same_frontier_resets_replay_in_index_order ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.76s
+
+   Doc-tests spark_c2_counterexamples
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
