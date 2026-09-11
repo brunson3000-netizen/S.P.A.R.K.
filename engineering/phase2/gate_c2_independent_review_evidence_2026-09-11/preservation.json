@@ -1,0 +1,136 @@
+{
+  "candidate": "053d1dc1131ec47be94b60513fad9ea8389cde0c",
+  "baseline": "7e3a0aae069a8bf840e4dfb74221cdf2687b1db5",
+  "unchanged_inherited_test_files": [
+    "crates/spark-core/tests/timeline_admission.rs",
+    "crates/spark-testkit/tests/external_compile_probes.rs",
+    "crates/spark-testkit/tests/final_closure.rs",
+    "crates/spark-testkit/tests/final_digest_correction.rs",
+    "crates/spark-testkit/tests/refoundation_adversarial.rs",
+    "crates/spark-testkit/tests/refoundation_v2_adversarial.rs",
+    "crates/spark-testkit/tests/workspace_dependency_direction.rs"
+  ],
+  "unchanged_inline_test_modules": [
+    "crates/spark-core/src/authority.rs",
+    "crates/spark-core/src/clock.rs",
+    "crates/spark-core/src/hash.rs",
+    "crates/spark-core/src/id.rs",
+    "crates/spark-core/src/random.rs",
+    "crates/spark-core/src/scheduler.rs",
+    "crates/spark-core/src/scope.rs",
+    "crates/spark-core/src/timeline.rs",
+    "crates/spark-core/src/value.rs",
+    "crates/spark-engine/src/activation.rs",
+    "crates/spark-engine/src/profile/config.rs",
+    "crates/spark-engine/src/profile/definition.rs",
+    "crates/spark-engine/src/profile/manifest.rs",
+    "crates/spark-engine/src/profile/text.rs",
+    "crates/spark-engine/src/state.rs",
+    "crates/spark-testkit/src/composition.rs",
+    "crates/spark-testkit/src/scenario.rs"
+  ],
+  "failures": [],
+  "unchanged_functions": {
+    "schedule": true,
+    "drain_due": true,
+    "stage": true,
+    "submit_fence": true
+  },
+  "lineage": [
+    {
+      "commit": "4b025322348da1c57ef065e3de5a12785ca21090",
+      "parent": "7e3a0aae069a8bf840e4dfb74221cdf2687b1db5",
+      "expected_parent": "7e3a0aae069a8bf840e4dfb74221cdf2687b1db5",
+      "match": true
+    },
+    {
+      "commit": "aad4633ee4312a61626848f1d1fe251f5b3eaf57",
+      "parent": "4b025322348da1c57ef065e3de5a12785ca21090",
+      "expected_parent": "4b025322348da1c57ef065e3de5a12785ca21090",
+      "match": true
+    },
+    {
+      "commit": "b7d849f7ee4b5fb30d01b49cfac45fe36cc4e3ff",
+      "parent": "aad4633ee4312a61626848f1d1fe251f5b3eaf57",
+      "expected_parent": "aad4633ee4312a61626848f1d1fe251f5b3eaf57",
+      "match": true
+    },
+    {
+      "commit": "5fe883fd09a6e678cdf5c48e4af050635c319643",
+      "parent": "b7d849f7ee4b5fb30d01b49cfac45fe36cc4e3ff",
+      "expected_parent": "b7d849f7ee4b5fb30d01b49cfac45fe36cc4e3ff",
+      "match": true
+    },
+    {
+      "commit": "0423d9167841404dd61852ab7f16f98fbdb468ce",
+      "parent": "5fe883fd09a6e678cdf5c48e4af050635c319643",
+      "expected_parent": "5fe883fd09a6e678cdf5c48e4af050635c319643",
+      "match": true
+    },
+    {
+      "commit": "4997d56220000edef3a2b4cd987feff7900d2488",
+      "parent": "0423d9167841404dd61852ab7f16f98fbdb468ce",
+      "expected_parent": "0423d9167841404dd61852ab7f16f98fbdb468ce",
+      "match": true
+    },
+    {
+      "commit": "053d1dc1131ec47be94b60513fad9ea8389cde0c",
+      "parent": "4997d56220000edef3a2b4cd987feff7900d2488",
+      "expected_parent": "4997d56220000edef3a2b4cd987feff7900d2488",
+      "match": true
+    }
+  ],
+  "final_documentation_commit_paths": [
+    "engineering/PHASE_STATUS.md",
+    "engineering/phase2/SPARK_PHASE_2_GATE_C2_IMPLEMENTATION_REPORT_2026-09-11.md",
+    "engineering/phase2/SPARK_PHASE_2_GATE_C2_INDEPENDENT_REVIEW_MISSION_2026-09-11.md",
+    "engineering/phase2/gate_c2_evidence_2026-09-11/SPARK_EVIDENCE_README.md",
+    "engineering/phase2/gate_c2_evidence_2026-09-11/validation/clippy.txt",
+    "engineering/phase2/gate_c2_evidence_2026-09-11/validation/fmt.txt",
+    "engineering/phase2/gate_c2_evidence_2026-09-11/validation/metadata.txt",
+    "engineering/phase2/gate_c2_evidence_2026-09-11/validation/static-targets.txt",
+    "engineering/phase2/gate_c2_evidence_2026-09-11/validation/strict.txt",
+    "engineering/phase2/gate_c2_evidence_2026-09-11/validation/workload.txt",
+    "engineering/phase2/gate_c2_evidence_2026-09-11/validation/workspace-tests.txt"
+  ],
+  "manifests_and_lock_unchanged": true,
+  "worktrees": [
+    {
+      "path": "/home/chromikey/Projects/SPARK",
+      "status": ""
+    },
+    {
+      "path": "/home/chromikey/Projects/SPARK-fable-challenge-worktree",
+      "status": ""
+    },
+    {
+      "path": "/home/chromikey/Projects/SPARK-gate-c2",
+      "status": ""
+    },
+    {
+      "path": "/home/chromikey/Projects/SPARK-v3-f01-rev2-writer",
+      "status": ""
+    },
+    {
+      "path": "/home/chromikey/Projects/SPARK-v3-f01-writer",
+      "status": ""
+    },
+    {
+      "path": "/tmp/spark-gate-c2-review",
+      "status": "?? engineering/phase2/gate_c2_independent_review_evidence_2026-09-11/\n"
+    },
+    {
+      "path": "/tmp/spark-v3-f01-production",
+      "status": ""
+    },
+    {
+      "path": "/tmp/spark-v3-f01-rev2-accept",
+      "status": ""
+    },
+    {
+      "path": "/tmp/spark-v3-f01-rev2-review",
+      "status": ""
+    }
+  ],
+  "remote": "053d1dc1131ec47be94b60513fad9ea8389cde0c\trefs/heads/candidate/phase2-gate-c2-implementation-20260911\n7e3a0aae069a8bf840e4dfb74221cdf2687b1db5\trefs/heads/phase1-refoundation-v2\n"
+}

@@ -1,0 +1,7 @@
+{
+  "exit_code": 101,
+  "contract_failures": 7,
+  "passing_probes": 3,
+  "candidate": "053d1dc1131ec47be94b60513fad9ea8389cde0c",
+  "candidate_source_modified": false
+}

@@ -1,0 +1,18 @@
+$ cargo check --workspace --all-targets --target x86_64-pc-windows-gnu
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.11
+    Checking cpufeatures v0.3.0
+    Checking arrayvec v0.7.8
+    Checking constant_time_eq v0.4.2
+    Checking cfg-if v1.0.4
+   Compiling cc v1.4.4
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+    Checking itoa v1.0.18
+    Checking memchr v2.8.3
+   Compiling blake3 v1.8.7
+    Checking spark-core v0.1.0 (/tmp/spark-gate-c2-review/crates/spark-core)
+    Checking spark-engine v0.1.0 (/tmp/spark-gate-c2-review/crates/spark-engine)
+    Checking spark-testkit v0.1.0 (/tmp/spark-gate-c2-review/crates/spark-testkit)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.35s
