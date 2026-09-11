@@ -246,9 +246,10 @@ pub struct CompletedHistory {
 ///
 /// Two frozen requirements need them: a re-evaluation obligation resolves its
 /// **exact originating** rule set by hash in the activation lineage (v1 §5,
-/// ADR-0006), and decay/recovery integrates each elapsed interval under the
-/// epoch in effect over it, so a hot-tuned rate applies only from its
-/// activating barrier (v1 Q7 + AT-I23). The lineage adds no canonical content:
+/// ADR-0006), and decay/recovery counts each parameter segment's fixed grid
+/// under the epoch in effect over it, so a hot-tuned rate or cadence applies
+/// only from its activating barrier (Operator decay adjudication D-3 … D-5,
+/// AT-I23′). The lineage adds no canonical content:
 /// each rule set and config is identified by the hash the digest-committed
 /// `EpochRegistry` record already binds, and each activation time is the
 /// effective time of the finalized command whose semantic hash that record
@@ -601,38 +602,40 @@ impl EvalView<'_> {
     }
 
     /// The v1 Q7 closed-form catch-up from `anchor` (the cell's `updated_at`)
-    /// to `now`, counted on the operation's **parameter-segment grid**
-    /// (C2-05; C2R-01, C2R-02, C2R-03).
+    /// to `now`, counted on the operation's **fixed parameter-segment grid**:
+    /// the controlling Phase-2 architecture, adopted by the Operator in
+    /// `SPARK_PHASE_2_GATE_C2_DECAY_OPERATOR_ADJUDICATION_2026-09-11.md`
+    /// (D-1 … D-7), which supersedes Q7's elapsed-since-`updated_at` step
+    /// count (adjudication S-1, S-5).
     ///
     /// A *parameter segment* is a maximal run of consecutive behavior epochs
     /// in which this operation exists with the same resolved `(rate,
     /// cadence)`. Its *origin* is the activation time of its first epoch
     /// (genesis: logical time 0), and its whole cadence steps end at
     /// `origin + k·cadence` (`k >= 1`) up to the next activation that changes
-    /// the parameters; a step ending exactly at that activation belongs to the
-    /// segment it closes. The whole cadence steps elapsed between `anchor` and
-    /// `now` are the grid points in `(anchor, now]`, each moving the value by
-    /// its segment's rate toward the baseline (linear, floor-exact, clamped at
-    /// the baseline by `move_toward`).
+    /// the parameters (D-1, D-3). The steps applied between `anchor` and `now`
+    /// are the grid points in `(anchor, now]`, each moving the value by its
+    /// segment's rate toward the baseline (linear, floor-exact, clamped at the
+    /// baseline by `move_toward`; D-7).
     ///
-    /// Why this representation (flagged for review as R-2′):
-    /// - the count is additive over every partition of `(anchor, now]`, so
-    ///   one catch-up equals any sequence of evaluations, and every result is
-    ///   committed at the cohort's canonical time (FINAL §4) with no remainder
-    ///   lost — the remainder lives in the grid, never in a backdated
-    ///   `updated_at` (C2R-01, C2R-03);
-    /// - no step of a new segment contains pre-barrier time, so a new rate or
-    ///   cadence applies only to whole steps lying after its activation
-    ///   barrier; the closed segment's incomplete last step is never billed
-    ///   at either rate, because Q7 integrates whole steps only (C2R-02,
-    ///   AT-I23);
-    /// - the grid is a function of committed state alone (the activation
-    ///   lineage, validated at restore), because `StateCell` has no phase
-    ///   field and canonical-time commits overwrite `updated_at`; an
-    ///   activation that leaves this operation's parameters unchanged does not
-    ///   move the grid;
-    /// - an epoch whose artifact lacks the operation integrates nothing and
-    ///   closes the segment.
+    /// - Non-decay writes set `updated_at` but never move the grid (D-2).
+    /// - A step ending exactly at a parameter-changing activation belongs to
+    ///   the segment it closes (D-4); the closed segment's unfinished residual
+    ///   is billed at no rate, and the new segment's first step ends one new
+    ///   cadence after the barrier, so new parameters never charge
+    ///   pre-activation time (D-3, D-5).
+    /// - The count is additive over every partition of `(anchor, now]`, so one
+    ///   catch-up equals any sequence of evaluations while every result
+    ///   commits at the cohort's canonical time (D-6, FINAL §4): the remainder
+    ///   lives in the grid, never in a backdated `updated_at`.
+    /// - The grid is a function of committed state alone (the activation
+    ///   lineage, validated at restore), so no `StateCell` field is added
+    ///   (adjudication S-4); an activation that leaves this operation's
+    ///   resolved parameters unchanged does not move the grid.
+    /// - An epoch whose artifact lacks the operation integrates nothing and
+    ///   closes the segment. The adjudication does not decide this case (its
+    ///   §5.1); it is the implementation's existing behavior, flagged for
+    ///   review.
     fn decay_walk(
         &self,
         op: &DecayOp<'_>,
@@ -943,8 +946,9 @@ impl EvalView<'_> {
                     // baseline, at rate zero, or with no whole step elapsed —
                     // so the committed cell after catching up to `T` is
                     // `(value(T), T)` under every evaluation partition
-                    // (C2R-03). The cadence remainder is not lost by this
-                    // commit: it lives in the segment grid (`decay_walk`).
+                    // (adjudication D-6; C2R-03). The cadence remainder is
+                    // not lost by this commit: it lives in the fixed grid
+                    // (`decay_walk`).
                     Some(Intent::Transform {
                         family: crate::rules::TransformFamily::Decay,
                         op_fingerprint: op_fp("decay"),
@@ -958,8 +962,8 @@ impl EvalView<'_> {
         // declared reducer, composed in declared stage order (v2 §4.2). Every
         // intermediate stays in checked `i128`; one conversion at the end (v1
         // Q1, C2-04). A body commits at the cohort's canonical time like every
-        // effect; a decay stage counts the same segment grid, so the body's
-        // non-decay stages never re-phase the cadence.
+        // effect; a decay stage counts the same fixed grid, so the body's
+        // non-decay stages never re-phase the cadence (adjudication D-2).
         let mut v = i128::from(current.unwrap_or(0));
         for o in ops {
             v = match &o.update {
@@ -1672,7 +1676,7 @@ impl Engine {
                     // (3) config inputs are ADR-0004 class-1 hot-tunable and
                     //     are read barrier-scoped: a point read uses the
                     //     config of the epoch in effect at the evaluation
-                    //     time, and decay integrates each elapsed interval
+                    //     time, and decay counts each segment's fixed grid
                     //     under the config of the epoch in effect over it.
                     //     Every config read is therefore an exact,
                     //     hash-identified artifact of the lineage, never an

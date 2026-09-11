@@ -1256,11 +1256,12 @@ fn at_i22_sanctioned_compositions_and_cross_family_rejection() {
     //     at 40 elapsed since 31: 65), decay at 41 (no grid step in (40, 41]:
     //     65, committed at 41).
     //
-    //     Adapted by the second correction (C2R-01): the former expectation
-    //     (75 at 40, 65 at 41) required the shock to re-phase the cadence
-    //     clock, which is representable only by a backdated or extra
-    //     per-cell phase — rejected by FINAL §4 and the frozen `StateCell`
-    //     encoding. Both compositions remain deterministic and declared.
+    //     Adapted by the second correction; controlling by the Operator decay
+    //     adjudication (D-2, S-6): a separate shock does not re-phase the
+    //     fixed grid. The former expectation (75 at 40, 65 at 41) enforced
+    //     the superseded elapsed-since-`updated_at` reading of v1 Q7 (S-1,
+    //     S-5), which the Operator rejected. Both compositions remain
+    //     deterministic and declared.
     let mut separate = decay_engine(
         vec![
             work_rule(

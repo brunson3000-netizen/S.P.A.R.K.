@@ -848,9 +848,10 @@ fn c2_05_new_decay_rate_must_not_apply_before_activation_barrier_converted() {
 /// Adapted by the second correction (C2R-02): with the barrier at 55 the new
 /// rate's segment starts at 55, so its first whole step ends at 65 and none
 /// has elapsed by 60 — 95, not 90. The former expectation billed the step
-/// `(50, 60]` at the new rate although half of it precedes the barrier (the
-/// residual interval the review requires excluded). A later evaluation at 65
-/// takes exactly that first new-rate step.
+/// `(50, 60]` at the new rate although half of it precedes the barrier. The
+/// Operator decay adjudication (D-3, D-5) makes the new grid start at the
+/// barrier and discards the old segment's residual `(50, 55]`. A later
+/// evaluation at 65 takes exactly that first new-rate step.
 #[test]
 fn c2_05_epoch_bound_rates_compose_across_the_barrier() {
     for (times, barrier, expected) in [

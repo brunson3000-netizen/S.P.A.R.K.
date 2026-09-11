@@ -360,7 +360,8 @@ pub enum Update {
     /// TRANSFORM: clamp into `[min, max]`.
     Clamp { min: i64, max: i64 },
     /// TRANSFORM: closed-form decay/recovery of the target cell toward its
-    /// `StateCell.baseline` by `rate` per whole elapsed `cadence` step (v1 Q7).
+    /// `StateCell.baseline` by `rate` per whole step of the operation's fixed
+    /// `cadence` grid (v1 Q7 as amended by the Operator decay adjudication).
     /// The target definition's baseline semantics must be declared by the
     /// rule set; there is no substitute target.
     Decay { rate: Param, cadence: Param },
