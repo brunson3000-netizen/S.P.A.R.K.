@@ -1,0 +1,9 @@
+[package]
+name = "spark-adversarial-sonnet"
+version = "0.0.0"
+edition = "2021"
+[workspace]
+[dependencies]
+spark-core = { path = "/tmp/spark-adversarial-sonnet/target/crates/spark-core" }
+spark-engine = { path = "/tmp/spark-adversarial-sonnet/target/crates/spark-engine", features = ["test-support"] }
+spark-testkit = { path = "/tmp/spark-adversarial-sonnet/target/crates/spark-testkit" }

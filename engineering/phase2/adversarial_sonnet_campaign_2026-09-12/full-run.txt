@@ -1,0 +1,111 @@
+warning: unused import: `spark_core::value::CanonicalValue`
+ --> tests/adversarial.rs:6:5
+  |
+6 | use spark_core::value::CanonicalValue;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `EngineSnapshot`
+ --> tests/adversarial.rs:7:36
+  |
+7 | use spark_engine::engine::{Engine, EngineSnapshot, RestoreError};
+  |                                    ^^^^^^^^^^^^^^
+
+warning: unused import: `CommandRequest`
+  --> tests/adversarial.rs:10:45
+   |
+10 | use spark_engine::request::{CommandPayload, CommandRequest, Outcome, Request};
+   |                                             ^^^^^^^^^^^^^^
+
+warning: unused variable: `i`
+  --> tests/adversarial.rs:81:37
+   |
+81 |     let work: Vec<_> = (0..20).map(|i| initial("rule.w", &a(), 5, "work.w")).collect();
+   |                                     ^ help: if this is intentional, prefix it with an underscore: `_i`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `t`
+   --> tests/adversarial.rs:642:9
+    |
+642 |     for t in 0..50 {
+    |         ^ help: if this is intentional, prefix it with an underscore: `_t`
+
+warning: `spark-adversarial-sonnet` (test "adversarial") generated 5 warnings (run `cargo fix --test "adversarial" -p spark-adversarial-sonnet` to apply 5 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running tests/adversarial.rs (target/debug/deps/adversarial-968f7d6e04a43d61)
+
+running 30 tests
+test sonnet_a1_identical_command_resubmitted_after_completion ... SONNET-A1: resubmit identical completed command -> CompletedCommandNotFinalized(CommandIdentityConflict { command_id: CommandId(cmd.1) })
+ok
+test sonnet_a2_conflicting_payload_same_command_id_and_time ... SONNET-A2: v_after_1st=Some(100) outcome_2nd=CompletedCommandNotFinalized(CommandIdentityConflict { command_id: CommandId(cmd.dup) }) v_after_2nd=Some(100)
+ok
+test sonnet_a3_active_request_mismatch_mid_pause ... SONNET-A3: first process -> Completed
+SONNET-A3: did not pause with budget=1/20 work items - unexpected, recording
+ok
+test sonnet_a4_horizon_behind_frontier_after_advance ... SONNET-A4: command behind frontier -> RefusedHorizonBehindFrontier { frontier: LogicalTime(50), horizon: LogicalTime(10) }
+ok
+test sonnet_b1_many_same_time_scheduled_work_items ... SONNET-B1: 500 same-time same-identity work items -> Completed, value=Some(500)
+ok
+test sonnet_b2_scheduled_work_and_command_same_time_ordering ... SONNET-B2: after command at t=10 -> Some(999), after advance to t=10 (scheduled work) -> Some(999), outcome=Completed
+ok
+test sonnet_b3_zero_delay_reschedule_loop_bounded ... SONNET-B3: zero-delay self-reschedule rule set construction -> Some([ZeroDelay { rule_id: DefinitionId(rule.loop) }])
+ok
+test sonnet_c1_restore_active_behind_frontier ... SONNET-C1: restore with active horizon behind frontier -> Some(ActiveBehindFrontier)
+ok
+test sonnet_c2_restore_truncated_lineage ... SONNET-C2: restore with truncated lineage -> Some(EpochLineageInvalid)
+ok
+test sonnet_c3_restore_tampered_activation_time ... SONNET-C3: restore with tampered activation time -> Some(EpochLineageInvalid)
+ok
+test sonnet_c4_restore_dropped_obligation_bidirectional ... SONNET-C4: snapshot taken after scheduling work; obligation drop needs internal WorkKey - skipping targeted drop, checking restore of unmodified snapshot for baseline
+SONNET-C4 baseline: restore unmodified reseal -> None
+ok
+test sonnet_c5_restore_wrong_profile ... SONNET-C5: restore against mismatched profile instance -> None
+ok
+test sonnet_d1_replay_with_reordered_batched_submission ... SONNET-D1: replay of 10-command history -> ok=true
+ok
+test sonnet_e1_bounds_refusal_leaves_state_unchanged ... SONNET-E1: bounds refusal before=Some(9) outcome=Completed after=Some(9)
+ok
+test sonnet_e2_host_owned_write_via_decay_rejected ... SONNET-E2: decay rule on HostOwned target -> Some("[BaselineInvalid { definition: DefinitionId(state.food) }, HostOwnedTarget { rule_id: DefinitionId(rule.bad), target: DefinitionId(state.food) }]")
+ok
+test sonnet_f1_long_mixed_sequence_activation_work_commands ... SONNET-F1: 40-step mixed sequence replay ok=true
+ok
+test sonnet_f2_snapshot_restore_repeatedly_across_long_sequence ... SONNET-F2: 30-step with periodic restore -> Completed, final=Some(87)
+ok
+test sonnet_g1_composed_body_removal_restoration_snapshot_restore_interleaved ... SONNET-G1: 15-round composed/snapshot/removal interleave completed, final value=Some(1078)
+ok
+test sonnet_g2_composed_body_with_extreme_values_near_i64_bounds ... SONNET-G2: genesis with dangling initial-work rule reference -> ok=false
+ok
+test sonnet_g3_composed_body_add_near_overflow_then_settle ... SONNET-G3: initial assign of i64::MAX-5 outcome=Completed (declared bound is -1e12..1e12, expect refusal)
+SONNET-G3: composed add near i64::MAX -> outcome=Completed, value=Some(10)
+SONNET-G3: after decay evaluation -> value=Some(9)
+ok
+test sonnet_g4_isolate_bounds_check_on_assign_exceeding_declared_range ... SONNET-G4: assign i64::MAX-5 (bound is +/-1e12) -> outcome=Completed, committed_value=None
+ok
+test sonnet_g5_check_cohort_report_for_bounds_refusal ... SONNET-G5: cohort outcome = Rejected { wave: 0, rejection: InvalidEffect { definition: DefinitionId(state.stress), scope: actor:a, error: OutOfBounds { profile_id: ProfileId(game-world), definition_id: DefinitionId(state.stress) } } }
+SONNET-G5: request outcome=Completed, cell=None
+ok
+test sonnet_h1_restore_rejects_digest_mismatch_without_reseal ... SONNET-H1: restore with tampered frontier and STALE digest -> Some(DigestMismatch)
+ok
+test sonnet_i1_budget_zero_does_not_hang ... SONNET-I1: rule_set construction with max_due_per_cycle=0 -> ok=false, err=Some([ZeroPacingBudget])
+SONNET-I1: final outcome after bounded loop = Some(Completed)
+ok
+test sonnet_i2_duplicate_command_id_different_time_and_payload ... SONNET-I2: first cmd.shared at t=5 -> Completed, value=Some(111)
+SONNET-I2: second cmd.shared (same id, different time/seq/payload) at t=20 -> CompletedCommandNotFinalized(CommandIdentityConflict { command_id: CommandId(cmd.shared) }), value=Some(111)
+ok
+test sonnet_i3_restore_mid_pause_snapshot_disallowed_or_consistent ... SONNET-I3: first process with budget=1/50 items -> Completed
+SONNET-I3: did not pause; budget=1 with 50 work items should pause per A3 semantics - recording
+ok
+test sonnet_i4_clamp_exact_boundary_composed_with_settlement ... SONNET-I4: settle-to-8 then +2 then clamp[0,10] -> outcome=Completed, value=Some(10) (expect Some((10,5)))
+ok
+test sonnet_i5_many_conflicting_identity_candidates_same_wave ... SONNET-I5: three distinct rules each +7 on same target -> outcome=Completed, value=Some(21) (expect 21, not 7)
+ok
+test sonnet_j1_snapshot_restore_immediately_after_atomic_refusal ... SONNET-J1: snapshot/restore right after atomic refusal -> ok=true
+SONNET-J1: valid command after restored refusal -> Completed, value=Some(10)
+ok
+test sonnet_j2_double_restore_of_same_snapshot_is_consistent ... SONNET-J2: restoring the SAME snapshot twice -> ok1=true ok2=true
+ok
+
+test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.06s
+
