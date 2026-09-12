@@ -1,0 +1,43 @@
+# mutant W01-settle-every-body: every composed body is settled, including one of transform stages alone, breaking the accepted standalone Scale/Clamp boundary
+# tree: 67b877192cc78b75c6fbe60c69b5594dc10befe8
+
+$ kills phase2_decay_write_composition::transform_only_paths_are_not_additive_events
+
+running 1 test
+test transform_only_paths_are_not_additive_events ... FAILED
+
+failures:
+
+---- transform_only_paths_are_not_additive_events stdout ----
+
+thread 'transform_only_paths_are_not_additive_events' (7114) panicked at crates/spark-testkit/tests/phase2_decay_write_composition.rs:373:9:
+assertion `left == right` failed
+  left: Some((45, 15))
+ right: Some((50, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    transform_only_paths_are_not_additive_events
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.05s
+
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.11
+   Compiling cc v1.4.4
+   Compiling constant_time_eq v0.4.2
+   Compiling arrayvec v0.7.8
+   Compiling cpufeatures v0.3.0
+   Compiling cfg-if v1.0.4
+   Compiling zmij v1.0.23
+   Compiling serde_core v1.0.229
+   Compiling serde_json v1.0.151
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-c2-w01-mutants-lqgb2lyt/W01-settle-every-body/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-w01-mutants-lqgb2lyt/W01-settle-every-body/crates/spark-engine)
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-w01-mutants-lqgb2lyt/W01-settle-every-body/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 11.85s
+     Running tests/phase2_decay_write_composition.rs (target/debug/deps/phase2_decay_write_composition-71e688aa7e20dcd1)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_composition`

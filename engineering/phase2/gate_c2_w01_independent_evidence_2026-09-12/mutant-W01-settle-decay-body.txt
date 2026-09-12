@@ -1,0 +1,43 @@
+# mutant W01-settle-decay-body: a body that declares a decay stage is also settled, so that stage walks the same endpoints a second time
+# tree: 67b877192cc78b75c6fbe60c69b5594dc10befe8
+
+$ kills phase2_decay_write_composition::a_body_that_declares_a_decay_stage_keeps_its_order_and_charges_once
+
+running 1 test
+test a_body_that_declares_a_decay_stage_keeps_its_order_and_charges_once ... FAILED
+
+failures:
+
+---- a_body_that_declares_a_decay_stage_keeps_its_order_and_charges_once stdout ----
+
+thread 'a_body_that_declares_a_decay_stage_keeps_its_order_and_charges_once' (6816) panicked at crates/spark-testkit/tests/phase2_decay_write_composition.rs:551:5:
+assertion `left == right` failed
+  left: Some((13, 12))
+ right: Some((19, 12))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_body_that_declares_a_decay_stage_keeps_its_order_and_charges_once
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.01s
+
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.11
+   Compiling cc v1.4.4
+   Compiling arrayvec v0.7.8
+   Compiling cfg-if v1.0.4
+   Compiling constant_time_eq v0.4.2
+   Compiling cpufeatures v0.3.0
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-c2-w01-mutants-lqgb2lyt/W01-settle-decay-body/crates/spark-core)
+   Compiling memchr v2.8.3
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-w01-mutants-lqgb2lyt/W01-settle-decay-body/crates/spark-engine)
+   Compiling itoa v1.0.18
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-w01-mutants-lqgb2lyt/W01-settle-decay-body/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 18.45s
+     Running tests/phase2_decay_write_composition.rs (target/debug/deps/phase2_decay_write_composition-71e688aa7e20dcd1)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_composition`

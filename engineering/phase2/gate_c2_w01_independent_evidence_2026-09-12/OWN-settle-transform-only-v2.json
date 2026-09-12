@@ -1,0 +1,29 @@
+{
+  "name": "OWN-settle-transform-only-v2",
+  "command": [
+    "cargo",
+    "test",
+    "--manifest-path",
+    "/tmp/spark-c2w01-third-OWN-settle-transform-only-v2-7u0h0m6v/probe/Cargo.toml",
+    "--offline",
+    "--target-dir",
+    "/tmp/spark-c2w01-third-OWN-settle-transform-only-v2-7u0h0m6v/target",
+    "--",
+    "--nocapture"
+  ],
+  "exit_code": 101,
+  "compiled": true,
+  "assertion_failures": [
+    "own_nonbinding_transform_only"
+  ],
+  "killed": true,
+  "patches": [
+    [
+      "let start = if is_additive_composition {",
+      "let start = if !declares_decay {"
+    ]
+  ],
+  "probe_source": "own_third_probes_v2.rs",
+  "probe_sha256": "158a5a519109777e8be6e1c695d7a10d0a7fedae4500bbb5bdf0eb2d91023098",
+  "target_dir": "/tmp/spark-c2w01-third-OWN-settle-transform-only-v2-7u0h0m6v/target"
+}

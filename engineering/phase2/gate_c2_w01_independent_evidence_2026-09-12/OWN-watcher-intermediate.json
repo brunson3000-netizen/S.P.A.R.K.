@@ -1,0 +1,29 @@
+{
+  "name": "OWN-watcher-intermediate",
+  "command": [
+    "cargo",
+    "test",
+    "--manifest-path",
+    "/tmp/spark-c2w01-third-OWN-watcher-intermediate-q40epyfs/probe/Cargo.toml",
+    "--offline",
+    "--target-dir",
+    "/tmp/spark-c2w01-third-OWN-watcher-intermediate-q40epyfs/target",
+    "--",
+    "--nocapture"
+  ],
+  "exit_code": 101,
+  "compiled": true,
+  "assertion_failures": [
+    "own_watchers_both_directions_single_effect"
+  ],
+  "killed": true,
+  "patches": [
+    [
+      "let old = view.cell(&r.definition, &r.scope).unwrap_or(0);",
+      "let old = view.settled(&r.definition, &r.scope, now)?.unwrap_or(0);"
+    ]
+  ],
+  "target_dir": "/tmp/spark-c2w01-third-OWN-watcher-intermediate-q40epyfs/target",
+  "probe_sha256": "52ffa96b60888ae3c3b76806dbb7c564329312e78bf313c6e48b9915c2c4334c",
+  "probe_source": "own_third_probes.rs"
+}

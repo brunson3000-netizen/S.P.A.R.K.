@@ -1,0 +1,43 @@
+# mutant W01-replacement-held-up-by-decay: a declared replacement inside a body cannot lower the value below the settled starting value (a wrong reading of "earlier decay must not reduce that replacement")
+# tree: 67b877192cc78b75c6fbe60c69b5594dc10befe8
+
+$ kills phase2_decay_write_composition::a_declared_replacement_inside_a_body_wins_in_either_stage_order
+
+running 1 test
+test a_declared_replacement_inside_a_body_wins_in_either_stage_order ... FAILED
+
+failures:
+
+---- a_declared_replacement_inside_a_body_wins_in_either_stage_order stdout ----
+
+thread 'a_declared_replacement_inside_a_body_wins_in_either_stage_order' (7412) panicked at crates/spark-testkit/tests/phase2_decay_write_composition.rs:373:9:
+assertion `left == right` failed
+  left: Some((93, 15))
+ right: Some((53, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_declared_replacement_inside_a_body_wins_in_either_stage_order
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.01s
+
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling cc v1.4.4
+   Compiling constant_time_eq v0.4.2
+   Compiling arrayvec v0.7.8
+   Compiling cfg-if v1.0.4
+   Compiling cpufeatures v0.3.0
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+   Compiling blake3 v1.8.7
+   Compiling memchr v2.8.3
+   Compiling spark-core v0.1.0 (/tmp/spark-c2-w01-mutants-lqgb2lyt/W01-replacement-held-up-by-decay/crates/spark-core)
+   Compiling itoa v1.0.18
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-w01-mutants-lqgb2lyt/W01-replacement-held-up-by-decay/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-w01-mutants-lqgb2lyt/W01-replacement-held-up-by-decay/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 17.30s
+     Running tests/phase2_decay_write_composition.rs (target/debug/deps/phase2_decay_write_composition-71e688aa7e20dcd1)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_composition`

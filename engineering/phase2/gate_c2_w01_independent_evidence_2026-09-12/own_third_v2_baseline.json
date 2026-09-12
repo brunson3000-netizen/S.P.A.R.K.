@@ -1,0 +1,18 @@
+{
+  "candidate": "67b877192cc78b75c6fbe60c69b5594dc10befe8",
+  "probe_sha256": "158a5a519109777e8be6e1c695d7a10d0a7fedae4500bbb5bdf0eb2d91023098",
+  "external_manifest": "[package]\nname = \"c2w01-third-review\"\nversion = \"0.0.0\"\nedition = \"2021\"\n[dependencies]\nspark-core = { path = \"/tmp/spark-c2w01-independent-review-20260912/crates/spark-core\", features = [\"test-support\"] }\nspark-engine = { path = \"/tmp/spark-c2w01-independent-review-20260912/crates/spark-engine\", features = [\"test-support\"] }\nspark-testkit = { path = \"/tmp/spark-c2w01-independent-review-20260912/crates/spark-testkit\" }\n",
+  "command": [
+    "cargo",
+    "test",
+    "--manifest-path",
+    "/tmp/spark-c2w01-third-probes/Cargo.toml",
+    "--offline",
+    "--",
+    "--nocapture"
+  ],
+  "exit_code": 0,
+  "result": "13 passed; 0 failed; 0 ignored",
+  "provenance": "v1 unchanged plus independently added nonbinding transform-only discriminator after one mutation survived the binding-Clamp test. Both probe versions and both mutant outcomes retained.",
+  "source": "own_third_probes_v2.rs"
+}

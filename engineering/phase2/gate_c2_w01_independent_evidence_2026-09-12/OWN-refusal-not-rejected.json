@@ -1,0 +1,29 @@
+{
+  "name": "OWN-refusal-not-rejected",
+  "command": [
+    "cargo",
+    "test",
+    "--manifest-path",
+    "/tmp/spark-c2w01-third-OWN-refusal-not-rejected-c9t8yjhf/probe/Cargo.toml",
+    "--offline",
+    "--target-dir",
+    "/tmp/spark-c2w01-third-OWN-refusal-not-rejected-c9t8yjhf/target",
+    "--",
+    "--nocapture"
+  ],
+  "exit_code": 101,
+  "compiled": true,
+  "assertion_failures": [
+    "own_refusal_keeps_debt_and_time"
+  ],
+  "killed": true,
+  "patches": [
+    [
+      "self.store\n                .validate_effect(&r.definition, &r.scope, &value, r.write_path)\n                .map_err(|error| WaveRejection::InvalidEffect {\n                    definition: r.definition.clone(),\n                    scope: r.scope.clone(),\n                    error: Box::new(error),\n                })?;",
+      "let _ = self.store.validate_effect(&r.definition, &r.scope, &value, r.write_path);"
+    ]
+  ],
+  "target_dir": "/tmp/spark-c2w01-third-OWN-refusal-not-rejected-c9t8yjhf/target",
+  "probe_sha256": "52ffa96b60888ae3c3b76806dbb7c564329312e78bf313c6e48b9915c2c4334c",
+  "probe_source": "own_third_probes.rs"
+}

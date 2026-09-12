@@ -1,0 +1,36 @@
+{
+  "name": "OWN-settle-after-fold",
+  "command": [
+    "cargo",
+    "test",
+    "--manifest-path",
+    "/tmp/spark-c2w01-third-OWN-settle-after-fold-rqf0utbs/probe/Cargo.toml",
+    "--offline",
+    "--target-dir",
+    "/tmp/spark-c2w01-third-OWN-settle-after-fold-rqf0utbs/target",
+    "--",
+    "--nocapture"
+  ],
+  "exit_code": 101,
+  "compiled": true,
+  "assertion_failures": [
+    "own_assign_order",
+    "own_aggregate_replacement_stage_orders",
+    "own_multistage_no_double_charge",
+    "own_nonidentity_transform_first_subtract_derived"
+  ],
+  "killed": true,
+  "patches": [
+    [
+      "let mut v = i128::from(start.unwrap_or(0));",
+      "let mut v = i128::from(current.unwrap_or(0));"
+    ],
+    [
+      "resolved: to_i64(v, \"rule_body\")?,",
+      "resolved: to_i64(v - i128::from(current.unwrap_or(0)) + i128::from(start.unwrap_or(0)), \"rule_body\")?,"
+    ]
+  ],
+  "target_dir": "/tmp/spark-c2w01-third-OWN-settle-after-fold-rqf0utbs/target",
+  "probe_sha256": "52ffa96b60888ae3c3b76806dbb7c564329312e78bf313c6e48b9915c2c4334c",
+  "probe_source": "own_third_probes.rs"
+}

@@ -1,0 +1,25 @@
+$ cargo test --offline -p spark-testkit --all-features --test phase2_bounded_revision -- --exact c2_05_decay_preserves_elapsed_cadence_remainder_converted
+
+running 1 test
+test c2_05_decay_preserves_elapsed_cadence_remainder_converted ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.02s
+
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.11
+   Compiling arrayvec v0.7.8
+   Compiling cc v1.4.4
+   Compiling cfg-if v1.0.4
+   Compiling constant_time_eq v0.4.2
+   Compiling cpufeatures v0.3.0
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-c2-w01-mutants-lqgb2lyt/baseline/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-w01-mutants-lqgb2lyt/baseline/crates/spark-engine)
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-w01-mutants-lqgb2lyt/baseline/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 14.54s
+     Running tests/phase2_bounded_revision.rs (/tmp/spark-c2-w01-mutants-lqgb2lyt/target/debug/deps/phase2_bounded_revision-a931c7c8e6ee1b83)

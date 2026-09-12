@@ -1,0 +1,9 @@
+$ cargo test --offline -p spark-testkit --all-features --test phase2_decay_oracle_revision -- --exact c2r_03_saturation_preserves_value_and_commit_time_chunk_invariance
+
+running 1 test
+test c2r_03_saturation_preserves_value_and_commit_time_chunk_invariance ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.66s
+
+    Finished `test` profile [unoptimized] target(s) in 0.07s
+     Running tests/phase2_decay_oracle_revision.rs (/tmp/spark-c2-w01-mutants-lqgb2lyt/target/debug/deps/phase2_decay_oracle_revision-000401f3a8d7e51d)

@@ -1,0 +1,17 @@
+{
+  "candidate": "67b877192cc78b75c6fbe60c69b5594dc10befe8",
+  "probe_sha256": "52ffa96b60888ae3c3b76806dbb7c564329312e78bf313c6e48b9915c2c4334c",
+  "external_manifest": "[package]\nname = \"c2w01-third-review\"\nversion = \"0.0.0\"\nedition = \"2021\"\n[dependencies]\nspark-core = { path = \"/tmp/spark-c2w01-independent-review-20260912/crates/spark-core\", features = [\"test-support\"] }\nspark-engine = { path = \"/tmp/spark-c2w01-independent-review-20260912/crates/spark-engine\", features = [\"test-support\"] }\nspark-testkit = { path = \"/tmp/spark-c2w01-independent-review-20260912/crates/spark-testkit\" }\n",
+  "command": [
+    "cargo",
+    "test",
+    "--manifest-path",
+    "/tmp/spark-c2w01-third-probes/Cargo.toml",
+    "--offline",
+    "--",
+    "--nocapture"
+  ],
+  "exit_code": 0,
+  "result": "12 passed; 0 failed; 0 ignored",
+  "provenance": "Fresh test and harness logic authored by third substantive independent reviewer; standard public testkit fixture helpers only; not copied writer or prior reviewer tests. Initial 10-test successful draft log retained, with minor comment cleanup and two additional passing tests in final source."
+}

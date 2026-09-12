@@ -1,0 +1,29 @@
+{
+  "name": "OWN-current-epoch-only",
+  "command": [
+    "cargo",
+    "test",
+    "--manifest-path",
+    "/tmp/spark-c2w01-third-OWN-current-epoch-only-hniuzj4f/probe/Cargo.toml",
+    "--offline",
+    "--target-dir",
+    "/tmp/spark-c2w01-third-OWN-current-epoch-only-hniuzj4f/target",
+    "--",
+    "--nocapture"
+  ],
+  "exit_code": 101,
+  "compiled": true,
+  "assertion_failures": [
+    "own_barrier_and_removed_lineage"
+  ],
+  "killed": true,
+  "patches": [
+    [
+      "self.lineage\n            .iter()\n            .rev()\n            .find_map(|e| e.rule_set.decay_operation(target))",
+      "self.lineage.last().and_then(|e| e.rule_set.decay_operation(target))"
+    ]
+  ],
+  "target_dir": "/tmp/spark-c2w01-third-OWN-current-epoch-only-hniuzj4f/target",
+  "probe_sha256": "52ffa96b60888ae3c3b76806dbb7c564329312e78bf313c6e48b9915c2c4334c",
+  "probe_source": "own_third_probes.rs"
+}

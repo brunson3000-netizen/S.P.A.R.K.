@@ -1,0 +1,46 @@
+{
+  "candidate": "67b877192cc78b75c6fbe60c69b5594dc10befe8",
+  "required_checks_passed": 15,
+  "workspace_passed": 427,
+  "corpora": {
+    "reviewer-own-probes": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "reviewer-materialization-probe": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "historical-own-probes": {
+      "passed": 8,
+      "failed": 1,
+      "ignored": 0
+    },
+    "resolution-adapted": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "decision-adapted": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "writer_baseline_tests": 42,
+  "writer_mutants_killed": 20,
+  "writer_assertion_kills": 57,
+  "writer_expected_survivals": 2,
+  "isolated_mutant_targets": true,
+  "preservation_passed": true,
+  "original_refs_worktrees_and_status_unchanged": true,
+  "checkpoint": "d1d9f8e55c33ecb5dddccc0e4799cd8f9aaccb40",
+  "final_added_documentation_evidence_files": 55,
+  "workload_rows": [
+    "1000,0.516,2680,6495,1617809",
+    "4000,12.675,2642,49393,6734124",
+    "16000,257.470,2498,1514440,26543976"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "name": "OWN-derived-time-lag",
+  "command": [
+    "cargo",
+    "test",
+    "--manifest-path",
+    "/tmp/spark-c2w01-third-OWN-derived-time-lag-403z1vbe/probe/Cargo.toml",
+    "--offline",
+    "--target-dir",
+    "/tmp/spark-c2w01-third-OWN-derived-time-lag-403z1vbe/target",
+    "--",
+    "--nocapture"
+  ],
+  "exit_code": 101,
+  "compiled": true,
+  "assertion_failures": [
+    "own_assign_order",
+    "own_absence_and_no_move_time",
+    "own_barrier_and_removed_lineage",
+    "own_declared_decay_order",
+    "own_nonidentity_transform_first_subtract_derived",
+    "own_same_time_reversal_and_unchanged",
+    "own_watchers_both_directions_single_effect",
+    "own_aggregate_replacement_stage_orders"
+  ],
+  "killed": true,
+  "patches": [
+    [
+      "WritePath::CommitDerived => self.store.commit_derived(\n                    self.profile_id.clone(),\n                    e.definition.clone(),\n                    e.scope.clone(),\n                    e.value.clone(),\n                    now,",
+      "WritePath::CommitDerived => self.store.commit_derived(\n                    self.profile_id.clone(),\n                    e.definition.clone(),\n                    e.scope.clone(),\n                    e.value.clone(),\n                    LogicalTime(now.0.saturating_sub(1)),"
+    ]
+  ],
+  "target_dir": "/tmp/spark-c2w01-third-OWN-derived-time-lag-403z1vbe/target",
+  "probe_sha256": "52ffa96b60888ae3c3b76806dbb7c564329312e78bf313c6e48b9915c2c4334c",
+  "probe_source": "own_third_probes.rs"
+}

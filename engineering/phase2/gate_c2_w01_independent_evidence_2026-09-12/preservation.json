@@ -1,0 +1,86 @@
+{
+  "byte_identical_to_production": {
+    "crates/spark-core/tests/timeline_admission.rs": true,
+    "crates/spark-testkit/tests/external_compile_probes.rs": true,
+    "crates/spark-testkit/tests/final_closure.rs": true,
+    "crates/spark-testkit/tests/final_digest_correction.rs": true,
+    "crates/spark-testkit/tests/refoundation_adversarial.rs": true,
+    "crates/spark-testkit/tests/refoundation_v2_adversarial.rs": true,
+    "crates/spark-testkit/tests/workspace_dependency_direction.rs": true,
+    "Cargo.toml": true,
+    "Cargo.lock": true,
+    "crates/spark-core/Cargo.toml": true,
+    "crates/spark-engine/Cargo.toml": true,
+    "crates/spark-testkit/Cargo.toml": true
+  },
+  "inline_test_modules_identical": {
+    "crates/spark-core/src/authority.rs": true,
+    "crates/spark-core/src/clock.rs": true,
+    "crates/spark-core/src/hash.rs": true,
+    "crates/spark-core/src/id.rs": true,
+    "crates/spark-core/src/random.rs": true,
+    "crates/spark-core/src/scheduler.rs": true,
+    "crates/spark-core/src/scope.rs": true,
+    "crates/spark-core/src/timeline.rs": true,
+    "crates/spark-core/src/value.rs": true,
+    "crates/spark-engine/src/activation.rs": true,
+    "crates/spark-engine/src/profile/config.rs": true,
+    "crates/spark-engine/src/profile/definition.rs": true,
+    "crates/spark-engine/src/profile/manifest.rs": true,
+    "crates/spark-engine/src/profile/text.rs": true,
+    "crates/spark-engine/src/state.rs": true,
+    "crates/spark-testkit/src/composition.rs": true,
+    "crates/spark-testkit/src/scenario.rs": true
+  },
+  "protected_functions_identical": {
+    "crates/spark-core/src/scheduler.rs::pub fn schedule(&mut self (vs 7e3a0aa)": true,
+    "crates/spark-core/src/scheduler.rs::pub fn drain_due( (vs 7e3a0aa)": true,
+    "crates/spark-core/src/timeline.rs::pub fn stage( (vs 7e3a0aa)": true,
+    "crates/spark-core/src/timeline.rs::pub fn submit_fence( (vs 7e3a0aa)": true,
+    "crates/spark-core/src/timeline.rs::pub fn derived_indexes_consistent( (vs e39690d)": true,
+    "crates/spark-engine/src/engine.rs::fn decay_walk( (vs e39690d)": true,
+    "crates/spark-engine/src/engine.rs::fn baseline_of( (vs e39690d)": true,
+    "crates/spark-engine/src/engine.rs::fn settled( (vs e39690d)": true,
+    "crates/spark-engine/src/engine.rs::fn settlement_operation( (vs e39690d)": true,
+    "crates/spark-engine/src/effects.rs::pub(crate) fn reduce( (vs e39690d)": true
+  },
+  "spark_core_changed_vs_review": [],
+  "crate_changes_vs_review": [
+    "M\tcrates/spark-engine/src/engine.rs",
+    "A\tcrates/spark-testkit/tests/phase2_decay_write_composition.rs"
+  ],
+  "production_diff_numstat": [
+    "24\t1\tcrates/spark-engine/src/engine.rs"
+  ],
+  "production_removed_lines": [
+    "        let mut v = i128::from(current.unwrap_or(0));"
+  ],
+  "first_commit_after_review": "bda58aa9e43dc571deefa508ec12364dba0a4ad0",
+  "first_commit_parent_is_review": true,
+  "first_commit_files": [
+    "A\tengineering/phase2/SPARK_PHASE_2_GATE_C2_W01_CONTRACT_CORRECTION_2026-09-12.md"
+  ],
+  "correction_unchanged_since_first_commit": true,
+  "historical_records_unchanged": {
+    "engineering/phase2/SPARK_PHASE_2_GATE_C2_DECAY_OPERATOR_ADJUDICATION_2026-09-11.md": true,
+    "engineering/phase2/SPARK_GATE_C2_DECAY_WRITE_RESOLUTION_MISSION_2026-09-12.md": true,
+    "engineering/phase2/SPARK_PHASE_2_GATE_C2_DECAY_WRITE_IMPLEMENTATION_CONTRACT_2026-09-12.md": true,
+    "engineering/phase2/SPARK_PHASE_2_GATE_C2_DECAY_WRITE_RESOLUTION_REPORT_2026-09-12.md": true,
+    "engineering/phase2/SPARK_PHASE_2_CODEX_GATE_C2_DECAY_WRITE_RESOLUTION_INDEPENDENT_REVIEW_2026-09-12.md": true
+  },
+  "engineering_non_additions": [],
+  "preexisting_engineering_files": 782,
+  "evidence_directories_unchanged": {
+    "gate_c2_decay_write_resolution_evidence_2026-09-12": true,
+    "gate_c2_decay_write_independent_evidence_2026-09-12": true,
+    "gate_c2_decay_adjudication_evidence_2026-09-11": true,
+    "gate_c2_decay_adjudication_independent_review_evidence_2026-09-11": true
+  },
+  "ancestor_7e3a0aa": true,
+  "ancestor_cc3dc70": true,
+  "ancestor_e39690d": true,
+  "worktrees": [
+    "/tmp/spark-c2w01-independent-review-20260912  67b8771 (detached HEAD)"
+  ],
+  "failures": []
+}

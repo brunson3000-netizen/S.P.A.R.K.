@@ -1,0 +1,33 @@
+{
+  "name": "OWN-subtract-not-additive",
+  "command": [
+    "cargo",
+    "test",
+    "--manifest-path",
+    "/tmp/spark-c2w01-third-OWN-subtract-not-additive-nqmw1mpy/probe/Cargo.toml",
+    "--offline",
+    "--target-dir",
+    "/tmp/spark-c2w01-third-OWN-subtract-not-additive-nqmw1mpy/target",
+    "--",
+    "--nocapture"
+  ],
+  "exit_code": 101,
+  "compiled": true,
+  "assertion_failures": [
+    "own_barrier_and_removed_lineage",
+    "own_nonidentity_transform_first_subtract_derived",
+    "own_multistage_no_double_charge",
+    "own_same_time_reversal_and_unchanged",
+    "own_watchers_both_directions_single_effect"
+  ],
+  "killed": true,
+  "patches": [
+    [
+      "let is_additive_composition = !declares_decay\n            && ops\n                .iter()\n                .any(|o| matches!(o.update, Update::Add(_) | Update::Subtract(_)));",
+      "let is_additive_composition = !declares_decay\n            && ops\n                .iter()\n                .any(|o| matches!(o.update, Update::Add(_)));"
+    ]
+  ],
+  "target_dir": "/tmp/spark-c2w01-third-OWN-subtract-not-additive-nqmw1mpy/target",
+  "probe_sha256": "52ffa96b60888ae3c3b76806dbb7c564329312e78bf313c6e48b9915c2c4334c",
+  "probe_source": "own_third_probes.rs"
+}

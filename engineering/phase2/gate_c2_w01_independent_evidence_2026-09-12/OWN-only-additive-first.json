@@ -1,0 +1,32 @@
+{
+  "name": "OWN-only-additive-first",
+  "command": [
+    "cargo",
+    "test",
+    "--manifest-path",
+    "/tmp/spark-c2w01-third-OWN-only-additive-first-cs2i29t7/probe/Cargo.toml",
+    "--offline",
+    "--target-dir",
+    "/tmp/spark-c2w01-third-OWN-only-additive-first-cs2i29t7/target",
+    "--",
+    "--nocapture"
+  ],
+  "exit_code": 101,
+  "compiled": true,
+  "assertion_failures": [
+    "own_barrier_and_removed_lineage",
+    "own_nonidentity_transform_first_subtract_derived",
+    "own_same_time_reversal_and_unchanged",
+    "own_watchers_both_directions_single_effect"
+  ],
+  "killed": true,
+  "patches": [
+    [
+      "let start = if is_additive_composition {",
+      "let start = if is_additive_composition && matches!(ops[0].update, Update::Add(_) | Update::Subtract(_)) {"
+    ]
+  ],
+  "target_dir": "/tmp/spark-c2w01-third-OWN-only-additive-first-cs2i29t7/target",
+  "probe_sha256": "52ffa96b60888ae3c3b76806dbb7c564329312e78bf313c6e48b9915c2c4334c",
+  "probe_source": "own_third_probes.rs"
+}

@@ -1,0 +1,321 @@
+[
+  {
+    "name": "OWN-subtract-not-additive",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "/tmp/spark-c2w01-third-OWN-subtract-not-additive-nqmw1mpy/probe/Cargo.toml",
+      "--offline",
+      "--target-dir",
+      "/tmp/spark-c2w01-third-OWN-subtract-not-additive-nqmw1mpy/target",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "compiled": true,
+    "assertion_failures": [
+      "own_barrier_and_removed_lineage",
+      "own_nonidentity_transform_first_subtract_derived",
+      "own_multistage_no_double_charge",
+      "own_same_time_reversal_and_unchanged",
+      "own_watchers_both_directions_single_effect"
+    ],
+    "killed": true,
+    "patches": [
+      [
+        "let is_additive_composition = !declares_decay\n            && ops\n                .iter()\n                .any(|o| matches!(o.update, Update::Add(_) | Update::Subtract(_)));",
+        "let is_additive_composition = !declares_decay\n            && ops\n                .iter()\n                .any(|o| matches!(o.update, Update::Add(_)));"
+      ]
+    ],
+    "target_dir": "/tmp/spark-c2w01-third-OWN-subtract-not-additive-nqmw1mpy/target"
+  },
+  {
+    "name": "OWN-only-additive-first",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "/tmp/spark-c2w01-third-OWN-only-additive-first-cs2i29t7/probe/Cargo.toml",
+      "--offline",
+      "--target-dir",
+      "/tmp/spark-c2w01-third-OWN-only-additive-first-cs2i29t7/target",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "compiled": true,
+    "assertion_failures": [
+      "own_barrier_and_removed_lineage",
+      "own_nonidentity_transform_first_subtract_derived",
+      "own_same_time_reversal_and_unchanged",
+      "own_watchers_both_directions_single_effect"
+    ],
+    "killed": true,
+    "patches": [
+      [
+        "let start = if is_additive_composition {",
+        "let start = if is_additive_composition && matches!(ops[0].update, Update::Add(_) | Update::Subtract(_)) {"
+      ]
+    ],
+    "target_dir": "/tmp/spark-c2w01-third-OWN-only-additive-first-cs2i29t7/target"
+  },
+  {
+    "name": "OWN-settle-after-fold",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "/tmp/spark-c2w01-third-OWN-settle-after-fold-rqf0utbs/probe/Cargo.toml",
+      "--offline",
+      "--target-dir",
+      "/tmp/spark-c2w01-third-OWN-settle-after-fold-rqf0utbs/target",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "compiled": true,
+    "assertion_failures": [
+      "own_assign_order",
+      "own_aggregate_replacement_stage_orders",
+      "own_multistage_no_double_charge",
+      "own_nonidentity_transform_first_subtract_derived"
+    ],
+    "killed": true,
+    "patches": [
+      [
+        "let mut v = i128::from(start.unwrap_or(0));",
+        "let mut v = i128::from(current.unwrap_or(0));"
+      ],
+      [
+        "resolved: to_i64(v, \"rule_body\")?,",
+        "resolved: to_i64(v - i128::from(current.unwrap_or(0)) + i128::from(start.unwrap_or(0)), \"rule_body\")?,"
+      ]
+    ],
+    "target_dir": "/tmp/spark-c2w01-third-OWN-settle-after-fold-rqf0utbs/target"
+  },
+  {
+    "name": "OWN-charge-start-twice",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "/tmp/spark-c2w01-third-OWN-charge-start-twice-2ywedh31/probe/Cargo.toml",
+      "--offline",
+      "--target-dir",
+      "/tmp/spark-c2w01-third-OWN-charge-start-twice-2ywedh31/target",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "compiled": true,
+    "assertion_failures": [
+      "own_barrier_and_removed_lineage",
+      "own_multistage_no_double_charge",
+      "own_nonidentity_transform_first_subtract_derived",
+      "own_refusal_keeps_debt_and_time",
+      "own_same_time_reversal_and_unchanged",
+      "own_watchers_both_directions_single_effect"
+    ],
+    "killed": true,
+    "patches": [
+      [
+        "let mut v = i128::from(start.unwrap_or(0));",
+        "let mut v = i128::from(start.unwrap_or(0)) * 2 - i128::from(current.unwrap_or(0));"
+      ]
+    ],
+    "target_dir": "/tmp/spark-c2w01-third-OWN-charge-start-twice-2ywedh31/target"
+  },
+  {
+    "name": "OWN-settle-declared-decay",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "/tmp/spark-c2w01-third-OWN-settle-declared-decay-m1xzfbad/probe/Cargo.toml",
+      "--offline",
+      "--target-dir",
+      "/tmp/spark-c2w01-third-OWN-settle-declared-decay-m1xzfbad/target",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "compiled": true,
+    "assertion_failures": [
+      "own_declared_decay_order"
+    ],
+    "killed": true,
+    "patches": [
+      [
+        "let is_additive_composition = !declares_decay",
+        "let is_additive_composition = true /* disregard declares_decay */"
+      ]
+    ],
+    "target_dir": "/tmp/spark-c2w01-third-OWN-settle-declared-decay-m1xzfbad/target"
+  },
+  {
+    "name": "OWN-settle-transform-only",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "/tmp/spark-c2w01-third-OWN-settle-transform-only-wfyyyeio/probe/Cargo.toml",
+      "--offline",
+      "--target-dir",
+      "/tmp/spark-c2w01-third-OWN-settle-transform-only-wfyyyeio/target",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 0,
+    "compiled": true,
+    "assertion_failures": [],
+    "killed": false,
+    "patches": [
+      [
+        "let start = if is_additive_composition {",
+        "let start = if !declares_decay {"
+      ]
+    ],
+    "target_dir": "/tmp/spark-c2w01-third-OWN-settle-transform-only-wfyyyeio/target"
+  },
+  {
+    "name": "OWN-aggregate-inherits-debt",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "/tmp/spark-c2w01-third-OWN-aggregate-inherits-debt-5jdpp_10/probe/Cargo.toml",
+      "--offline",
+      "--target-dir",
+      "/tmp/spark-c2w01-third-OWN-aggregate-inherits-debt-5jdpp_10/target",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "compiled": true,
+    "assertion_failures": [
+      "own_aggregate_replacement_stage_orders"
+    ],
+    "killed": true,
+    "patches": [
+      [
+        "Update::Aggregate { source, weight } => self.aggregate(source, weight)?,",
+        "Update::Aggregate { source, weight } => self.aggregate(source, weight)? - i128::from(current.unwrap_or(0)) + i128::from(start.unwrap_or(0)),"
+      ]
+    ],
+    "target_dir": "/tmp/spark-c2w01-third-OWN-aggregate-inherits-debt-5jdpp_10/target"
+  },
+  {
+    "name": "OWN-watcher-intermediate",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "/tmp/spark-c2w01-third-OWN-watcher-intermediate-q40epyfs/probe/Cargo.toml",
+      "--offline",
+      "--target-dir",
+      "/tmp/spark-c2w01-third-OWN-watcher-intermediate-q40epyfs/target",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "compiled": true,
+    "assertion_failures": [
+      "own_watchers_both_directions_single_effect"
+    ],
+    "killed": true,
+    "patches": [
+      [
+        "let old = view.cell(&r.definition, &r.scope).unwrap_or(0);",
+        "let old = view.settled(&r.definition, &r.scope, now)?.unwrap_or(0);"
+      ]
+    ],
+    "target_dir": "/tmp/spark-c2w01-third-OWN-watcher-intermediate-q40epyfs/target"
+  },
+  {
+    "name": "OWN-lineage-first",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "/tmp/spark-c2w01-third-OWN-lineage-first-2ve66v9k/probe/Cargo.toml",
+      "--offline",
+      "--target-dir",
+      "/tmp/spark-c2w01-third-OWN-lineage-first-2ve66v9k/target",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 0,
+    "compiled": true,
+    "assertion_failures": [],
+    "killed": false,
+    "patches": [
+      [
+        "self.lineage\n            .iter()\n            .rev()\n            .find_map",
+        "self.lineage\n            .iter()\n            .find_map"
+      ]
+    ],
+    "target_dir": "/tmp/spark-c2w01-third-OWN-lineage-first-2ve66v9k/target"
+  },
+  {
+    "name": "OWN-derived-time-lag",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "/tmp/spark-c2w01-third-OWN-derived-time-lag-403z1vbe/probe/Cargo.toml",
+      "--offline",
+      "--target-dir",
+      "/tmp/spark-c2w01-third-OWN-derived-time-lag-403z1vbe/target",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "compiled": true,
+    "assertion_failures": [
+      "own_assign_order",
+      "own_absence_and_no_move_time",
+      "own_barrier_and_removed_lineage",
+      "own_declared_decay_order",
+      "own_nonidentity_transform_first_subtract_derived",
+      "own_same_time_reversal_and_unchanged",
+      "own_watchers_both_directions_single_effect",
+      "own_aggregate_replacement_stage_orders"
+    ],
+    "killed": true,
+    "patches": [
+      [
+        "WritePath::CommitDerived => self.store.commit_derived(\n                    self.profile_id.clone(),\n                    e.definition.clone(),\n                    e.scope.clone(),\n                    e.value.clone(),\n                    now,",
+        "WritePath::CommitDerived => self.store.commit_derived(\n                    self.profile_id.clone(),\n                    e.definition.clone(),\n                    e.scope.clone(),\n                    e.value.clone(),\n                    LogicalTime(now.0.saturating_sub(1)),"
+      ]
+    ],
+    "target_dir": "/tmp/spark-c2w01-third-OWN-derived-time-lag-403z1vbe/target"
+  },
+  {
+    "name": "OWN-refusal-not-rejected",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "/tmp/spark-c2w01-third-OWN-refusal-not-rejected-c9t8yjhf/probe/Cargo.toml",
+      "--offline",
+      "--target-dir",
+      "/tmp/spark-c2w01-third-OWN-refusal-not-rejected-c9t8yjhf/target",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "compiled": true,
+    "assertion_failures": [
+      "own_refusal_keeps_debt_and_time"
+    ],
+    "killed": true,
+    "patches": [
+      [
+        "self.store\n                .validate_effect(&r.definition, &r.scope, &value, r.write_path)\n                .map_err(|error| WaveRejection::InvalidEffect {\n                    definition: r.definition.clone(),\n                    scope: r.scope.clone(),\n                    error: Box::new(error),\n                })?;",
+        "let _ = self.store.validate_effect(&r.definition, &r.scope, &value, r.write_path);"
+      ]
+    ],
+    "target_dir": "/tmp/spark-c2w01-third-OWN-refusal-not-rejected-c9t8yjhf/target"
+  }
+]

@@ -1,0 +1,9 @@
+$ cargo test --offline -p spark-testkit --all-features --test phase2_decay_adjudication -- --exact d3_d4_step_ending_at_activation_belongs_to_the_closing_segment
+
+running 1 test
+test d3_d4_step_ending_at_activation_belongs_to_the_closing_segment ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.07s
+
+    Finished `test` profile [unoptimized] target(s) in 0.08s
+     Running tests/phase2_decay_adjudication.rs (/tmp/spark-c2-w01-mutants-lqgb2lyt/target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)

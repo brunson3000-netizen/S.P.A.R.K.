@@ -1,0 +1,56 @@
+[
+  {
+    "name": "OWN-current-epoch-only",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "/tmp/spark-c2w01-third-OWN-current-epoch-only-hniuzj4f/probe/Cargo.toml",
+      "--offline",
+      "--target-dir",
+      "/tmp/spark-c2w01-third-OWN-current-epoch-only-hniuzj4f/target",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "compiled": true,
+    "assertion_failures": [
+      "own_barrier_and_removed_lineage"
+    ],
+    "killed": true,
+    "patches": [
+      [
+        "self.lineage\n            .iter()\n            .rev()\n            .find_map(|e| e.rule_set.decay_operation(target))",
+        "self.lineage.last().and_then(|e| e.rule_set.decay_operation(target))"
+      ]
+    ],
+    "target_dir": "/tmp/spark-c2w01-third-OWN-current-epoch-only-hniuzj4f/target"
+  },
+  {
+    "name": "OWN-drop-barrier-endpoint",
+    "command": [
+      "cargo",
+      "test",
+      "--manifest-path",
+      "/tmp/spark-c2w01-third-OWN-drop-barrier-endpoint-z8_rv6t7/probe/Cargo.toml",
+      "--offline",
+      "--target-dir",
+      "/tmp/spark-c2w01-third-OWN-drop-barrier-endpoint-z8_rv6t7/target",
+      "--",
+      "--nocapture"
+    ],
+    "exit_code": 101,
+    "compiled": true,
+    "assertion_failures": [
+      "own_barrier_and_removed_lineage"
+    ],
+    "killed": true,
+    "patches": [
+      [
+        ".map_or(now.0, |a| a.0.min(now.0));",
+        ".map_or(now.0, |a| a.0.saturating_sub(1).min(now.0));"
+      ]
+    ],
+    "target_dir": "/tmp/spark-c2w01-third-OWN-drop-barrier-endpoint-z8_rv6t7/target"
+  }
+]
