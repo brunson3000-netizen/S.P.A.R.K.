@@ -60,6 +60,7 @@ use spark_core::timeline::{
     TimelineFence, TimelineIngress,
 };
 use spark_core::value::{CanonicalValue, FixedPoint, ValueType};
+use std::collections::btree_map::Entry;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 
@@ -535,6 +536,71 @@ impl EvalView<'_> {
         self.store
             .get(self.profile_id, definition, scope)
             .and_then(|c| numeric(&c.value))
+    }
+
+    /// The decay/recovery operation whose fixed grid a write to `target`
+    /// settles against: the one carried by the **latest** epoch of the
+    /// retained lineage that carries one at all.
+    ///
+    /// In the ordinary case that is the current epoch. Searching backwards is
+    /// what makes an additive write land correctly while the operation is
+    /// *removed*: the identity still resolves, `decay_walk` integrates
+    /// nothing over the epochs that lack the operation, and the closing
+    /// segment's whole steps stay applicable (the Operator's 2026-09-12
+    /// decay-write resolution, behavior 3).
+    fn settlement_operation(
+        &self,
+        target: &DefinitionId,
+    ) -> Option<(&DefinitionId, &CanonicalTag, &ScopeRef)> {
+        self.lineage
+            .iter()
+            .rev()
+            .find_map(|e| e.rule_set.decay_operation(target))
+    }
+
+    /// The committed value of one cell **settled to `now`**: the value the
+    /// target's decay/recovery operation would commit at `now`, or the raw
+    /// committed value when the retained lineage carries no decay operation
+    /// for the target. `None` when the cell is absent or non-numeric.
+    ///
+    /// The Operator's 2026-09-12 decay-write resolution (behavior 1) makes an
+    /// **additive** change settle the applicable overdue decay or recovery
+    /// against the existing value before the delta applies, so an additive
+    /// event can no longer erase unapplied earlier grid steps. This reuses
+    /// `decay_walk` and `baseline_of` unchanged, so every D-1 … D-7 property
+    /// — segment origins, endpoint ownership, discarded residual, linear
+    /// floor-exact `i128` steps, baseline clamping — is exactly the
+    /// computation an explicit evaluation performs. The settled value is a
+    /// function of committed state alone, so replay, snapshot/restore and
+    /// every pacing budget reproduce it, and no `StateCell` field, encoding
+    /// or backdated commit time is introduced (adjudication S-4, D-6).
+    ///
+    /// An **explicit replacement** never consults this: it commits the
+    /// declared value, which earlier decay must not reduce (behavior 2).
+    fn settled(
+        &self,
+        definition: &DefinitionId,
+        scope: &ScopeId,
+        now: LogicalTime,
+    ) -> Result<Option<i64>, WaveRejection> {
+        let Some(cell) = self.store.get(self.profile_id, definition, scope) else {
+            return Ok(None);
+        };
+        let Some(value) = numeric(&cell.value) else {
+            return Ok(None);
+        };
+        let Some((rule_id, sub_id, scope_ref)) = self.settlement_operation(definition) else {
+            return Ok(Some(value));
+        };
+        let op = DecayOp {
+            rule_id,
+            sub_id,
+            target: definition,
+            scope: scope_ref,
+        };
+        let baseline = self.baseline_of(definition, Some(cell))?;
+        let moved = self.decay_walk(&op, i128::from(value), cell.updated_at, baseline, now)?;
+        to_i64(moved, "decay_settlement").map(Some)
     }
 
     fn resolve(scope: &ScopeRef, subject: &ScopeId) -> ScopeId {
@@ -2072,7 +2138,25 @@ impl Engine {
         }
         let canonical = canonicalize_candidates(draft.candidates)?;
         let set_digest = candidate_set_digest(&canonical);
-        let reduced = reduce(&canonical, &|d, s| view.cell(d, s))?;
+        // The pre-wave value each ADDITIVE group folds onto, settled to the
+        // cohort's canonical time (the Operator's 2026-09-12 decay-write
+        // resolution, behavior 1). One settlement per `(definition, scope)`,
+        // computed once before reduction, so several additive contributions to
+        // one target still settle exactly once and no grid endpoint is charged
+        // twice. A settlement failure is a rejection raised before any commit,
+        // so the wave fails atomically with nothing partially settled.
+        // `reduce` consults this only on the ADDITIVE branch: an explicit
+        // replacement commits its declared value, and every other family keeps
+        // its own arithmetic.
+        let mut settled: BTreeMap<(&DefinitionId, &ScopeId), i64> = BTreeMap::new();
+        for c in canonical.values() {
+            if let Entry::Vacant(slot) = settled.entry((&c.definition, &c.scope)) {
+                if let Some(v) = view.settled(&c.definition, &c.scope, now)? {
+                    slot.insert(v);
+                }
+            }
+        }
+        let reduced = reduce(&canonical, &|d, s| settled.get(&(d, s)).copied())?;
         // Committed effects, validated (authority, type, bounds, scope).
         let mut committed = Vec::new();
         for r in &reduced {

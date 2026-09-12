@@ -825,6 +825,25 @@ impl ActivatedRuleSet {
         self.rules.get(rule_id)
     }
 
+    /// The one decay/recovery operation on `target`, as `(rule, qualified
+    /// sub-ID, scope mapping)`: the identity every decay evaluation of that
+    /// target resolves. Admission guarantees at most one decay rule per
+    /// target and at most one decay operation per target inside a rule body
+    /// (v2 §4.3, `SecondDecayReducer`), so the answer is unique when this
+    /// rule set carries one at all.
+    pub(crate) fn decay_operation(
+        &self,
+        target: &DefinitionId,
+    ) -> Option<(&DefinitionId, &CanonicalTag, &ScopeRef)> {
+        self.rules.values().find_map(|r| {
+            r.spec
+                .emits
+                .iter()
+                .find(|e| &e.target == target && matches!(e.update, Update::Decay { .. }))
+                .map(|e| (&r.spec.rule_id, &e.sub_id, &e.scope))
+        })
+    }
+
     /// Every rule in ascending rule-ID order.
     pub fn rules(&self) -> impl Iterator<Item = &ActivatedRule> {
         self.rules.values()

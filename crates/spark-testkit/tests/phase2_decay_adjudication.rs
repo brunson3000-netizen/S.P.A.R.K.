@@ -276,8 +276,13 @@ fn run(t: &Timeline, pacing: u32, stops: &[u64], restore_after: Option<usize>) -
 /// - A decay evaluation applies the points in `(updated_at, now]` one step at
 ///   a time, linearly toward baseline 0 and never past it. It commits at
 ///   `now` whether or not the value moved (D-6, D-7).
-/// - A non-decay write sets the value and `updated_at` and leaves the grid
-///   alone (D-2).
+/// - A non-decay write sets `updated_at` and leaves the grid alone (D-2). An
+///   **additive** write first settles the points in `(updated_at, now]`
+///   against the existing value, then adds its delta; an **explicit
+///   replacement** takes the declared value, which earlier decay never
+///   reduces (the Operator's 2026-09-12 decay-write resolution, behaviors 1
+///   and 2). An additive write to an absent cell creates it from the delta
+///   alone: there is no value to settle.
 fn model(t: &Timeline, stops: &[u64]) -> Vec<Cell> {
     let end = t.end().max(stops.last().copied().unwrap_or(0));
     let mut epochs = vec![(0u64, t.genesis)];
@@ -330,36 +335,41 @@ fn model(t: &Timeline, stops: &[u64]) -> Vec<Cell> {
             (v + rate).min(0)
         }
     };
+    // The points in `(from, to]`, applied one at a time.
+    let settle = |v: i64, from: u64, to: u64| {
+        let mut v = v;
+        for &(p, rate) in &points {
+            if from < p && p <= to {
+                v = toward(v, rate);
+            }
+        }
+        v
+    };
     let (mut value, mut last): (Option<i64>, u64) = (None, 0);
     let mut out = Vec::new();
     let mut i = 0;
     for &s in stops {
         while i < events.len() && events[i].0 <= s {
             let (at, _, ev) = events[i];
+            // An additive write settles the existing value first; an absent
+            // cell has nothing to settle and is created from the delta.
+            let mut add = |delta: i64| {
+                value = Some(value.map_or(0, |v| settle(v, last, at)) + delta);
+                last = at;
+            };
             match ev {
                 Ev::Eval => {
-                    if let Some(mut v) = value {
-                        for &(p, rate) in &points {
-                            if last < p && p <= at {
-                                v = toward(v, rate);
-                            }
-                        }
-                        value = Some(v);
+                    if let Some(v) = value {
+                        value = Some(settle(v, last, at));
                         last = at;
                     }
                 }
-                Ev::Kick => {
-                    value = Some(value.unwrap_or(0) + t.kick);
-                    last = at;
-                }
+                Ev::Kick => add(t.kick),
                 Ev::Command(Write::Assign(v)) => {
                     value = Some(v);
                     last = at;
                 }
-                Ev::Command(Write::Shock(d)) => {
-                    value = Some(value.unwrap_or(0) + d);
-                    last = at;
-                }
+                Ev::Command(Write::Shock(d)) => add(d),
                 Ev::Command(Write::Activate(..)) => {}
             }
             i += 1;
