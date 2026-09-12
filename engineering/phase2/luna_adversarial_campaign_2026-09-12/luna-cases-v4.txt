@@ -1,0 +1,54 @@
+# source: luna_cases.rs sha256=dc2cdf75c9d94874c779bb0fb77488681090558b3890372aa515f9f3ef3b00dc
+# crate root: /tmp/spark-luna-campaign-20260912
+# spark-engine test-support: True
+# whitespace-normalized: trailing spaces and trailing blank lines removed
+$ cargo test --offline -- --nocapture --test-threads=1
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling cc v1.4.4
+   Compiling cfg-if v1.0.4
+   Compiling constant_time_eq v0.4.2
+   Compiling cpufeatures v0.3.0
+   Compiling arrayvec v0.7.8
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-luna-campaign-20260912/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-luna-campaign-20260912/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-luna-campaign-20260912/crates/spark-testkit)
+   Compiling spark-c2-counterexamples v0.0.0 (/tmp/spark-c2-w01-corpus-i5w7gcll)
+    Finished `test` profile [unoptimized] target(s) in 7.95s
+     Running unittests src/lib.rs (target/debug/deps/spark_c2_counterexamples-ea47d55d4d225cc1)
+
+running 15 tests
+test luna_extreme_assignments_and_zero_cadence_observation ... LUNA extreme value=9223372036854775807 outcome=Rejected { wave: 0, rejection: InvalidEffect { definition: DefinitionId(state.pressure), scope: actor:a, error: OutOfBounds { profile_id: ProfileId(game-world), definition_id: DefinitionId(state.pressure) } } } effects=[] cell=None
+LUNA extreme value=-9223372036854775808 outcome=Rejected { wave: 0, rejection: InvalidEffect { definition: DefinitionId(state.pressure), scope: actor:a, error: OutOfBounds { profile_id: ProfileId(game-world), definition_id: DefinitionId(state.pressure) } } } effects=[] cell=None
+LUNA extreme value=0 outcome=Committed effects=[CommittedEffect { definition: DefinitionId(state.pressure), scope: actor:a, write_path: CommitDerived, value: Int(0), provenance: Provenance { retained: [Digest(b376b530175083539675ee3f2f4d95c8354caa4348a682a648137bf5abc9b686)], omitted_source_count: 0, coverage_status: Complete, pruning_policy: "provenance_prune.v1" } }] cell=Some((0, 0))
+LUNA extreme value=-1 outcome=Committed effects=[CommittedEffect { definition: DefinitionId(state.pressure), scope: actor:a, write_path: CommitDerived, value: Int(-1), provenance: Provenance { retained: [Digest(4251a7309e73289b0f8ef4b379d56e8fad372d0e9aa25a5af94bea0d5bfabfad)], omitted_source_count: 0, coverage_status: Complete, pruning_policy: "provenance_prune.v1" } }] cell=Some((-1, 0))
+LUNA extreme value=1 outcome=Committed effects=[CommittedEffect { definition: DefinitionId(state.pressure), scope: actor:a, write_path: CommitDerived, value: Int(1), provenance: Provenance { retained: [Digest(4fcf813d66261ba550aa4dcb495e7d2d1db4b47bca7766996e2f47591acf2980)], omitted_source_count: 0, coverage_status: Complete, pruning_policy: "provenance_prune.v1" } }] cell=Some((1, 0))
+LUNA zero-rate cell=Some((2, 1))
+ok
+test luna_seeded_deterministic_sequences ... LUNA seeded sequence final=Some((3, 36))
+LUNA seeded sequence final=Some((3, 37))
+LUNA seeded sequence final=Some((-5, 37))
+LUNA seeded sequence final=Some((4, 36))
+ok
+test own_absence_and_no_move_time ... ok
+test own_aggregate_replacement_stage_orders ... ok
+test own_assign_order ... ok
+test own_barrier_and_removed_lineage ... ok
+test own_declared_decay_order ... ok
+test own_multistage_no_double_charge ... ok
+test own_nonbinding_transform_only ... ok
+test own_nonidentity_transform_first_subtract_derived ... ok
+test own_pacing_restore_replay ... ok
+test own_refusal_keeps_debt_and_time ... ok
+test own_same_time_reversal_and_unchanged ... ok
+test own_transform_boundaries ... ok
+test own_watchers_both_directions_single_effect ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.16s
+
+   Doc-tests spark_c2_counterexamples
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
