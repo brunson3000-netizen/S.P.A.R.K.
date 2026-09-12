@@ -1,6 +1,5 @@
 == cargo test --offline -- --nocapture --test-threads=1 ==
-   Compiling spark-game-contract-prototype v0.0.0 (<WORKTREE>/engineering/phase3/spark_game_contract_prototype_2026-09-12)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.47s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s
      Running unittests src/lib.rs (<TARGET_DIR>/proto-target/debug/deps/spark_game_contract_prototype-290d7f27be41b601)
 
 running 0 tests
@@ -9,10 +8,15 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
      Running tests/end_to_end.rs (<TARGET_DIR>/proto-target/debug/deps/end_to_end-30e4e808800f48ec)
 
-running 12 tests
+running 14 tests
 test e10_snapshot_restore_mid_sequence_reproduces_the_uninterrupted_run ... E-10 PASS: snapshot/restore across a boundary reproduces the uninterrupted run. LIMIT: the snapshot is an in-memory value; this is NOT durable process-recovery evidence (contract §9.4).
 ok
-test e11_re_presenting_a_completed_command_is_refused_not_re_executed ... E-11 PASS: a completed command cannot be replayed through the door. CONSEQUENCE: a host that loses a batch before applying it cannot re-derive it (contract §9.3/§9.4).
+test e11_re_presenting_a_completed_command_is_refused_not_re_executed ... E-11: carried refusal = CommandIdentityConflict { command_id: CommandId(cmd.tick.1) }
+E-11 PASS: a completed command cannot be replayed through the door. CONSEQUENCE: a host that loses a batch before applying it cannot re-derive it (contract §9.3/§9.4).
+ok
+test e12_intents_committed_before_a_pause_are_not_lost ... E-12 PASS: 1 pause(s); both paced slices' intents reached the host in canonical order
+ok
+test e13_the_at_most_once_key_separates_distinct_activations ... E-13 PASS: the at-most-once key is (activation, correlation, batch_digest)
 ok
 test e1_session_negotiation_is_fail_closed_on_major_and_downgrades_minor ... E-1 PASS: version fail-closed on major, minor downgraded, profile pair enforced
 ok
@@ -35,7 +39,7 @@ ok
 test e9_completed_history_replays_to_the_same_digests ... E-9 PASS: completed-boundary replay reproduces both recorded digests
 ok
 
-test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
 
    Doc-tests spark_game_contract_prototype
 

@@ -36,7 +36,7 @@ against a pinned **accepted** S.P.A.R.K. artifact, is Gate C4 and is not authori
 | `src/lib.rs` | The contract's logical types and the prototype device façade: version/capability negotiation, the entity mapping with its injectivity and stability checks, the intent projection and batch digest, the typed rejection vocabulary, and the host's at-most-once application ledger |
 | `src/fixture.rs` | The protocol §5 first-proof causal profile and rules. **Every constant is test data, not a gameplay law.** |
 | `src/fake_host.rs` | A fake G.A.M.E. host: it decides legality, executes against its own world numbers, and returns confirmations only as typed observations |
-| `tests/end_to_end.rs` | E-1 … E-11: negotiation, the first proof, rejection, duplicate delivery, stale input, `Busy`, message bounds, determinism, replay, restart, and the re-presentation limit |
+| `tests/end_to_end.rs` | E-1 … E-13: negotiation, the first proof, rejection, duplicate delivery, stale input, `Busy`, message bounds, determinism, replay, restart, the re-presentation limit, intent survival across a pause, and the at-most-once key's activation component |
 | `evidence/` | Captured validation output |
 
 ## Reproduce
@@ -53,7 +53,7 @@ CARGO_TARGET_DIR=<a scratch dir> CARGO_INCREMENTAL=0 CARGO_BUILD_JOBS=2 \
 |---|---|
 | `cargo fmt --all -- --check` | PASS (`proto-fmt.txt`) |
 | `cargo clippy --offline --all-targets -- -D warnings` | PASS (`proto-clippy.txt`) |
-| `cargo test --offline` | **12 passed, 0 failed, 0 ignored** (`proto-test.txt`) |
+| `cargo test --offline` | **14 passed, 0 failed, 0 ignored** (`proto-test.txt`) |
 | `cargo check --target x86_64-pc-windows-msvc` | PASS — **COMPILE-ONLY** (`proto-cross-targets.txt`) |
 | `cargo check --target x86_64-pc-windows-gnu` | PASS — **COMPILE-ONLY** |
 | `cargo check --target aarch64-linux-android` | PASS — **COMPILE-ONLY** |
@@ -73,3 +73,16 @@ evidence exists, and no three-platform equivalence is claimed.
   command log; contract §10.1 states this as a replay input.
 - `BehavioralLeverage` is declared on manifest input but not republished on the activated
   definition at this tree, so the projection carries `None` rather than inventing a value.
+- The outbound `max_intents_per_batch` bound is a **capacity hint**: an oversized batch is
+  delivered whole with `capacity_exceeded` set, never truncated. Chunked pull of one
+  boundary's results is a possible V2 surface and is not implemented.
+
+## Correction history
+
+Revision 2 (this revision) fixes a real defect found by the author while recovering prior
+G.A.M.E. records: the device projected its batch from the completing `ProcessResult` alone,
+but cohort reports are **per call**, so every intent committed before a pause in a paced
+request was silently dropped. The device now accumulates cohort reports across the active
+request's calls and projects once at the completed boundary. `E-12` is the regression test;
+`E-6e` additionally proves an interleaved `Busy` refusal does not disturb the accumulation.
+The at-most-once key also gained the session's activation identity (`E-13`).

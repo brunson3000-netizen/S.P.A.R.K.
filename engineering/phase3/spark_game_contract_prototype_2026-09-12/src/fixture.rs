@@ -346,11 +346,15 @@ fn heartbeat_rule() -> RuleSpec {
         rule_id: def("rule.heartbeat"),
         trigger: Trigger::Work(spark_core::scheduler::WorkKind::new(tag("work.tick"))),
         conditions: vec![],
+        // 50 per beat, so a single beat carries the actor over the fixture
+        // choice threshold of 40 and the slice really does produce an advisory
+        // intent. A heartbeat that produced nothing would make the paced-batch
+        // tests vacuous.
         emits: vec![emit_at(
             "beat",
             "actor.stress",
             actor(),
-            Update::Add(Expr::Input(Input::Literal(1))),
+            Update::Add(Expr::Input(Input::Literal(50))),
         )],
         schedules: vec![],
         cooldown: None,

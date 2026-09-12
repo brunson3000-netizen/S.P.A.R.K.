@@ -187,6 +187,10 @@ pub struct BehaviorIntent {
 /// Contract §6.2 / §7.2.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct IntentBatch {
+    /// The session's content-addressed profile activation identity (§3.2). It
+    /// is the first component of the at-most-once key, so that two engines
+    /// activated from different profile content can never share one.
+    pub session_activation: Digest,
     pub correlation: Digest,
     pub horizon: LogicalTime,
     pub intents: Vec<BehaviorIntent>,
@@ -290,9 +294,6 @@ pub enum Rejected {
         limit: u32,
         observed: u32,
     },
-    /// Contract §9.5: the command was not finalized; the typed engine refusal
-    /// is carried, never flattened to a boolean.
-    CommandNotFinalized(FinalizationRefusal),
     /// Contract §9.5: sticky fail-stop. No stable boundary is published and the
     /// only exit is restoring a prior snapshot.
     FailStopped,
@@ -312,9 +313,24 @@ pub enum DeviceResponse {
     /// The request boundary completed. The batch is publishable; `refusals`
     /// carries every cohort that was refused inside that same boundary, which
     /// an adapter must read (contract §9.5).
+    ///
+    /// `capacity_exceeded` reports that the batch is larger than the host's
+    /// declared `max_intents_per_batch`. The batch is still delivered whole:
+    /// the work is already committed and silently dropping an intent would be
+    /// far worse than an oversized message. The bound is a capacity hint the
+    /// host must size up, not a licence to truncate (contract §9.1).
     Completed {
         batch: IntentBatch,
         refusals: Vec<CohortRefusal>,
+        capacity_exceeded: bool,
+    },
+    /// The horizon completed but the command itself was not finalized (D-2).
+    /// Cohorts committed inside that boundary are real work and are published;
+    /// the typed engine refusal is carried alongside, never flattened away.
+    CompletedWithRefusedCommand {
+        batch: IntentBatch,
+        refusals: Vec<CohortRefusal>,
+        refusal: FinalizationRefusal,
     },
     /// Budget exhausted. Nothing is publishable; re-present the same request.
     Paused,
@@ -331,6 +347,17 @@ pub struct PrototypeDevice {
     intent_channels: Vec<DefinitionId>,
     bounds: DeclaredBounds,
     negotiated: ProtocolVersion,
+    /// Contract §6.2 / §4.3: canonical cohort reports accumulated across every
+    /// `process` call of the **currently active request**.
+    ///
+    /// A `ProcessResult` carries only the cohorts of its own call. A paced
+    /// request that pauses therefore spreads its committed cohorts over several
+    /// results, and a device that projected only from the completing result
+    /// would silently drop every intent committed before the last pause. The
+    /// batch is published only at the completed boundary (§4.3), so the reports
+    /// are held here until then.
+    accumulated: Vec<CohortReport>,
+    accumulated_for: Option<Digest>,
 }
 
 impl PrototypeDevice {
@@ -375,6 +402,8 @@ impl PrototypeDevice {
                 intent_channels,
                 bounds,
                 negotiated,
+                accumulated: Vec::new(),
+                accumulated_for: None,
             },
             descriptor,
         ))
@@ -433,15 +462,41 @@ impl PrototypeDevice {
         self.interpret(request, result)
     }
 
-    fn interpret(&self, request: &Request, result: ProcessResult) -> DeviceResponse {
+    /// Append this call's cohorts to the active request's accumulation,
+    /// starting a fresh accumulation when a different request begins.
+    fn accumulate(&mut self, correlation: &Digest, reports: &[CohortReport]) {
+        if self.accumulated_for.as_ref() != Some(correlation) {
+            self.accumulated.clear();
+            self.accumulated_for = Some(correlation.clone());
+        }
+        self.accumulated.extend_from_slice(reports);
+    }
+
+    fn take_accumulated(&mut self) -> Vec<CohortReport> {
+        self.accumulated_for = None;
+        std::mem::take(&mut self.accumulated)
+    }
+
+    /// Discard the accumulation, but only if it belongs to this request. A
+    /// `Busy` refusal is caused by an interloper and must never disturb the
+    /// active request's accumulated work.
+    fn discard_if_mine(&mut self, correlation: &Digest) {
+        if self.accumulated_for.as_ref() == Some(correlation) {
+            self.take_accumulated();
+        }
+    }
+
+    fn interpret(&mut self, request: &Request, result: ProcessResult) -> DeviceResponse {
         let correlation = request.discriminator().identity().clone();
         match result.outcome() {
-            Outcome::Paused => DeviceResponse::Paused,
+            Outcome::Paused => {
+                self.accumulate(&correlation, result.reports());
+                DeviceResponse::Paused
+            }
             Outcome::RefusedHorizonBehindFrontier { frontier, horizon } => {
-                DeviceResponse::Rejected(Rejected::StaleHorizon {
-                    frontier: *frontier,
-                    horizon: *horizon,
-                })
+                let (frontier, horizon) = (*frontier, *horizon);
+                self.discard_if_mine(&correlation);
+                DeviceResponse::Rejected(Rejected::StaleHorizon { frontier, horizon })
             }
             Outcome::RefusedActiveRequestMismatch { active } => {
                 DeviceResponse::Rejected(Rejected::Busy {
@@ -450,23 +505,51 @@ impl PrototypeDevice {
                 })
             }
             Outcome::FinalizationEntailmentViolated | Outcome::StoreInvariantViolated(_) => {
+                // Sticky fail-stop: no stable boundary is published, so nothing
+                // accumulated for this request may ever be exported.
+                self.discard_if_mine(&correlation);
                 DeviceResponse::Rejected(Rejected::FailStopped)
             }
             Outcome::CompletedCommandNotFinalized(refusal) => {
-                DeviceResponse::Rejected(Rejected::CommandNotFinalized(refusal.clone()))
-            }
-            Outcome::Completed => {
-                let (intents, refusals) = self.project(result.reports());
+                let refusal = refusal.clone();
+                // The horizon completed, so cohorts accumulated for this request
+                // are real committed work and must still be published. Only the
+                // command itself was refused, and that refusal is carried.
+                self.accumulate(&correlation, result.reports());
+                let reports = self.take_accumulated();
+                let (intents, refusals) = self.project(&reports);
                 let horizon = request.horizon();
                 let digest = batch_digest(&correlation, horizon, &intents, &self.map);
-                DeviceResponse::Completed {
+                DeviceResponse::CompletedWithRefusedCommand {
                     batch: IntentBatch {
+                        session_activation: self.profile.activation_hash().clone(),
                         correlation,
                         horizon,
                         intents,
                         batch_digest: digest,
                     },
                     refusals,
+                    refusal,
+                }
+            }
+            Outcome::Completed => {
+                self.accumulate(&correlation, result.reports());
+                let reports = self.take_accumulated();
+                let (intents, refusals) = self.project(&reports);
+                let horizon = request.horizon();
+                let digest = batch_digest(&correlation, horizon, &intents, &self.map);
+                let capacity_exceeded =
+                    intents.len() as u64 > u64::from(self.bounds.max_intents_per_batch);
+                DeviceResponse::Completed {
+                    batch: IntentBatch {
+                        session_activation: self.profile.activation_hash().clone(),
+                        correlation,
+                        horizon,
+                        intents,
+                        batch_digest: digest,
+                    },
+                    refusals,
+                    capacity_exceeded,
                 }
             }
         }
@@ -534,7 +617,7 @@ impl PrototypeDevice {
 /// `(CorrelationId, batch_digest)`.
 #[derive(Debug, Default, Clone)]
 pub struct ApplicationLedger {
-    applied: BTreeMap<(Digest, Digest), usize>,
+    applied: BTreeMap<(Digest, Digest, Digest), usize>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -546,8 +629,16 @@ pub enum ApplicationDecision {
 }
 
 impl ApplicationLedger {
+    pub fn key_of(batch: &IntentBatch) -> (Digest, Digest, Digest) {
+        (
+            batch.session_activation.clone(),
+            batch.correlation.clone(),
+            batch.batch_digest.clone(),
+        )
+    }
+
     pub fn admit(&mut self, batch: &IntentBatch) -> ApplicationDecision {
-        let key = (batch.correlation.clone(), batch.batch_digest.clone());
+        let key = Self::key_of(batch);
         match self.applied.get_mut(&key) {
             Some(seen) => {
                 *seen = seen.saturating_add(1);
@@ -561,9 +652,6 @@ impl ApplicationLedger {
     }
 
     pub fn deliveries(&self, batch: &IntentBatch) -> usize {
-        self.applied
-            .get(&(batch.correlation.clone(), batch.batch_digest.clone()))
-            .copied()
-            .unwrap_or(0)
+        self.applied.get(&Self::key_of(batch)).copied().unwrap_or(0)
     }
 }

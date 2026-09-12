@@ -1,0 +1,68 @@
+// SF-01 probe, retained as evidence. Run against the PRE-correction device to
+// see the loss; the post-correction regression test is end_to_end.rs E-12.
+// Recorded output: PROBE: calls=2 intents_in_final_batch=0
+//                  PROBE: cohort reports per call = [1, 1], total = 2
+//! Probe: does a paced request lose intents committed during its paused calls?
+use spark_core::clock::LogicalTime;
+use spark_engine::request::{Outcome, Request};
+use spark_game_contract_prototype::fixture;
+use spark_game_contract_prototype::*;
+
+#[test]
+fn probe_intents_committed_before_the_pause() {
+    // Heartbeat work at two distinct due times, budget 1 => the request pauses
+    // after the first due time's cohort, which has already committed effects.
+    let (engine, profile) = fixture::device_engine_paced(1, &[5, 6]);
+    let (mut d, _s) = PrototypeDevice::open(
+        engine,
+        profile,
+        fixture::entity_map(),
+        fixture::intent_channels(),
+        CONTRACT_VERSION,
+        DeclaredBounds::default(),
+    )
+    .unwrap();
+
+    let req = Request::Advance(LogicalTime(6));
+    let mut calls = 0;
+    loop {
+        let r = d.present(&req);
+        calls += 1;
+        match r {
+            DeviceResponse::Paused => continue,
+            DeviceResponse::Completed { batch, .. } => {
+                println!("PROBE: calls={calls} intents_in_final_batch={}", batch.intents.len());
+                break;
+            }
+            other => panic!("{other:?}"),
+        }
+    }
+
+    // Now look at what the raw engine reports would have carried, call by call.
+    let (engine2, profile2) = fixture::device_engine_paced(1, &[5, 6]);
+    let mut e2 = engine2;
+    let _ = profile2;
+    let mut total_cohorts = 0usize;
+    let mut per_call = Vec::new();
+    loop {
+        let r = e2.process(&req);
+        let n = r.reports().len();
+        per_call.push(n);
+        total_cohorts += n;
+        if !matches!(r.outcome(), Outcome::Paused) {
+            break;
+        }
+    }
+    println!("PROBE: cohort reports per call = {per_call:?}, total = {total_cohorts}");
+    assert!(
+        per_call.len() > 1,
+        "the probe needs an actually paced request"
+    );
+    let last = *per_call.last().unwrap();
+    assert!(
+        total_cohorts > last,
+        "PROBE CONFIRMS LOSS: {total_cohorts} cohort reports were produced across the \
+         request, but only the final call's {last} are visible to a device that projects \
+         from the completing result alone"
+    );
+}

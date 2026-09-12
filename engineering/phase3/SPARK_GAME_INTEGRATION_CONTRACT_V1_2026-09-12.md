@@ -23,6 +23,10 @@ independent review and Operator acceptance.
 | Independent KEEP of that candidate | `21a4fec666ca493f6ac4d5194ec6e9c5380ce40c` |
 | G.A.M.E. live `origin/main` when this contract was written | `a73fbac743adc1a00679ebc63b91027386718d71` |
 | G.A.M.E. local `main` at the same moment | `88cc098736a245c42a30c6178ab37b47bdd4d055` (behind live by 17 commits; the live hash is the pin) |
+| G.A.M.E. governing set | version 2.9.6; all seven members verified against `OPERATIVE_SET.sha256`, exit 0 |
+| Recovered G.A.M.E. product direction | `project_records/foundation/GAME_PRODUCT_DESIGN_FOUNDATION_V1.md` §11.2–§11.3, status **CANONICAL — OPERATOR-APPROVED PRODUCT/DESIGN DIRECTION** |
+| Recovered G.A.M.E. working record | `project_records/research/game_architecture_refoundation/GAME_IMPLEMENTATION_READINESS_CLOSEOUT_20260909.md`, status **working research record; non-operative** |
+| Recovered S.P.A.R.K. research | `engineering/research/SPARK_FABLE_ARCHITECTURE_CHALLENGE_2026-09-09/CLOSEOUT_2026-09-09.md` on `research/fable-architecture-challenge-2026-09-09`, **noncanonical and unmerged** |
 
 This contract is written against the S.P.A.R.K. public surface of that exact crate tree.
 Every S.P.A.R.K. type named below is a real public item of `spark-core`/`spark-engine` at
@@ -40,6 +44,79 @@ shape, the transport, the serialization and the embedded-versus-service form are
 It does **not** claim that a device exists, that an adapter exists, that G.A.M.E. has
 accepted anything, that Phase 2 is accepted, that Phase 3 is open, or that any
 cross-platform runtime parity has been demonstrated.
+
+## 1.2 Recovered G.A.M.E. decisions, and where this contract diverges
+
+Gate C3 work must recover existing accepted G.A.M.E. integration decisions before designing
+replacements. Three prior sources were found and read. Their status differs sharply and is
+stated for each, because only the first carries G.A.M.E. authority.
+
+### 1.2.1 Accepted: `GAME_PRODUCT_DESIGN_FOUNDATION_V1.md` §11.3
+
+This record's status line is **CANONICAL — OPERATOR-APPROVED PRODUCT/DESIGN DIRECTION**.
+Its §11.3 carries a **SETTLED DIRECTION** on the authority split that matches protocol §3
+verbatim in substance — including the sentence "A S.P.A.R.K. `BehaviorIntent` or
+gameplay-hook candidate is never an executable G.A.M.E. command" — and a **REQUIRED
+CAPABILITY** paragraph for the seam. `BehaviorIntent` is therefore **G.A.M.E.'s own
+vocabulary**, recovered rather than invented here.
+
+Every required capability it names is satisfied by a numbered section of this contract:
+
+| G.A.M.E. REQUIRED CAPABILITY (§11.3) | Where this contract provides it |
+|---|---|
+| stable entity identities | §4.1, with injectivity and stability as hard, checkable requirements |
+| monotonic authoritative logical time | §4.2, enforced by the engine's own refusal, not by trusting the host |
+| typed/scoped host observations | §5 |
+| actor/affiliation context | §4.1 (`ExternalAffiliationRef`) |
+| advisory outputs | §6 |
+| explicit host-confirmed outcomes | §8, with closed rejection and defer vocabularies |
+| "Exact transport, serialization, process boundary, and embedded-versus-service deployment remain open" | §10.2, which leaves all four unselected |
+
+§11.2 of the same record states that G.A.M.E. "integrates a specific S.P.A.R.K.
+artifact/version only under a later bounded implementation mission". That is G.A.M.E.'s own
+statement of the Gate C4 precondition, and this contract does not attempt to satisfy it.
+
+### 1.2.2 Not accepted: `GAME_IMPLEMENTATION_READINESS_CLOSEOUT_20260909.md`
+
+This record is explicitly classified **working research; non-operative**, and states that
+"neither side's proposal is adopted by this record". It nonetheless matters, because it is
+the current G.A.M.E. record that **names** the seam questions:
+
+- it records "the challenge closeout's bounded pull/`Busy`/ack result flow and related
+  late-input, transaction-unit, retention, and durable-snapshot choices remain proposals";
+- it records a **G.A.M.E.-side** proposal of "`BehaviorIntent` parent/child identity, staged
+  child admission, durable outcome replay, and frontier-based release".
+
+So the accurate provenance statement is **not** "G.A.M.E. has no record of this design". It
+is: G.A.M.E. has a current record that names the design and classifies it as an unadopted
+proposal, alongside a different G.A.M.E.-side proposal that this contract does not adopt
+either. §11.2 states each item on that footing.
+
+**Divergences from the G.A.M.E.-side proposal, stated rather than buried:**
+
+| G.A.M.E.-side proposal (unadopted) | This contract | Why |
+|---|---|---|
+| `BehaviorIntent` parent/child identity | flat intents carrying the engine's own bounded `Provenance` | the pinned engine exposes provenance, not a parent/child intent tree; inventing one would put structure in the seam that no evidence backs |
+| staged child admission | not present | it presupposes the parent/child model |
+| durable outcome replay | **not present**, and §9.4 says why: there is no durable state to replay from | a capability the engine cannot support must not be advertised |
+| frontier-based release | the completed request boundary **is** the release point (§4.3) | the same idea, expressed in the frozen architecture's own terms |
+
+### 1.2.3 Noncanonical: the S.P.A.R.K. Fable architecture challenge closeout
+
+Research on the S.P.A.R.K. side, unmerged and non-adopted, and the origin of the
+pull/`Busy`/ack flow the G.A.M.E. record cites. Two of its open questions are now **closed
+by later S.P.A.R.K. authority**, and this contract says so rather than reopening them:
+
+- its "transaction unit: per-`WorkKey` versus equal-time slice" question is superseded by
+  the 2026-09-10 V3-F01 acceptance and freeze, which makes the **request boundary** the
+  transaction unit (§4.3);
+- its "strict reject versus adapter re-date" late-input question is settled **on the device
+  side** by the engine's typed `RefusedHorizonBehindFrontier` (§4.2). What the *adapter*
+  does with that refusal — retry later, drop, escalate — remains an open host policy and is
+  not decided here.
+
+Its acknowledgment-gap analysis is adopted in substance at §7.2, with the difference
+recorded there.
 
 ## 2. Authority boundary (restated, unchanged)
 
@@ -182,12 +259,15 @@ The serialized boundary gives the seam its concurrency model directly:
 - A mismatch terminates nothing. A `Paused` result terminates nothing.
 
 **Provenance, stated precisely.** This design is settled *in S.P.A.R.K.*, by the frozen
-V3-F01 architecture and the reviewed Gate C2 implementation. It is **not** recorded as a
-settled decision in current G.A.M.E. records: a search of `origin/main` at
-`a73fbac743adc1a00679ebc63b91027386718d71` finds no G.A.M.E. record adopting an
-outstanding-request/Busy/pull-results integration design. The G.A.M.E.-side obligation to
-adopt it is therefore an **engineering proposal of this contract**, not a recovered
-G.A.M.E. decision, and is listed as such in §11.
+V3-F01 architecture and the reviewed Gate C2 implementation.
+
+On the G.A.M.E. side it is **named but not adopted**. `GAME_IMPLEMENTATION_READINESS_CLOSEOUT_20260909.md`
+— a record G.A.M.E. itself classifies as working research, non-operative — states that "the
+challenge closeout's bounded pull/`Busy`/ack result flow and related late-input,
+transaction-unit, retention, and durable-snapshot choices remain proposals" and that
+"neither side's proposal is adopted by this record". No G.A.M.E. record **adopts** the
+design. The G.A.M.E.-side obligation to adopt it is therefore an **engineering proposal of
+this contract**, listed as such in §11.2. See §1.2.2 for the full recovery.
 
 ## 5. Typed, scoped host observations
 
@@ -233,7 +313,16 @@ A profile declares which of its definitions are **intent channels**, using the e
 required; `domain` is already part of the manifest content hash, so the intent-channel
 set is content-addressed along with everything else.
 
-For one completed request, the device emits one **intent batch**:
+For one completed request, the device emits one **intent batch**. "For one completed
+request" is load-bearing: a paced request spreads its committed cohorts over several
+`process` calls, and each `ProcessResult` carries only its own call's cohorts. The device
+therefore **accumulates cohort reports across every call of the active request** and
+projects the batch once, at the completed boundary. A device that projected only from the
+completing result would silently drop every intent committed before the last pause — a
+defect this contract's prototype actually contained and now carries a regression test for
+(`tests/end_to_end.rs` E-12). An interleaved `Busy` refusal (§4.4) must not disturb the
+active request's accumulation; a sticky fail-stop discards it, because no stable boundary
+is published.
 
 ```
 IntentBatch {
@@ -293,7 +382,8 @@ and never enters the canonical seam.
 
 ### 7.2 Acknowledgment identity and at-most-once application
 
-The unit G.A.M.E. acknowledges is `(CorrelationId, batch_digest)` where
+The unit G.A.M.E. acknowledges is `(activation_hash, CorrelationId, batch_digest)`, where
+`activation_hash` is the session's content-addressed profile activation identity (§3.2) and
 
 ```
 batch_digest = H( "spark.intent_batch.v1"
@@ -307,8 +397,27 @@ computed with the engine's own `CanonicalEncoder`, so it is a function of canoni
 content alone.
 
 **At-most-once rule.** The host applies the effects of a batch at most once per
-`(CorrelationId, batch_digest)`. A redelivered batch with an identity the host has already
-applied is acknowledged again and **not** re-applied. This is what makes duplicate
+`(activation_hash, CorrelationId, batch_digest)`. A redelivered batch with an identity the
+host has already applied is acknowledged again and **not** re-applied — and it is
+acknowledged with the **recorded** disposition of the first application, not a freshly
+recomputed one, since the world the first application moved would otherwise produce a
+contradictory second answer.
+
+**Why this key and not a sequence number.** The prior S.P.A.R.K. research
+(§1.2.3) established that "`acked_through` or another persisted sequence number alone
+cannot prove exactly-once application", and proposed
+`(spark_instance_id, report_seq, report_digest)`. This contract adopts that conclusion and
+differs in one way: every component of its key is **content-addressed**, so it needs no
+instance counter and no issued sequence. `activation_hash` distinguishes engines activated
+from different profile content; `CorrelationId` is the canonical hash of the whole request;
+`batch_digest` is a function of the committed canonical content. Two engines that are
+genuinely interchangeable — identical activation, identical history — produce the identical
+key, and treating a redelivery from either as already applied is correct, not a collision.
+Two engines that diverge produce different keys and cannot be confused.
+
+**What the key does not solve.** It gives at-most-once. It does not by itself give
+at-least-once: if the host loses a batch before recording it, §9.3 shows the batch cannot be
+re-derived from the device. That is the durability gap of §9.4, not a defect of this key. This is what makes duplicate
 delivery safe without SPARK-side state: re-presenting a completed request is refused by
 the engine's own identity checks (`CommandIdentityConflict`, proved identity-scoped rather
 than payload-scoped by diagnostic D-2), and re-delivering a batch is deduplicated by the
@@ -370,8 +479,18 @@ protocol's first proof requires, and it keeps G.A.M.E. the sole author of world 
 
 Every list in this contract is bounded, and the bound is declared in the session
 descriptor: `max_observations_per_command`, `max_intents_per_batch`,
-`max_message_bytes`. A message exceeding a declared bound is refused with
-`Rejected::MessageTooLarge { limit, observed }` and **nothing is partially processed**.
+`max_message_bytes`.
+
+**Inbound** bounds are enforced by refusal: a message exceeding a declared bound is refused
+with `Rejected::MessageTooLarge { limit, observed }` and **nothing is partially processed**.
+
+**Outbound, `max_intents_per_batch` is a capacity hint, not an enforceable refusal, and the
+contract says so rather than pretending otherwise.** By the time a batch is projected its
+work is already committed at a completed boundary; a device cannot un-commit it, and
+truncating a batch would silently lose advisory output. So an oversized batch is delivered
+**whole**, with a `capacity_exceeded` flag telling the host to size the bound up. The
+alternative — chunked pull of one boundary's results, as the prior research proposed — is a
+reasonable V2 surface and is deliberately **not** in the smallest V1.
 S.P.A.R.K.'s own semantic caps (`max_effects_per_wave`, `max_wave_depth`, `max_fan_out`,
 `max_obligations`, `max_cohort_candidates`) remain the engine's internal bounds and are
 reported through the engine's typed `WaveRejection::SemanticCap { cap, observed, bound }`;
@@ -403,6 +522,14 @@ Four points can fail. The contract's required behavior at each:
 | After a `Paused` result, before completion | The host re-presents the identical request. A *different* request is refused `Busy`. No stable boundary was published, so there is nothing to apply or roll back. |
 | After a completed result, before the host applied the batch | The host may re-derive the batch by re-presenting? **No.** Re-presenting a completed command is refused (`CommandIdentityConflict`). The host must have durably recorded the batch before acknowledging, or must treat the batch as lost (§9.4). |
 | After the host applied the batch, before acknowledgment | The host re-acknowledges. The at-most-once key (§7.2) makes the second acknowledgment a no-op. |
+
+**Device-side retention is deliberately absent from V1, and this is a divergence worth
+naming.** The prior research design (§1.2.3) has the device *retain* an unacknowledged
+report and redeliver it, which would close row 3 above. V1 has no retention because the
+pinned engine has no durable state to retain it in: a retained report held only in memory
+is lost by exactly the failure it exists to survive. Retention is therefore recorded as a
+**candidate resolution of the §9.4 durability gap**, to be designed together with the
+persistent boundary rather than bolted on before it.
 
 ### 9.4 The durability gap — stated, not papered over
 
@@ -507,8 +634,12 @@ Recorded honestly so a reviewer is not misled about provenance:
 |---|---|
 | Transaction unit = one request boundary | **Settled** by frozen S.P.A.R.K. V3-F01 authority (§4.3) |
 | Late/stale input refused at `F` | **Settled** by the engine's typed refusal (§4.2) |
-| One outstanding request / `Busy` / pull-by-re-presenting | **Settled in S.P.A.R.K.**; **proposed** as a G.A.M.E.-side obligation — no G.A.M.E. record adopts it (§4.4) |
-| Acknowledgment identity `(CorrelationId, batch_digest)` | **Proposed** by this contract (§7.2) |
+| The authority split and the seam's required capabilities | **Settled by G.A.M.E.**, recovered from `GAME_PRODUCT_DESIGN_FOUNDATION_V1.md` §11.3 (§1.2.1) |
+| One outstanding request / `Busy` / pull-by-re-presenting | **Settled in S.P.A.R.K.**; **named but expressly unadopted** in current G.A.M.E. records, so **proposed** as a G.A.M.E.-side obligation (§1.2.2, §4.4) |
+| Acknowledgment identity `(activation_hash, CorrelationId, batch_digest)` | **Proposed** by this contract, adopting the prior research's conclusion with a content-addressed key (§7.2) |
+| Outbound batch capacity as a hint rather than a refusal; no chunked pull in V1 | **Proposed** by this contract (§9.1) |
+| Device-side retention of unacknowledged reports | **Deferred**, tied to the persistent boundary (§9.3, §9.4) |
+| G.A.M.E.-side `BehaviorIntent` parent/child identity, staged child admission, durable outcome replay | **Not adopted**; divergences recorded (§1.2.2) |
 | At-most-once host application and atomic batch application | **Proposed** by this contract (§7.2, §7.3) |
 | `BehaviorIntent` as a contract-layer projection over `domain = "intent"` | **Proposed** by this contract (§6) |
 | Closed rejection/defer vocabularies | **Proposed** by this contract (§8) |

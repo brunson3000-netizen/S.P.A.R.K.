@@ -45,7 +45,17 @@ fn present_to_completion(d: &mut PrototypeDevice, r: &Request) -> DeviceResponse
 
 fn expect_completed(resp: DeviceResponse) -> (IntentBatch, Vec<CohortRefusal>) {
     match resp {
-        DeviceResponse::Completed { batch, refusals } => (batch, refusals),
+        DeviceResponse::Completed {
+            batch,
+            refusals,
+            capacity_exceeded,
+        } => {
+            assert!(
+                !capacity_exceeded,
+                "no fixture batch should exceed the declared capacity hint"
+            );
+            (batch, refusals)
+        }
         other => panic!("expected a completed boundary, got {other:?}"),
     }
 }
@@ -426,6 +436,13 @@ fn e6_a_second_request_while_one_is_active_is_refused_busy() {
         matches!(done, DeviceResponse::Completed { .. }),
         "E-6d: the original request completes on re-presentation"
     );
+    // The interloper must not have disturbed the active request's accumulation.
+    let (batch, _) = expect_completed(done);
+    assert_eq!(
+        batch.intents.len(),
+        2,
+        "E-6e: both paced slices' intents survive the interleaved Busy refusal"
+    );
     println!(
         "E-6 PASS: one outstanding request; Busy for another; results pulled by re-presenting"
     );
@@ -629,7 +646,12 @@ fn e11_re_presenting_a_completed_command_is_refused_not_re_executed() {
 
     let resp = present_to_completion(&mut d, &tick);
     match resp {
-        DeviceResponse::Rejected(Rejected::CommandNotFinalized(_)) => {}
+        DeviceResponse::CompletedWithRefusedCommand { batch, refusal, .. } => {
+            // The horizon completed and the typed refusal is carried; because
+            // nothing new committed, the batch is empty rather than absent.
+            assert!(batch.intents.is_empty(), "E-11c: nothing new was committed");
+            println!("E-11: carried refusal = {refusal:?}");
+        }
         other => panic!("E-11a: expected a typed finalization refusal, got {other:?}"),
     }
     assert_eq!(
@@ -642,4 +664,107 @@ fn e11_re_presenting_a_completed_command_is_refused_not_re_executed() {
          CONSEQUENCE: a host that loses a batch before applying it cannot re-derive it \
          (contract §9.3/§9.4)."
     );
+}
+
+// ==================================================================== E-12
+// Contract §6.2/§4.3: a paced request spreads its committed cohorts over
+// several `process` calls, and the batch is published only at the completed
+// boundary. Every intent committed before a pause must still reach the host.
+//
+// This is a regression test for a real defect in an earlier revision of this
+// prototype, which projected only from the completing `ProcessResult` and
+// therefore silently dropped every intent committed before the last pause.
+
+#[test]
+fn e12_intents_committed_before_a_pause_are_not_lost() {
+    // Heartbeat work at two distinct due times with budget 1: the request
+    // pauses after the first due time's cohort, which has already committed an
+    // intent-channel effect.
+    let (engine, profile) = fixture::device_engine_paced(1, &[5, 6]);
+    let (mut d, _s) = PrototypeDevice::open(
+        engine,
+        profile,
+        fixture::entity_map(),
+        fixture::intent_channels(),
+        CONTRACT_VERSION,
+        DeclaredBounds::default(),
+    )
+    .expect("session");
+
+    let req = advance(6);
+    let mut pauses = 0;
+    let resp = loop {
+        match d.present(&req) {
+            DeviceResponse::Paused => {
+                pauses += 1;
+                continue;
+            }
+            other => break other,
+        }
+    };
+    assert!(
+        pauses >= 1,
+        "E-12a: the probe needs an actually paced request"
+    );
+    let (batch, _) = expect_completed(resp);
+    assert_eq!(
+        batch.intents.len(),
+        2,
+        "E-12b: one intent per due time must survive, including the one \
+         committed before the pause (got {})",
+        batch.intents.len()
+    );
+    assert_eq!(
+        batch.intents[0].canonical_time,
+        LogicalTime(5),
+        "E-12c: the first intent is the pre-pause one, in canonical order"
+    );
+    assert_eq!(batch.intents[1].canonical_time, LogicalTime(6));
+    println!(
+        "E-12 PASS: {pauses} pause(s); both paced slices' intents reached the host in \
+         canonical order"
+    );
+}
+
+// ==================================================================== E-13
+// Contract §7.2: the at-most-once key carries the session's activation
+// identity, so two engines activated from different profile content can never
+// share a key even if they produce an identical request and an identical batch.
+
+#[test]
+fn e13_the_at_most_once_key_separates_distinct_activations() {
+    let (mut d, session) = open_device();
+    let tick = host_command(
+        "cmd.tick.1",
+        10,
+        1,
+        "cmd.world_tick",
+        fixture::settlement(),
+        &[("world.drought", 30), ("world.food_supply", 20)],
+    );
+    let (batch, _) = expect_completed(present_to_completion(&mut d, &tick));
+    assert_eq!(
+        batch.session_activation, session.activation_hash,
+        "E-13a: the batch carries the session's activation identity"
+    );
+
+    // The same batch content under a different activation is a different key.
+    let mut other = batch.clone();
+    other.session_activation = spark_core::hash::hash_bytes(b"a different activation");
+    assert_ne!(
+        ApplicationLedger::key_of(&batch),
+        ApplicationLedger::key_of(&other),
+        "E-13b: differing only in activation must not collide"
+    );
+
+    // And a ledger that applied one must not consider the other already applied.
+    let mut ledger = ApplicationLedger::default();
+    assert_eq!(ledger.admit(&batch), ApplicationDecision::Apply);
+    assert_eq!(
+        ledger.admit(&other),
+        ApplicationDecision::Apply,
+        "E-13c: a different activation's batch is not deduplicated away"
+    );
+    assert_eq!(ledger.admit(&batch), ApplicationDecision::AlreadyApplied);
+    println!("E-13 PASS: the at-most-once key is (activation, correlation, batch_digest)");
 }

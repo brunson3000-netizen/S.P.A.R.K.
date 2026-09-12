@@ -65,7 +65,7 @@ pub struct FakeHost {
     /// time. A redelivery replays this record rather than re-deciding against
     /// a world the first application already moved — otherwise the second
     /// acknowledgment would contradict the first.
-    reports: BTreeMap<(Digest, Digest), OutcomeReport>,
+    reports: BTreeMap<(Digest, Digest, Digest), OutcomeReport>,
 }
 
 impl FakeHost {
@@ -101,7 +101,7 @@ impl FakeHost {
     /// accepted set is staged and committed together, or nothing is.
     pub fn deliver(&mut self, batch: &IntentBatch) -> OutcomeReport {
         let decision = self.ledger.admit(batch);
-        let key = (batch.correlation.clone(), batch.batch_digest.clone());
+        let key = ApplicationLedger::key_of(batch);
         if decision == ApplicationDecision::AlreadyApplied {
             if let Some(stored) = self.reports.get(&key) {
                 return stored.clone();
