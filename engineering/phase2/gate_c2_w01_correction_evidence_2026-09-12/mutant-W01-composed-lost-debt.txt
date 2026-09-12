@@ -1,0 +1,204 @@
+# mutant W01-composed-lost-debt: the C2W-01 regression: a composed body folds from the raw committed value, so an additive stage finished by a transform forfeits every grid step that ended before it
+# tree: d1d9f8e55c33ecb5dddccc0e4799cd8f9aaccb40
+
+$ kills phase2_decay_write_composition::an_additive_composition_settles_before_its_declared_stages
+
+running 1 test
+test an_additive_composition_settles_before_its_declared_stages ... FAILED
+
+failures:
+
+---- an_additive_composition_settles_before_its_declared_stages stdout ----
+
+thread 'an_additive_composition_settles_before_its_declared_stages' (1386523) panicked at crates/spark-testkit/tests/phase2_decay_write_composition.rs:373:9:
+assertion `left == right` failed
+  left: Some((105, 15))
+ right: Some((95, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    an_additive_composition_settles_before_its_declared_stages
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.01s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-w01-mutants-swu_28jh/W01-composed-lost-debt/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-w01-mutants-swu_28jh/W01-composed-lost-debt/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 4.15s
+     Running tests/phase2_decay_write_composition.rs (/tmp/spark-c2-w01-mutants-swu_28jh/target/debug/deps/phase2_decay_write_composition-71e688aa7e20dcd1)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_composition`
+
+$ kills phase2_decay_write_composition::a_composed_catch_up_equals_an_explicit_pre_evaluation
+
+running 1 test
+test a_composed_catch_up_equals_an_explicit_pre_evaluation ... FAILED
+
+failures:
+
+---- a_composed_catch_up_equals_an_explicit_pre_evaluation stdout ----
+
+thread 'a_composed_catch_up_equals_an_explicit_pre_evaluation' (1386532) panicked at crates/spark-testkit/tests/phase2_decay_write_composition.rs:373:9:
+assertion `left == right` failed
+  left: Some((105, 15))
+ right: Some((95, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_composed_catch_up_equals_an_explicit_pre_evaluation
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_write_composition.rs (/tmp/spark-c2-w01-mutants-swu_28jh/target/debug/deps/phase2_decay_write_composition-71e688aa7e20dcd1)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_composition`
+
+$ kills phase2_decay_write_composition::nonidentity_transforms_resolve_from_the_settled_sum
+
+running 1 test
+test nonidentity_transforms_resolve_from_the_settled_sum ... FAILED
+
+failures:
+
+---- nonidentity_transforms_resolve_from_the_settled_sum stdout ----
+
+thread 'nonidentity_transforms_resolve_from_the_settled_sum' (1386541) panicked at crates/spark-testkit/tests/phase2_decay_write_composition.rs:373:9:
+assertion `left == right` failed
+  left: Some((52, 15))
+ right: Some((47, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    nonidentity_transforms_resolve_from_the_settled_sum
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_write_composition.rs (/tmp/spark-c2-w01-mutants-swu_28jh/target/debug/deps/phase2_decay_write_composition-71e688aa7e20dcd1)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_composition`
+
+$ kills phase2_decay_write_composition::successive_composed_writes_never_charge_a_grid_point_twice
+
+running 1 test
+test successive_composed_writes_never_charge_a_grid_point_twice ... FAILED
+
+failures:
+
+---- successive_composed_writes_never_charge_a_grid_point_twice stdout ----
+
+thread 'successive_composed_writes_never_charge_a_grid_point_twice' (1386550) panicked at crates/spark-testkit/tests/phase2_decay_write_composition.rs:373:9:
+assertion `left == right` failed
+  left: Some((105, 15))
+ right: Some((95, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    successive_composed_writes_never_charge_a_grid_point_twice
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_write_composition.rs (/tmp/spark-c2-w01-mutants-swu_28jh/target/debug/deps/phase2_decay_write_composition-71e688aa7e20dcd1)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_composition`
+
+$ kills phase2_decay_write_composition::a_composed_write_settles_the_closing_segment_while_the_operation_is_removed
+
+running 1 test
+test a_composed_write_settles_the_closing_segment_while_the_operation_is_removed ... FAILED
+
+failures:
+
+---- a_composed_write_settles_the_closing_segment_while_the_operation_is_removed stdout ----
+
+thread 'a_composed_write_settles_the_closing_segment_while_the_operation_is_removed' (1386559) panicked at crates/spark-testkit/tests/phase2_decay_write_composition.rs:373:9:
+assertion `left == right` failed
+  left: Some((105, 20))
+ right: Some((99, 20))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_composed_write_settles_the_closing_segment_while_the_operation_is_removed
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_write_composition.rs (/tmp/spark-c2-w01-mutants-swu_28jh/target/debug/deps/phase2_decay_write_composition-71e688aa7e20dcd1)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_composition`
+
+$ kills phase2_decay_write_composition::a_composed_write_at_a_barrier_bills_the_closing_endpoint_once
+
+running 1 test
+test a_composed_write_at_a_barrier_bills_the_closing_endpoint_once ... FAILED
+
+failures:
+
+---- a_composed_write_at_a_barrier_bills_the_closing_endpoint_once stdout ----
+
+thread 'a_composed_write_at_a_barrier_bills_the_closing_endpoint_once' (1386568) panicked at crates/spark-testkit/tests/phase2_decay_write_composition.rs:373:9:
+assertion `left == right` failed
+  left: Some((105, 12))
+ right: Some((99, 12))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_composed_write_at_a_barrier_bills_the_closing_endpoint_once
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_write_composition.rs (/tmp/spark-c2-w01-mutants-swu_28jh/target/debug/deps/phase2_decay_write_composition-71e688aa7e20dcd1)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_composition`
+
+$ kills phase2_decay_write_composition::a_refused_composed_wave_settles_nothing
+
+running 1 test
+test a_refused_composed_wave_settles_nothing ... FAILED
+
+failures:
+
+---- a_refused_composed_wave_settles_nothing stdout ----
+
+thread 'a_refused_composed_wave_settles_nothing' (1386577) panicked at crates/spark-testkit/tests/phase2_decay_write_composition.rs:722:5:
+assertion `left == right` failed
+  left: Some((10, 10))
+ right: Some((8, 10))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_refused_composed_wave_settles_nothing
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_write_composition.rs (/tmp/spark-c2-w01-mutants-swu_28jh/target/debug/deps/phase2_decay_write_composition-71e688aa7e20dcd1)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_composition`
+
+$ kills phase2_decay_write_composition::a_composed_write_is_one_committed_transition_a_watcher_can_see
+
+running 1 test
+test a_composed_write_is_one_committed_transition_a_watcher_can_see ... FAILED
+
+failures:
+
+---- a_composed_write_is_one_committed_transition_a_watcher_can_see stdout ----
+
+thread 'a_composed_write_is_one_committed_transition_a_watcher_can_see' (1386586) panicked at crates/spark-testkit/tests/phase2_decay_write_composition.rs:373:9:
+assertion `left == right` failed
+  left: Some((105, 15))
+ right: Some((95, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_composed_write_is_one_committed_transition_a_watcher_can_see
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_write_composition.rs (/tmp/spark-c2-w01-mutants-swu_28jh/target/debug/deps/phase2_decay_write_composition-71e688aa7e20dcd1)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_composition`

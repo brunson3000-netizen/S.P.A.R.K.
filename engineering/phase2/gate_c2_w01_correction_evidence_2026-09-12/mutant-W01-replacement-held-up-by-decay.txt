@@ -1,0 +1,29 @@
+# mutant W01-replacement-held-up-by-decay: a declared replacement inside a body cannot lower the value below the settled starting value (a wrong reading of "earlier decay must not reduce that replacement")
+# tree: d1d9f8e55c33ecb5dddccc0e4799cd8f9aaccb40
+
+$ kills phase2_decay_write_composition::a_declared_replacement_inside_a_body_wins_in_either_stage_order
+
+running 1 test
+test a_declared_replacement_inside_a_body_wins_in_either_stage_order ... FAILED
+
+failures:
+
+---- a_declared_replacement_inside_a_body_wins_in_either_stage_order stdout ----
+
+thread 'a_declared_replacement_inside_a_body_wins_in_either_stage_order' (1386796) panicked at crates/spark-testkit/tests/phase2_decay_write_composition.rs:373:9:
+assertion `left == right` failed
+  left: Some((93, 15))
+ right: Some((53, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_declared_replacement_inside_a_body_wins_in_either_stage_order
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.01s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-w01-mutants-swu_28jh/W01-replacement-held-up-by-decay/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-w01-mutants-swu_28jh/W01-replacement-held-up-by-decay/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 2.76s
+     Running tests/phase2_decay_write_composition.rs (/tmp/spark-c2-w01-mutants-swu_28jh/target/debug/deps/phase2_decay_write_composition-71e688aa7e20dcd1)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_composition`

@@ -1,0 +1,29 @@
+# mutant W01-settle-every-body: every composed body is settled, including one of transform stages alone, breaking the accepted standalone Scale/Clamp boundary
+# tree: d1d9f8e55c33ecb5dddccc0e4799cd8f9aaccb40
+
+$ kills phase2_decay_write_composition::transform_only_paths_are_not_additive_events
+
+running 1 test
+test transform_only_paths_are_not_additive_events ... FAILED
+
+failures:
+
+---- transform_only_paths_are_not_additive_events stdout ----
+
+thread 'transform_only_paths_are_not_additive_events' (1386727) panicked at crates/spark-testkit/tests/phase2_decay_write_composition.rs:373:9:
+assertion `left == right` failed
+  left: Some((45, 15))
+ right: Some((50, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    transform_only_paths_are_not_additive_events
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.03s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-w01-mutants-swu_28jh/W01-settle-every-body/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-w01-mutants-swu_28jh/W01-settle-every-body/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 2.88s
+     Running tests/phase2_decay_write_composition.rs (/tmp/spark-c2-w01-mutants-swu_28jh/target/debug/deps/phase2_decay_write_composition-71e688aa7e20dcd1)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_composition`

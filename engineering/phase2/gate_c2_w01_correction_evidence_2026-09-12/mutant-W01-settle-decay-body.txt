@@ -1,0 +1,29 @@
+# mutant W01-settle-decay-body: a body that declares a decay stage is also settled, so that stage walks the same endpoints a second time
+# tree: d1d9f8e55c33ecb5dddccc0e4799cd8f9aaccb40
+
+$ kills phase2_decay_write_composition::a_body_that_declares_a_decay_stage_keeps_its_order_and_charges_once
+
+running 1 test
+test a_body_that_declares_a_decay_stage_keeps_its_order_and_charges_once ... FAILED
+
+failures:
+
+---- a_body_that_declares_a_decay_stage_keeps_its_order_and_charges_once stdout ----
+
+thread 'a_body_that_declares_a_decay_stage_keeps_its_order_and_charges_once' (1386661) panicked at crates/spark-testkit/tests/phase2_decay_write_composition.rs:551:5:
+assertion `left == right` failed
+  left: Some((13, 12))
+ right: Some((19, 12))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_body_that_declares_a_decay_stage_keeps_its_order_and_charges_once
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.01s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-w01-mutants-swu_28jh/W01-settle-decay-body/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-w01-mutants-swu_28jh/W01-settle-decay-body/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 3.87s
+     Running tests/phase2_decay_write_composition.rs (/tmp/spark-c2-w01-mutants-swu_28jh/target/debug/deps/phase2_decay_write_composition-71e688aa7e20dcd1)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_composition`

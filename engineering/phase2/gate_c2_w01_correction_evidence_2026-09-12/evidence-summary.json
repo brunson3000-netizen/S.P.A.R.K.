@@ -1,0 +1,63 @@
+{
+  "tree": "d1d9f8e55c33ecb5dddccc0e4799cd8f9aaccb40",
+  "base": "e39690dc51b63fa09fe7c3f30ebd48aa2c16686f",
+  "required_checks_passed": 15,
+  "workspace": {
+    "passed": 427,
+    "failed": 0,
+    "ignored": 0
+  },
+  "new_composition_tests": 12,
+  "corpora": {
+    "reviewer-own-probes": {
+      "passed": 9,
+      "failed": 0
+    },
+    "reviewer-materialization-probe": {
+      "passed": 1,
+      "failed": 0
+    },
+    "historical-own-probes": {
+      "passed": 8,
+      "failed": 1
+    },
+    "resolution-adapted": {
+      "passed": 9,
+      "failed": 0
+    },
+    "decision-adapted": {
+      "passed": 9,
+      "failed": 0
+    }
+  },
+  "c2w01_blocking_vectors": "reviewer own_probes.rs passes 9/9 byte-unchanged",
+  "expected_historical_failure": [
+    "own_open_lost_prewrite_step"
+  ],
+  "mutants": {
+    "total": 20,
+    "w01_mutants": 4,
+    "killed": 20,
+    "kill_assertions": 57,
+    "prior_test_survivals": 2,
+    "baseline_tests": 42,
+    "superseded_and_replaced": "RES-settle-composed-body -> W01-settle-every-body"
+  },
+  "preservation": {
+    "failures": 0,
+    "inline_modules": 17,
+    "preexisting_engineering_files": 782,
+    "production_numstat": [
+      "24\t1\tcrates/spark-engine/src/engine.rs"
+    ],
+    "production_lines_removed": [
+      "        let mut v = i128::from(current.unwrap_or(0));"
+    ]
+  },
+  "environment": {
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_BUILD_JOBS": "2"
+  }
+}

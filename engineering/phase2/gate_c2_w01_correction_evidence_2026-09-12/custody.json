@@ -1,0 +1,262 @@
+{
+  "utc": "2026-09-12T11:07:53.911712+00:00",
+  "refs": {
+    "review/phase2-gate-c2-decay-write-resolution-independent-20260912": {
+      "expected": "e39690dc51b63fa09fe7c3f30ebd48aa2c16686f",
+      "local": null,
+      "tracking": "e39690dc51b63fa09fe7c3f30ebd48aa2c16686f",
+      "live": "e39690dc51b63fa09fe7c3f30ebd48aa2c16686f",
+      "equal": true
+    },
+    "candidate/phase2-gate-c2-decay-write-resolution-20260912": {
+      "expected": "cc3dc70182b428f7cbc953ae722f85b39d407dfa",
+      "local": "cc3dc70182b428f7cbc953ae722f85b39d407dfa",
+      "tracking": "cc3dc70182b428f7cbc953ae722f85b39d407dfa",
+      "live": "cc3dc70182b428f7cbc953ae722f85b39d407dfa",
+      "equal": true
+    },
+    "review/phase2-gate-c2-decay-adjudication-independent-20260911": {
+      "expected": "e00f248e25f6d34f1041e219f74085649714c19d",
+      "local": "e00f248e25f6d34f1041e219f74085649714c19d",
+      "tracking": "e00f248e25f6d34f1041e219f74085649714c19d",
+      "live": "e00f248e25f6d34f1041e219f74085649714c19d",
+      "equal": true
+    },
+    "candidate/phase2-gate-c2-decay-adjudication-20260911": {
+      "expected": "544c5f6f99d8dabf9855f8ac68f5666286aa9741",
+      "local": "544c5f6f99d8dabf9855f8ac68f5666286aa9741",
+      "tracking": "544c5f6f99d8dabf9855f8ac68f5666286aa9741",
+      "live": "544c5f6f99d8dabf9855f8ac68f5666286aa9741",
+      "equal": true
+    },
+    "review/phase2-gate-c2-decay-oracle-revision-independent-20260911": {
+      "expected": "6b167d84f21fb60f374a2ab45c62d5c6a040790a",
+      "local": "6b167d84f21fb60f374a2ab45c62d5c6a040790a",
+      "tracking": "6b167d84f21fb60f374a2ab45c62d5c6a040790a",
+      "live": "6b167d84f21fb60f374a2ab45c62d5c6a040790a",
+      "equal": true
+    },
+    "candidate/phase2-gate-c2-decay-oracle-revision-20260911": {
+      "expected": "6968a4af917c9a32761be371c3e12ec12ba0f1bd",
+      "local": "6968a4af917c9a32761be371c3e12ec12ba0f1bd",
+      "tracking": "6968a4af917c9a32761be371c3e12ec12ba0f1bd",
+      "live": "6968a4af917c9a32761be371c3e12ec12ba0f1bd",
+      "equal": true
+    },
+    "review/phase2-gate-c2-revision-independent-20260911": {
+      "expected": "3a0b51463e1874ad8b02dd3a3261933fcd2e22f4",
+      "local": "3a0b51463e1874ad8b02dd3a3261933fcd2e22f4",
+      "tracking": "3a0b51463e1874ad8b02dd3a3261933fcd2e22f4",
+      "live": "3a0b51463e1874ad8b02dd3a3261933fcd2e22f4",
+      "equal": true
+    },
+    "candidate/phase2-gate-c2-bounded-revision-20260911": {
+      "expected": "5b7fcf50161a65dc83b4806b513f01c0a4943ea5",
+      "local": "5b7fcf50161a65dc83b4806b513f01c0a4943ea5",
+      "tracking": "5b7fcf50161a65dc83b4806b513f01c0a4943ea5",
+      "live": "5b7fcf50161a65dc83b4806b513f01c0a4943ea5",
+      "equal": true
+    },
+    "phase1-refoundation-v2": {
+      "expected": "7e3a0aae069a8bf840e4dfb74221cdf2687b1db5",
+      "local": "7e3a0aae069a8bf840e4dfb74221cdf2687b1db5",
+      "tracking": "7e3a0aae069a8bf840e4dfb74221cdf2687b1db5",
+      "live": "7e3a0aae069a8bf840e4dfb74221cdf2687b1db5",
+      "equal": true
+    },
+    "candidate/phase2-gate-c2-implementation-20260911": {
+      "expected": "053d1dc1131ec47be94b60513fad9ea8389cde0c",
+      "local": "053d1dc1131ec47be94b60513fad9ea8389cde0c",
+      "tracking": "053d1dc1131ec47be94b60513fad9ea8389cde0c",
+      "live": "053d1dc1131ec47be94b60513fad9ea8389cde0c",
+      "equal": true
+    },
+    "review/phase2-gate-c2-independent-20260911": {
+      "expected": "00d647e6c3581d1dfbaeccf31c6b8d1966f8bfd0",
+      "local": "00d647e6c3581d1dfbaeccf31c6b8d1966f8bfd0",
+      "tracking": "00d647e6c3581d1dfbaeccf31c6b8d1966f8bfd0",
+      "live": "00d647e6c3581d1dfbaeccf31c6b8d1966f8bfd0",
+      "equal": true
+    },
+    "research/fable-architecture-challenge-2026-09-09": {
+      "expected": "03d36dd649641b28b232f4650b773413db634611",
+      "local": "03d36dd649641b28b232f4650b773413db634611",
+      "tracking": "03d36dd649641b28b232f4650b773413db634611",
+      "live": "03d36dd649641b28b232f4650b773413db634611",
+      "equal": true
+    }
+  },
+  "worktrees": [
+    {
+      "path": "/home/chromikey/Projects/SPARK",
+      "registration": [
+        "HEAD 5b19d7b5aa935b65fcfad1d8bda9a210d5a5684d",
+        "branch refs/heads/review/v3-f01-final-20260910"
+      ],
+      "status": []
+    },
+    {
+      "path": "/home/chromikey/Projects/SPARK-fable-challenge-worktree",
+      "registration": [
+        "HEAD 03d36dd649641b28b232f4650b773413db634611",
+        "branch refs/heads/research/fable-architecture-challenge-2026-09-09"
+      ],
+      "status": []
+    },
+    {
+      "path": "/home/chromikey/Projects/SPARK-gate-c2",
+      "registration": [
+        "HEAD 053d1dc1131ec47be94b60513fad9ea8389cde0c",
+        "branch refs/heads/candidate/phase2-gate-c2-implementation-20260911"
+      ],
+      "status": []
+    },
+    {
+      "path": "/home/chromikey/Projects/SPARK-gate-c2-adjudication",
+      "registration": [
+        "HEAD 544c5f6f99d8dabf9855f8ac68f5666286aa9741",
+        "branch refs/heads/candidate/phase2-gate-c2-decay-adjudication-20260911"
+      ],
+      "status": []
+    },
+    {
+      "path": "/home/chromikey/Projects/SPARK-gate-c2-rev",
+      "registration": [
+        "HEAD 5b7fcf50161a65dc83b4806b513f01c0a4943ea5",
+        "branch refs/heads/candidate/phase2-gate-c2-bounded-revision-20260911"
+      ],
+      "status": []
+    },
+    {
+      "path": "/home/chromikey/Projects/SPARK-gate-c2-rev2",
+      "registration": [
+        "HEAD 6968a4af917c9a32761be371c3e12ec12ba0f1bd",
+        "branch refs/heads/candidate/phase2-gate-c2-decay-oracle-revision-20260911"
+      ],
+      "status": []
+    },
+    {
+      "path": "/home/chromikey/Projects/SPARK-gate-c2-w01",
+      "registration": [
+        "HEAD d1d9f8e55c33ecb5dddccc0e4799cd8f9aaccb40",
+        "branch refs/heads/candidate/phase2-gate-c2-w01-correction-20260912"
+      ],
+      "status": [
+        "?? engineering/phase2/SPARK_PHASE_2_GATE_C2_OPERATOR_NEXT_AUTHORIZED_STEP_2026-09-12.md",
+        "?? engineering/phase2/gate_c2_w01_correction_evidence_2026-09-12/"
+      ]
+    },
+    {
+      "path": "/home/chromikey/Projects/SPARK-gate-c2-write",
+      "registration": [
+        "HEAD cc3dc70182b428f7cbc953ae722f85b39d407dfa",
+        "branch refs/heads/candidate/phase2-gate-c2-decay-write-resolution-20260912"
+      ],
+      "status": []
+    },
+    {
+      "path": "/home/chromikey/Projects/SPARK-v3-f01-rev2-writer",
+      "registration": [
+        "HEAD 5ecc95c033bf3a7744bb7862bf959066e6561670",
+        "branch refs/heads/candidate/v3-f01-bounded-correction-rev2-20260910"
+      ],
+      "status": []
+    },
+    {
+      "path": "/home/chromikey/Projects/SPARK-v3-f01-writer",
+      "registration": [
+        "HEAD 74d044ddd2b59c3c2eff558beeeeb515390dbe0f",
+        "branch refs/heads/candidate/v3-f01-final-correction-20260910"
+      ],
+      "status": []
+    },
+    {
+      "path": "/tmp/spark-gate-c2-adjudication-review",
+      "registration": [
+        "HEAD e00f248e25f6d34f1041e219f74085649714c19d",
+        "branch refs/heads/review/phase2-gate-c2-decay-adjudication-independent-20260911"
+      ],
+      "status": []
+    },
+    {
+      "path": "/tmp/spark-gate-c2-decay-oracle-review",
+      "registration": [
+        "HEAD 6b167d84f21fb60f374a2ab45c62d5c6a040790a",
+        "branch refs/heads/review/phase2-gate-c2-decay-oracle-revision-independent-20260911"
+      ],
+      "status": []
+    },
+    {
+      "path": "/tmp/spark-gate-c2-review",
+      "registration": [
+        "HEAD 00d647e6c3581d1dfbaeccf31c6b8d1966f8bfd0",
+        "branch refs/heads/review/phase2-gate-c2-independent-20260911"
+      ],
+      "status": []
+    },
+    {
+      "path": "/tmp/spark-gate-c2-revision-review",
+      "registration": [
+        "HEAD 3a0b51463e1874ad8b02dd3a3261933fcd2e22f4",
+        "branch refs/heads/review/phase2-gate-c2-revision-independent-20260911"
+      ],
+      "status": []
+    },
+    {
+      "path": "/tmp/spark-v3-f01-production",
+      "registration": [
+        "HEAD 7e3a0aae069a8bf840e4dfb74221cdf2687b1db5",
+        "branch refs/heads/phase1-refoundation-v2"
+      ],
+      "status": []
+    },
+    {
+      "path": "/tmp/spark-v3-f01-rev2-accept",
+      "registration": [
+        "HEAD 7e3a0aae069a8bf840e4dfb74221cdf2687b1db5",
+        "branch refs/heads/accept/v3-f01-rev2-freeze-20260910"
+      ],
+      "status": []
+    },
+    {
+      "path": "/tmp/spark-v3-f01-rev2-review",
+      "registration": [
+        "HEAD e55b1da1c9049b1de58fcb06c65eea59939f2a57",
+        "branch refs/heads/review/v3-f01-rev2-20260910"
+      ],
+      "status": []
+    }
+  ],
+  "branches": [
+    "refs/heads/accept/v3-f01-rev2-freeze-20260910 7e3a0aae069a8bf840e4dfb74221cdf2687b1db5",
+    "refs/heads/backup/production-github-0b1ea6a 0b1ea6aebb0d7eeefbeb2bc37ee1031da9136534",
+    "refs/heads/backup/production-local-47729bb 47729bb719d8ae95ae00c4e195fa64d0e27bfdb7",
+    "refs/heads/candidate/phase2-gate-c2-bounded-revision-20260911 5b7fcf50161a65dc83b4806b513f01c0a4943ea5",
+    "refs/heads/candidate/phase2-gate-c2-decay-adjudication-20260911 544c5f6f99d8dabf9855f8ac68f5666286aa9741",
+    "refs/heads/candidate/phase2-gate-c2-decay-oracle-revision-20260911 6968a4af917c9a32761be371c3e12ec12ba0f1bd",
+    "refs/heads/candidate/phase2-gate-c2-decay-write-resolution-20260912 cc3dc70182b428f7cbc953ae722f85b39d407dfa",
+    "refs/heads/candidate/phase2-gate-c2-implementation-20260911 053d1dc1131ec47be94b60513fad9ea8389cde0c",
+    "refs/heads/candidate/phase2-gate-c2-w01-correction-20260912 d1d9f8e55c33ecb5dddccc0e4799cd8f9aaccb40",
+    "refs/heads/candidate/v3-f01-bounded-correction-rev2-20260910 5ecc95c033bf3a7744bb7862bf959066e6561670",
+    "refs/heads/candidate/v3-f01-final-correction-20260910 74d044ddd2b59c3c2eff558beeeeb515390dbe0f",
+    "refs/heads/master 1ac3e3b4b9cfe7bb9f2862bb364b908e169eb738",
+    "refs/heads/phase1-refoundation 244391d41aa2c6f6f32af1f7529b22e934493a81",
+    "refs/heads/phase1-refoundation-v2 7e3a0aae069a8bf840e4dfb74221cdf2687b1db5",
+    "refs/heads/reconcile/production-2026-09-09 e9e26e815f1d4d890c5f5621be9e2143e7dd9ac8",
+    "refs/heads/research/fable-architecture-challenge-2026-09-09 03d36dd649641b28b232f4650b773413db634611",
+    "refs/heads/review/phase2-gate-c2-decay-adjudication-independent-20260911 e00f248e25f6d34f1041e219f74085649714c19d",
+    "refs/heads/review/phase2-gate-c2-decay-oracle-revision-independent-20260911 6b167d84f21fb60f374a2ab45c62d5c6a040790a",
+    "refs/heads/review/phase2-gate-c2-independent-20260911 00d647e6c3581d1dfbaeccf31c6b8d1966f8bfd0",
+    "refs/heads/review/phase2-gate-c2-revision-independent-20260911 3a0b51463e1874ad8b02dd3a3261933fcd2e22f4",
+    "refs/heads/review/v3-f01-final-20260910 5b19d7b5aa935b65fcfad1d8bda9a210d5a5684d",
+    "refs/heads/review/v3-f01-rev2-20260910 e55b1da1c9049b1de58fcb06c65eea59939f2a57"
+  ],
+  "candidate_branch": {
+    "candidate/phase2-gate-c2-w01-correction-20260912": {
+      "local": "d1d9f8e55c33ecb5dddccc0e4799cd8f9aaccb40",
+      "tracking": "d1d9f8e55c33ecb5dddccc0e4799cd8f9aaccb40",
+      "live": "d1d9f8e55c33ecb5dddccc0e4799cd8f9aaccb40",
+      "equal": true
+    }
+  }
+}
