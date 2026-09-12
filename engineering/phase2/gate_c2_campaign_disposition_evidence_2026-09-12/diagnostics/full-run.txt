@@ -1,8 +1,9 @@
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+   Compiling spark-handoff-diagnostics v0.0.0 (<TARGET_DIR>/diag)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.59s
      Running tests/diagnostics.rs (<TARGET_DIR>/cargo-target/debug/deps/diagnostics-421a9f77f50a6dec)
 
 running 13 tests
-test d10_rn02_the_repeated_settlement_walk_has_no_canonical_effect ... D-10 PASS: additive path and settled path both commit 68 against a hand-computed oracle, with 42 of decay debt already billed once. RN02's repeated walk is read-only; it is recorded as a disclosed cost limitation and is not optimized.
+test d10_rn02_the_repeated_settlement_walk_has_no_canonical_effect ... D-10 PASS: additive path and settled path both commit 68 against a hand-computed oracle, with 42 of decay debt already billed once; a binding clamp at 60 does change the result, so the transform stage is genuinely evaluated. RN02's repeated walk is read-only; it is recorded as a disclosed cost limitation and is not optimized.
 ok
 test d10b_rn02_the_composed_result_is_also_reproducible_run_to_run ... D-10b PASS: run-to-run reproducibility only — this does not discriminate RN02
 ok

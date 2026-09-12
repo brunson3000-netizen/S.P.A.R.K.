@@ -580,17 +580,16 @@ fn d9_luna002_zero_rate_evaluation_commits_time_without_changing_value() {
 const DECAY_RATE: i64 = 7;
 const DECAY_CADENCE: i64 = 3;
 
-fn rn02_engine(mixed: bool) -> Engine {
+/// `None` = all-additive body. `Some(max)` = mixed body whose clamp has that
+/// upper bound.
+fn rn02_engine(clamp_max: Option<i64>) -> Engine {
     let mut f = standard();
     let mut emits = vec![emit("add", "state.stress", Update::Add(lit(10)))];
-    if mixed {
+    if let Some(max) = clamp_max {
         emits.push(emit(
             "clamp",
             "state.stress",
-            Update::Clamp {
-                min: -WIDE,
-                max: WIDE,
-            },
+            Update::Clamp { min: -WIDE, max },
         ));
     }
     let rules = vec![
@@ -620,8 +619,8 @@ fn rn02_engine(mixed: bool) -> Engine {
 
 /// Seed 100 at t=1, accrue decay debt to t=19, then write the body at t=20.
 /// Returns (value at t=19, value after the body).
-fn rn02_run(mixed: bool) -> (Option<i64>, Option<i64>, Digest) {
-    let mut e = rn02_engine(mixed);
+fn rn02_run(clamp_max: Option<i64>) -> (Option<i64>, Option<i64>, Digest) {
+    let mut e = rn02_engine(clamp_max);
     let r = drive(
         &mut e,
         &Request::Command(command_request(
@@ -651,8 +650,10 @@ fn d10_rn02_the_repeated_settlement_walk_has_no_canonical_effect() {
     // and the body adds 10: 68.
     const EXPECTED_AFTER_BODY: i64 = EXPECTED_AT_19 + 10; // 68
 
-    let (mid_add, add_only, _) = rn02_run(false);
-    let (mid_mixed, mixed, _) = rn02_run(true);
+    let (mid_add, add_only, _) = rn02_run(None);
+    // A deliberately NON-BINDING clamp: it changes no value, but it makes the
+    // body "mixed", which is what selects the settled path.
+    let (mid_mixed, mixed, _) = rn02_run(Some(WIDE));
 
     assert_eq!(
         mid_add,
@@ -682,11 +683,32 @@ fn d10_rn02_the_repeated_settlement_walk_has_no_canonical_effect() {
         add_only, mixed,
         "D-10 check 5: the two code paths agree exactly on identical state"
     );
+
+    // POSITIVE CONTROL. Checks 1-5 would also pass if the clamp stage were
+    // simply dropped — in which case body B would be the same all-additive body
+    // as A and the comparison would prove nothing. A clamp that BINDS must
+    // therefore change the result, and by exactly the amount the declared
+    // semantics predict.
+    const BINDING_MAX: i64 = 60;
+    let (_, clamped, _) = rn02_run(Some(BINDING_MAX));
+    assert_eq!(
+        clamped,
+        Some(BINDING_MAX),
+        "D-10 check 6 (positive control): a binding clamp must take effect, proving \
+         the transform stage is really evaluated and body B is genuinely the mixed \
+         path rather than a silently-dropped no-op"
+    );
+    assert_ne!(
+        clamped, add_only,
+        "D-10 check 7 (positive control): and it must differ from the additive-only \
+         result, or the clamp stage is not reaching the value at all"
+    );
     println!(
         "D-10 PASS: additive path and settled path both commit {EXPECTED_AFTER_BODY} \
-         against a hand-computed oracle, with {} of decay debt already billed once. \
-         RN02's repeated walk is read-only; it is recorded as a disclosed cost \
-         limitation and is not optimized.",
+         against a hand-computed oracle, with {} of decay debt already billed once; \
+         a binding clamp at {BINDING_MAX} does change the result, so the transform \
+         stage is genuinely evaluated. RN02's repeated walk is read-only; it is \
+         recorded as a disclosed cost limitation and is not optimized.",
         100 - EXPECTED_AT_19
     );
 }
@@ -695,8 +717,8 @@ fn d10_rn02_the_repeated_settlement_walk_has_no_canonical_effect() {
 fn d10b_rn02_the_composed_result_is_also_reproducible_run_to_run() {
     // This is a DETERMINISM check, not the RN02 discriminator. It is kept
     // because reproducibility is worth asserting, and named for what it proves.
-    let (_, first, d1) = rn02_run(true);
-    let (_, second, d2) = rn02_run(true);
+    let (_, first, d1) = rn02_run(Some(WIDE));
+    let (_, second, d2) = rn02_run(Some(WIDE));
     assert_eq!(first, second, "D-10b check 1: same value across runs");
     assert_eq!(d1, d2, "D-10b check 2: same canonical state digest across runs");
     println!("D-10b PASS: run-to-run reproducibility only — this does not discriminate RN02");

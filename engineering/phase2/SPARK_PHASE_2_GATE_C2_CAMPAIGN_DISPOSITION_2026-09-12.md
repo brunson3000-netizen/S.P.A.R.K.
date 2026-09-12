@@ -100,7 +100,7 @@ citation resolves against the source without re-deriving it.
 | **SONNET T-6** — a "different" profile restored successfully | (a) restore fails to validate profile identity; (b) content addressing made the second profile *identical*, so it was never a distinct profile | **D-6**: a manifest with genuinely different content (an added definition) yields a different `activation_hash`, and restoring across it is refused with `ArtifactBindingMismatch` | **(b), and the declared coverage gap is now closed.** |
 | SONNET gap — obligation-drop bidirectional-invariant mutation (needed an internal `WorkKey`) | — | **D-7**: the key is reachable from the public `ObligationStore::keys()`; dropping one claim set **and resealing the digest** is caught by `BidirectionalInvariantBroken`, not by the digest check | **Gap closed.** The invariant, not the digest, is what catches it. |
 | SONNET gap — a command staged directly into a snapshot | — | **D-8**: staging at the real frontier ordinal and resealing is refused with `TimelineStagingPresent` (Revision-2 §7 step 2b) | **Gap closed.** |
-| **C2W-RN02** — composed settlement performs two pure walks, not one | (a) the repeated walk bills decay debt a second time, so a body taking the settled path commits a lower value than the same arithmetic on the additive-only path; (b) the repeat is read-only, and both paths commit the value the declared semantics predict | **D-10** (revised, §3.2): with 42 units of decay debt already billed once, the **all-additive** `AddDelta` path and the **mixed** settled path — two different code paths on identical state — both commit **68**, the hand-computed oracle value. A second billing walk would put the settled path below it. **D-10b** separately records run-to-run reproducibility, and is named as the determinism check it is. | **(b).** Recorded as a **disclosed cost limitation** (§4). Deliberately **not** optimized. |
+| **C2W-RN02** — composed settlement performs two pure walks, not one | (a) the repeated walk bills decay debt a second time, so a body taking the settled path commits a lower value than the same arithmetic on the additive-only path; (b) the repeat is read-only, and both paths commit the value the declared semantics predict | **D-10** (revised, §3.2): with 42 units of decay debt already billed once, the **all-additive** `AddDelta` path and the **mixed** settled path — two different code paths on identical state — both commit **68**, the hand-computed oracle value. A second billing walk would put the settled path below it. A positive control with a **binding** clamp at 60 commits exactly 60, proving the transform stage is genuinely evaluated rather than dropped. **D-10b** separately records run-to-run reproducibility, and is named as the determinism check it is. | **(b).** Recorded as a **disclosed cost limitation** (§4). Deliberately **not** optimized. |
 
 ### 3.1 One new observation, recorded rather than buried
 
@@ -146,6 +146,11 @@ computed from the declared semantics rather than from the engine:
 - the oracle says both must commit **68** (no further cadence elapses between 19 and 20).
   Both do. A second billing walk would have driven the settled path below 68 while leaving
   the additive path at 68.
+- **a positive control closes the obvious hole in that argument.** Checks 1–5 would also pass
+  if the clamp stage were simply dropped, because body B would then *be* body A and the
+  comparison would prove nothing. So the same body is run once more with a clamp that
+  **binds**, at 60: the result changes to exactly 60, and differs from the additive-only 68.
+  The transform stage is therefore really evaluated, and body B really is the mixed path.
 
 The old assertion is retained as **D-10b**, renamed to say what it actually proves —
 run-to-run reproducibility — and explicitly marked as not discriminating for RN02.
