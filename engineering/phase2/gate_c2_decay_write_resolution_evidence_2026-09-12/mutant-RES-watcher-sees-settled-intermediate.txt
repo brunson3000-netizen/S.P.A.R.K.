@@ -1,0 +1,29 @@
+# mutant RES-watcher-sees-settled-intermediate: a crossing watcher compares its threshold against the settled intermediate instead of the committed pre-wave value
+# tree: b1608ddc4470d73b9c9eaf5ce26c61697000be38
+
+$ kills phase2_decay_write_resolution::a_watcher_sees_one_committed_transition_and_the_reported_effect_matches
+
+running 1 test
+test a_watcher_sees_one_committed_transition_and_the_reported_effect_matches ... FAILED
+
+failures:
+
+---- a_watcher_sees_one_committed_transition_and_the_reported_effect_matches stdout ----
+
+thread 'a_watcher_sees_one_committed_transition_and_the_reported_effect_matches' (1336752) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:767:5:
+assertion `left == right` failed: 100 -> 95 crosses 97 falling
+  left: None
+ right: Some((1, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_watcher_sees_one_committed_transition_and_the_reported_effect_matches
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-resolution-mutants-wdrbzq_v/RES-watcher-sees-settled-intermediate/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-resolution-mutants-wdrbzq_v/RES-watcher-sees-settled-intermediate/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 2.65s
+     Running tests/phase2_decay_write_resolution.rs (/tmp/spark-c2-resolution-mutants-wdrbzq_v/target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`

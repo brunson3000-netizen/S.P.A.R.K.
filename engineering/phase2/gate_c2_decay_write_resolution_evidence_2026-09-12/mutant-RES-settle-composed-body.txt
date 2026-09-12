@@ -1,0 +1,29 @@
+# mutant RES-settle-composed-body: a composed rule body's starting value is implicitly settled, so its declared decay stage has nothing left to apply
+# tree: b1608ddc4470d73b9c9eaf5ce26c61697000be38
+
+$ kills phase2_decay_write_resolution::a_composed_body_folds_its_declared_stages_in_order
+
+running 1 test
+test a_composed_body_folds_its_declared_stages_in_order ... FAILED
+
+failures:
+
+---- a_composed_body_folds_its_declared_stages_in_order stdout ----
+
+thread 'a_composed_body_folds_its_declared_stages_in_order' (1336818) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:703:5:
+assertion `left == right` failed
+  left: Some((3, 6))
+ right: Some((6, 6))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_composed_body_folds_its_declared_stages_in_order
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-resolution-mutants-wdrbzq_v/RES-settle-composed-body/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-resolution-mutants-wdrbzq_v/RES-settle-composed-body/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 2.56s
+     Running tests/phase2_decay_write_resolution.rs (/tmp/spark-c2-resolution-mutants-wdrbzq_v/target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`

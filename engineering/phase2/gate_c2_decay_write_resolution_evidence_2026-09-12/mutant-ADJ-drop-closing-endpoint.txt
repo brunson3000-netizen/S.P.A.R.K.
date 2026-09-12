@@ -1,0 +1,29 @@
+# mutant ADJ-drop-closing-endpoint: exclude the step ending exactly at a parameter-changing activation from the closing segment (the reviewer's own mutant, retargeted)
+# tree: b1608ddc4470d73b9c9eaf5ce26c61697000be38
+
+$ kills phase2_decay_adjudication::d3_d4_step_ending_at_activation_belongs_to_the_closing_segment
+
+running 1 test
+test d3_d4_step_ending_at_activation_belongs_to_the_closing_segment ... FAILED
+
+failures:
+
+---- d3_d4_step_ending_at_activation_belongs_to_the_closing_segment stdout ----
+
+thread 'd3_d4_step_ending_at_activation_belongs_to_the_closing_segment' (1336454) panicked at crates/spark-testkit/tests/phase2_decay_adjudication.rs:393:9:
+assertion `left == right` failed: engine, sign 1: Timeline { genesis: (2, 7), commands: [(0, Assign(100)), (21, Activate(5, 4))], evals: [25], kicks: [], kick: 0 }
+  left: [Some((91, LogicalTime(25)))]
+ right: [Some((89, LogicalTime(25)))]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    d3_d4_step_ending_at_activation_belongs_to_the_closing_segment
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.01s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-resolution-mutants-wdrbzq_v/ADJ-drop-closing-endpoint/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-resolution-mutants-wdrbzq_v/ADJ-drop-closing-endpoint/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 2.54s
+     Running tests/phase2_decay_adjudication.rs (/tmp/spark-c2-resolution-mutants-wdrbzq_v/target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_adjudication`

@@ -1,0 +1,4 @@
+# tree: b1608ddc4470d73b9c9eaf5ce26c61697000be38
+# whitespace-normalized
+$ python3 /home/chromikey/Projects/SPARK-gate-c2-write/engineering/phase2/gate_c2_decay_write_resolution_evidence_2026-09-12/check_preservation.py
+{"failures": [], "inline_modules_checked": 17, "preexisting_engineering_files": 627}

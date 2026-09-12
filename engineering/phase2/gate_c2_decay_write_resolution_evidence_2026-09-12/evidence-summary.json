@@ -1,0 +1,55 @@
+{
+  "tree": "b1608ddc4470d73b9c9eaf5ce26c61697000be38",
+  "base": "a3227eb423e75851b05b9992dfde6424a7d8932d",
+  "required_checks_passed": 15,
+  "workspace": {
+    "passed": 415,
+    "failed": 0,
+    "ignored": 0
+  },
+  "new_resolution_tests": 15,
+  "adjudication_tests": 10,
+  "corpora": {
+    "controlling-review-own-probes": {
+      "passed": 8,
+      "failed": 1
+    },
+    "controlling-review-own-probes-resolution-adapted": {
+      "passed": 9,
+      "failed": 0
+    },
+    "oracle-revision-review-probes-decision-adapted": {
+      "passed": 9,
+      "failed": 0
+    }
+  },
+  "superseded_review_assertion": [
+    "own_open_lost_prewrite_step"
+  ],
+  "mutants": {
+    "total": 17,
+    "resolution_mutants": 7,
+    "killed": 17,
+    "kill_assertions": 45,
+    "prior_test_survivals": 2,
+    "baseline_tests": 32
+  },
+  "preservation": {
+    "failures": 0,
+    "inline_modules": 17,
+    "preexisting_engineering_files": 627,
+    "production_lines_added": [
+      "85\t1\tcrates/spark-engine/src/engine.rs",
+      "19\t0\tcrates/spark-engine/src/rules.rs"
+    ],
+    "production_lines_removed": [
+      "        let reduced = reduce(&canonical, &|d, s| view.cell(d, s))?;"
+    ]
+  },
+  "environment": {
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_BUILD_JOBS": "2"
+  }
+}

@@ -1,0 +1,29 @@
+# mutant RES-decay-reduces-replacement: earlier decay reduces an explicit replacement: the reduced RESULT is capped by the settled pre-wave value
+# tree: b1608ddc4470d73b9c9eaf5ce26c61697000be38
+
+$ kills phase2_decay_write_resolution::an_explicit_replacement_is_never_reduced_by_earlier_decay
+
+running 1 test
+test an_explicit_replacement_is_never_reduced_by_earlier_decay ... FAILED
+
+failures:
+
+---- an_explicit_replacement_is_never_reduced_by_earlier_decay stdout ----
+
+thread 'an_explicit_replacement_is_never_reduced_by_earlier_decay' (1336682) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:320:9:
+assertion `left == right` failed
+  left: Some((90, 15))
+ right: Some((100, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    an_explicit_replacement_is_never_reduced_by_earlier_decay
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.01s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-resolution-mutants-wdrbzq_v/RES-decay-reduces-replacement/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-resolution-mutants-wdrbzq_v/RES-decay-reduces-replacement/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 2.46s
+     Running tests/phase2_decay_write_resolution.rs (/tmp/spark-c2-resolution-mutants-wdrbzq_v/target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`

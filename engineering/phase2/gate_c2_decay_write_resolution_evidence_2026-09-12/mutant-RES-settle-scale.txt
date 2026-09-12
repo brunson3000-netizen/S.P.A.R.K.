@@ -1,0 +1,29 @@
+# mutant RES-settle-scale: `Scale` resolves from the settled value instead of the committed one
+# tree: b1608ddc4470d73b9c9eaf5ce26c61697000be38
+
+$ kills phase2_decay_write_resolution::scale_keeps_its_existing_semantics
+
+running 1 test
+test scale_keeps_its_existing_semantics ... FAILED
+
+failures:
+
+---- scale_keeps_its_existing_semantics stdout ----
+
+thread 'scale_keeps_its_existing_semantics' (1336883) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:320:9:
+assertion `left == right` failed
+  left: Some((45, 15))
+ right: Some((50, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    scale_keeps_its_existing_semantics
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.01s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-resolution-mutants-wdrbzq_v/RES-settle-scale/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-resolution-mutants-wdrbzq_v/RES-settle-scale/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 2.47s
+     Running tests/phase2_decay_write_resolution.rs (/tmp/spark-c2-resolution-mutants-wdrbzq_v/target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`

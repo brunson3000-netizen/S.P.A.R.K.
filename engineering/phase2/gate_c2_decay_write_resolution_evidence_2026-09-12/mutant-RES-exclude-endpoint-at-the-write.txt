@@ -1,0 +1,54 @@
+# mutant RES-exclude-endpoint-at-the-write: settlement excludes the grid point ending exactly at the write time
+# tree: b1608ddc4470d73b9c9eaf5ce26c61697000be38
+
+$ kills phase2_decay_write_resolution::settlement_counts_exactly_the_grid_points_that_have_ended
+
+running 1 test
+test settlement_counts_exactly_the_grid_points_that_have_ended ... FAILED
+
+failures:
+
+---- settlement_counts_exactly_the_grid_points_that_have_ended stdout ----
+
+thread 'settlement_counts_exactly_the_grid_points_that_have_ended' (1337017) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:320:9:
+assertion `left == right` failed
+  left: Some((95, 20))
+ right: Some((85, 20))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    settlement_counts_exactly_the_grid_points_that_have_ended
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.02s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-resolution-mutants-wdrbzq_v/RES-exclude-endpoint-at-the-write/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-resolution-mutants-wdrbzq_v/RES-exclude-endpoint-at-the-write/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 2.46s
+     Running tests/phase2_decay_write_resolution.rs (/tmp/spark-c2-resolution-mutants-wdrbzq_v/target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`
+
+$ kills phase2_decay_write_resolution::settlement_bills_the_barrier_endpoint_once_at_the_old_rate
+
+running 1 test
+test settlement_bills_the_barrier_endpoint_once_at_the_old_rate ... FAILED
+
+failures:
+
+---- settlement_bills_the_barrier_endpoint_once_at_the_old_rate stdout ----
+
+thread 'settlement_bills_the_barrier_endpoint_once_at_the_old_rate' (1337026) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:320:9:
+assertion `left == right` failed
+  left: Some((101, 12))
+ right: Some((99, 12))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    settlement_bills_the_barrier_endpoint_once_at_the_old_rate
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_write_resolution.rs (/tmp/spark-c2-resolution-mutants-wdrbzq_v/target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`
