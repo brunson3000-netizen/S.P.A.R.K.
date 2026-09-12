@@ -118,12 +118,29 @@ impl Default for DeclaredBounds {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ExternalEntityRef(pub String);
 
+/// G.A.M.E.'s stable external **affiliation** reference — a settlement, region,
+/// faction or other grouping. Gate C3 enumerates "stable external entity **and
+/// affiliation** references" as two surfaces, not one, so this is a distinct
+/// type rather than an entity reference used loosely.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct ExternalAffiliationRef(pub String);
+
+/// What an advisory intent is addressed to. An intent-channel effect committed
+/// at an affiliation-kind scope addresses the affiliation, not an actor.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub enum IntentSubject {
+    Entity(ExternalEntityRef),
+    Affiliation(ExternalAffiliationRef),
+}
+
 /// The host-side mapping of contract §4.1, with both required properties
 /// checked rather than assumed: **injective** and **stable**.
 #[derive(Debug, Clone, Default)]
 pub struct EntityMap {
     forward: BTreeMap<ExternalEntityRef, ScopeId>,
     reverse: BTreeMap<ScopeId, ExternalEntityRef>,
+    affiliations: BTreeMap<ExternalAffiliationRef, ScopeId>,
+    affiliations_reverse: BTreeMap<ScopeId, ExternalAffiliationRef>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -168,6 +185,65 @@ impl EntityMap {
     pub fn external_of(&self, scope: &ScopeId) -> Option<&ExternalEntityRef> {
         self.reverse.get(scope)
     }
+
+    /// Affiliation binding, under the same two hard requirements as §4.1's
+    /// entity binding: injective, and stable for the life of the engine.
+    pub fn bind_affiliation(
+        &mut self,
+        external: ExternalAffiliationRef,
+        scope: ScopeId,
+    ) -> Result<(), AffiliationMappingError> {
+        if let Some(existing) = self.affiliations.get(&external) {
+            if existing != &scope {
+                return Err(AffiliationMappingError::NotStable {
+                    existing: existing.clone(),
+                });
+            }
+            return Ok(());
+        }
+        if let Some(existing) = self.affiliations_reverse.get(&scope) {
+            return Err(AffiliationMappingError::NotInjective {
+                existing: existing.clone(),
+            });
+        }
+        self.affiliations.insert(external.clone(), scope.clone());
+        self.affiliations_reverse.insert(scope, external);
+        Ok(())
+    }
+
+    pub fn affiliation_scope_of(&self, external: &ExternalAffiliationRef) -> Option<&ScopeId> {
+        self.affiliations.get(external)
+    }
+
+    pub fn affiliation_of(&self, scope: &ScopeId) -> Option<&ExternalAffiliationRef> {
+        self.affiliations_reverse.get(scope)
+    }
+
+    /// The subject an intent-channel effect at `scope` is addressed to:
+    /// an affiliation if the scope is bound as one, otherwise an entity.
+    pub fn subject_of(&self, scope: &ScopeId) -> Option<IntentSubject> {
+        if let Some(a) = self.affiliation_of(scope) {
+            return Some(IntentSubject::Affiliation(a.clone()));
+        }
+        self.external_of(scope)
+            .map(|e| IntentSubject::Entity(e.clone()))
+    }
+
+    /// The canonical scope behind any intent subject.
+    pub fn scope_of_subject(&self, subject: &IntentSubject) -> Option<&ScopeId> {
+        match subject {
+            IntentSubject::Entity(e) => self.scope_of(e),
+            IntentSubject::Affiliation(a) => self.affiliation_scope_of(a),
+        }
+    }
+}
+
+/// The affiliation analogue of [`MappingError`], kept distinct so a diagnostic
+/// never confuses an entity collision with an affiliation collision.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum AffiliationMappingError {
+    NotInjective { existing: ExternalAffiliationRef },
+    NotStable { existing: ScopeId },
 }
 
 // ===================================================================== §6
@@ -176,7 +252,7 @@ impl EntityMap {
 /// It is never an executable G.A.M.E. command.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BehaviorIntent {
-    pub subject: ExternalEntityRef,
+    pub subject: IntentSubject,
     pub channel: DefinitionId,
     pub value: CanonicalValue,
     pub leverage: Option<BehavioralLeverage>,
@@ -214,7 +290,7 @@ pub fn batch_digest(
         let mut inner = CanonicalEncoder::new();
         // The canonical scope, not the host-side token: the digest must be a
         // function of S.P.A.R.K. canonical content.
-        match map.scope_of(&i.subject) {
+        match map.scope_of_subject(&i.subject) {
             Some(s) => s.canonicalize(&mut inner),
             None => {
                 inner.push_str("scope.unmapped");
@@ -578,7 +654,7 @@ impl PrototypeDevice {
                     if !self.intent_channels.contains(&effect.definition) {
                         continue;
                     }
-                    let Some(subject) = self.map.external_of(&effect.scope) else {
+                    let Some(subject) = self.map.subject_of(&effect.scope) else {
                         // An unmapped scope is never silently dropped into an
                         // anonymous intent; it is a host mapping defect and is
                         // reported as an unmappable refusal.
@@ -589,7 +665,7 @@ impl PrototypeDevice {
                         continue;
                     };
                     intents.push(BehaviorIntent {
-                        subject: subject.clone(),
+                        subject,
                         channel: effect.definition.clone(),
                         value: effect.value.clone(),
                         leverage: self.leverage_of(&effect.definition),

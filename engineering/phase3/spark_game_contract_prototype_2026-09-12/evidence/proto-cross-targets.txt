@@ -1,20 +1,20 @@
 == cargo check --offline --target x86_64-pc-windows-msvc (COMPILE-ONLY, no runtime execution) ==
     Checking spark-game-contract-prototype v0.0.0 (<WORKTREE>/engineering/phase3/spark_game_contract_prototype_2026-09-12)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.34s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.21s
 exit=0
 == cargo check --offline --target x86_64-pc-windows-gnu (COMPILE-ONLY, no runtime execution) ==
     Checking spark-game-contract-prototype v0.0.0 (<WORKTREE>/engineering/phase3/spark_game_contract_prototype_2026-09-12)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.33s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.21s
 exit=0
 == cargo check --offline --target aarch64-linux-android (COMPILE-ONLY, no runtime execution) ==
     Checking spark-game-contract-prototype v0.0.0 (<WORKTREE>/engineering/phase3/spark_game_contract_prototype_2026-09-12)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.37s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.20s
 exit=0
 == cargo check --offline --target armv7-linux-androideabi (COMPILE-ONLY, no runtime execution) ==
     Checking spark-game-contract-prototype v0.0.0 (<WORKTREE>/engineering/phase3/spark_game_contract_prototype_2026-09-12)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.35s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.21s
 exit=0
 == cargo check --offline --target x86_64-linux-android (COMPILE-ONLY, no runtime execution) ==
     Checking spark-game-contract-prototype v0.0.0 (<WORKTREE>/engineering/phase3/spark_game_contract_prototype_2026-09-12)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.40s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.21s
 exit=0

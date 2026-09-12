@@ -11,10 +11,21 @@ instead of prose.
 
 ## What it does and does not prove
 
-**Does:** that the S.P.A.R.K. public surface at pinned crate tree
-`7907f4d729104fd5dbfd4adad46e66cf09aa13dd` supports every logical surface Gate C3
-enumerates, and that the protocol's canonical first causal sequence runs end to end across
-that surface with deterministic, replayable results.
+**Does:** exercise the S.P.A.R.K. public surface at pinned crate tree
+`7907f4d729104fd5dbfd4adad46e66cf09aa13dd` across the contract's surfaces — version and
+capability negotiation, entity **and affiliation** identity, monotonic time and stale
+refusal, typed scoped observations, advisory intent projection on both an entity-addressed
+and an affiliation-addressed channel, executed / rejected / **deferred** dispositions,
+at-most-once application, `Busy` and pull-by-re-presenting, inbound message bounds and the
+outbound capacity hint, snapshot/restore, and completed-history replay — and run the
+protocol's canonical first causal sequence end to end with deterministic, replayable
+results.
+
+An earlier revision of this README claimed the prototype demonstrates "every logical surface
+Gate C3 enumerates". An independent reviewer found three that it did not then exercise —
+affiliation identity, the `Deferred` disposition, and two of three declared bounds. Two are
+now exercised (E-15, E-14, E-16) and the third, a byte-size bound, was removed from the
+contract instead, because the seam selects no wire format for a byte count to bound.
 
 **Does not:** prove G.A.M.E. integration. `src/fake_host.rs` is a fake. Nothing here was
 authored, reviewed or accepted by G.A.M.E. A real adapter, in the G.A.M.E. repository,
@@ -36,7 +47,7 @@ against a pinned **accepted** S.P.A.R.K. artifact, is Gate C4 and is not authori
 | `src/lib.rs` | The contract's logical types and the prototype device façade: version/capability negotiation, the entity mapping with its injectivity and stability checks, the intent projection and batch digest, the typed rejection vocabulary, and the host's at-most-once application ledger |
 | `src/fixture.rs` | The protocol §5 first-proof causal profile and rules. **Every constant is test data, not a gameplay law.** |
 | `src/fake_host.rs` | A fake G.A.M.E. host: it decides legality, executes against its own world numbers, and returns confirmations only as typed observations |
-| `tests/end_to_end.rs` | E-1 … E-13: negotiation, the first proof, rejection, duplicate delivery, stale input, `Busy`, message bounds, determinism, replay, restart, the re-presentation limit, intent survival across a pause, and the at-most-once key's activation component |
+| `tests/end_to_end.rs` | E-1 … E-16: negotiation, the first proof, rejection, duplicate delivery, stale input, `Busy`, message bounds, reproducibility, replay, restart, the re-presentation limit, intent survival across a pause, the at-most-once key's activation component, deferral, affiliation mapping, and the outbound capacity hint |
 | `evidence/` | Captured validation output |
 
 ## Reproduce
@@ -53,7 +64,7 @@ CARGO_TARGET_DIR=<a scratch dir> CARGO_INCREMENTAL=0 CARGO_BUILD_JOBS=2 \
 |---|---|
 | `cargo fmt --all -- --check` | PASS (`proto-fmt.txt`) |
 | `cargo clippy --offline --all-targets -- -D warnings` | PASS (`proto-clippy.txt`) |
-| `cargo test --offline` | **14 passed, 0 failed, 0 ignored** (`proto-test.txt`) |
+| `cargo test --offline` | **17 passed, 0 failed, 0 ignored** (`proto-test.txt`) |
 | `cargo check --target x86_64-pc-windows-msvc` | PASS — **COMPILE-ONLY** (`proto-cross-targets.txt`) |
 | `cargo check --target x86_64-pc-windows-gnu` | PASS — **COMPILE-ONLY** |
 | `cargo check --target aarch64-linux-android` | PASS — **COMPILE-ONLY** |
@@ -78,6 +89,12 @@ evidence exists, and no three-platform equivalence is claimed.
   boundary's results is a possible V2 surface and is not implemented.
 
 ## Correction history
+
+Revision 3 responds to an independent review of revision 1. It exercises affiliation
+identity as a namespace distinct from entity identity (`IntentSubject`, `E-15`), produces
+and asserts a `Deferred` disposition (`E-14`), makes the outbound batch bound a reported
+capacity hint rather than a dead field (`E-16`), renames `E-8` to say it compares two
+in-process runs rather than "independent runs", and narrows the coverage claim above.
 
 Revision 2 (this revision) fixes a real defect found by the author while recovering prior
 G.A.M.E. records: the device projected its batch from the completing `ProcessResult` alone,

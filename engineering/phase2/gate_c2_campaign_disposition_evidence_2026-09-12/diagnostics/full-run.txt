@@ -1,9 +1,10 @@
-   Compiling spark-handoff-diagnostics v0.0.0 (/tmp/claude-1000/-home-chromikey-Projects-SPARK/0cda3517-7c1b-4a7d-80a1-fddc4e1d94d6/scratchpad/diag)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.76s
-     Running tests/diagnostics.rs (/tmp/claude-1000/-home-chromikey-Projects-SPARK/0cda3517-7c1b-4a7d-80a1-fddc4e1d94d6/scratchpad/cargo-target/debug/deps/diagnostics-421a9f77f50a6dec)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running tests/diagnostics.rs (<TARGET_DIR>/cargo-target/debug/deps/diagnostics-421a9f77f50a6dec)
 
-running 12 tests
-test d10_rn02_repeated_settlement_is_observably_idempotent ... D-10 PASS: RN02 repeated settlement has no observable canonical effect; recorded as a disclosed cost limitation, not optimized
+running 13 tests
+test d10_rn02_the_repeated_settlement_walk_has_no_canonical_effect ... D-10 PASS: additive path and settled path both commit 68 against a hand-computed oracle, with 42 of decay debt already billed once. RN02's repeated walk is read-only; it is recorded as a disclosed cost limitation and is not optimized.
+ok
+test d10b_rn02_the_composed_result_is_also_reproducible_run_to_run ... D-10b PASS: run-to-run reproducibility only — this does not discriminate RN02
 ok
 test d11_obs_test_seam_reports_true_for_an_out_of_window_stage ... D-11 OBSERVATION: fixture::snapshot_stage_raw returned true at ordinal Ordinal(1001) (window starts at Ordinal(1)) while staging nothing — is_ok() covers the retryable NotInAdmissionWindow disposition. Test-seam reporting only; production unaffected.
 ok
@@ -29,4 +30,4 @@ ok
 test d9_luna002_zero_rate_evaluation_commits_time_without_changing_value ... D-9 PASS: LUNA-002 is a value-preserving evaluation that still commits canonical time
 ok
 
-test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s

@@ -200,14 +200,29 @@ fn e2_canonical_first_proof_runs_end_to_end_across_the_seam() {
         Some(70),
         "E-2e: actor stress"
     );
-    // -> actor choice, exported as exactly one advisory intent
-    assert_eq!(batches[0].intents.len(), 1, "E-2f: one advisory intent");
-    let intent = &batches[0].intents[0];
+    // -> actor choice, exported as advisory intents on two channels: one
+    //    addressed to an ENTITY (the actor), one to an AFFILIATION (the
+    //    settlement). Gate C3 requires both reference kinds.
+    assert_eq!(batches[0].intents.len(), 2, "E-2f: two advisory intents");
+    let ration = batches[0]
+        .intents
+        .iter()
+        .find(|i| i.channel.as_str() == "intent.ration")
+        .expect("E-2f1: the affiliation-addressed intent");
+    assert_eq!(
+        ration.subject,
+        IntentSubject::Affiliation(ExternalAffiliationRef("game:settlement/1".to_string())),
+        "E-2f2: a settlement-scoped intent addresses an affiliation, not an entity"
+    );
+    let intent = batches[0]
+        .intents
+        .iter()
+        .find(|i| i.channel.as_str() == "intent.hunt")
+        .expect("E-2f3: the entity-addressed intent");
     assert_eq!(
         intent.subject,
-        ExternalEntityRef("game:actor/1".to_string())
+        IntentSubject::Entity(ExternalEntityRef("game:actor/1".to_string()))
     );
-    assert_eq!(intent.channel.as_str(), "intent.hunt");
     assert_eq!(intent.value, CanonicalValue::Int(1));
 
     // -> G.A.M.E. alone executed the hunt, in its own world numbers
@@ -257,7 +272,15 @@ fn e3_a_refused_intent_changes_nothing_in_the_world() {
 
     assert_eq!(host.world.executed_hunts, 0, "E-3a: nothing was executed");
     assert_eq!(host.world.wildlife, 100, "E-3b: the world is unchanged");
-    assert_eq!(batches[0].intents.len(), 1, "E-3c: SPARK still advised");
+    assert_eq!(
+        batches[0]
+            .intents
+            .iter()
+            .filter(|i| i.channel.as_str() == "intent.hunt")
+            .count(),
+        1,
+        "E-3c: SPARK still advised the hunt — the refusal is the host's, not SPARK's"
+    );
 
     // And S.P.A.R.K.'s own causal state reflects the *observed* world, not the
     // advice: wildlife never declined, so there is no neighbouring pressure.
@@ -271,9 +294,10 @@ fn e3_a_refused_intent_changes_nothing_in_the_world() {
 
 #[test]
 fn e3b_unknown_subject_and_unsupported_channel_are_named_rejections() {
-    // The host does not know this actor.
+    // The host knows neither the actor nor the settlement.
     let world = FakeWorld {
         known: vec![],
+        known_affiliations: vec![],
         ..FakeWorld::default()
     };
     let (mut d, _s) = open_device();
@@ -288,11 +312,14 @@ fn e3b_unknown_subject_and_unsupported_channel_are_named_rejections() {
     );
     let (batch, _) = expect_completed(present_to_completion(&mut d, &tick));
     let report = host.deliver(&batch);
-    assert_eq!(
-        report.per_intent[0],
-        IntentDisposition::Rejected {
-            reason: RejectionReason::UnknownSubject
-        }
+    assert!(
+        report.per_intent.iter().all(|d| *d
+            == IntentDisposition::Rejected {
+                reason: RejectionReason::UnknownSubject
+            }),
+        "E-3b1: every intent, entity- and affiliation-addressed alike, is an \
+         UnknownSubject rejection: {:?}",
+        report.per_intent
     );
 
     let world2 = FakeWorld {
@@ -301,11 +328,13 @@ fn e3b_unknown_subject_and_unsupported_channel_are_named_rejections() {
     };
     let mut host2 = FakeHost::new(world2);
     let report2 = host2.deliver(&batch);
-    assert_eq!(
-        report2.per_intent[0],
-        IntentDisposition::Rejected {
-            reason: RejectionReason::UnsupportedChannel
-        }
+    assert!(
+        report2.per_intent.iter().all(|d| *d
+            == IntentDisposition::Rejected {
+                reason: RejectionReason::UnsupportedChannel
+            }),
+        "E-3b2: every intent is an UnsupportedChannel rejection: {:?}",
+        report2.per_intent
     );
     println!("E-3b PASS: the rejection vocabulary is closed and names the actual cause");
 }
@@ -330,6 +359,7 @@ fn e4_duplicate_batch_delivery_applies_at_most_once() {
     let r1 = host.deliver(&batch);
     assert_eq!(host.world.wildlife, 90);
     assert_eq!(host.world.executed_hunts, 1);
+    assert_eq!(host.world.executed_rations, 1);
 
     // Redeliver the identical batch three more times.
     for _ in 0..3 {
@@ -493,7 +523,7 @@ fn e7_oversized_observation_list_is_refused_whole() {
 // Contract §7/§10.1: determinism. Two independent runs agree byte for byte.
 
 #[test]
-fn e8_the_whole_proof_is_deterministic_across_independent_runs() {
+fn e8_the_whole_proof_is_reproducible_across_two_in_process_runs() {
     let (d1, h1, b1) = run_first_proof(FakeWorld::default());
     let (d2, h2, b2) = run_first_proof(FakeWorld::default());
 
@@ -509,7 +539,11 @@ fn e8_the_whole_proof_is_deterministic_across_independent_runs() {
         "E-8c: identical stable boundary digest"
     );
     assert_eq!(h1.world.wildlife, h2.world.wildlife);
-    println!("E-8 PASS: the whole sequence, including every batch digest, is reproducible");
+    println!(
+        "E-8 PASS: the whole sequence, including every batch digest, is reproducible \
+         across two constructions IN ONE PROCESS. No cross-process and no cross-platform \
+         determinism is claimed by this test."
+    );
 }
 
 // ===================================================================== E-9
@@ -767,4 +801,165 @@ fn e13_the_at_most_once_key_separates_distinct_activations() {
     );
     assert_eq!(ledger.admit(&batch), ApplicationDecision::AlreadyApplied);
     println!("E-13 PASS: the at-most-once key is (activation, correlation, batch_digest)");
+}
+
+// ==================================================================== E-14
+// Contract §8: the defer half of the outcome vocabulary. An independent
+// reviewer recorded that `DeferReason` existed but that no test ever produced
+// a `Deferred` disposition, so the surface was declared and unexercised.
+
+#[test]
+fn e14_a_deferred_intent_defers_without_moving_the_world() {
+    let world = FakeWorld {
+        busy: vec![ExternalEntityRef("game:actor/1".to_string())],
+        ..FakeWorld::default()
+    };
+    let (mut d, _s) = open_device();
+    let mut host = FakeHost::new(world);
+    let tick = host_command(
+        "cmd.tick.1",
+        10,
+        1,
+        "cmd.world_tick",
+        fixture::settlement(),
+        &[("world.drought", 30), ("world.food_supply", 20)],
+    );
+    let (batch, _) = expect_completed(present_to_completion(&mut d, &tick));
+    let report = host.deliver(&batch);
+
+    let hunt_index = batch
+        .intents
+        .iter()
+        .position(|i| i.channel.as_str() == "intent.hunt")
+        .expect("E-14a: the hunt intent");
+    assert_eq!(
+        report.per_intent[hunt_index],
+        IntentDisposition::Deferred {
+            reason: DeferReason::WorldBusy,
+            not_before: None
+        },
+        "E-14b: a busy subject defers rather than rejects"
+    );
+    assert_eq!(
+        host.world.wildlife, 100,
+        "E-14c: a deferred intent moves nothing in the world"
+    );
+    assert_eq!(host.world.executed_hunts, 0, "E-14d: nothing executed");
+
+    // A defer is not a rejection: the affiliation-addressed intent in the same
+    // batch still executed, so deferral is per intent, not per batch.
+    assert_eq!(
+        host.world.executed_rations, 1,
+        "E-14e: deferral is per intent, not per batch"
+    );
+    println!("E-14 PASS: Deferred{{WorldBusy}} is produced, is per intent, and moves nothing");
+}
+
+// ==================================================================== E-15
+// Contract §4.1: affiliation references carry the same two hard requirements
+// as entity references — injective and stable — and the two namespaces are
+// separate.
+
+#[test]
+fn e15_affiliation_mapping_enforces_injectivity_and_stability() {
+    let mut m = fixture::entity_map();
+
+    // Stability: an affiliation's scope may not change.
+    let err = m
+        .bind_affiliation(
+            ExternalAffiliationRef("game:settlement/1".to_string()),
+            fixture::neighbour(),
+        )
+        .expect_err("E-15a: re-pointing an affiliation must be refused");
+    assert!(
+        matches!(err, AffiliationMappingError::NotStable { .. }),
+        "E-15b: expected NotStable, got {err:?}"
+    );
+
+    // Injectivity: a second affiliation may not claim a bound scope.
+    let err = m
+        .bind_affiliation(
+            ExternalAffiliationRef("game:settlement/99".to_string()),
+            fixture::settlement(),
+        )
+        .expect_err("E-15c: a second affiliation on one scope must be refused");
+    assert!(
+        matches!(err, AffiliationMappingError::NotInjective { .. }),
+        "E-15d: expected NotInjective, got {err:?}"
+    );
+
+    // Re-binding the identical pair is idempotent, not an error.
+    m.bind_affiliation(
+        ExternalAffiliationRef("game:settlement/1".to_string()),
+        fixture::settlement(),
+    )
+    .expect("E-15e: an identical re-bind is a no-op");
+
+    // The two namespaces are separate: an affiliation scope resolves as an
+    // affiliation subject, never as an entity.
+    assert_eq!(
+        m.subject_of(&fixture::settlement()),
+        Some(IntentSubject::Affiliation(ExternalAffiliationRef(
+            "game:settlement/1".to_string()
+        )))
+    );
+    assert_eq!(
+        m.subject_of(&fixture::actor()),
+        Some(IntentSubject::Entity(ExternalEntityRef(
+            "game:actor/1".to_string()
+        )))
+    );
+    assert!(m.external_of(&fixture::settlement()).is_none());
+    assert!(m.affiliation_of(&fixture::actor()).is_none());
+    println!("E-15 PASS: affiliation references are injective, stable and namespace-separate");
+}
+
+// ==================================================================== E-16
+// Contract §9.1: the outbound batch bound is a capacity hint. An oversized
+// batch is delivered WHOLE with `capacity_exceeded` set — never truncated,
+// because the work behind it is already committed.
+
+#[test]
+fn e16_an_oversized_batch_is_reported_not_truncated() {
+    let (engine, profile) = fixture::device_engine();
+    let (mut d, _s) = PrototypeDevice::open(
+        engine,
+        profile,
+        fixture::entity_map(),
+        fixture::intent_channels(),
+        CONTRACT_VERSION,
+        DeclaredBounds {
+            max_observations_per_command: 64,
+            max_intents_per_batch: 1, // deliberately too small
+        },
+    )
+    .expect("session");
+    let tick = host_command(
+        "cmd.tick.1",
+        10,
+        1,
+        "cmd.world_tick",
+        fixture::settlement(),
+        &[("world.drought", 30), ("world.food_supply", 20)],
+    );
+    let resp = present_to_completion(&mut d, &tick);
+    match resp {
+        DeviceResponse::Completed {
+            batch,
+            capacity_exceeded,
+            ..
+        } => {
+            assert!(
+                capacity_exceeded,
+                "E-16a: a batch above the declared hint must report it"
+            );
+            assert_eq!(
+                batch.intents.len(),
+                2,
+                "E-16b: and must still carry every intent — no truncation"
+            );
+        }
+        other => panic!("E-16c: expected a completed boundary, got {other:?}"),
+    }
+    println!("E-16 PASS: the outbound bound is a reported hint, never a silent truncation");
 }

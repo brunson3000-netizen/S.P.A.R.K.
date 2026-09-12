@@ -19,7 +19,12 @@ than about intent. Reading the campaign artifacts themselves:
 | Campaign | Window | Recorded elapsed | Cases | Novel cases |
 |---|---|---|---|---|
 | LUNA (original) | 30 min from 11:30:30Z | closeout at 11:34:00Z — **about 4 min** | 15 | **2** (13 inherited, by its own index) |
-| SONNET (original) | 30 min from 11:30:40Z | handoff written ~11:40Z — **about 11 min** | 30 | 30 |
+| SONNET (original) | 30 min from 11:30:40Z | handoff written ~11:40Z — **about 11 min** | 30 | **not stated by its artifacts** |
+
+No SONNET artifact records how many of its 30 cases were novel against the existing
+427-test workspace suite, and this table does not supply a figure it cannot source. Its
+report describes all 30 as written for the campaign, but "written for the campaign" and
+"covering a vector the suite did not" are different claims and only the first is recorded.
 
 **Neither original campaign ran its full 30 minutes.** Together they consumed roughly 15 of
 a granted 60 minutes. That is a limitation of the evidence, not a defect of the product, and
@@ -41,6 +46,13 @@ disposable external harnesses against the pinned commit verified against live Gi
 |---|---|---|---|---|
 | LUNA-C | 26 min | **~7.2 min** (12:25:36Z → 12:32:50Z) | 3 | **0** |
 | SONNET-C | 19 min | **~10.3 min** (12:26:13Z → 12:36:29Z) | 7 | **0** |
+
+Both continuations were run by separate Claude Sonnet 5 (`claude-sonnet-5`) agent sessions
+dispatched by the main engineer with collection-only missions. Recording this because an
+independent reviewer noted that the continuation documents attest their own independence
+without naming who held the role. What can be **verified** from the artifacts rather than
+attested is the behavior: no file under `crates/` changed, the workspaces were isolated
+under `/tmp`, and no corrective candidate was opened.
 
 Neither continuation used its whole budget either; each stopped when its highest-value
 vectors were exhausted rather than padding the clock. Recorded honestly: total adversarial
@@ -67,14 +79,18 @@ a non-finalizing command.
 The mission authorised the main engineer to diagnose these against requirements and
 fixtures, and warned that source implementation alone is not proof of intended behavior.
 Each disposition below therefore rests on a **discriminating test** that would come out
-differently if the competing explanation were the true one. All twelve are in
+differently if the competing explanation were the true one. An independent review found
+that an earlier revision of one of them — D-10 — did not meet that standard, and it has
+been replaced; §3.2 records what was wrong and what changed. The diagnostics are in
 `gate_c2_campaign_disposition_evidence_2026-09-12/diagnostics/`, run against the pinned
-crate tree, 12 passed / 0 failed.
+crate tree: **13 passed / 0 failed**. Throughout this document a bare `D-n` names a **test
+function** and a numbered "check" inside one names an **assertion** within that test, so a
+citation resolves against the source without re-deriving it.
 
 | Observation | Competing explanations | Discriminating result | Disposition |
 |---|---|---|---|
 | **LUNA-001** — `i64::MAX`/`i64::MIN` assignment to `state.pressure` refused `OutOfBounds`, cell absent | (a) behavior for extreme values is unspecified; (b) the refusal is the declared `ValueConstraint` doing its job | **D-1**: the declared maximum `1_000_000_000_000` **commits**; declared-max **+1** refuses; `i64::MAX` produces the **byte-identical** refusal to declared-max+1; the same holds symmetrically at the minimum | **(b). Not unspecified, and not a defect.** The refusal boundary tracks the profile's declared constraint, not the machine integer range. The campaign's own "expected behavior was not specified" is the one claim here that is wrong; the manifest specifies it. |
-| LUNA-001 (cell absent) | (a) refusal erases the cell; (b) absence is the unchanged initial condition | **D-1b**: with a refused *first* write the cell stays absent; **D-1f**: with a prior committed value, four consecutive refusals leave that value intact | **(b).** Refusal never erases. |
+| LUNA-001 (cell absent) | (a) refusal erases the cell; (b) absence is the unchanged initial condition | **D-1b** (the test `d1b_luna001_absent_cell_...`): with a refused *first* write the cell stays absent. **D-1 check 6** (an assertion inside the test `d1_luna001_...`): with a prior committed value, four consecutive refusals leave that value intact | **(b).** Refusal never erases. |
 | **LUNA-002** — zero-rate evaluation commits canonical time | (a) a silent state change; (b) a value-preserving evaluation that still advances time | **D-9**: value identical before and after; frontier advances to the requested horizon | **(b).** Matches retained D-6 behavior, as the campaign itself recorded. Not a defect. |
 | LUNA-003 — seeded sequences replay deterministically | — | reconfirmed independently by LUNA-C's 40-step seeded random walk with snapshot/restore and full replay equivalence | Passing observation. |
 | **SONNET T-1** — resubmission returns `CommandIdentityConflict` rather than an idempotent `Completed` | (a) the engine rejects repeated *work*; (b) it rejects reuse of a command *identity* (P-7/D-2) | **D-2**: exact resubmission is a typed refusal leaving **both** digests byte-identical; the **same payload under a fresh command id and sequence finalizes normally** and moves the engine | **(b).** Identity-scoped, exactly as D-2 requires. Not a defect. |
@@ -84,7 +100,7 @@ crate tree, 12 passed / 0 failed.
 | **SONNET T-6** — a "different" profile restored successfully | (a) restore fails to validate profile identity; (b) content addressing made the second profile *identical*, so it was never a distinct profile | **D-6**: a manifest with genuinely different content (an added definition) yields a different `activation_hash`, and restoring across it is refused with `ArtifactBindingMismatch` | **(b), and the declared coverage gap is now closed.** |
 | SONNET gap — obligation-drop bidirectional-invariant mutation (needed an internal `WorkKey`) | — | **D-7**: the key is reachable from the public `ObligationStore::keys()`; dropping one claim set **and resealing the digest** is caught by `BidirectionalInvariantBroken`, not by the digest check | **Gap closed.** The invariant, not the digest, is what catches it. |
 | SONNET gap — a command staged directly into a snapshot | — | **D-8**: staging at the real frontier ordinal and resealing is refused with `TimelineStagingPresent` (Revision-2 §7 step 2b) | **Gap closed.** |
-| **C2W-RN02** — composed settlement performs two pure walks, not one | (a) repeated computation changes the committed result; (b) it is read-only and observably idempotent | **D-10**: the composed result and the engine state digest are identical across two independent runs | **(b).** Recorded as a **disclosed cost limitation** (§4). Deliberately **not** optimized. |
+| **C2W-RN02** — composed settlement performs two pure walks, not one | (a) the repeated walk bills decay debt a second time, so a body taking the settled path commits a lower value than the same arithmetic on the additive-only path; (b) the repeat is read-only, and both paths commit the value the declared semantics predict | **D-10** (revised, §3.2): with 42 units of decay debt already billed once, the **all-additive** `AddDelta` path and the **mixed** settled path — two different code paths on identical state — both commit **68**, the hand-computed oracle value. A second billing walk would put the settled path below it. **D-10b** separately records run-to-run reproducibility, and is named as the determinism check it is. | **(b).** Recorded as a **disclosed cost limitation** (§4). Deliberately **not** optimized. |
 
 ### 3.1 One new observation, recorded rather than buried
 
@@ -106,6 +122,36 @@ snapshot then restores successfully because nothing was actually staged.
 - **No repair is proposed here.** Changing a `test-support` seam on the pinned candidate
   would modify the crate tree the KEEP review certified as byte-identical, for a
   non-blocking clarity gain. It is recorded for a future bounded pass to decide on.
+
+### 3.2 A diagnostic that did not meet this document's own standard, and what replaced it
+
+An independent review of the first revision of this disposition recorded one MAJOR finding,
+and it was right. The original D-10 ran the identical composed-body history through two
+freshly constructed engines **in the same process** and asserted that the committed value
+and engine-state digest agreed. That establishes reproducibility. It does **not** establish
+that the repeated settlement walk is read-only: had the second walk perturbed the result,
+both runs would have been perturbed identically and the test would still have passed. The
+test nevertheless printed "RN02 repeated settlement has no observable canonical effect",
+and three sentences of this document presented it as discriminating.
+
+The replacement compares **two different code paths on identical state**, against an oracle
+computed from the declared semantics rather than from the engine:
+
+- state: `state.stress` seeded to 100 at t=1 with a declared baseline of 0 and a decay of 7
+  per cadence of 3, left to accrue to t=19. Eighteen logical units is six whole cadences, so
+  6 × 7 = 42 of debt: the oracle says **58**, and both engines hold 58.
+- at t=20, body **A** is `[Add(10)]` — all-additive, so the `AddDelta` reduction path — and
+  body **B** is `[Add(10), Clamp(-WIDE, +WIDE)]`, whose clamp binds nothing but makes the
+  body mixed, selecting the settled path with its repeated `settled` call.
+- the oracle says both must commit **68** (no further cadence elapses between 19 and 20).
+  Both do. A second billing walk would have driven the settled path below 68 while leaving
+  the additive path at 68.
+
+The old assertion is retained as **D-10b**, renamed to say what it actually proves —
+run-to-run reproducibility — and explicitly marked as not discriminating for RN02.
+
+The finding is recorded here rather than quietly fixed, because the overstated claim had
+already been offered to the Operator in support of an acceptance recommendation.
 
 ## 4. Carried report-accuracy qualifications
 
@@ -178,8 +224,11 @@ campaign finds." That campaign has now run, and this document is the "whatever i
 3. Four adversarial passes by three parties other than the candidate's writer found **zero**
    reproducible defects.
 4. Every observation those passes recorded now has a **discriminating** disposition, not an
-   argument from source reading — twelve diagnostics, all passing, each of which would have
-   come out differently had the defect explanation been the true one.
+   argument from source reading — thirteen diagnostics, all passing. Twelve are
+   discriminating in the strict sense: each would have come out differently had the defect
+   explanation been the true one. The thirteenth, D-10b, is a determinism check and is
+   labelled as one, not counted as discrimination. One earlier diagnostic failed this
+   standard and was replaced after independent review (§3.2).
 5. Three coverage gaps the campaigns declared open are now closed (D-6, D-7, D-8), and the
    continuations added ten further discriminating cases across pausing, epoch reset,
    fail-stop stickiness, semantic caps, work-key conflict and adversarial replay.

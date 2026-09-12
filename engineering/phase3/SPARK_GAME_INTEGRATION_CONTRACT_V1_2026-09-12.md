@@ -194,10 +194,16 @@ snapshot is an in-memory value with no persistence backend and no crash-recovery
 G.A.M.E. owns identity. The contract requires a host-side **injective, stable** mapping
 
 ```
-ExternalEntityRef  <->  spark_core::scope::ScopeId
-ExternalAffiliationRef  <->  spark_core::scope::ScopeId (ScopeKind::Region or an
-                             affiliation-kind scope the profile declares)
+ExternalEntityRef        <->  spark_core::scope::ScopeId   (actor-, household-kind scopes)
+ExternalAffiliationRef   <->  spark_core::scope::ScopeId   (settlement-, region-,
+                                                            watershed-, faction-kind scopes)
 ```
+
+These are **two separate namespaces**, because Gate C3 enumerates "stable external entity
+**and affiliation** references" as two surfaces. A scope bound as an affiliation never
+resolves as an entity and vice versa. An intent-channel effect committed at an
+affiliation-kind scope therefore addresses the affiliation, not an actor — see
+`IntentSubject` in §6.2.
 
 Two hard requirements, both because `ScopeId` is an input to every canonical digest the
 engine commits:
@@ -326,14 +332,17 @@ is published.
 
 ```
 IntentBatch {
+  session_activation: Digest,          // §7.2, the first key component
   correlation: CorrelationId,          // §7.1
   horizon: GameLogicalTime,            // the completed request horizon
   intents: [BehaviorIntent],           // canonical order, see below
   batch_digest: Digest,                // §7.2
 }
 
+IntentSubject = Entity(ExternalEntityRef) | Affiliation(ExternalAffiliationRef)
+
 BehaviorIntent {
-  subject: ExternalEntityRef,          // mapped back from the effect's ScopeId
+  subject: IntentSubject,              // mapped back from the effect's ScopeId (§4.1)
   channel: DefinitionId,               // the intent-channel definition
   value: CanonicalValue,               // the committed value
   leverage: Option<BehavioralLeverage>,// declared metadata, advisory only
@@ -478,8 +487,11 @@ protocol's first proof requires, and it keeps G.A.M.E. the sole author of world 
 ### 9.1 Bounded message size
 
 Every list in this contract is bounded, and the bound is declared in the session
-descriptor: `max_observations_per_command`, `max_intents_per_batch`,
-`max_message_bytes`.
+descriptor: `max_observations_per_command` and `max_intents_per_batch`.
+
+A byte-size bound is **deliberately not declared**. The seam is defined over canonical
+logical content with no selected wire format (§10.2), so a byte count would be a bound on
+something this contract does not define. A transport that adds one declares its own.
 
 **Inbound** bounds are enforced by refusal: a message exceeding a declared bound is refused
 with `Rejected::MessageTooLarge { limit, observed }` and **nothing is partially processed**.
@@ -565,7 +577,8 @@ All fail closed, with a typed refusal and no partial effect:
 | Effect violating a declared constraint | cohort `Rejected { WaveRejection::InvalidEffect }`; the wave is atomic, earlier waves stay committed |
 | Reused command identity | `CompletedCommandNotFinalized(CommandIdentityConflict)` |
 | Non-increasing source sequence | `CompletedCommandNotFinalized(SourceSequenceNotIncreasing)` |
-| Oversized message | `Rejected::MessageTooLarge` |
+| Oversized inbound message | `Rejected::MessageTooLarge` |
+| Oversized outbound batch | delivered whole with `capacity_exceeded` set; never truncated (§9.1) |
 | Engine-internal invariant violation | sticky fail-stop; no snapshot published; the only exit is restoring a prior snapshot |
 
 **Two-level reporting is part of the contract, not an accident.** A request can complete

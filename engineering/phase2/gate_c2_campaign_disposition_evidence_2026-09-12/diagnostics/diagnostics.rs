@@ -97,7 +97,7 @@ fn d1_luna001_refusal_boundary_tracks_the_declared_constraint() {
     assert_eq!(
         at_max,
         CohortOutcome::Committed,
-        "D-1a: the declared maximum must commit"
+        "D-1 check 1: the declared maximum must commit"
     );
     assert_eq!(value(&e, "state.pressure", &a()), Some(WIDE));
 
@@ -108,7 +108,7 @@ fn d1_luna001_refusal_boundary_tracks_the_declared_constraint() {
     let past_max = set_pressure(&mut e, "cmd.2", 6, 2, WIDE + 1);
     assert!(
         is_out_of_bounds(&past_max),
-        "D-1b: declared maximum + 1 must be an InvalidEffect refusal, got {past_max:?}"
+        "D-1 check 2: declared maximum + 1 must be an InvalidEffect refusal, got {past_max:?}"
     );
 
     // i64::MAX refuses in exactly the same way: it is not a distinct,
@@ -116,35 +116,35 @@ fn d1_luna001_refusal_boundary_tracks_the_declared_constraint() {
     let extreme_hi = set_pressure(&mut e, "cmd.3", 7, 3, i64::MAX);
     assert_eq!(
         extreme_hi, past_max,
-        "D-1c: i64::MAX must produce the identical refusal to declared-max+1"
+        "D-1 check 3: i64::MAX must produce the identical refusal to declared-max+1"
     );
 
     let extreme_lo = set_pressure(&mut e, "cmd.4", 8, 4, i64::MIN);
     assert!(
         is_out_of_bounds(&extreme_lo),
-        "D-1d: i64::MIN must be the same declared-bounds refusal, got {extreme_lo:?}"
+        "D-1 check 4: i64::MIN must be the same declared-bounds refusal, got {extreme_lo:?}"
     );
     let below_min = set_pressure(&mut e, "cmd.5", 9, 5, -WIDE - 1);
     assert_eq!(
         extreme_lo, below_min,
-        "D-1e: i64::MIN must produce the identical refusal to declared-min-1"
+        "D-1 check 5: i64::MIN must produce the identical refusal to declared-min-1"
     );
 
     // Every refusal left the previously committed cell exactly as it was.
     assert_eq!(
         value(&e, "state.pressure", &a()),
         Some(WIDE),
-        "D-1f: refused assignments must not change the committed value"
+        "D-1 check 6: refused assignments must not change the committed value"
     );
     assert_eq!(
         cells_digest(&e),
         before_cells,
-        "D-1g: the canonical state store must be unchanged by four refusals"
+        "D-1 check 7: the canonical state store must be unchanged by four refusals"
     );
     assert_ne!(
         before.0,
         digests(&e).0,
-        "D-1g2: the engine state digest DOES move, because the refused commands \
+        "D-1 check 8: the engine state digest DOES move, because the refused commands \
          still finalize on the timeline; only the state store is unchanged"
     );
     println!(
@@ -166,7 +166,7 @@ fn d1b_luna001_absent_cell_is_the_refusal_consequence_not_a_separate_behavior() 
     assert_eq!(
         value(&e, "state.pressure", &a()),
         None,
-        "D-1h: a refused first write creates no cell"
+        "D-1b check 1: a refused first write creates no cell"
     );
     println!("D-1b PASS: cell absence after refusal is the unchanged initial condition");
 }
@@ -264,8 +264,8 @@ fn d3_t2_t3_zero_delay_and_zero_budget_are_static_admission_refusals() {
         .rule_set(budgets(0), vec![ok_rule])
         .expect_err("D-3c: a zero pacing budget must fail rule-set activation");
     assert!(
-        !errs.is_empty(),
-        "D-3d: expected a typed zero-budget error, got {errs:?}"
+        errs.iter().any(|e| matches!(e, RuleSetError::ZeroPacingBudget)),
+        "D-3d: expected the typed ZeroPacingBudget error specifically, got {errs:?}"
     );
     println!("D-3 PASS: T-2/T-3 hazards are refused at activation; no Engine can carry them");
 }
@@ -411,14 +411,11 @@ fn d6_gap_restore_against_a_genuinely_distinct_profile_is_refused() {
 
     let err = Engine::restore(snap, &fb.profile)
         .expect_err("D-6c: restoring A's snapshot into B must be refused");
-    assert!(
-        matches!(
-            err,
-            RestoreError::ArtifactBindingMismatch
-                | RestoreError::EpochChainInvalid
-                | RestoreError::DigestMismatch
-        ),
-        "D-6d: expected a typed binding/chain/digest refusal, got {err:?}"
+    assert_eq!(
+        err,
+        RestoreError::ArtifactBindingMismatch,
+        "D-6d: the refusal must be exactly ArtifactBindingMismatch — step 1 of restore \
+         validation, reached before the epoch chain or the digest is consulted"
     );
     println!("D-6 PASS: coverage gap closed — a genuinely distinct profile refuses restore ({err:?})");
 }
@@ -555,60 +552,155 @@ fn d9_luna002_zero_rate_evaluation_commits_time_without_changing_value() {
 
 // ==================================================================== D-10
 // C2W-RN02 (recorded, not optimized): composed additive settlement resolves the
-// settled baseline more than once per written target per wave. This test
-// records the *observable* consequence — namely none: repeated read-only
-// settlement is idempotent, so the committed result of a composed body is the
-// same as a single-walk result would be. The cost caveat stands as a disclosed
-// limitation; it is not a correctness defect and is not optimized here.
+// settled baseline more than once per written target per wave.
+//
+// Competing explanations:
+//   (a) the repeated walk has a canonical effect — it bills decay debt twice,
+//       so a body that takes the settled path commits a different value than
+//       the same arithmetic taken on the additive-only path;
+//   (b) the repeat is read-only, so both paths commit the same value and that
+//       value is the one the declared semantics predict.
+//
+// This test discriminates by exercising TWO DIFFERENT CODE PATHS on identical
+// state and comparing them against a hand-computed oracle:
+//
+//   * body A = [Add(10)]                        -> all-additive AddDelta path
+//   * body B = [Add(10), Clamp(-WIDE, +WIDE)]   -> mixed body, settled path,
+//                                                  with a clamp that binds
+//                                                  nothing and so changes no
+//                                                  value of its own
+//
+// A previous revision of this diagnostic ran the same history through two
+// freshly built engines and asserted they agreed. An independent reviewer
+// correctly recorded that as NOT discriminating: a walk that perturbed the
+// result would perturb both runs identically. That test proved reproducibility;
+// it is retained below as exactly that, under an honest name, and the
+// discriminating work is done by the two-path comparison and the oracle.
+
+const DECAY_RATE: i64 = 7;
+const DECAY_CADENCE: i64 = 3;
+
+fn rn02_engine(mixed: bool) -> Engine {
+    let mut f = standard();
+    let mut emits = vec![emit("add", "state.stress", Update::Add(lit(10)))];
+    if mixed {
+        emits.push(emit(
+            "clamp",
+            "state.stress",
+            Update::Clamp {
+                min: -WIDE,
+                max: WIDE,
+            },
+        ));
+    }
+    let rules = vec![
+        on_command(
+            "rule.seed",
+            "cmd.seed",
+            vec![emit("s", "state.stress", Update::Assign(param(0)))],
+        ),
+        on_command("rule.body", "cmd.body", emits),
+        with_schedule(
+            work_rule(
+                "rule.d",
+                "work.d",
+                vec![emit("d", "state.stress", decay(DECAY_RATE, DECAY_CADENCE))],
+            ),
+            reevaluate_after("sch", DECAY_CADENCE as u64, "work.d", "rule.d"),
+        ),
+    ];
+    let g = f.genesis_with(
+        budgets(50),
+        rules,
+        vec![baseline("state.stress", 0)],
+        vec![initial("rule.d", &a(), DECAY_CADENCE as u64, "work.d")],
+    );
+    Engine::genesis(g).unwrap()
+}
+
+/// Seed 100 at t=1, accrue decay debt to t=19, then write the body at t=20.
+/// Returns (value at t=19, value after the body).
+fn rn02_run(mixed: bool) -> (Option<i64>, Option<i64>, Digest) {
+    let mut e = rn02_engine(mixed);
+    let r = drive(
+        &mut e,
+        &Request::Command(command_request(
+            "c.seed", 1, 1, "cmd.seed", a(), vec![], vec![100],
+        )),
+    );
+    assert_eq!(r.last().unwrap().outcome(), &Outcome::Completed);
+    drive(&mut e, &advance(19));
+    let mid = value(&e, "state.stress", &a());
+    let r = drive(
+        &mut e,
+        &Request::Command(command_request(
+            "c.body", 20, 2, "cmd.body", a(), vec![], vec![],
+        )),
+    );
+    assert_eq!(r.last().unwrap().outcome(), &Outcome::Completed);
+    (mid, value(&e, "state.stress", &a()), cells_digest(&e))
+}
 
 #[test]
-fn d10_rn02_repeated_settlement_is_observably_idempotent() {
-    let mut f = standard();
-    let rules = vec![on_command(
-        "rule.compose",
-        "cmd.go",
-        vec![
-            emit("s1", "state.stress", Update::Add(lit(100))),
-            emit("s2", "state.stress", Update::Clamp { min: 0, max: 60 }),
-        ],
-    )];
-    let g = f.genesis(budgets(50), rules, vec![]);
-    let mut e = Engine::genesis(g).unwrap();
+fn d10_rn02_the_repeated_settlement_walk_has_no_canonical_effect() {
+    // The oracle, computed from the declared semantics and not from the engine:
+    // seeded 100 at t=1 with baseline 0; by t=19 that is 18 logical units, i.e.
+    // 6 whole cadences of 3, so 6 * 7 = 42 of decay debt: 100 - 42 = 58.
+    const EXPECTED_AT_19: i64 = 100 - (18 / DECAY_CADENCE) * DECAY_RATE; // 58
+    // From t=19 to t=20 is less than one cadence, so no further debt is billed
+    // and the body adds 10: 68.
+    const EXPECTED_AFTER_BODY: i64 = EXPECTED_AT_19 + 10; // 68
 
-    let r = drive(&mut e, &Request::Command(command_request(
-        "cmd.1", 5, 1, "cmd.go", a(), vec![], vec![],
-    )));
-    assert_eq!(r.last().unwrap().outcome(), &Outcome::Completed);
-    let v1 = value(&e, "state.stress", &a());
+    let (mid_add, add_only, _) = rn02_run(false);
+    let (mid_mixed, mixed, _) = rn02_run(true);
 
-    // Replay the identical history into a fresh engine: the committed result
-    // must agree exactly, so no repeated walk leaks into the canonical result.
-    let mut f2 = standard();
-    let rules2 = vec![on_command(
-        "rule.compose",
-        "cmd.go",
-        vec![
-            emit("s1", "state.stress", Update::Add(lit(100))),
-            emit("s2", "state.stress", Update::Clamp { min: 0, max: 60 }),
-        ],
-    )];
-    let g2 = f2.genesis(budgets(50), rules2, vec![]);
-    let mut e2 = Engine::genesis(g2).unwrap();
-    drive(&mut e2, &Request::Command(command_request(
-        "cmd.1", 5, 1, "cmd.go", a(), vec![], vec![],
-    )));
-    assert_eq!(v1, value(&e2, "state.stress", &a()), "D-10a: composed result must be reproducible");
     assert_eq!(
-        digests(&e).0,
-        digests(&e2).0,
-        "D-10b: the engine state digest must be identical across the two runs"
+        mid_add,
+        Some(EXPECTED_AT_19),
+        "D-10 check 1: the additive-path engine must hold the hand-computed \
+         decayed value at t=19"
+    );
+    assert_eq!(
+        mid_mixed,
+        Some(EXPECTED_AT_19),
+        "D-10 check 2: so must the mixed-path engine — the two runs start equal"
+    );
+    assert_eq!(
+        add_only,
+        Some(EXPECTED_AFTER_BODY),
+        "D-10 check 3: the all-additive AddDelta path must commit the oracle value"
+    );
+    assert_eq!(
+        mixed,
+        Some(EXPECTED_AFTER_BODY),
+        "D-10 check 4: THE DISCRIMINATOR — the mixed body takes the settled path, \
+         which resolves the settled baseline twice. If that repeat billed decay \
+         debt a second time the committed value would be below the oracle. It is \
+         not: both paths commit {EXPECTED_AFTER_BODY}"
+    );
+    assert_eq!(
+        add_only, mixed,
+        "D-10 check 5: the two code paths agree exactly on identical state"
     );
     println!(
-        "D-10 PASS: RN02 repeated settlement has no observable canonical effect; \
-         recorded as a disclosed cost limitation, not optimized"
+        "D-10 PASS: additive path and settled path both commit {EXPECTED_AFTER_BODY} \
+         against a hand-computed oracle, with {} of decay debt already billed once. \
+         RN02's repeated walk is read-only; it is recorded as a disclosed cost \
+         limitation and is not optimized.",
+        100 - EXPECTED_AT_19
     );
 }
 
+#[test]
+fn d10b_rn02_the_composed_result_is_also_reproducible_run_to_run() {
+    // This is a DETERMINISM check, not the RN02 discriminator. It is kept
+    // because reproducibility is worth asserting, and named for what it proves.
+    let (_, first, d1) = rn02_run(true);
+    let (_, second, d2) = rn02_run(true);
+    assert_eq!(first, second, "D-10b check 1: same value across runs");
+    assert_eq!(d1, d2, "D-10b check 2: same canonical state digest across runs");
+    println!("D-10b PASS: run-to-run reproducibility only — this does not discriminate RN02");
+}
 
 // ==================================================================== D-11
 // H-OBS-01 (new observation, test-seam only): `snapshot_stage_raw` and

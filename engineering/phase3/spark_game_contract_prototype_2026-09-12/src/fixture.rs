@@ -33,7 +33,7 @@ use spark_engine::rules::{
     Trigger, Update,
 };
 
-use crate::{EntityMap, ExternalEntityRef};
+use crate::{EntityMap, ExternalAffiliationRef, ExternalEntityRef};
 
 pub const PROFILE: &str = "game-world";
 pub const SEQUENCER: &str = "sequencer.engine";
@@ -85,19 +85,29 @@ pub fn region() -> ScopeId {
 }
 
 /// The host-side mapping of contract §4.1 for this fixture.
+///
+/// Entities and affiliations are bound through **separate** surfaces, because
+/// Gate C3 enumerates them as two required references rather than one. Actors
+/// and households are entities; settlements, regions and watersheds are
+/// affiliations.
 pub fn entity_map() -> EntityMap {
     let mut m = EntityMap::default();
+    for (external, scope) in [
+        ("game:household/1", household()),
+        ("game:actor/1", actor()),
+        ("game:actor/2", neighbour_actor()),
+    ] {
+        m.bind(ExternalEntityRef(external.to_string()), scope)
+            .expect("the fixture entity mapping is injective and stable");
+    }
     for (external, scope) in [
         ("game:watershed/1", watershed()),
         ("game:settlement/1", settlement()),
         ("game:settlement/2", neighbour()),
-        ("game:household/1", household()),
-        ("game:actor/1", actor()),
-        ("game:actor/2", neighbour_actor()),
         ("game:region/1", region()),
     ] {
-        m.bind(ExternalEntityRef(external.to_string()), scope)
-            .expect("the fixture mapping is injective and stable");
+        m.bind_affiliation(ExternalAffiliationRef(external.to_string()), scope)
+            .expect("the fixture affiliation mapping is injective and stable");
     }
     m
 }
@@ -156,11 +166,18 @@ pub fn manifest() -> ProfileManifest {
                 &[Settlement],
                 None,
             ),
-            // The advisory intent channel (contract §6.2).
+            // The advisory intent channels (contract §6.2): one addresses an
+            // entity, one addresses an affiliation.
             spec(
                 "intent.hunt",
                 Authority::SparkOwned,
                 &[Actor],
+                Some(INTENT_DOMAIN),
+            ),
+            spec(
+                "intent.ration",
+                Authority::SparkOwned,
+                &[Settlement],
                 Some(INTENT_DOMAIN),
             ),
         ],
@@ -168,7 +185,7 @@ pub fn manifest() -> ProfileManifest {
 }
 
 pub fn intent_channels() -> Vec<DefinitionId> {
-    vec![def("intent.hunt")]
+    vec![def("intent.hunt"), def("intent.ration")]
 }
 
 // -------------------------------------------------------------- rule bodies
@@ -278,6 +295,31 @@ pub fn rules() -> Vec<RuleSpec> {
             emits: vec![emit_here(
                 "hunt",
                 "intent.hunt",
+                Update::Assign(Expr::Input(Input::Literal(1))),
+            )],
+            schedules: vec![],
+            cooldown: None,
+        },
+        // 4b. The settlement-level advice, addressed to an AFFILIATION rather
+        //     than an actor. Subject-scoped: the Change trigger's subject is the
+        //     settlement whose price moved.
+        RuleSpec {
+            rule_id: def("rule.ration"),
+            trigger: Trigger::Change {
+                watched: def("econ.food_price"),
+            },
+            conditions: vec![Condition::Compare {
+                left: Expr::Input(Input::Cell {
+                    definition: def("econ.food_price"),
+                    scope: ScopeRef::Subject,
+                    absent: 0,
+                }),
+                op: CmpOp::Ge,
+                right: Expr::Input(Input::Literal(60)),
+            }],
+            emits: vec![emit_here(
+                "ration",
+                "intent.ration",
                 Update::Assign(Expr::Input(Input::Literal(1))),
             )],
             schedules: vec![],

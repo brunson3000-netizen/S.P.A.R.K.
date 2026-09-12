@@ -1,5 +1,6 @@
 == cargo test --offline -- --nocapture --test-threads=1 ==
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s
+   Compiling spark-game-contract-prototype v0.0.0 (<WORKTREE>/engineering/phase3/spark_game_contract_prototype_2026-09-12)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.02s
      Running unittests src/lib.rs (<TARGET_DIR>/proto-target/debug/deps/spark_game_contract_prototype-290d7f27be41b601)
 
 running 0 tests
@@ -8,7 +9,7 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
      Running tests/end_to_end.rs (<TARGET_DIR>/proto-target/debug/deps/end_to_end-30e4e808800f48ec)
 
-running 14 tests
+running 17 tests
 test e10_snapshot_restore_mid_sequence_reproduces_the_uninterrupted_run ... E-10 PASS: snapshot/restore across a boundary reproduces the uninterrupted run. LIMIT: the snapshot is an in-memory value; this is NOT durable process-recovery evidence (contract §9.4).
 ok
 test e11_re_presenting_a_completed_command_is_refused_not_re_executed ... E-11: carried refusal = CommandIdentityConflict { command_id: CommandId(cmd.tick.1) }
@@ -17,6 +18,12 @@ ok
 test e12_intents_committed_before_a_pause_are_not_lost ... E-12 PASS: 1 pause(s); both paced slices' intents reached the host in canonical order
 ok
 test e13_the_at_most_once_key_separates_distinct_activations ... E-13 PASS: the at-most-once key is (activation, correlation, batch_digest)
+ok
+test e14_a_deferred_intent_defers_without_moving_the_world ... E-14 PASS: Deferred{WorldBusy} is produced, is per intent, and moves nothing
+ok
+test e15_affiliation_mapping_enforces_injectivity_and_stability ... E-15 PASS: affiliation references are injective, stable and namespace-separate
+ok
+test e16_an_oversized_batch_is_reported_not_truncated ... E-16 PASS: the outbound bound is a reported hint, never a silent truncation
 ok
 test e1_session_negotiation_is_fail_closed_on_major_and_downgrades_minor ... E-1 PASS: version fail-closed on major, minor downgraded, profile pair enforced
 ok
@@ -34,12 +41,12 @@ test e6_a_second_request_while_one_is_active_is_refused_busy ... E-6 PASS: one o
 ok
 test e7_oversized_observation_list_is_refused_whole ... E-7 PASS: an oversized message is refused whole, with no partial processing
 ok
-test e8_the_whole_proof_is_deterministic_across_independent_runs ... E-8 PASS: the whole sequence, including every batch digest, is reproducible
+test e8_the_whole_proof_is_reproducible_across_two_in_process_runs ... E-8 PASS: the whole sequence, including every batch digest, is reproducible across two constructions IN ONE PROCESS. No cross-process and no cross-platform determinism is claimed by this test.
 ok
 test e9_completed_history_replays_to_the_same_digests ... E-9 PASS: completed-boundary replay reproduces both recorded digests
 ok
 
-test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
 
    Doc-tests spark_game_contract_prototype
 
