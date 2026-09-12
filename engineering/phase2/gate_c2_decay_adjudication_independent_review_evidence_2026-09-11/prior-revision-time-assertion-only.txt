@@ -1,0 +1,46 @@
+# source: prior_revision_time_assertion_only.rs sha256=933bdc4c73475649b1d57e6185ec7d2cff65b9b33a5077d27c92f34df6423352
+# crate root: /tmp/spark-gate-c2-adjudication-review
+# spark-engine test-support: True
+# whitespace-normalized: trailing spaces and trailing blank lines removed
+$ cargo test --offline -- --nocapture --test-threads=1
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling constant_time_eq v0.4.2
+   Compiling cc v1.4.4
+   Compiling cfg-if v1.0.4
+   Compiling arrayvec v0.7.8
+   Compiling cpufeatures v0.3.0
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-gate-c2-adjudication-review/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-gate-c2-adjudication-review/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-gate-c2-adjudication-review/crates/spark-testkit)
+   Compiling spark-c2-counterexamples v0.0.0 (/tmp/spark-c2-adjudication-corpus-qvxux_df)
+    Finished `test` profile [unoptimized] target(s) in 23.92s
+     Running unittests src/lib.rs (target/debug/deps/spark_c2_counterexamples-1aae2f2f0d179655)
+
+running 14 tests
+test c2_01_fixed_scope_condition_reads_join_parent_union_once ... ok
+test c2_02_scope_fanout_and_materialized_edge_controls ... ok
+test c2_03_nested_ids_share_namespace_across_schedules ... ok
+test c2_04_negative_widened_aggregate_and_staged_cancellation ... ok
+test c2_05_effect_reapplication_at_frozen_cohort_time_must_reproduce_state ... actual=(90, LogicalTime(15)); frozen-at reapplication=(90, LogicalTime(15))
+ok
+test c2_05_recovery_and_unsaturated_remainders_positive ... ok
+test c2_05_saturation_must_preserve_claimed_value_and_commit_time_chunk_invariance ... saturation single=(0, LogicalTime(150)) chunks=(0, LogicalTime(150))
+ok
+test c2_05_shorter_cadence_must_not_bill_steps_ending_before_activation ... shortened cadence result=(95, LogicalTime(60)); new-rate step ends must be after barrier 50
+ok
+test c2_06_both_kind_payload_mismatches_leave_artifacts_unchanged ... ok
+test d_c2_11_mismatch_before_first_cohort_is_sticky_without_boundary ... ok
+test d_c2_13_materialized_creator_fingerprint_survives_epoch_replacement ... ok
+test d_c2_7_exact_rule_identity_and_barrier_config_controls ... ok
+test r3_lineage_restore_binds_multiple_activations_across_reset ... ok
+test r8_enqueue_redelivery_folds_and_contested_payload_rejects_atomically ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.35s
+
+   Doc-tests spark_c2_counterexamples
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

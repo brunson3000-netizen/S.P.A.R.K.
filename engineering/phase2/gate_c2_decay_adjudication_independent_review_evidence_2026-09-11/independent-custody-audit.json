@@ -1,0 +1,17 @@
+{
+  "candidate": "544c5f6f99d8dabf9855f8ac68f5666286aa9741",
+  "checkpoint1": "244c54b66a9c5bdfe8dd49e28b05cc0f5c255637",
+  "checkpoint0": "0c27ad89833d0c88162803ab41dec177424b49bb",
+  "direct_base": "6b167d84f21fb60f374a2ab45c62d5c6a040790a",
+  "final_parent_is_checkpoint1": true,
+  "final_delta_files": 75,
+  "final_delta_engineering_only": true,
+  "code_test_manifest_lockfile_identical": true,
+  "historical_engineering_files_checked": 448,
+  "historical_changes": [],
+  "decision_immutable": true,
+  "writer_hash_checks": 75,
+  "writer_hash_checks_pass": true,
+  "checkpoint0_files": "A\tengineering/phase2/SPARK_PHASE_2_GATE_C2_DECAY_ADJUDICATION_WRITER_MISSION_2026-09-11.md\nA\tengineering/phase2/SPARK_PHASE_2_GATE_C2_DECAY_OPERATOR_ADJUDICATION_2026-09-11.md\n",
+  "source_tree": "4b8c618615b3d6d8a38c9ca5538895757a6ac7b3"
+}

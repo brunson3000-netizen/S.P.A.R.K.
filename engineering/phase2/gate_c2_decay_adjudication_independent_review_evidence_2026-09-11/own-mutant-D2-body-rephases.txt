@@ -1,0 +1,25 @@
+# tree: 544c5f6f99d8dabf9855f8ac68f5666286aa9741
+$ cargo test --offline -- --exact own_d2_body_and_command_shock --nocapture
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-adjudication-reviewer-mutants-knhod9wl/tree/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-adjudication-reviewer-mutants-knhod9wl/tree/crates/spark-testkit)
+   Compiling reviewer-decay-probes v0.0.0 (/tmp/spark-c2-adjudication-reviewer-mutants-knhod9wl/probe)
+    Finished `test` profile [unoptimized] target(s) in 11.56s
+     Running unittests src/lib.rs (target/debug/deps/reviewer_decay_probes-c217548d9dba31b8)
+
+running 1 test
+
+thread 'own_d2_body_and_command_shock' (444) panicked at src/lib.rs:39:29:
+assertion `left == right` failed
+  left: Some((25, 6))
+ right: Some((22, 6))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test own_d2_body_and_command_shock ... FAILED
+
+failures:
+
+failures:
+    own_d2_body_and_command_shock
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `--lib`

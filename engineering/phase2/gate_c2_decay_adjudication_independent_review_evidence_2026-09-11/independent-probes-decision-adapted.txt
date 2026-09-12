@@ -1,0 +1,41 @@
+# source: independent_probes_decision_adapted.rs sha256=d5c80c797fd2c743bf1de8074bb169f33e6b87c7e781ef293f06c1273933f424
+# crate root: /tmp/spark-gate-c2-adjudication-review
+# spark-engine test-support: True
+# whitespace-normalized: trailing spaces and trailing blank lines removed
+$ cargo test --offline -- --nocapture --test-threads=1
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling cc v1.4.4
+   Compiling cfg-if v1.0.4
+   Compiling arrayvec v0.7.8
+   Compiling cpufeatures v0.3.0
+   Compiling constant_time_eq v0.4.2
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-gate-c2-adjudication-review/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-gate-c2-adjudication-review/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-gate-c2-adjudication-review/crates/spark-testkit)
+   Compiling spark-c2-counterexamples v0.0.0 (/tmp/spark-c2-adjudication-corpus-it2uu5_9)
+    Finished `test` profile [unoptimized] target(s) in 20.50s
+     Running unittests src/lib.rs (target/debug/deps/spark_c2_counterexamples-1aae2f2f0d179655)
+
+running 9 tests
+test r01_recovery_reapplication_and_timestamp ... ok
+test r02_activation_endpoint_is_owned_by_closing_segment ... ok
+test r02_residual_is_unbilled_observation ... residual sign=-1: (-91, LogicalTime(24))
+residual sign=1: (91, LogicalTime(24))
+ok
+test r03_saturated_recovery_partitions ... ok
+test r03_unmoved_writes_fire_watchers_and_reject_shocks ... ok
+test r04_per_wave_store_and_index_discriminator ... ok
+test r2prime_frozen_q7_full_cadence_after_fresh_assignment ... ok
+test r2prime_frozen_q7_full_cadence_after_separate_shock ... ok
+test r2prime_grid_behavior_is_observable_after_non_decay_write ... one logical tick after assignment: (90, LogicalTime(10))
+ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+   Doc-tests spark_c2_counterexamples
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

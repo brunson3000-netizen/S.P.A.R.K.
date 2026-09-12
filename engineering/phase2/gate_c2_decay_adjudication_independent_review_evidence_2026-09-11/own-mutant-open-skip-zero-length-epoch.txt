@@ -1,0 +1,25 @@
+# tree: 544c5f6f99d8dabf9855f8ac68f5666286aa9741
+$ cargo test --offline -- --exact own_open_same_time_activations --nocapture
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-adjudication-reviewer-mutants-knhod9wl/tree/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-adjudication-reviewer-mutants-knhod9wl/tree/crates/spark-testkit)
+   Compiling reviewer-decay-probes v0.0.0 (/tmp/spark-c2-adjudication-reviewer-mutants-knhod9wl/probe)
+    Finished `test` profile [unoptimized] target(s) in 6.02s
+     Running unittests src/lib.rs (target/debug/deps/reviewer_decay_probes-c217548d9dba31b8)
+
+running 1 test
+
+thread 'own_open_same_time_activations' (920) panicked at src/lib.rs:39:29:
+assertion `left == right` failed
+  left: Some((-92, 16))
+ right: Some((-94, 16))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test own_open_same_time_activations ... FAILED
+
+failures:
+
+failures:
+    own_open_same_time_activations
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.03s
+
+error: test failed, to rerun pass `--lib`

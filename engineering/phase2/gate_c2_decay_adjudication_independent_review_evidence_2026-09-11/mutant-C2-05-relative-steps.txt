@@ -1,0 +1,181 @@
+# mutant C2-05-relative-steps: the superseded elapsed-since-write count: whole steps (now - updated_at) / cadence per segment, committing at now
+# tree: 544c5f6f99d8dabf9855f8ac68f5666286aa9741
+
+$ kills phase2_decay_oracle_revision::c2r_02_03_grid_matches_the_reference_model_under_every_partition
+
+running 1 test
+test c2r_02_03_grid_matches_the_reference_model_under_every_partition ... FAILED
+
+failures:
+
+---- c2r_02_03_grid_matches_the_reference_model_under_every_partition stdout ----
+
+thread 'c2r_02_03_grid_matches_the_reference_model_under_every_partition' (741) panicked at crates/spark-testkit/tests/phase2_decay_oracle_revision.rs:686:9:
+assertion `left == right` failed: scenario 0: Scenario { initial: 24, genesis: (9, 11), epochs: [(31, Some((9, 11))), (66, Some((9, 11))), (81, Some((9, 19)))], evals: [7, 8, 16, 23, 30, 34, 39, 53, 61, 85, 86, 87, 88, 99, 100] }
+  left: (6, LogicalTime(100))
+ right: (0, LogicalTime(100))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c2r_02_03_grid_matches_the_reference_model_under_every_partition
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.07s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-adjudication-mutants-3ibzammo/C2-05-relative-steps/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-adjudication-mutants-3ibzammo/C2-05-relative-steps/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 10.76s
+     Running tests/phase2_decay_oracle_revision.rs (/tmp/spark-c2-adjudication-mutants-3ibzammo/target/debug/deps/phase2_decay_oracle_revision-000401f3a8d7e51d)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_oracle_revision`
+
+$ kills phase2_bounded_revision::c2_05_decay_preserves_elapsed_cadence_remainder_converted
+
+running 1 test
+test c2_05_decay_preserves_elapsed_cadence_remainder_converted ... FAILED
+
+failures:
+
+---- c2_05_decay_preserves_elapsed_cadence_remainder_converted stdout ----
+
+thread 'c2_05_decay_preserves_elapsed_cadence_remainder_converted' (770) panicked at crates/spark-testkit/tests/phase2_bounded_revision.rs:718:5:
+assertion `left == right` failed: five units of remainder at 15 survive to 20
+  left: 90
+ right: 80
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c2_05_decay_preserves_elapsed_cadence_remainder_converted
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.06s
+
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-adjudication-mutants-3ibzammo/C2-05-relative-steps/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 2.30s
+     Running tests/phase2_bounded_revision.rs (/tmp/spark-c2-adjudication-mutants-3ibzammo/target/debug/deps/phase2_bounded_revision-a931c7c8e6ee1b83)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_bounded_revision`
+
+$ kills phase2_decay_adjudication::d2_fresh_assignment_keeps_the_fixed_grid
+
+running 1 test
+test d2_fresh_assignment_keeps_the_fixed_grid ... FAILED
+
+failures:
+
+---- d2_fresh_assignment_keeps_the_fixed_grid stdout ----
+
+thread 'd2_fresh_assignment_keeps_the_fixed_grid' (803) panicked at crates/spark-testkit/tests/phase2_decay_adjudication.rs:383:9:
+assertion `left == right` failed: engine, sign 1: Timeline { genesis: (10, 10), commands: [(9, Assign(100))], evals: [10, 19, 20, 30], kicks: [], kick: 0 }
+  left: [Some((100, LogicalTime(9))), Some((100, LogicalTime(10))), Some((100, LogicalTime(19))), Some((100, LogicalTime(20))), Some((90, LogicalTime(30)))]
+ right: [Some((100, LogicalTime(9))), Some((90, LogicalTime(10))), Some((90, LogicalTime(19))), Some((80, LogicalTime(20))), Some((70, LogicalTime(30)))]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    d2_fresh_assignment_keeps_the_fixed_grid
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.01s
+
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-adjudication-mutants-3ibzammo/C2-05-relative-steps/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 1.57s
+     Running tests/phase2_decay_adjudication.rs (/tmp/spark-c2-adjudication-mutants-3ibzammo/target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_adjudication`
+
+$ kills phase2_decay_adjudication::d2_post_shock_decay_keeps_the_fixed_grid
+
+running 1 test
+test d2_post_shock_decay_keeps_the_fixed_grid ... FAILED
+
+failures:
+
+---- d2_post_shock_decay_keeps_the_fixed_grid stdout ----
+
+thread 'd2_post_shock_decay_keeps_the_fixed_grid' (812) panicked at crates/spark-testkit/tests/phase2_decay_adjudication.rs:383:9:
+assertion `left == right` failed: engine, sign 1: Timeline { genesis: (10, 10), commands: [(0, Assign(100))], evals: [30, 40, 41, 50], kicks: [31], kick: 5 }
+  left: [Some((70, LogicalTime(30))), Some((75, LogicalTime(31))), Some((75, LogicalTime(40))), Some((75, LogicalTime(41))), Some((75, LogicalTime(50)))]
+ right: [Some((70, LogicalTime(30))), Some((75, LogicalTime(31))), Some((65, LogicalTime(40))), Some((65, LogicalTime(41))), Some((55, LogicalTime(50)))]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    d2_post_shock_decay_keeps_the_fixed_grid
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized] target(s) in 0.04s
+     Running tests/phase2_decay_adjudication.rs (/tmp/spark-c2-adjudication-mutants-3ibzammo/target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_adjudication`
+
+$ kills phase2_decay_adjudication::d3_d5_shortened_cadence_starts_a_new_grid_at_the_barrier
+
+running 1 test
+test d3_d5_shortened_cadence_starts_a_new_grid_at_the_barrier ... FAILED
+
+failures:
+
+---- d3_d5_shortened_cadence_starts_a_new_grid_at_the_barrier stdout ----
+
+thread 'd3_d5_shortened_cadence_starts_a_new_grid_at_the_barrier' (821) panicked at crates/spark-testkit/tests/phase2_decay_adjudication.rs:383:9:
+assertion `left == right` failed: engine, sign 1: Timeline { genesis: (1, 100), commands: [(0, Assign(100)), (53, Activate(5, 10))], evals: [53, 60, 62, 63, 73], kicks: [], kick: 0 }
+  left: [Some((100, LogicalTime(53))), Some((100, LogicalTime(60))), Some((100, LogicalTime(62))), Some((100, LogicalTime(63))), Some((95, LogicalTime(73)))]
+ right: [Some((100, LogicalTime(53))), Some((100, LogicalTime(60))), Some((100, LogicalTime(62))), Some((95, LogicalTime(63))), Some((90, LogicalTime(73)))]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    d3_d5_shortened_cadence_starts_a_new_grid_at_the_barrier
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.02s
+
+    Finished `test` profile [unoptimized] target(s) in 0.04s
+     Running tests/phase2_decay_adjudication.rs (/tmp/spark-c2-adjudication-mutants-3ibzammo/target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_adjudication`
+
+$ kills phase2_decay_adjudication::d1_chunking_across_unaligned_writes_and_barriers
+
+running 1 test
+test d1_chunking_across_unaligned_writes_and_barriers ... FAILED
+
+failures:
+
+---- d1_chunking_across_unaligned_writes_and_barriers stdout ----
+
+thread 'd1_chunking_across_unaligned_writes_and_barriers' (830) panicked at crates/spark-testkit/tests/phase2_decay_adjudication.rs:383:9:
+assertion `left == right` failed: engine, sign 1: Timeline { genesis: (2, 7), commands: [(9, Assign(100)), (19, Activate(5, 4)), (29, Shock(5)), (36, Activate(3, 6))], evals: [14, 19, 23, 27, 33, 40, 45], kicks: [], kick: 0 }
+  left: [Some((100, LogicalTime(14))), Some((100, LogicalTime(19))), Some((95, LogicalTime(23))), Some((90, LogicalTime(27))), Some((95, LogicalTime(29))), Some((90, LogicalTime(33))), Some((90, LogicalTime(40))), Some((90, LogicalTime(45)))]
+ right: [Some((98, LogicalTime(14))), Some((98, LogicalTime(19))), Some((93, LogicalTime(23))), Some((88, LogicalTime(27))), Some((93, LogicalTime(29))), Some((88, LogicalTime(33))), Some((83, LogicalTime(40))), Some((80, LogicalTime(45)))]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    d1_chunking_across_unaligned_writes_and_barriers
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.04s
+
+    Finished `test` profile [unoptimized] target(s) in 0.06s
+     Running tests/phase2_decay_adjudication.rs (/tmp/spark-c2-adjudication-mutants-3ibzammo/target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_adjudication`
+
+$ kills phase2_decay_adjudication::d_generated_timelines_with_writes_match_the_reference_model
+
+running 1 test
+test d_generated_timelines_with_writes_match_the_reference_model ... FAILED
+
+failures:
+
+---- d_generated_timelines_with_writes_match_the_reference_model stdout ----
+
+thread 'd_generated_timelines_with_writes_match_the_reference_model' (839) panicked at crates/spark-testkit/tests/phase2_decay_adjudication.rs:861:9:
+assertion `left == right` failed: timeline 0: Timeline { genesis: (11, 6), commands: [(2, Assign(-83)), (82, Activate(3, 22))], evals: [3, 11, 17, 26, 60, 62, 83, 84, 92, 93, 98, 100], kicks: [], kick: 0 }
+  left: [Some((-83, LogicalTime(3))), Some((-72, LogicalTime(11))), Some((-61, LogicalTime(17))), Some((-50, LogicalTime(26))), Some((0, LogicalTime(60))), Some((0, LogicalTime(62))), Some((0, LogicalTime(83))), Some((0, LogicalTime(84))), Some((0, LogicalTime(92))), Some((0, LogicalTime(93))), Some((0, LogicalTime(98))), Some((0, LogicalTime(100)))]
+ right: [Some((-83, LogicalTime(3))), Some((-72, LogicalTime(11))), Some((-61, LogicalTime(17))), Some((-39, LogicalTime(26))), Some((0, LogicalTime(60))), Some((0, LogicalTime(62))), Some((0, LogicalTime(83))), Some((0, LogicalTime(84))), Some((0, LogicalTime(92))), Some((0, LogicalTime(93))), Some((0, LogicalTime(98))), Some((0, LogicalTime(100)))]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    d_generated_timelines_with_writes_match_the_reference_model
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.04s
+
+    Finished `test` profile [unoptimized] target(s) in 0.07s
+     Running tests/phase2_decay_adjudication.rs (/tmp/spark-c2-adjudication-mutants-3ibzammo/target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_adjudication`

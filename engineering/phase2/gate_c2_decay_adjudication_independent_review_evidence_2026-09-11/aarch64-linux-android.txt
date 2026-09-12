@@ -1,0 +1,16 @@
+# tree: 544c5f6f99d8dabf9855f8ac68f5666286aa9741
+# whitespace-normalized
+$ cargo check --workspace --all-targets --target aarch64-linux-android
+   Compiling blake3 v1.8.7
+    Checking cfg-if v1.0.4
+    Checking arrayvec v0.7.8
+    Checking constant_time_eq v0.4.2
+   Compiling zmij v1.0.23
+   Compiling serde_core v1.0.229
+   Compiling serde_json v1.0.151
+    Checking spark-core v0.1.0 (/tmp/spark-gate-c2-adjudication-review/crates/spark-core)
+    Checking spark-engine v0.1.0 (/tmp/spark-gate-c2-adjudication-review/crates/spark-engine)
+    Checking itoa v1.0.18
+    Checking memchr v2.8.3
+    Checking spark-testkit v0.1.0 (/tmp/spark-gate-c2-adjudication-review/crates/spark-testkit)
+    Finished `dev` profile [unoptimized] target(s) in 16.67s

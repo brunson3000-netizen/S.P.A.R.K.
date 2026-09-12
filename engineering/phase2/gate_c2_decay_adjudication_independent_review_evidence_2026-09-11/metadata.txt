@@ -1,0 +1,3 @@
+# tree: 544c5f6f99d8dabf9855f8ac68f5666286aa9741
+# whitespace-normalized
+$ cargo metadata --format-version 1 > /dev/null

@@ -1,0 +1,72 @@
+# Base source excerpts; trailing whitespace normalized.
+S-1/2/3/4: SPARK_PHASE_2_FABLE_ARCHITECTURE_FREEZE_2026-08-26.md at base 6b167d84f21fb60f374a2ab45c62d5c6a040790a
+250: ### Q7 — Decay/recovery: **rule-layer operations over existing cell fields; no encoding change**
+251:
+252: **Decision.** Decay and recovery are declarative rule operations (Q1 enum members), not
+253: new cell machinery:
+254:
+255: - **Target/floor:** the existing `StateCell.baseline` field is the declared
+256:   decay/recovery target. A decay/recovery rule references the target definition and its
+257:   baseline; rules on definitions without a baseline semantics are rejected at rule-set
+258:   activation.
+259: - **Rate/cadence:** rule parameters, referencing `ConfigRevision` keys where hot-tunable
+260:   (ADR-0004 change class 1).
+261: - **Closed-form catch-up (frozen):** decay/recovery computes the new value as a closed-
+262:   form function of (current value, baseline, rate, whole elapsed cadence steps between
+263:   `updated_at` and now) in `i128` with the Q1 floor rule, clamped to declared bounds and
+264:   the baseline — linear per-step; curved profiles compose the piecewise-curve operation.
+265:   Catch-up over N missed steps in one evaluation is therefore bit-identical to N separate
+266:   evaluations, so batching/chunking cannot alter outcomes (§28 item 2, §18.3
+267:   deterministic catch-up).
+
+S-5/6: SPARK_PHASE_2_FABLE_ARCHITECTURE_FREEZE_v2_2026-08-26.md at base 6b167d84f21fb60f374a2ab45c62d5c6a040790a
+199: - **Decay/recovery:** activation admits at most one decay/recovery rule per target
+200:   definition (TRANSFORM family); the v1 §Q7 closed-form catch-up formula, floor
+201:   rounding, and chunk-invariance are upheld and remain the frozen formula. A
+202:   simultaneous shock (`AddDelta`) coinciding with a decay evaluation on one target in
+203:   one wave is a cross-family mixture: rejected, deterministically and visibly, unless
+204:   the profile combines them in one rule body or separates them by a scheduled boundary.
+
+S-7: SPARK_PHASE_2_V3_F01_ARCHITECTURE_CORRECTION_CANDIDATE_FINAL_2026-09-10.md at base 6b167d84f21fb60f374a2ab45c62d5c6a040790a
+112: surface is introduced anywhere below.
+113:
+114: ---
+115:
+116: ## 4. Vocabulary (binding)
+117:
+118: - **Request.** One external input: `Advance{T}` or `Command{request}` (§8 defines the
+119:   command request's fields). Its **horizon** `h` is `T` or the command's `effective_time`.
+120: - **Horizon.** An inclusive eligibility bound on which resident scheduled work may be
+121:   consumed by the request. Never the canonical time of anything evaluated.
+122: - **Canonical time of a cohort.** A scheduled cohort's `due_time`; a command cohort's
+123:   `effective_time`. Every inherited use of `now`, `at`, and "current logical time" during
+124:   that cohort's evaluation denotes this value. Delayed work created by a cohort carries
+125:   `due_time ≥ canonical_time + 1` under checked `u64` addition; overflow rejects the wave
+126:   atomically (R-3).
+
+S-8/9: SPARK_PHASE_2_ACCEPTANCE_TEST_ORACLE_V3_F01_FINAL_2026-09-10.md at base 6b167d84f21fb60f374a2ab45c62d5c6a040790a
+54: | **AT-I20 / AT-I20b / AT-I20c / AT-I20d / AT-I21 / AT-I22** | **UNCHANGED in substance**, read under the clarified `now` (candidate §4); AT-I21's "same barrier" is the same logical-time barrier; AT-I20's "drain call" is one `process` call |
+55: | Every other AT-I entry (AT-I1 … AT-I19, AT-I23 … AT-I28, AT-I30, AT-I31, AT-I33, AT-I34, AT-I36 … AT-I38, AT-I41) | **UNCHANGED** |
+
+S-10/11: SPARK_PHASE_2_ACCEPTANCE_TEST_MATRIX_2026-08-26.md at base 6b167d84f21fb60f374a2ab45c62d5c6a040790a
+139: - **AT-I22 `decay_catch_up_is_chunk_invariant`** — N missed cadence steps applied as one
+140:   catch-up evaluation vs N separate evaluations vs two uneven chunks: identical cell
+141:   values and engine digests; convergence stops exactly at `baseline`; clamping at
+142:   declared bounds is exact (no float, no drift — assert bit equality, not tolerance).
+143: - **AT-I23 `recovery_and_decay_respect_epoch_bound_rates`** — a hot-tuned rate under a
+144:   new behavior epoch applies only from that epoch's barrier; pre-barrier evaluations use
+145:   the old rate (epoch binding, freeze §Q5).
+
+S-12/13: SPARK_PHASE_2_ACCEPTANCE_TEST_MATRIX_v2_2026-08-26.md at base 6b167d84f21fb60f374a2ab45c62d5c6a040790a
+182: - **AT-I22 `decay_catch_up_is_chunk_invariant`** (REVISED v2) — as v1 (bit-equal
+183:   chunk invariance, baseline convergence, exact clamping), plus: exact formula/rounding
+184:   vectors pinned as expected values, and a scheduled decay evaluation **coincident with
+185:   an independent `AddDelta` shock on the same target in one wave** asserts the frozen
+186:   cross-family rejection — and, in companion fixtures, that the two sanctioned
+187:   compositions (one rule body combining both; separate scheduled boundaries) produce
+188:   their declared deterministic results.
+189: - **AT-I23 `recovery_and_decay_respect_epoch_bound_rates`** (UNCHANGED).
+
+S-13: SPARK_PHASE_2_ACCEPTANCE_TEST_MATRIX_v3_2026-08-26.md at base 6b167d84f21fb60f374a2ab45c62d5c6a040790a
+283: - **AT-I22 `decay_catch_up_is_chunk_invariant`** (UNCHANGED v2).
+284: - **AT-I23 `recovery_and_decay_respect_epoch_bound_rates`** (UNCHANGED v2).

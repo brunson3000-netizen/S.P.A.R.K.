@@ -1,0 +1,57 @@
+{
+  "code_and_test_tree": "544c5f6f99d8dabf9855f8ac68f5666286aa9741",
+  "required_checks_passed": 14,
+  "workspace": {
+    "passed": 400,
+    "failed": 0,
+    "ignored": 0
+  },
+  "new_adjudication_tests": 10,
+  "corpora": {
+    "original-corpus": "expected compile failure: E0308,E0559,E0603,E0609",
+    "adapted-corpus": [
+      9,
+      0
+    ],
+    "prior-revision-probes": [
+      13,
+      1
+    ],
+    "prior-revision-time-assertion-only": [
+      14,
+      0
+    ],
+    "independent-probes": [
+      7,
+      2
+    ],
+    "independent-probes-decision-adapted": [
+      9,
+      0
+    ]
+  },
+  "superseded_review_assertions": [
+    "r2prime_frozen_q7_full_cadence_after_fresh_assignment",
+    "r2prime_frozen_q7_full_cadence_after_separate_shock"
+  ],
+  "mutants": {
+    "total": 10,
+    "killed": 10,
+    "kill_assertions": 28,
+    "prior_test_survivals": 2,
+    "baseline_tests": 21
+  },
+  "reviewer_mutants_killed": 4,
+  "default_feature_surface_controls": 17,
+  "preservation": {
+    "failures": 0,
+    "comment_only_files": 4,
+    "inline_modules": 17
+  },
+  "environment": {
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_BUILD_JOBS": "2"
+  }
+}

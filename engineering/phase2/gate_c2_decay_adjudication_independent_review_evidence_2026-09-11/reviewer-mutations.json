@@ -1,0 +1,71 @@
+{
+  "tree": "544c5f6f99d8dabf9855f8ac68f5666286aa9741",
+  "probe_source": "engineering/phase2/gate_c2_decay_oracle_revision_independent_review_evidence_2026-09-11/independent_probes.rs",
+  "baseline": [
+    {
+      "name": "r01_recovery_reapplication_and_timestamp",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "name": "r02_activation_endpoint_is_owned_by_closing_segment",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "name": "r03_unmoved_writes_fire_watchers_and_reject_shocks",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "name": "r04_per_wave_store_and_index_discriminator",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    }
+  ],
+  "mutants": [
+    {
+      "id": "own-C2R-01-next-tick",
+      "name": "r01_recovery_reapplication_and_timestamp",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    },
+    {
+      "id": "own-C2R-02-drop-closing-endpoint",
+      "name": "r02_activation_endpoint_is_owned_by_closing_segment",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    },
+    {
+      "id": "own-C2R-03-drop-zero-rate",
+      "name": "r03_unmoved_writes_fire_watchers_and_reject_shocks",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    },
+    {
+      "id": "own-C2R-04-drop-later-wave-records",
+      "name": "r04_per_wave_store_and_index_discriminator",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    }
+  ],
+  "probe_sha256": "2d7cba1a6a32508d0def1ec32644dfd1c001a2ade7a6b6e4375102a0d8c6ac69",
+  "baseline_all_pass": true,
+  "all_killed": true
+}

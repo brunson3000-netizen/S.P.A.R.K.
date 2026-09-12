@@ -1,0 +1,25 @@
+# tree: 544c5f6f99d8dabf9855f8ac68f5666286aa9741
+$ cargo test --offline -- --exact r01_recovery_reapplication_and_timestamp --nocapture
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-adjudication-reviewer-mutants-cngzowsw/tree/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-adjudication-reviewer-mutants-cngzowsw/tree/crates/spark-testkit)
+   Compiling reviewer-decay-probes v0.0.0 (/tmp/spark-c2-adjudication-reviewer-mutants-cngzowsw/probe)
+    Finished `test` profile [unoptimized] target(s) in 9.12s
+     Running unittests src/lib.rs (target/debug/deps/reviewer_decay_probes-f65bf42a71dcd508)
+
+running 1 test
+
+thread 'r01_recovery_reapplication_and_timestamp' (1579) panicked at src/lib.rs:38:9:
+assertion `left == right` failed
+  left: (-19, LogicalTime(2))
+ right: (-19, LogicalTime(1))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test r01_recovery_reapplication_and_timestamp ... FAILED
+
+failures:
+
+failures:
+    r01_recovery_reapplication_and_timestamp
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--lib`

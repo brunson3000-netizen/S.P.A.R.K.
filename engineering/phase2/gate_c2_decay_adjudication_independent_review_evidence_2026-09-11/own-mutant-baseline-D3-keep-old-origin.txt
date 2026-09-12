@@ -1,0 +1,15 @@
+# tree: 544c5f6f99d8dabf9855f8ac68f5666286aa9741
+$ cargo test --offline -- --exact own_d3_d4_d5_barrier_endpoint_residual_and_unchanged --nocapture
+    Finished `test` profile [unoptimized] target(s) in 0.03s
+     Running unittests src/lib.rs (target/debug/deps/reviewer_decay_probes-c217548d9dba31b8)
+
+running 1 test
+test own_d3_d4_d5_barrier_endpoint_residual_and_unchanged ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.11s
+
+   Doc-tests reviewer_decay_probes
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

@@ -1,0 +1,12 @@
+# source:
+pub fn probe() { let _ = spark_engine::request::FinalizationRefusal::SourceSequenceNotIncreasing { source_id: spark_core::id::SourceId::new("source.one").unwrap(), previously_finalized: 2, attempted: 1 }; }
+$ cargo check --offline
+    Checking independent-surfaces v0.0.0 (/tmp/spark-c2-independent-surfaces-f0qn4rjc)
+error[E0639]: cannot create non-exhaustive variant using struct expression
+ --> src/lib.rs:1:26
+  |
+1 | ... = spark_engine::request::FinalizationRefusal::SourceSequenceNotIncreasing { source_id: spark_core::id::SourceId::new("source.one").unwrap(), previously_finalized: 2, attempted: 1 }; }
+  |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0639`.
+error: could not compile `independent-surfaces` (lib) due to 1 previous error

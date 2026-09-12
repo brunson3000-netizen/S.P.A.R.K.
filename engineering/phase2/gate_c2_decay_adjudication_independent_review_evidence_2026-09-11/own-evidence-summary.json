@@ -1,0 +1,9 @@
+{
+  "candidate": "544c5f6f99d8dabf9855f8ac68f5666286aa9741",
+  "own_probes": 9,
+  "own_mutants_compiled_and_killed": 9,
+  "own_positive_baselines": 9,
+  "own_probe_sha256": "4a4514197b9aea7f71edfda7a5669d62d37dd8ea4ada8b11f07a5fb9b8219989",
+  "historical_engineering_files_unchanged": 448,
+  "writer_checksum_manifest_valid": true
+}

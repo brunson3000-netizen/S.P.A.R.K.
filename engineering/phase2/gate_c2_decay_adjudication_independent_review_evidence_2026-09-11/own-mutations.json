@@ -1,0 +1,146 @@
+{
+  "tree": "544c5f6f99d8dabf9855f8ac68f5666286aa9741",
+  "probe_source": "engineering/phase2/gate_c2_decay_adjudication_independent_review_evidence_2026-09-11/own_probes.rs",
+  "baseline": [
+    {
+      "name": "own_d1_d2_unaligned_write_and_partition",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "name": "own_d2_body_and_command_shock",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "name": "own_d3_d4_d5_barrier_endpoint_residual_and_unchanged",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "name": "own_d3_d4_d5_barrier_endpoint_residual_and_unchanged",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "name": "own_d3_d4_d5_barrier_endpoint_residual_and_unchanged",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "name": "own_d3_d4_d5_barrier_endpoint_residual_and_unchanged",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "name": "own_d6_d7_nonzero_baseline_saturation_and_zero",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "name": "own_d6_d7_nonzero_baseline_saturation_and_zero",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    },
+    {
+      "name": "own_open_same_time_activations",
+      "exit_code": 0,
+      "compiled": true,
+      "passed": true,
+      "assertion_failure": false
+    }
+  ],
+  "mutants": [
+    {
+      "id": "D1-double-anchor-endpoint",
+      "name": "own_d1_d2_unaligned_write_and_partition",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    },
+    {
+      "id": "D2-body-rephases",
+      "name": "own_d2_body_and_command_shock",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    },
+    {
+      "id": "D3-ignore-cadence-only-change",
+      "name": "own_d3_d4_d5_barrier_endpoint_residual_and_unchanged",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    },
+    {
+      "id": "D3-keep-old-origin",
+      "name": "own_d3_d4_d5_barrier_endpoint_residual_and_unchanged",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    },
+    {
+      "id": "D4-exclude-old-endpoint",
+      "name": "own_d3_d4_d5_barrier_endpoint_residual_and_unchanged",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    },
+    {
+      "id": "D5-charge-prebarrier",
+      "name": "own_d3_d4_d5_barrier_endpoint_residual_and_unchanged",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    },
+    {
+      "id": "D6-next-tick",
+      "name": "own_d6_d7_nonzero_baseline_saturation_and_zero",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    },
+    {
+      "id": "D7-overshoot-baseline",
+      "name": "own_d6_d7_nonzero_baseline_saturation_and_zero",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    },
+    {
+      "id": "open-skip-zero-length-epoch",
+      "name": "own_open_same_time_activations",
+      "exit_code": 101,
+      "compiled": true,
+      "passed": false,
+      "assertion_failure": true
+    }
+  ],
+  "probe_sha256": "4a4514197b9aea7f71edfda7a5669d62d37dd8ea4ada8b11f07a5fb9b8219989",
+  "baseline_all_pass": true,
+  "all_killed": true
+}

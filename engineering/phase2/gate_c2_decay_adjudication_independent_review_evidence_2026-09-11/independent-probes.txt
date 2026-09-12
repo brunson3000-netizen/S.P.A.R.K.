@@ -1,0 +1,54 @@
+# source: independent_probes.rs sha256=2d7cba1a6a32508d0def1ec32644dfd1c001a2ade7a6b6e4375102a0d8c6ac69
+# crate root: /tmp/spark-gate-c2-adjudication-review
+# spark-engine test-support: True
+# whitespace-normalized: trailing spaces and trailing blank lines removed
+$ cargo test --offline -- --nocapture --test-threads=1
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.11
+   Compiling cc v1.4.4
+   Compiling cfg-if v1.0.4
+   Compiling arrayvec v0.7.8
+   Compiling constant_time_eq v0.4.2
+   Compiling cpufeatures v0.3.0
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-gate-c2-adjudication-review/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-gate-c2-adjudication-review/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-gate-c2-adjudication-review/crates/spark-testkit)
+   Compiling spark-c2-counterexamples v0.0.0 (/tmp/spark-c2-adjudication-corpus-ueorm3ui)
+    Finished `test` profile [unoptimized] target(s) in 21.37s
+     Running unittests src/lib.rs (target/debug/deps/spark_c2_counterexamples-1aae2f2f0d179655)
+
+running 9 tests
+test r01_recovery_reapplication_and_timestamp ... ok
+test r02_activation_endpoint_is_owned_by_closing_segment ... ok
+test r02_residual_is_unbilled_observation ... residual sign=-1: (-91, LogicalTime(24))
+residual sign=1: (91, LogicalTime(24))
+ok
+test r03_saturated_recovery_partitions ... ok
+test r03_unmoved_writes_fire_watchers_and_reject_shocks ... ok
+test r04_per_wave_store_and_index_discriminator ... ok
+test r2prime_frozen_q7_full_cadence_after_fresh_assignment ...
+thread 'r2prime_frozen_q7_full_cadence_after_fresh_assignment' (1052) panicked at src/lib.rs:165:5:
+assertion `left == right` failed: v1 Q7: no whole cadence has elapsed since updated_at=9
+  left: (90, LogicalTime(10))
+ right: (100, LogicalTime(10))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+test r2prime_frozen_q7_full_cadence_after_separate_shock ...
+thread 'r2prime_frozen_q7_full_cadence_after_separate_shock' (1053) panicked at src/lib.rs:173:5:
+assertion `left == right` failed: v2 4.3 retains Q7: nine units after the shock is not a whole cadence
+  left: (65, LogicalTime(40))
+ right: (75, LogicalTime(40))
+FAILED
+test r2prime_grid_behavior_is_observable_after_non_decay_write ... one logical tick after assignment: (90, LogicalTime(10))
+ok
+
+failures:
+
+failures:
+    r2prime_frozen_q7_full_cadence_after_fresh_assignment
+    r2prime_frozen_q7_full_cadence_after_separate_shock
+
+test result: FAILED. 7 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.46s
+
+error: test failed, to rerun pass `--lib`

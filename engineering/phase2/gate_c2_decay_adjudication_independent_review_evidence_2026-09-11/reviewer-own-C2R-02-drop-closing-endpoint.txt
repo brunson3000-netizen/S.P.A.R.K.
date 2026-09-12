@@ -1,0 +1,25 @@
+# tree: 544c5f6f99d8dabf9855f8ac68f5666286aa9741
+$ cargo test --offline -- --exact r02_activation_endpoint_is_owned_by_closing_segment --nocapture
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-adjudication-reviewer-mutants-cngzowsw/tree/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-adjudication-reviewer-mutants-cngzowsw/tree/crates/spark-testkit)
+   Compiling reviewer-decay-probes v0.0.0 (/tmp/spark-c2-adjudication-reviewer-mutants-cngzowsw/probe)
+    Finished `test` profile [unoptimized] target(s) in 6.15s
+     Running unittests src/lib.rs (target/debug/deps/reviewer_decay_probes-f65bf42a71dcd508)
+
+running 1 test
+
+thread 'r02_activation_endpoint_is_owned_by_closing_segment' (1648) panicked at src/lib.rs:75:9:
+assertion `left == right` failed
+  left: (-91, LogicalTime(25))
+ right: (-89, LogicalTime(25))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test r02_activation_endpoint_is_owned_by_closing_segment ... FAILED
+
+failures:
+
+failures:
+    r02_activation_endpoint_is_owned_by_closing_segment
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--lib`

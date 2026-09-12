@@ -1,0 +1,27 @@
+# tree: 544c5f6f99d8dabf9855f8ac68f5666286aa9741
+$ cargo test --offline -- --exact own_d1_d2_unaligned_write_and_partition --nocapture
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling cc v1.4.4
+   Compiling constant_time_eq v0.4.2
+   Compiling cpufeatures v0.3.0
+   Compiling arrayvec v0.7.8
+   Compiling cfg-if v1.0.4
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-c2-adjudication-reviewer-mutants-knhod9wl/tree/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-adjudication-reviewer-mutants-knhod9wl/tree/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-adjudication-reviewer-mutants-knhod9wl/tree/crates/spark-testkit)
+   Compiling reviewer-decay-probes v0.0.0 (/tmp/spark-c2-adjudication-reviewer-mutants-knhod9wl/probe)
+    Finished `test` profile [unoptimized] target(s) in 17.14s
+     Running unittests src/lib.rs (target/debug/deps/reviewer_decay_probes-c217548d9dba31b8)
+
+running 1 test
+test own_d1_d2_unaligned_write_and_partition ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.09s
+
+   Doc-tests reviewer_decay_probes
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
