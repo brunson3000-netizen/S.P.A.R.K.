@@ -1030,7 +1030,30 @@ impl EvalView<'_> {
         // Q1, C2-04). A body commits at the cohort's canonical time like every
         // effect; a decay stage counts the same fixed grid, so the body's
         // non-decay stages never re-phase the cadence (adjudication D-2).
-        let mut v = i128::from(current.unwrap_or(0));
+        //
+        // A body that performs an **additive change** and declares no
+        // debt-consuming `Decay` stage is an additive event, so its starting
+        // value is settled to the cohort's canonical time before the declared
+        // stages fold (C2W-01; the Operator's 2026-09-12 resolution, behavior
+        // 1). A body that *does* declare a decay stage is not settled here:
+        // that stage walks the same grid from the cell's own `updated_at`, so
+        // prepending settlement would charge its endpoints twice. A body of
+        // transform stages alone contains no additive event and settles
+        // nothing, which is the retained standalone `Scale`/`Clamp` boundary.
+        // Settlement applies to the starting value only, so a declared
+        // `Assign` or `Aggregate` stage still overwrites it and an explicit
+        // replacement is never reduced by earlier decay.
+        let declares_decay = ops.iter().any(|o| matches!(o.update, Update::Decay { .. }));
+        let is_additive_composition = !declares_decay
+            && ops
+                .iter()
+                .any(|o| matches!(o.update, Update::Add(_) | Update::Subtract(_)));
+        let start = if is_additive_composition {
+            self.settled(target, scope, ctx.now)?
+        } else {
+            current
+        };
+        let mut v = i128::from(start.unwrap_or(0));
         for o in ops {
             v = match &o.update {
                 Update::Add(x) => v
