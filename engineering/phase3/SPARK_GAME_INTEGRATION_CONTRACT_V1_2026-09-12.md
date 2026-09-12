@@ -582,6 +582,12 @@ All fail closed, with a typed refusal and no partial effect:
 | Oversized outbound batch | delivered whole with `capacity_exceeded` set; never truncated (§9.1) |
 | Engine-internal invariant violation | sticky fail-stop; no snapshot published; the only exit is restoring a prior snapshot |
 
+**A refused command does not void the boundary's committed work.** When a horizon completes
+but the command itself is not finalized, cohorts committed inside that boundary are real
+committed work: they are published as an ordinary batch, with the typed engine refusal
+carried alongside rather than flattened into a boolean or discarded with the batch. Only the
+two sticky fail-stops publish nothing, because they publish no stable boundary at all.
+
 **Two-level reporting is part of the contract, not an accident.** A request can complete
 (`Outcome::Completed`) while a cohort inside it was rejected. Both levels must be read: the
 request level says the boundary was processed, the cohort level says what was refused and
