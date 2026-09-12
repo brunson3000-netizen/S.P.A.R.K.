@@ -403,10 +403,19 @@ Produced on `candidate/spark-game-safe-handoff-20260912`:
 - `engineering/phase3/handoff_independent_review_2026-09-12/` and
   `engineering/phase3/SPARK_GAME_HANDOFF_REVIEW_RESPONSE_2026-09-12.md` — a fresh independent
   adversarial review of the handoff artifacts (verdict
-  `HANDOFF_REVIEW_BOUNDED_REVISION_REQUIRED`; 0 blockers, 1 major, 6 minor, 4 notes) and the
-  writer's disposition of every finding. The major finding — a diagnostic that proved
-  reproducibility while claiming to prove idempotence — is corrected and the failure is
-  recorded rather than quietly replaced.
+  `HANDOFF_REVIEW_BOUNDED_REVISION_REQUIRED`; 0 blockers, 1 major, 6 minor, 4 notes), the
+  repair verification (`HANDOFF_REPAIRS_INCOMPLETE`; 10 of 11 fixed, 2 new findings), the final
+  confirmation (**`HANDOFF_REPAIRS_VERIFIED` — nothing stands**), and the writer's disposition
+  of every finding. Three failures are recorded in place rather than absorbed: a self-found
+  blocking prototype defect that dropped intents committed before a pause, a diagnostic that
+  proved reproducibility while claiming to prove idempotence, and a correction the writer
+  reported as made that had not been applied.
+- `engineering/phase3/SPARK_GAME_SAFE_HANDOFF_RECORD_2026-09-12.md` — the execution-ready
+  handoff: both repositories' exact commits, artifact hashes, build and invoke instructions,
+  the end-to-end example, the failure/recovery table, a requirements-to-evidence inventory,
+  retained limits and the pending decisions. The compatible G.A.M.E.-side record is on
+  `candidate/spark-convergence-record-20260912` at `ab0ec60a45b59b9fcff0a61997acd07a04d33587`,
+  **not merged to G.A.M.E. `main`**.
 
 Blocked until Gate C2 acceptance: freezing the contract (Gate C3), implementing the
 production device surface, implementing the G.A.M.E. adapter (Gate C4), and building the
