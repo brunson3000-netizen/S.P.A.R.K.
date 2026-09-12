@@ -1,0 +1,295 @@
+{
+  "tree": "cc3dc70182b428f7cbc953ae722f85b39d407dfa",
+  "controls": [
+    {
+      "id": "RES-lost-debt",
+      "test": "own_additive_and_replacement",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "-p",
+        "spark-testkit",
+        "--all-features",
+        "--test",
+        "reviewer_own",
+        "--",
+        "--exact",
+        "own_additive_and_replacement",
+        "--nocapture"
+      ],
+      "patches": [
+        [
+          "crates/spark-engine/src/engine.rs",
+          "        let reduced = reduce(&canonical, &|d, s| settled.get(&(d, s)).copied())?;",
+          "        let _ = &settled;\n        let reduced = reduce(&canonical, &|d, s| view.cell(d, s))?;"
+        ]
+      ],
+      "baseline_exit": 0,
+      "mutant_exit": 101,
+      "baseline_pass": true,
+      "killed": true
+    },
+    {
+      "id": "RES-decay-reduces-replacement",
+      "test": "own_additive_and_replacement",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "-p",
+        "spark-testkit",
+        "--all-features",
+        "--test",
+        "reviewer_own",
+        "--",
+        "--exact",
+        "own_additive_and_replacement",
+        "--nocapture"
+      ],
+      "patches": [
+        [
+          "crates/spark-engine/src/effects.rs",
+          "                    if values.len() == 1 {\n                        *value",
+          "                    if values.len() == 1 {\n                        (*value).min(pre(&definition, &scope).unwrap_or(*value))"
+        ]
+      ],
+      "baseline_exit": 0,
+      "mutant_exit": 101,
+      "baseline_pass": true,
+      "killed": true
+    },
+    {
+      "id": "RES-current-epoch-only",
+      "test": "own_removed_and_barrier",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "-p",
+        "spark-testkit",
+        "--all-features",
+        "--test",
+        "reviewer_own",
+        "--",
+        "--exact",
+        "own_removed_and_barrier",
+        "--nocapture"
+      ],
+      "patches": [
+        [
+          "crates/spark-engine/src/engine.rs",
+          "        self.lineage\n            .iter()\n            .rev()\n            .find_map(|e| e.rule_set.decay_operation(target))",
+          "        self.rule_set.decay_operation(target)"
+        ]
+      ],
+      "baseline_exit": 0,
+      "mutant_exit": 101,
+      "baseline_pass": true,
+      "killed": true
+    },
+    {
+      "id": "C2R-02-reset-every-activation",
+      "test": "own_same_time_and_absent",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "-p",
+        "spark-testkit",
+        "--all-features",
+        "--test",
+        "reviewer_own",
+        "--",
+        "--exact",
+        "own_same_time_and_absent",
+        "--nocapture"
+      ],
+      "patches": [
+        [
+          "crates/spark-engine/src/engine.rs",
+          "if (rate, cadence) == (r, c) => {\n                    Some((rate, cadence, origin))",
+          "if (rate, cadence) == (r, c) => {\n                    let _ = origin;\n                    Some((rate, cadence, begin))"
+        ]
+      ],
+      "baseline_exit": 0,
+      "mutant_exit": 101,
+      "baseline_pass": true,
+      "killed": true
+    },
+    {
+      "id": "RES-watcher-sees-settled-intermediate",
+      "test": "own_watchers_and_atomic_refusal",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "-p",
+        "spark-testkit",
+        "--all-features",
+        "--test",
+        "reviewer_own",
+        "--",
+        "--exact",
+        "own_watchers_and_atomic_refusal",
+        "--nocapture"
+      ],
+      "patches": [
+        [
+          "crates/spark-engine/src/engine.rs",
+          "                        let old = view.cell(&r.definition, &r.scope).unwrap_or(0);",
+          "                        let old = settled.get(&(&r.definition, &r.scope)).copied().unwrap_or(0);"
+        ]
+      ],
+      "baseline_exit": 0,
+      "mutant_exit": 101,
+      "baseline_pass": true,
+      "killed": true
+    },
+    {
+      "id": "RES-settle-composed-body",
+      "test": "own_explicit_decay_body_once",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "-p",
+        "spark-testkit",
+        "--all-features",
+        "--test",
+        "reviewer_own",
+        "--",
+        "--exact",
+        "own_explicit_decay_body_once",
+        "--nocapture"
+      ],
+      "patches": [
+        [
+          "crates/spark-engine/src/engine.rs",
+          "        let mut v = i128::from(current.unwrap_or(0));",
+          "        let mut v = i128::from(self.settled(target, scope, ctx.now)?.unwrap_or(0));"
+        ]
+      ],
+      "baseline_exit": 0,
+      "mutant_exit": 101,
+      "baseline_pass": true,
+      "killed": true
+    },
+    {
+      "id": "RES-settle-scale",
+      "test": "own_scale_clamp_observed_boundary",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "-p",
+        "spark-testkit",
+        "--all-features",
+        "--test",
+        "reviewer_own",
+        "--",
+        "--exact",
+        "own_scale_clamp_observed_boundary",
+        "--nocapture"
+      ],
+      "patches": [
+        [
+          "crates/spark-engine/src/engine.rs",
+          "                    resolved: scale(current.unwrap_or(0), f.raw())?,",
+          "                    resolved: scale(self.settled(target, scope, ctx.now)?.unwrap_or(0), f.raw())?,"
+        ]
+      ],
+      "baseline_exit": 0,
+      "mutant_exit": 101,
+      "baseline_pass": true,
+      "killed": true
+    },
+    {
+      "id": "OWN-clamp-settled",
+      "test": "own_scale_clamp_observed_boundary",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "-p",
+        "spark-testkit",
+        "--all-features",
+        "--test",
+        "reviewer_own",
+        "--",
+        "--exact",
+        "own_scale_clamp_observed_boundary",
+        "--nocapture"
+      ],
+      "patches": [
+        [
+          "crates/spark-engine/src/engine.rs",
+          "resolved: current.unwrap_or(0).max(*min).min(*max),",
+          "resolved: self.settled(target, scope, ctx.now)?.unwrap_or(0).max(*min).min(*max),"
+        ]
+      ],
+      "baseline_exit": 0,
+      "mutant_exit": 101,
+      "baseline_pass": true,
+      "killed": true
+    },
+    {
+      "id": "OWN-absent-decay-creates",
+      "test": "own_same_time_and_absent",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "-p",
+        "spark-testkit",
+        "--all-features",
+        "--test",
+        "reviewer_own",
+        "--",
+        "--exact",
+        "own_same_time_and_absent",
+        "--nocapture"
+      ],
+      "patches": [
+        [
+          "crates/spark-engine/src/engine.rs",
+          "let (Some(cell), Some(value)) = (cell, current) else {\n                        return Ok(None);",
+          "let (Some(cell), Some(value)) = (cell, current) else {\n                        return Ok(Some(Intent::AddDelta(0)));"
+        ]
+      ],
+      "baseline_exit": 0,
+      "mutant_exit": 101,
+      "baseline_pass": true,
+      "killed": true
+    },
+    {
+      "id": "OWN-refusal-bills-endpoint",
+      "test": "own_watchers_and_atomic_refusal",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "-p",
+        "spark-testkit",
+        "--all-features",
+        "--test",
+        "reviewer_own",
+        "--",
+        "--exact",
+        "own_watchers_and_atomic_refusal",
+        "--nocapture"
+      ],
+      "patches": [
+        [
+          "crates/spark-engine/src/engine.rs",
+          "if let Some(v) = view.settled(&c.definition, &c.scope, now)? {",
+          "if let Some(v) = view.settled(&c.definition, &c.scope, LogicalTime(now.0.saturating_add(10)))? {"
+        ]
+      ],
+      "baseline_exit": 0,
+      "mutant_exit": 101,
+      "baseline_pass": true,
+      "killed": true
+    }
+  ]
+}

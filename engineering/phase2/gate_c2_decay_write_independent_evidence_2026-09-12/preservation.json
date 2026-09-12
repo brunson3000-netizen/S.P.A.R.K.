@@ -1,0 +1,78 @@
+{
+  "byte_identical_to_production": {
+    "crates/spark-core/tests/timeline_admission.rs": true,
+    "crates/spark-testkit/tests/external_compile_probes.rs": true,
+    "crates/spark-testkit/tests/final_closure.rs": true,
+    "crates/spark-testkit/tests/final_digest_correction.rs": true,
+    "crates/spark-testkit/tests/refoundation_adversarial.rs": true,
+    "crates/spark-testkit/tests/refoundation_v2_adversarial.rs": true,
+    "crates/spark-testkit/tests/workspace_dependency_direction.rs": true,
+    "Cargo.toml": true,
+    "Cargo.lock": true,
+    "crates/spark-core/Cargo.toml": true,
+    "crates/spark-engine/Cargo.toml": true,
+    "crates/spark-testkit/Cargo.toml": true
+  },
+  "inline_test_modules_identical": {
+    "crates/spark-core/src/authority.rs": true,
+    "crates/spark-core/src/clock.rs": true,
+    "crates/spark-core/src/hash.rs": true,
+    "crates/spark-core/src/id.rs": true,
+    "crates/spark-core/src/random.rs": true,
+    "crates/spark-core/src/scheduler.rs": true,
+    "crates/spark-core/src/scope.rs": true,
+    "crates/spark-core/src/timeline.rs": true,
+    "crates/spark-core/src/value.rs": true,
+    "crates/spark-engine/src/activation.rs": true,
+    "crates/spark-engine/src/profile/config.rs": true,
+    "crates/spark-engine/src/profile/definition.rs": true,
+    "crates/spark-engine/src/profile/manifest.rs": true,
+    "crates/spark-engine/src/profile/text.rs": true,
+    "crates/spark-engine/src/state.rs": true,
+    "crates/spark-testkit/src/composition.rs": true,
+    "crates/spark-testkit/src/scenario.rs": true
+  },
+  "protected_functions_identical": {
+    "crates/spark-core/src/scheduler.rs::pub fn schedule(&mut self (vs 7e3a0aa)": true,
+    "crates/spark-core/src/scheduler.rs::pub fn drain_due( (vs 7e3a0aa)": true,
+    "crates/spark-core/src/timeline.rs::pub fn stage( (vs 7e3a0aa)": true,
+    "crates/spark-core/src/timeline.rs::pub fn submit_fence( (vs 7e3a0aa)": true,
+    "crates/spark-core/src/timeline.rs::pub fn derived_indexes_consistent( (vs a3227eb)": true,
+    "crates/spark-engine/src/engine.rs::fn decay_walk( (vs a3227eb)": true,
+    "crates/spark-engine/src/engine.rs::fn baseline_of( (vs a3227eb)": true
+  },
+  "spark_core_changed_vs_base": [],
+  "crate_changes_vs_base": [
+    "M\tcrates/spark-engine/src/engine.rs",
+    "M\tcrates/spark-engine/src/rules.rs",
+    "M\tcrates/spark-testkit/tests/phase2_decay_adjudication.rs",
+    "A\tcrates/spark-testkit/tests/phase2_decay_write_resolution.rs"
+  ],
+  "production_diff_numstat": [
+    "85\t1\tcrates/spark-engine/src/engine.rs",
+    "19\t0\tcrates/spark-engine/src/rules.rs"
+  ],
+  "production_removed_lines": [
+    "        let reduced = reduce(&canonical, &|d, s| view.cell(d, s))?;"
+  ],
+  "first_commit_after_checkpoint": "ddee0a28f846160b958a392505c4f0076b341f72",
+  "first_commit_parent_is_checkpoint": true,
+  "first_commit_files": [
+    "A\tengineering/phase2/SPARK_PHASE_2_GATE_C2_DECAY_WRITE_IMPLEMENTATION_CONTRACT_2026-09-12.md"
+  ],
+  "contract_unchanged_since_first_commit": true,
+  "immutable_records_unchanged": {
+    "engineering/phase2/SPARK_GATE_C2_DECAY_WRITE_RESOLUTION_MISSION_2026-09-12.md": true,
+    "engineering/phase2/SPARK_PHASE_2_GATE_C2_DECAY_OPERATOR_ADJUDICATION_2026-09-11.md": true
+  },
+  "engineering_non_additions": [],
+  "preexisting_engineering_files": 627,
+  "ancestor_7e3a0aa": true,
+  "ancestor_544c5f6": true,
+  "ancestor_e00f248": true,
+  "ancestor_a3227eb": true,
+  "worktrees": [
+    "/tmp/spark-c2-independent-review-20260912  cc3dc70 (detached HEAD)"
+  ],
+  "failures": []
+}

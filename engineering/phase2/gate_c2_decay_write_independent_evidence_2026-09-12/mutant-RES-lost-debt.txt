@@ -1,0 +1,219 @@
+# mutant RES-lost-debt: the superseded reading: an additive write folds its delta onto the raw committed value, forfeiting every grid step that ended before it
+# tree: cc3dc70182b428f7cbc953ae722f85b39d407dfa
+
+$ kills phase2_decay_write_resolution::an_additive_write_settles_overdue_decay_before_applying_its_delta
+
+running 1 test
+test an_additive_write_settles_overdue_decay_before_applying_its_delta ... FAILED
+
+failures:
+
+---- an_additive_write_settles_overdue_decay_before_applying_its_delta stdout ----
+
+thread 'an_additive_write_settles_overdue_decay_before_applying_its_delta' (4413) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:320:9:
+assertion `left == right` failed
+  left: Some((105, 15))
+ right: Some((95, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    an_additive_write_settles_overdue_decay_before_applying_its_delta
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.11
+   Compiling cc v1.4.4
+   Compiling cpufeatures v0.3.0
+   Compiling cfg-if v1.0.4
+   Compiling constant_time_eq v0.4.2
+   Compiling arrayvec v0.7.8
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/RES-lost-debt/crates/spark-core)
+   Compiling itoa v1.0.18
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/RES-lost-debt/crates/spark-engine)
+   Compiling memchr v2.8.3
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/RES-lost-debt/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 7.86s
+     Running tests/phase2_decay_write_resolution.rs (target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`
+
+$ kills phase2_decay_write_resolution::additive_settlement_kills_the_former_lost_debt_reading
+
+running 1 test
+test additive_settlement_kills_the_former_lost_debt_reading ... FAILED
+
+failures:
+
+---- additive_settlement_kills_the_former_lost_debt_reading stdout ----
+
+thread 'additive_settlement_kills_the_former_lost_debt_reading' (4422) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:400:5:
+assertion `left != right` failed: superseded lost-debt reading
+  left: Some((105, 15))
+ right: Some((105, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    additive_settlement_kills_the_former_lost_debt_reading
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_write_resolution.rs (target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`
+
+$ kills phase2_decay_write_resolution::settlement_counts_exactly_the_grid_points_that_have_ended
+
+running 1 test
+test settlement_counts_exactly_the_grid_points_that_have_ended ... FAILED
+
+failures:
+
+---- settlement_counts_exactly_the_grid_points_that_have_ended stdout ----
+
+thread 'settlement_counts_exactly_the_grid_points_that_have_ended' (4431) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:320:9:
+assertion `left == right` failed
+  left: Some((105, 20))
+ right: Some((85, 20))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    settlement_counts_exactly_the_grid_points_that_have_ended
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.02s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_write_resolution.rs (target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`
+
+$ kills phase2_decay_write_resolution::repeated_and_co_firing_additions_never_charge_a_grid_point_twice
+
+running 1 test
+test repeated_and_co_firing_additions_never_charge_a_grid_point_twice ... FAILED
+
+failures:
+
+---- repeated_and_co_firing_additions_never_charge_a_grid_point_twice stdout ----
+
+thread 'repeated_and_co_firing_additions_never_charge_a_grid_point_twice' (4440) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:320:9:
+assertion `left == right` failed
+  left: Some((105, 15))
+ right: Some((95, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    repeated_and_co_firing_additions_never_charge_a_grid_point_twice
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_write_resolution.rs (target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`
+
+$ kills phase2_decay_write_resolution::settlement_saturates_at_the_baseline_and_is_inert_at_rate_zero
+
+running 1 test
+test settlement_saturates_at_the_baseline_and_is_inert_at_rate_zero ... FAILED
+
+failures:
+
+---- settlement_saturates_at_the_baseline_and_is_inert_at_rate_zero stdout ----
+
+thread 'settlement_saturates_at_the_baseline_and_is_inert_at_rate_zero' (4449) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:320:9:
+assertion `left == right` failed
+  left: Some((21, 20))
+ right: Some((14, 20))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    settlement_saturates_at_the_baseline_and_is_inert_at_rate_zero
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_write_resolution.rs (target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`
+
+$ kills phase2_decay_write_resolution::removal_suspends_accrual_and_restoration_starts_a_fresh_grid
+
+running 1 test
+test removal_suspends_accrual_and_restoration_starts_a_fresh_grid ... FAILED
+
+failures:
+
+---- removal_suspends_accrual_and_restoration_starts_a_fresh_grid stdout ----
+
+thread 'removal_suspends_accrual_and_restoration_starts_a_fresh_grid' (4458) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:320:9:
+assertion `left == right` failed
+  left: Some((105, 20))
+ right: Some((99, 20))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    removal_suspends_accrual_and_restoration_starts_a_fresh_grid
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.02s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_write_resolution.rs (target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`
+
+$ kills phase2_decay_write_resolution::settlement_bills_the_barrier_endpoint_once_at_the_old_rate
+
+running 1 test
+test settlement_bills_the_barrier_endpoint_once_at_the_old_rate ... FAILED
+
+failures:
+
+---- settlement_bills_the_barrier_endpoint_once_at_the_old_rate stdout ----
+
+thread 'settlement_bills_the_barrier_endpoint_once_at_the_old_rate' (4467) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:320:9:
+assertion `left == right` failed
+  left: Some((105, 12))
+ right: Some((99, 12))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    settlement_bills_the_barrier_endpoint_once_at_the_old_rate
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized] target(s) in 0.02s
+     Running tests/phase2_decay_write_resolution.rs (target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`
+
+$ kills phase2_decay_adjudication::d_generated_timelines_with_writes_match_the_reference_model
+
+running 1 test
+test d_generated_timelines_with_writes_match_the_reference_model ... FAILED
+
+failures:
+
+---- d_generated_timelines_with_writes_match_the_reference_model stdout ----
+
+thread 'd_generated_timelines_with_writes_match_the_reference_model' (4499) panicked at crates/spark-testkit/tests/phase2_decay_adjudication.rs:871:9:
+assertion `left == right` failed: timeline 26: Timeline { genesis: (11, 13), commands: [(7, Assign(57)), (54, Shock(10)), (85, Activate(4, 13))], evals: [4, 6, 12, 13, 19, 25, 26, 31, 35, 38, 49, 56, 58, 62, 66, 67, 70, 71, 80, 88, 89, 91, 100], kicks: [], kick: 0 }
+  left: [None, None, Some((57, LogicalTime(12))), Some((46, LogicalTime(13))), Some((46, LogicalTime(19))), Some((46, LogicalTime(25))), Some((35, LogicalTime(26))), Some((35, LogicalTime(31))), Some((35, LogicalTime(35))), Some((35, LogicalTime(38))), Some((24, LogicalTime(49))), Some((34, LogicalTime(56))), Some((34, LogicalTime(58))), Some((34, LogicalTime(62))), Some((23, LogicalTime(66))), Some((23, LogicalTime(67))), Some((23, LogicalTime(70))), Some((23, LogicalTime(71))), Some((12, LogicalTime(80))), Some((12, LogicalTime(88))), Some((12, LogicalTime(89))), Some((12, LogicalTime(91))), Some((8, LogicalTime(100)))]
+ right: [None, None, Some((57, LogicalTime(12))), Some((46, LogicalTime(13))), Some((46, LogicalTime(19))), Some((46, LogicalTime(25))), Some((35, LogicalTime(26))), Some((35, LogicalTime(31))), Some((35, LogicalTime(35))), Some((35, LogicalTime(38))), Some((24, LogicalTime(49))), Some((23, LogicalTime(56))), Some((23, LogicalTime(58))), Some((23, LogicalTime(62))), Some((12, LogicalTime(66))), Some((12, LogicalTime(67))), Some((12, LogicalTime(70))), Some((12, LogicalTime(71))), Some((1, LogicalTime(80))), Some((1, LogicalTime(88))), Some((1, LogicalTime(89))), Some((1, LogicalTime(91))), Some((0, LogicalTime(100)))]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    d_generated_timelines_with_writes_match_the_reference_model
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.79s
+
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/RES-lost-debt/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 0.48s
+     Running tests/phase2_decay_adjudication.rs (target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_adjudication`

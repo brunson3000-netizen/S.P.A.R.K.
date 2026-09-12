@@ -1,0 +1,38 @@
+# source: own_probes_resolution_adapted.rs sha256=514457a191ff8e66c52b6c0717de284957df2768ddb70bf0d6403bc9444a5b59
+# crate root: /tmp/spark-c2-independent-review-20260912
+# spark-engine test-support: True
+# whitespace-normalized: trailing spaces and trailing blank lines removed
+$ cargo test --offline -- --nocapture --test-threads=1
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling cc v1.4.4
+   Compiling cpufeatures v0.3.0
+   Compiling arrayvec v0.7.8
+   Compiling constant_time_eq v0.4.2
+   Compiling cfg-if v1.0.4
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-c2-independent-review-20260912/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-independent-review-20260912/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-independent-review-20260912/crates/spark-testkit)
+   Compiling spark-c2-counterexamples v0.0.0 (/tmp/spark-c2-resolution-corpus-wycg6z6i)
+    Finished `test` profile [unoptimized] target(s) in 18.24s
+     Running unittests src/lib.rs (target/debug/deps/spark_c2_counterexamples-bf843a7d0285f71d)
+
+running 9 tests
+test own_d1_d2_unaligned_write_and_partition ... ok
+test own_d2_body_and_command_shock ... ok
+test own_d3_d4_d5_barrier_endpoint_residual_and_unchanged ... ok
+test own_d4_scheduled_at_barrier_and_later_command ... ok
+test own_d6_d7_nonzero_baseline_saturation_and_zero ... ok
+test own_open_absent_cell_no_write ... ok
+test own_open_lost_prewrite_step ... ok
+test own_open_remove_restore ... ok
+test own_open_same_time_activations ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.96s
+
+   Doc-tests spark_c2_counterexamples
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

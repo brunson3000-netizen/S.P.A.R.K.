@@ -1,0 +1,144 @@
+# mutant C2R-02-absolute-grid: one grid from logical time 0 for every segment: a new rate/cadence step may contain pre-barrier time
+# tree: cc3dc70182b428f7cbc953ae722f85b39d407dfa
+
+$ kills phase2_decay_oracle_revision::c2r_02_lengthened_cadence_and_residual_interval
+
+running 1 test
+test c2r_02_lengthened_cadence_and_residual_interval ... FAILED
+
+failures:
+
+---- c2r_02_lengthened_cadence_and_residual_interval stdout ----
+
+thread 'c2r_02_lengthened_cadence_and_residual_interval' (1760) panicked at crates/spark-testkit/tests/phase2_decay_oracle_revision.rs:479:13:
+assertion `left == right` failed: 1 [150]
+  left: (90, LogicalTime(150))
+ right: (95, LogicalTime(150))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c2r_02_lengthened_cadence_and_residual_interval
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s
+
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling cc v1.4.4
+   Compiling cpufeatures v0.3.0
+   Compiling cfg-if v1.0.4
+   Compiling arrayvec v0.7.8
+   Compiling constant_time_eq v0.4.2
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/C2R-02-absolute-grid/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/C2R-02-absolute-grid/crates/spark-engine)
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/C2R-02-absolute-grid/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 18.80s
+     Running tests/phase2_decay_oracle_revision.rs (target/debug/deps/phase2_decay_oracle_revision-000401f3a8d7e51d)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_oracle_revision`
+
+$ kills phase2_decay_oracle_revision::c2r_02_rate_only_change_at_an_unaligned_barrier
+
+running 1 test
+test c2r_02_rate_only_change_at_an_unaligned_barrier ... FAILED
+
+failures:
+
+---- c2r_02_rate_only_change_at_an_unaligned_barrier stdout ----
+
+thread 'c2r_02_rate_only_change_at_an_unaligned_barrier' (1769) panicked at crates/spark-testkit/tests/phase2_decay_oracle_revision.rs:510:9:
+assertion `left == right` failed
+  left: (-90, LogicalTime(60))
+ right: (-95, LogicalTime(60))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    c2r_02_rate_only_change_at_an_unaligned_barrier
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized] target(s) in 0.04s
+     Running tests/phase2_decay_oracle_revision.rs (target/debug/deps/phase2_decay_oracle_revision-000401f3a8d7e51d)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_oracle_revision`
+
+$ kills phase2_decay_adjudication::d3_residual_interval_is_discarded_at_a_parameter_change
+
+running 1 test
+test d3_residual_interval_is_discarded_at_a_parameter_change ... FAILED
+
+failures:
+
+---- d3_residual_interval_is_discarded_at_a_parameter_change stdout ----
+
+thread 'd3_residual_interval_is_discarded_at_a_parameter_change' (1801) panicked at crates/spark-testkit/tests/phase2_decay_adjudication.rs:393:9:
+assertion `left == right` failed: engine, sign 1: Timeline { genesis: (2, 7), commands: [(0, Assign(100)), (19, Activate(5, 4))], evals: [19, 22, 23, 26, 27], kicks: [], kick: 0 }
+  left: [Some((96, LogicalTime(19))), Some((91, LogicalTime(22))), Some((91, LogicalTime(23))), Some((86, LogicalTime(26))), Some((86, LogicalTime(27)))]
+ right: [Some((96, LogicalTime(19))), Some((96, LogicalTime(22))), Some((91, LogicalTime(23))), Some((91, LogicalTime(26))), Some((86, LogicalTime(27)))]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    d3_residual_interval_is_discarded_at_a_parameter_change
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.01s
+
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/C2R-02-absolute-grid/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 0.84s
+     Running tests/phase2_decay_adjudication.rs (target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_adjudication`
+
+$ kills phase2_decay_adjudication::d3_d5_shortened_cadence_starts_a_new_grid_at_the_barrier
+
+running 1 test
+test d3_d5_shortened_cadence_starts_a_new_grid_at_the_barrier ... FAILED
+
+failures:
+
+---- d3_d5_shortened_cadence_starts_a_new_grid_at_the_barrier stdout ----
+
+thread 'd3_d5_shortened_cadence_starts_a_new_grid_at_the_barrier' (1810) panicked at crates/spark-testkit/tests/phase2_decay_adjudication.rs:393:9:
+assertion `left == right` failed: engine, sign 1: Timeline { genesis: (1, 100), commands: [(0, Assign(100)), (53, Activate(5, 10))], evals: [53, 60, 62, 63, 73], kicks: [], kick: 0 }
+  left: [Some((100, LogicalTime(53))), Some((95, LogicalTime(60))), Some((95, LogicalTime(62))), Some((95, LogicalTime(63))), Some((90, LogicalTime(73)))]
+ right: [Some((100, LogicalTime(53))), Some((100, LogicalTime(60))), Some((100, LogicalTime(62))), Some((95, LogicalTime(63))), Some((90, LogicalTime(73)))]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    d3_d5_shortened_cadence_starts_a_new_grid_at_the_barrier
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.02s
+
+    Finished `test` profile [unoptimized] target(s) in 0.03s
+     Running tests/phase2_decay_adjudication.rs (target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_adjudication`
+
+$ kills phase2_decay_adjudication::d3_d5_lengthened_cadence_starts_a_new_grid_at_the_barrier
+
+running 1 test
+test d3_d5_lengthened_cadence_starts_a_new_grid_at_the_barrier ... FAILED
+
+failures:
+
+---- d3_d5_lengthened_cadence_starts_a_new_grid_at_the_barrier stdout ----
+
+thread 'd3_d5_lengthened_cadence_starts_a_new_grid_at_the_barrier' (1819) panicked at crates/spark-testkit/tests/phase2_decay_adjudication.rs:393:9:
+assertion `left == right` failed: engine, sign 1: Timeline { genesis: (1, 10), commands: [(0, Assign(100)), (55, Activate(5, 100))], evals: [55, 60, 150, 154, 155], kicks: [], kick: 0 }
+  left: [Some((95, LogicalTime(55))), Some((95, LogicalTime(60))), Some((90, LogicalTime(150))), Some((90, LogicalTime(154))), Some((90, LogicalTime(155)))]
+ right: [Some((95, LogicalTime(55))), Some((95, LogicalTime(60))), Some((95, LogicalTime(150))), Some((95, LogicalTime(154))), Some((90, LogicalTime(155)))]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    d3_d5_lengthened_cadence_starts_a_new_grid_at_the_barrier
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized] target(s) in 0.03s
+     Running tests/phase2_decay_adjudication.rs (target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_adjudication`

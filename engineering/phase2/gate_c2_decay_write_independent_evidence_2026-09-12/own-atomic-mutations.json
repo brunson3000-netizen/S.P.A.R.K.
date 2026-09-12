@@ -1,0 +1,34 @@
+{
+  "tree": "cc3dc70182b428f7cbc953ae722f85b39d407dfa",
+  "controls": [
+    {
+      "id": "OWN-family-mixture-commits",
+      "test": "own_watchers_and_atomic_refusal",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "-p",
+        "spark-testkit",
+        "--all-features",
+        "--test",
+        "reviewer_own",
+        "--",
+        "--exact",
+        "own_watchers_and_atomic_refusal",
+        "--nocapture"
+      ],
+      "patches": [
+        [
+          "crates/spark-engine/src/effects.rs",
+          "        } else {\n            return Err(WaveRejection::FamilyMixture { definition, scope });\n        };",
+          "        } else {\n            pre(&definition, &scope).unwrap_or(0)\n        };"
+        ]
+      ],
+      "baseline_exit": 0,
+      "mutant_exit": 101,
+      "baseline_pass": true,
+      "killed": true
+    }
+  ]
+}

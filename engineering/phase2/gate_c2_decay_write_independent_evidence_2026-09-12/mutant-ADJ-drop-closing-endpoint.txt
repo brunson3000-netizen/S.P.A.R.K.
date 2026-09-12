@@ -1,0 +1,43 @@
+# mutant ADJ-drop-closing-endpoint: exclude the step ending exactly at a parameter-changing activation from the closing segment (the reviewer's own mutant, retargeted)
+# tree: cc3dc70182b428f7cbc953ae722f85b39d407dfa
+
+$ kills phase2_decay_adjudication::d3_d4_step_ending_at_activation_belongs_to_the_closing_segment
+
+running 1 test
+test d3_d4_step_ending_at_activation_belongs_to_the_closing_segment ... FAILED
+
+failures:
+
+---- d3_d4_step_ending_at_activation_belongs_to_the_closing_segment stdout ----
+
+thread 'd3_d4_step_ending_at_activation_belongs_to_the_closing_segment' (4115) panicked at crates/spark-testkit/tests/phase2_decay_adjudication.rs:393:9:
+assertion `left == right` failed: engine, sign 1: Timeline { genesis: (2, 7), commands: [(0, Assign(100)), (21, Activate(5, 4))], evals: [25], kicks: [], kick: 0 }
+  left: [Some((91, LogicalTime(25)))]
+ right: [Some((89, LogicalTime(25)))]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    d3_d4_step_ending_at_activation_belongs_to_the_closing_segment
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.01s
+
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling cc v1.4.4
+   Compiling cfg-if v1.0.4
+   Compiling constant_time_eq v0.4.2
+   Compiling cpufeatures v0.3.0
+   Compiling arrayvec v0.7.8
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/ADJ-drop-closing-endpoint/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/ADJ-drop-closing-endpoint/crates/spark-engine)
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/ADJ-drop-closing-endpoint/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 7.60s
+     Running tests/phase2_decay_adjudication.rs (target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_adjudication`

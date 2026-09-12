@@ -1,0 +1,9 @@
+$ cargo test --offline -p spark-testkit --all-features --test phase2_decay_adjudication -- --exact d3_d5_lengthened_cadence_starts_a_new_grid_at_the_barrier
+
+running 1 test
+test d3_d5_lengthened_cadence_starts_a_new_grid_at_the_barrier ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.08s
+
+    Finished `test` profile [unoptimized] target(s) in 0.04s
+     Running tests/phase2_decay_adjudication.rs (/tmp/spark-c2-resolution-mutants-0jbs0ls5/target/debug/deps/phase2_decay_adjudication-af98c9234d6bdd0c)

@@ -1,0 +1,43 @@
+# mutant RES-watcher-sees-settled-intermediate: a crossing watcher compares its threshold against the settled intermediate instead of the committed pre-wave value
+# tree: cc3dc70182b428f7cbc953ae722f85b39d407dfa
+
+$ kills phase2_decay_write_resolution::a_watcher_sees_one_committed_transition_and_the_reported_effect_matches
+
+running 1 test
+test a_watcher_sees_one_committed_transition_and_the_reported_effect_matches ... FAILED
+
+failures:
+
+---- a_watcher_sees_one_committed_transition_and_the_reported_effect_matches stdout ----
+
+thread 'a_watcher_sees_one_committed_transition_and_the_reported_effect_matches' (5095) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:767:5:
+assertion `left == right` failed: 100 -> 95 crosses 97 falling
+  left: None
+ right: Some((1, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    a_watcher_sees_one_committed_transition_and_the_reported_effect_matches
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.01s
+
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.11
+   Compiling cc v1.4.4
+   Compiling cfg-if v1.0.4
+   Compiling constant_time_eq v0.4.2
+   Compiling cpufeatures v0.3.0
+   Compiling arrayvec v0.7.8
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/RES-watcher-sees-settled-intermediate/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/RES-watcher-sees-settled-intermediate/crates/spark-engine)
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/RES-watcher-sees-settled-intermediate/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 10.60s
+     Running tests/phase2_decay_write_resolution.rs (target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`

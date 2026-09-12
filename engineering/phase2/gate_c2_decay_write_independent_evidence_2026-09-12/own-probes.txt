@@ -1,0 +1,183 @@
+# source: own_probes.rs sha256=33d5e9e70f71dd5e55f6a2265e106a9664581befa1399615cb4a04fe5a9cb298
+# crate root: /tmp/spark-c2-independent-review-20260912
+# spark-engine test-support: True
+# whitespace-normalized: trailing spaces and trailing blank lines removed
+$ cargo test --offline -- --nocapture --test-threads=1
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling cpufeatures v0.3.0
+   Compiling arrayvec v0.7.8
+   Compiling cc v1.4.4
+   Compiling cfg-if v1.0.4
+   Compiling constant_time_eq v0.4.2
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-c2-independent-review-20260912/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-independent-review-20260912/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-independent-review-20260912/crates/spark-testkit)
+   Compiling spark-c2-counterexamples v0.0.0 (/tmp/spark-c2-resolution-corpus-m6td96n5)
+warning: unused import: `spark_core::clock::LogicalTime`
+  --> src/lib.rs:38:5
+   |
+38 | use spark_core::clock::LogicalTime;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `WaveRejection`
+  --> src/lib.rs:43:60
+   |
+43 | use spark_engine::report::{CohortOutcome, CommittedEffect, WaveRejection};
+   |                                                            ^^^^^^^^^^^^^
+
+warning: constant `STRESS` is never used
+  --> src/lib.rs:48:7
+   |
+48 | const STRESS: &str = "state.stress";
+   |       ^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `MOOD` is never used
+  --> src/lib.rs:49:7
+   |
+49 | const MOOD: &str = "state.mood";
+   |       ^^^^
+
+warning: constant `ALARM` is never used
+  --> src/lib.rs:50:7
+   |
+50 | const ALARM: &str = "state.alarm";
+   |       ^^^^^
+
+warning: constant `BOUNDED` is never used
+  --> src/lib.rs:51:7
+   |
+51 | const BOUNDED: &str = "state.bounded";
+   |       ^^^^^^^
+
+warning: function `a` is never used
+  --> src/lib.rs:53:4
+   |
+53 | fn a() -> ScopeId {
+   |    ^
+
+warning: function `tune` is never used
+  --> src/lib.rs:57:4
+   |
+57 | fn tune(rate: i64, cadence: u64) -> ConfigRevision {
+   |    ^^^^
+
+warning: function `tuned_decay` is never used
+  --> src/lib.rs:65:4
+   |
+65 | fn tuned_decay(sub: &str) -> EmitOp {
+   |    ^^^^^^^^^^^
+
+warning: struct `Work` is never constructed
+  --> src/lib.rs:84:8
+   |
+84 | struct Work {
+   |        ^^^^
+
+warning: associated function `evals` is never used
+  --> src/lib.rs:94:8
+   |
+93 | impl Work {
+   | --------- associated function in this implementation
+94 |     fn evals(evals: &[u64]) -> Self {
+   |        ^^^^^
+
+warning: struct `Rig` is never constructed
+   --> src/lib.rs:104:8
+    |
+104 | struct Rig {
+    |        ^^^
+
+warning: multiple associated items are never used
+   --> src/lib.rs:114:8
+    |
+113 | impl Rig {
+    | -------- associated items in this implementation
+114 |     fn new(rate: i64, cadence: u64, baseline_value: i64, work: &Work) -> Self {
+    |        ^^^
+...
+118 |     fn build(rate: i64, cadence: u64, baseline_value: i64, work: &Work, pacing: u32) -> Self {
+    |        ^^^^^
+...
+238 |     fn request(&mut self, at: u64, kind: &str, arg: i64) -> CommandRequest {
+    |        ^^^^^^^
+...
+245 |     fn send(&mut self, at: u64, kind: &str, arg: i64) {
+    |        ^^^^
+...
+251 |     fn try_send(&mut self, at: u64, kind: &str, arg: i64) -> CohortOutcome {
+    |        ^^^^^^^^
+...
+259 |     fn submit(&mut self, c: CommandRequest, expected: CohortOutcome) {
+    |        ^^^^^^
+...
+267 |     fn set(&mut self, at: u64, v: i64) {
+    |        ^^^
+...
+271 |     fn shock(&mut self, at: u64, d: i64) {
+    |        ^^^^^
+...
+276 |     fn activate(&mut self, at: u64, present: bool, rate: i64, cadence: u64) {
+    |        ^^^^^^^^
+...
+298 |     fn go(&mut self, at: u64) -> Vec<CommittedEffect> {
+    |        ^^
+...
+307 |     fn read(&self, definition: &str) -> Option<(i64, u64)> {
+    |        ^^^^
+...
+317 |     fn cell(&self) -> Option<(i64, u64)> {
+    |        ^^^^
+...
+322 |     fn want(&self, value: i64, at: u64) {
+    |        ^^^^
+...
+326 |     fn restore(&mut self) {
+    |        ^^^^^^^
+...
+333 |     fn replay(&self) {
+    |        ^^^^^^
+
+warning: `spark-c2-counterexamples` (lib) generated 13 warnings (run `cargo fix --lib -p spark-c2-counterexamples` to apply 2 suggestions)
+warning: `spark-c2-counterexamples` (lib test) generated 1 warning (1 duplicate)
+    Finished `test` profile [unoptimized] target(s) in 17.83s
+     Running unittests src/lib.rs (target/debug/deps/spark_c2_counterexamples-bf843a7d0285f71d)
+
+running 9 tests
+test own_additive_and_replacement ... ok
+test own_composed_clamp_must_settle ... add + identity clamp sign=1: Some((105, 15))
+
+thread 'own_composed_clamp_must_settle' (211) panicked at src/lib.rs:323:9:
+assertion `left == right` failed
+  left: Some((105, 15))
+ right: Some((95, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+test own_composed_scale_must_settle_recovery ... subtract + identity scale: Some((-105, 15))
+
+thread 'own_composed_scale_must_settle_recovery' (212) panicked at src/lib.rs:323:9:
+assertion `left == right` failed
+  left: Some((-105, 15))
+ right: Some((-95, 15))
+FAILED
+test own_explicit_decay_body_once ... ok
+test own_removed_and_barrier ... ok
+test own_same_time_and_absent ... ok
+test own_saturation_scheduled_and_zero ... ok
+test own_scale_clamp_observed_boundary ... ok
+test own_watchers_and_atomic_refusal ... ok
+
+failures:
+
+failures:
+    own_composed_clamp_must_settle
+    own_composed_scale_must_settle_recovery
+
+test result: FAILED. 7 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.84s
+
+error: test failed, to rerun pass `--lib`

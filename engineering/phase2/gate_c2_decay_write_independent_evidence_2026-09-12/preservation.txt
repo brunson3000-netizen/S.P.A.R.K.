@@ -1,0 +1,4 @@
+# tree: cc3dc70182b428f7cbc953ae722f85b39d407dfa
+# whitespace-normalized
+$ python3 /tmp/spark-c2-independent-review-20260912/engineering/phase2/gate_c2_decay_write_independent_evidence_2026-09-12/check_preservation.py
+{"failures": [], "inline_modules_checked": 17, "preexisting_engineering_files": 627}

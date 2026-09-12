@@ -1,0 +1,67 @@
+# candidate cc3dc70182b428f7cbc953ae722f85b39d407dfa
+$ cargo test --offline -p spark-testkit --all-features --test reviewer_own -- --exact own_same_time_and_absent --nocapture
+BASELINE
+
+running 1 test
+test own_same_time_and_absent ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.08s
+
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling cc v1.4.4
+   Compiling constant_time_eq v0.4.2
+   Compiling cpufeatures v0.3.0
+   Compiling arrayvec v0.7.8
+   Compiling cfg-if v1.0.4
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-c2-own-mutants-eeibcw0r/OWN-absent-decay-creates/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-own-mutants-eeibcw0r/OWN-absent-decay-creates/crates/spark-engine)
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-own-mutants-eeibcw0r/OWN-absent-decay-creates/crates/spark-testkit)
+warning: unused import: `spark_core::clock::LogicalTime`
+  --> crates/spark-testkit/tests/reviewer_own.rs:38:5
+   |
+38 | use spark_core::clock::LogicalTime;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `spark-testkit` (test "reviewer_own") generated 1 warning (run `cargo fix --test "reviewer_own" -p spark-testkit` to apply 1 suggestion)
+    Finished `test` profile [unoptimized] target(s) in 16.83s
+     Running tests/reviewer_own.rs (target/debug/deps/reviewer_own-826f12555b3643b9)
+
+MUTANT
+
+running 1 test
+test own_same_time_and_absent ... FAILED
+
+failures:
+
+failures:
+    own_same_time_and_absent
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.05s
+
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-own-mutants-eeibcw0r/OWN-absent-decay-creates/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-own-mutants-eeibcw0r/OWN-absent-decay-creates/crates/spark-testkit)
+warning: unused import: `spark_core::clock::LogicalTime`
+  --> crates/spark-testkit/tests/reviewer_own.rs:38:5
+   |
+38 | use spark_core::clock::LogicalTime;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `spark-testkit` (test "reviewer_own") generated 1 warning (run `cargo fix --test "reviewer_own" -p spark-testkit` to apply 1 suggestion)
+    Finished `test` profile [unoptimized] target(s) in 6.14s
+     Running tests/reviewer_own.rs (target/debug/deps/reviewer_own-826f12555b3643b9)
+
+thread 'own_same_time_and_absent' (3231) panicked at crates/spark-testkit/tests/reviewer_own.rs:375:51:
+assertion failed: r.go(5).is_empty()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `-p spark-testkit --test reviewer_own`

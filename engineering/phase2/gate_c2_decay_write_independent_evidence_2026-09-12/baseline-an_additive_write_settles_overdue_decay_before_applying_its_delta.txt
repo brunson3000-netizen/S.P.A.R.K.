@@ -1,0 +1,9 @@
+$ cargo test --offline -p spark-testkit --all-features --test phase2_decay_write_resolution -- --exact an_additive_write_settles_overdue_decay_before_applying_its_delta
+
+running 1 test
+test an_additive_write_settles_overdue_decay_before_applying_its_delta ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.09s
+
+    Finished `test` profile [unoptimized] target(s) in 0.03s
+     Running tests/phase2_decay_write_resolution.rs (/tmp/spark-c2-resolution-mutants-0jbs0ls5/target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)

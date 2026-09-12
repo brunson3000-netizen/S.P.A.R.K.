@@ -1,0 +1,24 @@
+{
+  "candidate": "cc3dc70182b428f7cbc953ae722f85b39d407dfa",
+  "required_checks": 15,
+  "required_checks_passed": true,
+  "workspace_passed": 415,
+  "writer_baseline_tests": 32,
+  "writer_mutants_killed": 17,
+  "writer_assertion_kill_runs": 45,
+  "writer_expected_survivals": 2,
+  "reviewer_positive_baselines": 11,
+  "reviewer_mutants_killed": 11,
+  "independent_probe_passes": 8,
+  "independent_current_blocking_failures": 2,
+  "historical_probe_passes": 8,
+  "historical_superseded_failures": 1,
+  "resolution_adapted_passes": 9,
+  "decision_adapted_passes": 9,
+  "original_worktrees_unchanged": true,
+  "workload_rows": [
+    "1000,0.907,6931,9605,1849732",
+    "4000,13.943,2511,92463,6707193",
+    "16000,231.999,5020,2318810,17804963"
+  ]
+}

@@ -1,0 +1,3 @@
+# tree: cc3dc70182b428f7cbc953ae722f85b39d407dfa
+# whitespace-normalized
+$ git diff --check 7e3a0aae069a8bf840e4dfb74221cdf2687b1db5 HEAD

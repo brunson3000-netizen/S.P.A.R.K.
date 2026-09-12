@@ -1,0 +1,101 @@
+{
+  "tree": "cc3dc70182b428f7cbc953ae722f85b39d407dfa",
+  "environment": {
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_BUILD_JOBS": "2"
+  },
+  "checks": [
+    {
+      "name": "fmt",
+      "command": "cargo fmt --all --check",
+      "exit_code": 0,
+      "seconds": 0.663
+    },
+    {
+      "name": "workspace-tests",
+      "command": "cargo test --workspace --all-features --no-fail-fast",
+      "exit_code": 0,
+      "seconds": 72.367
+    },
+    {
+      "name": "clippy",
+      "command": "cargo clippy --workspace --all-targets --all-features -- -D warnings",
+      "exit_code": 0,
+      "seconds": 17.093
+    },
+    {
+      "name": "strict",
+      "command": "cargo clippy -p spark-core -p spark-engine --lib --all-features -- -D warnings -D clippy::unwrap_used -D clippy::expect_used -D clippy::panic -D clippy::indexing_slicing -D clippy::arithmetic_side_effects",
+      "exit_code": 0,
+      "seconds": 4.128
+    },
+    {
+      "name": "metadata",
+      "command": "cargo metadata --format-version 1 > /dev/null",
+      "exit_code": 0,
+      "seconds": 0.329
+    },
+    {
+      "name": "whitespace-candidate-range",
+      "command": "git diff --check a3227eb423e75851b05b9992dfde6424a7d8932d HEAD",
+      "exit_code": 0,
+      "seconds": 0.03
+    },
+    {
+      "name": "whitespace-production-range",
+      "command": "git diff --check 7e3a0aae069a8bf840e4dfb74221cdf2687b1db5 HEAD",
+      "exit_code": 0,
+      "seconds": 0.117
+    },
+    {
+      "name": "whitespace-review-range",
+      "command": "git diff --check e00f248e25f6d34f1041e219f74085649714c19d HEAD",
+      "exit_code": 0,
+      "seconds": 0.036
+    },
+    {
+      "name": "x86_64-pc-windows-gnu",
+      "command": "cargo check --workspace --all-targets --target x86_64-pc-windows-gnu",
+      "exit_code": 0,
+      "seconds": 17.067
+    },
+    {
+      "name": "x86_64-pc-windows-msvc",
+      "command": "cargo check --workspace --all-targets --target x86_64-pc-windows-msvc",
+      "exit_code": 0,
+      "seconds": 17.47
+    },
+    {
+      "name": "aarch64-linux-android",
+      "command": "cargo check --workspace --all-targets --target aarch64-linux-android",
+      "exit_code": 0,
+      "seconds": 15.045
+    },
+    {
+      "name": "armv7-linux-androideabi",
+      "command": "cargo check --workspace --all-targets --target armv7-linux-androideabi",
+      "exit_code": 0,
+      "seconds": 20.272
+    },
+    {
+      "name": "x86_64-linux-android",
+      "command": "cargo check --workspace --all-targets --target x86_64-linux-android",
+      "exit_code": 0,
+      "seconds": 15.572
+    },
+    {
+      "name": "preservation",
+      "command": "python3 /tmp/spark-c2-independent-review-20260912/engineering/phase2/gate_c2_decay_write_independent_evidence_2026-09-12/check_preservation.py",
+      "exit_code": 0,
+      "seconds": 0.742
+    },
+    {
+      "name": "workload",
+      "command": "cargo run --release --offline -p spark-testkit --example gate_c2_workload",
+      "exit_code": 0,
+      "seconds": 311.962
+    }
+  ]
+}

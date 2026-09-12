@@ -1,0 +1,43 @@
+# mutant RES-decay-reduces-replacement: earlier decay reduces an explicit replacement: the reduced RESULT is capped by the settled pre-wave value
+# tree: cc3dc70182b428f7cbc953ae722f85b39d407dfa
+
+$ kills phase2_decay_write_resolution::an_explicit_replacement_is_never_reduced_by_earlier_decay
+
+running 1 test
+test an_explicit_replacement_is_never_reduced_by_earlier_decay ... FAILED
+
+failures:
+
+---- an_explicit_replacement_is_never_reduced_by_earlier_decay stdout ----
+
+thread 'an_explicit_replacement_is_never_reduced_by_earlier_decay' (4797) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:320:9:
+assertion `left == right` failed
+  left: Some((90, 15))
+ right: Some((100, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    an_explicit_replacement_is_never_reduced_by_earlier_decay
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.01s
+
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.11
+   Compiling cc v1.4.4
+   Compiling cfg-if v1.0.4
+   Compiling constant_time_eq v0.4.2
+   Compiling cpufeatures v0.3.0
+   Compiling arrayvec v0.7.8
+   Compiling zmij v1.0.23
+   Compiling serde_core v1.0.229
+   Compiling serde_json v1.0.151
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/RES-decay-reduces-replacement/crates/spark-core)
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/RES-decay-reduces-replacement/crates/spark-engine)
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/RES-decay-reduces-replacement/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 9.64s
+     Running tests/phase2_decay_write_resolution.rs (target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`

@@ -1,0 +1,10 @@
+$ cargo test --offline -p spark-testkit --all-features --test phase2_decay_write_resolution -- --exact a_composed_body_folds_its_declared_stages_in_order
+
+running 1 test
+test a_composed_body_folds_its_declared_stages_in_order ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.02s
+
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/baseline/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 2.12s
+     Running tests/phase2_decay_write_resolution.rs (/tmp/spark-c2-resolution-mutants-0jbs0ls5/target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)

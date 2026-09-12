@@ -1,0 +1,43 @@
+# mutant RES-settle-scale: `Scale` resolves from the settled value instead of the committed one
+# tree: cc3dc70182b428f7cbc953ae722f85b39d407dfa
+
+$ kills phase2_decay_write_resolution::scale_keeps_its_existing_semantics
+
+running 1 test
+test scale_keeps_its_existing_semantics ... FAILED
+
+failures:
+
+---- scale_keeps_its_existing_semantics stdout ----
+
+thread 'scale_keeps_its_existing_semantics' (5691) panicked at crates/spark-testkit/tests/phase2_decay_write_resolution.rs:320:9:
+assertion `left == right` failed
+  left: Some((45, 15))
+ right: Some((50, 15))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    scale_keeps_its_existing_semantics
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.01s
+
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+   Compiling arrayvec v0.7.8
+   Compiling cc v1.4.4
+   Compiling cpufeatures v0.3.0
+   Compiling constant_time_eq v0.4.2
+   Compiling cfg-if v1.0.4
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+   Compiling blake3 v1.8.7
+   Compiling spark-core v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/RES-settle-scale/crates/spark-core)
+   Compiling spark-engine v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/RES-settle-scale/crates/spark-engine)
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling spark-testkit v0.1.0 (/tmp/spark-c2-resolution-mutants-0jbs0ls5/RES-settle-scale/crates/spark-testkit)
+    Finished `test` profile [unoptimized] target(s) in 9.92s
+     Running tests/phase2_decay_write_resolution.rs (target/debug/deps/phase2_decay_write_resolution-dae65360d5ae5d8e)
+error: test failed, to rerun pass `-p spark-testkit --test phase2_decay_write_resolution`

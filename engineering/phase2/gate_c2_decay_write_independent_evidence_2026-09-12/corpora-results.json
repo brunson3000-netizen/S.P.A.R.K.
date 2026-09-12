@@ -1,0 +1,20 @@
+[
+  {
+    "name": "historical-own",
+    "wrapper_exit": 0,
+    "output": "{\"log\": \"historical-own\", \"source\": \"own_probes.rs\", \"root\": \"/tmp/spark-c2-independent-review-20260912\", \"test_support\": true, \"exit_code\": 101}\n",
+    "stderr": ""
+  },
+  {
+    "name": "resolution-adapted",
+    "wrapper_exit": 0,
+    "output": "{\"log\": \"resolution-adapted\", \"source\": \"own_probes_resolution_adapted.rs\", \"root\": \"/tmp/spark-c2-independent-review-20260912\", \"test_support\": true, \"exit_code\": 0}\n",
+    "stderr": ""
+  },
+  {
+    "name": "decision-adapted",
+    "wrapper_exit": 0,
+    "output": "{\"log\": \"decision-adapted\", \"source\": \"independent_probes_decision_adapted.rs\", \"root\": \"/tmp/spark-c2-independent-review-20260912\", \"test_support\": true, \"exit_code\": 0}\n",
+    "stderr": ""
+  }
+]
