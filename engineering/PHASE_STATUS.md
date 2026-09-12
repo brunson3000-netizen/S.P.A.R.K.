@@ -394,12 +394,19 @@ Produced on `candidate/spark-game-safe-handoff-20260912`:
   durability gap rather than resolving it. **Not frozen.**
 - `engineering/phase3/spark_game_contract_prototype_2026-09-12/` — a contained, reversible
   prototype permitted by protocol §6. It runs the protocol's canonical first causal sequence
-  end to end across the real S.P.A.R.K. surface against a **fake** host: 14 tests pass, fmt
+  end to end across the real S.P.A.R.K. surface against a **fake** host: 17 tests pass, fmt
   and clippy with warnings denied pass, five cross-target checks pass **compile-only**. A
   fake host is preparatory evidence only, never proof of G.A.M.E. integration.
 - `engineering/phase3/SPARK_GAME_CONTRACT_V1_SELF_CORRECTION_REPORT_2026-09-12.md` — six
   author-found corrections, including a blocking prototype defect that dropped every intent
   committed before a pause in a paced request.
+- `engineering/phase3/handoff_independent_review_2026-09-12/` and
+  `engineering/phase3/SPARK_GAME_HANDOFF_REVIEW_RESPONSE_2026-09-12.md` — a fresh independent
+  adversarial review of the handoff artifacts (verdict
+  `HANDOFF_REVIEW_BOUNDED_REVISION_REQUIRED`; 0 blockers, 1 major, 6 minor, 4 notes) and the
+  writer's disposition of every finding. The major finding — a diagnostic that proved
+  reproducibility while claiming to prove idempotence — is corrected and the failure is
+  recorded rather than quietly replaced.
 
 Blocked until Gate C2 acceptance: freezing the contract (Gate C3), implementing the
 production device surface, implementing the G.A.M.E. adapter (Gate C4), and building the

@@ -391,8 +391,9 @@ and never enters the canonical seam.
 
 ### 7.2 Acknowledgment identity and at-most-once application
 
-The unit G.A.M.E. acknowledges is `(activation_hash, CorrelationId, batch_digest)`, where
-`activation_hash` is the session's content-addressed profile activation identity (§3.2) and
+The unit G.A.M.E. acknowledges is the triple `(activation_hash, CorrelationId, batch_digest)`.
+`activation_hash` is the session's content-addressed profile activation identity (§3.2),
+`CorrelationId` is §7.1's request identity, and `batch_digest` is
 
 ```
 batch_digest = H( "spark.intent_batch.v1"
