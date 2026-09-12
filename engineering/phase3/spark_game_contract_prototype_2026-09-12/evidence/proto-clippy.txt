@@ -1,0 +1,4 @@
+== cargo clippy --offline --all-targets -- -D warnings ==
+    Checking spark-game-contract-prototype v0.0.0 (<WORKTREE>/engineering/phase3/spark_game_contract_prototype_2026-09-12)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.14s
+exit=0

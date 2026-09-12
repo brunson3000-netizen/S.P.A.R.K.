@@ -1,0 +1,11 @@
+[package]
+name = "luna-c"
+version = "0.0.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+spark-core = { path = "/tmp/luna-c-20260912/target/crates/spark-core" }
+spark-engine = { path = "/tmp/luna-c-20260912/target/crates/spark-engine", features = ["test-support"] }
+spark-testkit = { path = "/tmp/luna-c-20260912/target/crates/spark-testkit" }

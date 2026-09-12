@@ -1,0 +1,56 @@
+== cargo check --offline --target x86_64-pc-windows-msvc (COMPILE-ONLY, no runtime execution) ==
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.12
+   Compiling cc v1.4.5
+    Checking cpufeatures v0.3.1
+    Checking arrayvec v0.7.8
+    Checking cfg-if v1.0.4
+    Checking constant_time_eq v0.4.2
+   Compiling blake3 v1.8.7
+    Checking spark-core v0.1.0 (<WORKTREE>/crates/spark-core)
+    Checking spark-engine v0.1.0 (<WORKTREE>/crates/spark-engine)
+    Checking spark-game-contract-prototype v0.0.0 (<WORKTREE>/engineering/phase3/spark_game_contract_prototype_2026-09-12)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.19s
+exit=0
+== cargo check --offline --target x86_64-pc-windows-gnu (COMPILE-ONLY, no runtime execution) ==
+   Compiling blake3 v1.8.7
+    Checking arrayvec v0.7.8
+    Checking constant_time_eq v0.4.2
+    Checking cfg-if v1.0.4
+    Checking cpufeatures v0.3.1
+    Checking spark-core v0.1.0 (<WORKTREE>/crates/spark-core)
+    Checking spark-engine v0.1.0 (<WORKTREE>/crates/spark-engine)
+    Checking spark-game-contract-prototype v0.0.0 (<WORKTREE>/engineering/phase3/spark_game_contract_prototype_2026-09-12)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.51s
+exit=0
+== cargo check --offline --target aarch64-linux-android (COMPILE-ONLY, no runtime execution) ==
+   Compiling blake3 v1.8.7
+    Checking cfg-if v1.0.4
+    Checking arrayvec v0.7.8
+    Checking constant_time_eq v0.4.2
+    Checking spark-core v0.1.0 (<WORKTREE>/crates/spark-core)
+    Checking spark-engine v0.1.0 (<WORKTREE>/crates/spark-engine)
+    Checking spark-game-contract-prototype v0.0.0 (<WORKTREE>/engineering/phase3/spark_game_contract_prototype_2026-09-12)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.46s
+exit=0
+== cargo check --offline --target armv7-linux-androideabi (COMPILE-ONLY, no runtime execution) ==
+   Compiling blake3 v1.8.7
+    Checking arrayvec v0.7.8
+    Checking cfg-if v1.0.4
+    Checking constant_time_eq v0.4.2
+    Checking spark-core v0.1.0 (<WORKTREE>/crates/spark-core)
+    Checking spark-engine v0.1.0 (<WORKTREE>/crates/spark-engine)
+    Checking spark-game-contract-prototype v0.0.0 (<WORKTREE>/engineering/phase3/spark_game_contract_prototype_2026-09-12)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.61s
+exit=0
+== cargo check --offline --target x86_64-linux-android (COMPILE-ONLY, no runtime execution) ==
+    Checking cfg-if v1.0.4
+   Compiling blake3 v1.8.7
+    Checking constant_time_eq v0.4.2
+    Checking arrayvec v0.7.8
+    Checking cpufeatures v0.3.1
+    Checking spark-core v0.1.0 (<WORKTREE>/crates/spark-core)
+    Checking spark-engine v0.1.0 (<WORKTREE>/crates/spark-engine)
+    Checking spark-game-contract-prototype v0.0.0 (<WORKTREE>/engineering/phase3/spark_game_contract_prototype_2026-09-12)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.50s
+exit=0

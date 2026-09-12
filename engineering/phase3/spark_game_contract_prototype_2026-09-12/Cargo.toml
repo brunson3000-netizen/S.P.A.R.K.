@@ -1,0 +1,18 @@
+# Contained, reversible Gate-C3 contract prototype. NOT a workspace member and
+# NOT production code: the empty `[workspace]` table detaches it from the
+# S.P.A.R.K. workspace so the canonical crate tree is unaffected.
+[package]
+name = "spark-game-contract-prototype"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+spark-core = { path = "../../../crates/spark-core" }
+spark-engine = { path = "../../../crates/spark-engine" }
+
+[dev-dependencies]
+spark-core = { path = "../../../crates/spark-core" }
+spark-engine = { path = "../../../crates/spark-engine" }

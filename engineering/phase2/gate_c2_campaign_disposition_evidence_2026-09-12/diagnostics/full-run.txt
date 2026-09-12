@@ -1,0 +1,32 @@
+   Compiling spark-handoff-diagnostics v0.0.0 (/tmp/claude-1000/-home-chromikey-Projects-SPARK/0cda3517-7c1b-4a7d-80a1-fddc4e1d94d6/scratchpad/diag)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.76s
+     Running tests/diagnostics.rs (/tmp/claude-1000/-home-chromikey-Projects-SPARK/0cda3517-7c1b-4a7d-80a1-fddc4e1d94d6/scratchpad/cargo-target/debug/deps/diagnostics-421a9f77f50a6dec)
+
+running 12 tests
+test d10_rn02_repeated_settlement_is_observably_idempotent ... D-10 PASS: RN02 repeated settlement has no observable canonical effect; recorded as a disclosed cost limitation, not optimized
+ok
+test d11_obs_test_seam_reports_true_for_an_out_of_window_stage ... D-11 OBSERVATION: fixture::snapshot_stage_raw returned true at ordinal Ordinal(1001) (window starts at Ordinal(1)) while staging nothing — is_ok() covers the retryable NotInAdmissionWindow disposition. Test-seam reporting only; production unaffected.
+ok
+test d1_luna001_refusal_boundary_tracks_the_declared_constraint ... D-1 PASS: refusal boundary is the declared constraint, not the i64 range; state store unchanged across four refusals, while the timeline advances
+ok
+test d1b_luna001_absent_cell_is_the_refusal_consequence_not_a_separate_behavior ... D-1b PASS: cell absence after refusal is the unchanged initial condition
+ok
+test d2_t1_identity_conflict_is_identity_scoped_not_payload_scoped ... D-2 PASS: T-1 is an identity-scoped P-7 refusal, not a payload-level rejection
+ok
+test d3_t2_t3_zero_delay_and_zero_budget_are_static_admission_refusals ... D-3 PASS: T-2/T-3 hazards are refused at activation; no Engine can carry them
+ok
+test d4_t4_oversize_first_slice_is_admitted_but_the_budget_still_paces ... D-4 PASS: T-4 is a declared progress guarantee with a reported overrun, not an ignored budget (deferred cohorts > 0)
+ok
+test d5_t5_request_completion_and_cohort_rejection_are_distinct_levels ... D-5 PASS: T-5 is two-level reporting; the cohort level names the refused definition
+ok
+test d6_gap_restore_against_a_genuinely_distinct_profile_is_refused ... D-6 PASS: coverage gap closed — a genuinely distinct profile refuses restore (ArtifactBindingMismatch)
+ok
+test d7_gap_dropping_an_obligation_inside_a_snapshot_breaks_restore ... D-7 PASS: coverage gap closed — obligation-drop is caught by the bidirectional invariant, not by the digest
+ok
+test d8_gap_staged_command_inside_a_snapshot_is_refused_on_restore ... D-8: staging at ordinal Ordinal(1) -> true
+D-8 PASS: coverage gap closed — staged-command snapshots are refused (Revision 2 §7 step 2b)
+ok
+test d9_luna002_zero_rate_evaluation_commits_time_without_changing_value ... D-9 PASS: LUNA-002 is a value-preserving evaluation that still commits canonical time
+ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s

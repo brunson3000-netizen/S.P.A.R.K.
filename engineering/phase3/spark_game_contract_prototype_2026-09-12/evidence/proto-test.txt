@@ -1,0 +1,46 @@
+== cargo test --offline -- --nocapture --test-threads=1 ==
+   Compiling spark-game-contract-prototype v0.0.0 (<WORKTREE>/engineering/phase3/spark_game_contract_prototype_2026-09-12)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.47s
+     Running unittests src/lib.rs (<TARGET_DIR>/proto-target/debug/deps/spark_game_contract_prototype-290d7f27be41b601)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/end_to_end.rs (<TARGET_DIR>/proto-target/debug/deps/end_to_end-30e4e808800f48ec)
+
+running 12 tests
+test e10_snapshot_restore_mid_sequence_reproduces_the_uninterrupted_run ... E-10 PASS: snapshot/restore across a boundary reproduces the uninterrupted run. LIMIT: the snapshot is an in-memory value; this is NOT durable process-recovery evidence (contract §9.4).
+ok
+test e11_re_presenting_a_completed_command_is_refused_not_re_executed ... E-11 PASS: a completed command cannot be replayed through the door. CONSEQUENCE: a host that loses a batch before applying it cannot re-derive it (contract §9.3/§9.4).
+ok
+test e1_session_negotiation_is_fail_closed_on_major_and_downgrades_minor ... E-1 PASS: version fail-closed on major, minor downgraded, profile pair enforced
+ok
+test e2_canonical_first_proof_runs_end_to_end_across_the_seam ... E-2 PASS: drought -> affordability -> exposure -> actor choice -> hunting -> wildlife decline -> neighbouring-settlement feedback, across the real seam (fake host: preparatory evidence only)
+ok
+test e3_a_refused_intent_changes_nothing_in_the_world ... E-3 PASS: a host rejection leaves the world and the feedback loop untouched
+ok
+test e3b_unknown_subject_and_unsupported_channel_are_named_rejections ... E-3b PASS: the rejection vocabulary is closed and names the actual cause
+ok
+test e4_duplicate_batch_delivery_applies_at_most_once ... E-4 PASS: at-most-once application keyed by (correlation, batch_digest)
+ok
+test e5_stale_horizon_is_refused_with_the_frontier_named ... E-5 PASS: stale input refused with the frontier named; state byte-identical
+ok
+test e6_a_second_request_while_one_is_active_is_refused_busy ... E-6 PASS: one outstanding request; Busy for another; results pulled by re-presenting
+ok
+test e7_oversized_observation_list_is_refused_whole ... E-7 PASS: an oversized message is refused whole, with no partial processing
+ok
+test e8_the_whole_proof_is_deterministic_across_independent_runs ... E-8 PASS: the whole sequence, including every batch digest, is reproducible
+ok
+test e9_completed_history_replays_to_the_same_digests ... E-9 PASS: completed-boundary replay reproduces both recorded digests
+ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+   Doc-tests spark_game_contract_prototype
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+exit=0

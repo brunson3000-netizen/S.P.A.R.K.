@@ -1,0 +1,9 @@
+[package]
+name = "spark-handoff-diagnostics"
+version = "0.0.0"
+edition = "2021"
+[workspace]
+[dependencies]
+spark-core = { path = "/home/chromikey/Projects/SPARK-game-handoff/crates/spark-core" }
+spark-engine = { path = "/home/chromikey/Projects/SPARK-game-handoff/crates/spark-engine", features = ["test-support"] }
+spark-testkit = { path = "/home/chromikey/Projects/SPARK-game-handoff/crates/spark-testkit" }

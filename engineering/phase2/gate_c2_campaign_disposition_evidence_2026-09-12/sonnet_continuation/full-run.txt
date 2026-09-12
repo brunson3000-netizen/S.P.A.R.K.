@@ -1,0 +1,29 @@
+=== command: CARGO_TARGET_DIR=/tmp/sonnet-c-20260912/cargo CARGO_INCREMENTAL=0 CARGO_BUILD_JOBS=2 cargo test --offline ===
+=== run started (UTC): 2026-09-12T12:36:29Z ===
+warning: variable does not need to be mutable
+  --> tests/sonnet_c.rs:82:9
+   |
+82 |     let mut f2 = standard();
+   |         ----^^
+   |         |
+   |         help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: `sonnet-c` (test "sonnet_c") generated 1 warning (run `cargo fix --test "sonnet_c" -p sonnet-c` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running tests/sonnet_c.rs (/tmp/sonnet-c-20260912/cargo/debug/deps/sonnet_c-955cae5e13a8bac8)
+
+running 7 tests
+test sc1_snapshot_restore_mid_paused_command_then_resume ... ok
+test sc2_epoch_reset_mid_paused_command_then_resume_refuses_stale_epoch ... ok
+test sc3_store_invariant_violated_is_sticky_across_different_requests_and_blocks_snapshot ... ok
+test sc4_snapshot_with_staged_residue_at_real_frontier_refuses_restore ... ok
+test sc5_max_enqueue_per_wave_semantic_cap_rejects_atomically_without_fail_stop ... ok
+test sc6_conflicting_work_key_extracts_and_reports_conflict_only_and_survives_restore ... ok
+test sc7_reconstruct_completed_refuses_a_history_with_a_non_finalizing_command ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+=== exit code: 0 ===
+=== run finished (UTC): 2026-09-12T12:36:29Z ===
