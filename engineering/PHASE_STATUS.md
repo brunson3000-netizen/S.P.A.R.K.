@@ -154,7 +154,7 @@ in `engineering/phase2/gate_c2_campaign_disposition_evidence_2026-09-12/`. It di
 recorded observation against twelve discriminating diagnostics, closes three declared
 coverage gaps, records one new nonblocking observation (H-OBS-01, a `test-support` seam that
 reports success for a stage it did not perform), and **recommends** Gate C2 acceptance with
-four recorded limitations. It accepts nothing.
+five recorded limitations. It accepts nothing.
 
 ### Historical Gate C1 chronology — superseded status statements
 

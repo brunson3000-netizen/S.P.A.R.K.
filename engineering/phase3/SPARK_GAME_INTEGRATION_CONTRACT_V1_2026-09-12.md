@@ -585,8 +585,11 @@ All fail closed, with a typed refusal and no partial effect:
 **A refused command does not void the boundary's committed work.** When a horizon completes
 but the command itself is not finalized, cohorts committed inside that boundary are real
 committed work: they are published as an ordinary batch, with the typed engine refusal
-carried alongside rather than flattened into a boolean or discarded with the batch. Only the
-two sticky fail-stops publish nothing, because they publish no stable boundary at all.
+carried alongside rather than flattened into a boolean or discarded with the batch. Of the outcomes that
+complete a horizon, only the two sticky fail-stops publish nothing. Several outcomes that do
+**not** complete a horizon also publish nothing, for the same reason — `Paused`,
+`Rejected::Busy`, `Rejected::StaleHorizon` and `Rejected::MessageTooLarge` all leave the
+boundary unpublished.
 
 **Two-level reporting is part of the contract, not an accident.** A request can complete
 (`Outcome::Completed`) while a cohort inside it was rejected. Both levels must be read: the

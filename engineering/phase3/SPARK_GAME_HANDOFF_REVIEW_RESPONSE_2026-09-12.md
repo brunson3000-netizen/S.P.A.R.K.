@@ -11,6 +11,10 @@ authority, working in its own detached worktree and modifying nothing.
 4 NOTE.
 **Full review, preserved verbatim:**
 `handoff_independent_review_2026-09-12/SPARK_GAME_HANDOFF_INDEPENDENT_REVIEW_2026-09-12.md`.
+**Repair verification, preserved verbatim:**
+`handoff_independent_review_2026-09-12/SPARK_GAME_HANDOFF_REPAIR_VERIFICATION_2026-09-12.md`,
+verdict `HANDOFF_REPAIRS_INCOMPLETE` — 10 of 11 findings verified fixed, one (F-04) not, plus
+two new findings NF-01 (MAJOR) and NF-02 (MINOR). Both new findings are dispositioned in §5.
 
 The review independently reproduced and confirmed, among other things: the exact commit
 against live GitHub; that `crates/` is untouched and both crate trees are
@@ -24,6 +28,29 @@ all, so an external consumer cannot serialize it by hand); and, searching every 
 filename and content, that **no Operator acceptance of Gate C2 exists anywhere in the
 repository**.
 
+## 0. A correction to this document, raised by the repair-verification pass
+
+**This document previously reported a correction that had not been made.** Its F-04 row
+stated in detail that "three parties" had been withdrawn from the disposition and described
+the replacement text. The edit had silently failed to apply — it was written against an
+anchor carrying emphasis markers the target line did not have — and nobody noticed, because
+the row was written from intent rather than from the file.
+
+The repair-verification pass caught it, by the direct method of `grep -rn "three parties"`,
+and raised it as **NF-01 (MAJOR)**: two things stood, the original unsubstantiated party
+count and a false statement in the very document meant to let a reviewer navigate the
+corrections.
+
+Both are now fixed, and each fix was asserted to have landed before being committed rather
+than assumed. The failure is recorded here rather than quietly overwritten, for the same
+reason §1 records the D-10 failure: the disposition is what reaches the Operator, and a
+reader who trusted that row was misled.
+
+**The standing lesson, recorded against this document rather than against the reviewer:**
+a claim that an edit was made is a claim about a file, and it must be checked against the
+file. Every edit in the second correction pass is now verified present by an assertion that
+fails loudly if the anchor does not match.
+
 ## Disposition of every finding
 
 | id | severity | disposition |
@@ -31,7 +58,7 @@ repository**.
 | **F-01** | MAJOR | **Accepted and corrected.** See §1. |
 | F-02 | MINOR | **Accepted and corrected.** See §2. |
 | F-03 | MINOR | **Accepted and corrected.** The SONNET "30 novel" figure is withdrawn; the table now reads "not stated by its artifacts", with a sentence explaining that "written for the campaign" and "covering a vector the suite did not" are different claims. |
-| F-04 | MINOR | **Accepted and corrected.** "three parties" is withdrawn. §7.1 item 3 now claims only what the artifacts establish: four passes, none run by the candidate's writer, under collection-only missions, with no count of distinct parties asserted. |
+| F-04 | MINOR | **Accepted, but this row was published before the edit had actually landed — see §0.** The edit is now applied and verified present: §7.1 item 3 claims only what the artifacts establish, with no count of distinct parties. |
 | F-05 | MINOR | **Already corrected before the review returned**, by the writer's own recovery of the same records, in commit `747e44a` (new contract §1.2.2, §4.4 and §11.2). The retention-until-acknowledgment divergence the reviewer specifically named is recorded at §9.3 as a divergence and a candidate resolution of the §9.4 durability gap. See §3. |
 | F-06 | MINOR | **Accepted and corrected.** D-3's zero-budget half now asserts the exact `RuleSetError::ZeroPacingBudget` variant instead of a non-empty error list. |
 | F-07 | MINOR | **Accepted and corrected.** Assertion labels inside `d1` are renumbered "D-1 check *n*", and the disposition states once that a bare `D-n` names a test function while a "check" names an assertion inside one. The §3 row now cites both precisely. |
@@ -138,10 +165,54 @@ verifies the repairs under the same assignment.
 | five Windows/Android `cargo check` targets | PASS — **COMPILE-ONLY** |
 | files under `crates/` changed | **none** |
 
-## 5. What the review did not change
+## 5. The repair-verification pass and its two new findings
+
+The reviewer verified the corrections at `40147801e9ad091840cf9aa2eedf0a537ecf8a18` under the
+same assignment, re-running everything itself: diagnostics **13 passed**, prototype
+**17 passed**, `crates/` untouched at tree `7907f4d729104fd5dbfd4adad46e66cf09aa13dd`,
+workspace still exactly three members. It confirmed **10 of 11** findings fixed, and went
+further than verification in three places worth recording:
+
+- it **independently recomputed** the D-10 oracle by hand before running anything (58 at
+  t=19, 68 after the body), then reproduced A=68, B=68, C=60 with its own probe;
+- it **closed by exhaustion** the residual question the writer could not settle from the
+  author's position — whether body B could take the additive path with a clamp applied
+  downstream. `Update::Clamp` reaches a runtime value at exactly two sites in the engine, one
+  unreachable for a two-operation body and the other downstream of the `settled()` call, and
+  the declared `ValueConstraint` refuses rather than clamps. The hypothetical path does not
+  exist at this tree;
+- it **attacked SF-01 harder than the shipped regression tests** — three due times, budget 1,
+  and on every pause both a `Busy` interloper and a stale-horizon request — and found exactly
+  three intents at canonical times `[5, 6, 7]`, no loss, no duplication, no double publish.
+
+It also recorded one honest limit the writer should not paper over: **path selection is not
+observable through the report surface.** `write_path` and `Provenance` are identical for both
+bodies, so D-10 establishes the path by its positive control plus source facts rather than by
+direct assertion. That is inherent to a hypothesis asserting the two paths agree — no
+value-based observation can separate them, and the pinned tree exposes no walk counter.
+
+### NF-01 (MAJOR) — a reported correction that had not been made
+
+**Accepted in full.** See §0. The F-04 edit is applied and its presence asserted; this
+document's false row is corrected and the failure recorded rather than overwritten.
+
+### NF-02 (MINOR) — an under-scoped sentence in contract §9.5
+
+**Accepted and corrected.** The sentence "Only the two sticky fail-stops publish nothing" was
+true within its paragraph's subject — outcomes at a completed horizon — and false read across
+all outcomes, since `Paused`, `Rejected::Busy`, `Rejected::StaleHorizon` and
+`Rejected::MessageTooLarge` also publish nothing, for the same reason. It is now scoped to the
+outcomes that complete a horizon and names the other unpublished cases explicitly. The
+reviewer classified this as understating rather than overstating the code, and separately
+verified by probe that the paragraph's load-bearing premise holds: after an unfinalized
+command the frontier is intact and a stable-boundary snapshot is still publishable, so calling
+that boundary's cohorts committed work is sound.
+
+## 6. What the review did not change
 
 No gate is accepted. No reserved choice is frozen. The contract remains a candidate, Gate C3
 is not frozen, Gate C4 is not begun, no G.A.M.E. file is modified, and production is neither
-merged nor deployed. The Gate C2 acceptance recommendation stands, with its four recorded
-limitations and now a fifth fact on its face: one of the diagnostics supporting it had to be
-replaced after independent review.
+merged nor deployed. The Gate C2 acceptance recommendation stands, with its five recorded
+limitations and now two further facts on its face: one of the diagnostics supporting it had to
+be replaced after independent review, and this response document itself had to be corrected
+after reporting a fix that had not been made.

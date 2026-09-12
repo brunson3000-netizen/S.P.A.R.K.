@@ -211,7 +211,7 @@ Nothing in this disposition modifies any file under `crates/`.
 ## 7. Gate C2 acceptance recommendation
 
 **Recommendation: ACCEPT Gate C2 at `67b877192cc78b75c6fbe60c69b5594dc10befe8`, with the
-four limitations of §7.2 recorded on the face of the acceptance.**
+five limitations of §7.2 recorded on the face of the acceptance.**
 
 This is a recommendation to the Operator. **It is not an acceptance, and no Operator
 acceptance of Gate C2 exists in this repository.** A search of the engineering records finds
@@ -226,8 +226,10 @@ campaign finds." That campaign has now run, and this document is the "whatever i
    new blocking code defect established.
 2. 427 workspace tests, formatting, all-target clippy, strict lint, metadata and five static
    cross-target builds pass on that exact tree.
-3. Four adversarial passes by three parties other than the candidate's writer found **zero**
-   reproducible defects.
+3. Four adversarial passes, none of them run by the candidate's writer, found **zero**
+   reproducible defects. The artifacts establish that the passes were separate sessions under
+   collection-only missions; they do not establish a count of distinct parties, and none is
+   claimed here.
 4. Every observation those passes recorded now has a **discriminating** disposition, not an
    argument from source reading — thirteen diagnostics, all passing. Twelve are
    discriminating in the strict sense: each would have come out differently had the defect
@@ -246,7 +248,13 @@ campaign finds." That campaign has now run, and this document is the "whatever i
 2. **C2W-RN01 and C2W-RN02 stand uncorrected by choice** (§4). RN02 in particular means the
    documented per-wave settlement walk count understates actual work.
 3. **H-OBS-01 stands unrepaired** (§3.1): a `test-support` seam can mislead a future tester.
-4. **Durability, crash recovery, G.A.M.E. integration, performance evidence and executable
+4. **Two documents supporting this recommendation had to be corrected after independent
+   review.** One diagnostic (D-10, §3.2) proved reproducibility while claiming to prove
+   idempotence, and the accompanying review-response document reported a correction to §7.1
+   item 3 that had not in fact been applied. Both are fixed and both failures are recorded
+   in place. The Operator should weigh that this material needed two rounds of independent
+   correction, not only that it passed the second.
+5. **Durability, crash recovery, G.A.M.E. integration, performance evidence and executable
    Windows/Android parity remain later gates.** Snapshot/restore evidence is in-memory
    round-trip evidence; it is not durable process-recovery proof, and the cross-platform
    evidence is compile-only.
