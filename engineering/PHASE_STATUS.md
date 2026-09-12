@@ -1,6 +1,6 @@
 # S.P.A.R.K. Engineering Status
 
-**Updated:** 2026-09-11
+**Updated:** 2026-09-12
 **Branch:** `phase1-refoundation-v2`  
 **Status basis:** Operator acceptance of candidate `5ecc95c033bf3a7744bb7862bf959066e6561670`, independently reviewed at `e55b1da1c9049b1de58fcb06c65eea59939f2a57`
 
@@ -16,7 +16,11 @@ The active cross-project operating record is:
 
 `engineering/SPARK_GAME_CONVERGENCE_PROTOCOL_V1.md`
 
-The Operator has now accepted and frozen the independently reviewed V3-F01 Revision-2 correction. V3-F01 is CLOSED. S.P.A.R.K. Gate C1 is satisfied. The Operator authorized Gate C2 (Phase-2 implementation) on 2026-09-11; its writer candidate was independently reviewed (bounded revision required), and the bounded-revision candidate awaits a fresh independent review; nothing is promoted to production. Phase 3 remains unauthorized. G.A.M.E. integration requirements and test fixtures may be prepared within the existing protocol; no joint integration readiness or G.A.M.E. state change is claimed.
+The Operator has now accepted and frozen the independently reviewed V3-F01 Revision-2 correction. V3-F01 is CLOSED. S.P.A.R.K. Gate C1 is satisfied. The Operator authorized Gate C2 (Phase-2 implementation) on 2026-09-11; the Gate C2 candidate series ran through bounded revisions, a decay adjudication and write resolution, and the C2W-01 contract correction, which an independent review returned `GATE_C2_W01_CORRECTION_KEEP` on 2026-09-12. An adversarial campaign then ran against that exact pinned candidate and found no reproducible defect.
+
+**Gate C2 acceptance is the Operator's decision and has not been given.** Nothing is promoted to production.
+
+On 2026-09-12 the Operator authorized Phase-3 connection work within the safe-handoff objective, subject to existing predecessor gates (`engineering/SPARK_GAME_SAFE_HANDOFF_MISSION_2026-09-12.md`). Because Gate C2 acceptance is the controlling predecessor, only the working material protocol §6 permits has been produced: the integration-contract candidate and its test fixtures and prototype. No production device surface, no G.A.M.E. adapter, no contract freeze, no joint integration readiness and no G.A.M.E. state change is claimed.
 
 ## Phase 0
 
@@ -49,7 +53,7 @@ No Phase-1 semantic identity, encoding, conflict, authority, or determinism inva
 
 ## Phase 2
 
-**ARCHITECTURE CORRECTION ACCEPTED AND FROZEN. V3-F01 CLOSED. GATE C2 BOUNDED-REVISION CANDIDATE AWAITING INDEPENDENT REVIEW.**
+**ARCHITECTURE CORRECTION ACCEPTED AND FROZEN. V3-F01 CLOSED. GATE C2 CANDIDATE INDEPENDENTLY KEPT AND ADVERSARIALLY TESTED; ACCEPTANCE IS THE OPERATOR'S DECISION AND HAS NOT BEEN GIVEN.**
 
 The controlling Operator acceptance is
 `engineering/phase2/SPARK_PHASE_2_V3_F01_OPERATOR_ACCEPTANCE_FREEZE_2026-09-10.md`.
@@ -124,6 +128,33 @@ passed, 0 failed, 0 ignored (232 inherited unmodified); formatting, all-target c
 strict lint, metadata, five static targets and 45 external compile probes pass. Nine
 representation choices are flagged for review. Nothing is accepted or promoted;
 production is unchanged; Phase 3 remains unauthorized.
+
+### Gate C2 — C2W-01 correction, independent KEEP and adversarial campaign (2026-09-12)
+
+The pinned tested candidate is `67b877192cc78b75c6fbe60c69b5594dc10befe8` on
+`candidate/phase2-gate-c2-w01-correction-20260912`, crate tree
+`7907f4d729104fd5dbfd4adad46e66cf09aa13dd`. Independent review
+`21a4fec666ca493f6ac4d5194ec6e9c5380ce40c` returned `GATE_C2_W01_CORRECTION_KEEP`; C2W-01 is
+closed. Fresh validation on that exact tree: **427 workspace tests passed, 0 failed, 0
+ignored**, with formatting, all-target/all-feature clippy, strict core/engine lint,
+`cargo metadata`, whitespace and five static Windows/Android target builds passing. Two
+nonblocking report-accuracy qualifications, C2W-RN01 and C2W-RN02, are recorded and
+deliberately uncorrected.
+
+The Operator's next authorized step
+(`engineering/phase2/SPARK_PHASE_2_GATE_C2_OPERATOR_NEXT_AUTHORIZED_STEP_2026-09-12.md`) was
+an adversarial campaign against that pinned build by independent testers who may not repair
+product code. Four passes ran — the original LUNA and SONNET campaigns and two bounded
+collection-only continuations of their unused window time — for roughly 32 minutes of a
+nominal 60, finding **zero reproducible defects**.
+
+The consolidated disposition is
+`engineering/phase2/SPARK_PHASE_2_GATE_C2_CAMPAIGN_DISPOSITION_2026-09-12.md`, with evidence
+in `engineering/phase2/gate_c2_campaign_disposition_evidence_2026-09-12/`. It disposes every
+recorded observation against twelve discriminating diagnostics, closes three declared
+coverage gaps, records one new nonblocking observation (H-OBS-01, a `test-support` seam that
+reports success for a stage it did not perform), and **recommends** Gate C2 acceptance with
+four recorded limitations. It accepts nothing.
 
 ### Historical Gate C1 chronology — superseded status statements
 
@@ -350,7 +381,29 @@ was written.
 
 ## Phase 3
 
-**NOT AUTHORIZED.**
+**CONNECTION WORK AUTHORIZED WITHIN THE SAFE-HANDOFF OBJECTIVE; BLOCKED ON GATE C2
+ACCEPTANCE FOR EVERYTHING BEYOND PROTOCOL §6 WORKING MATERIAL.**
+
+Produced on `candidate/spark-game-safe-handoff-20260912`:
+
+- `engineering/phase3/SPARK_GAME_INTEGRATION_CONTRACT_V1_2026-09-12.md` — the Gate C3
+  contract **candidate**, covering every surface the protocol enumerates. It recovers and
+  cites G.A.M.E.'s own accepted direction (`GAME_PRODUCT_DESIGN_FOUNDATION_V1.md` §11.3,
+  CANONICAL/Operator-approved), distinguishes settled decisions from engineering proposals,
+  leaves embedded-versus-service, transport and serialization unselected, and states the
+  durability gap rather than resolving it. **Not frozen.**
+- `engineering/phase3/spark_game_contract_prototype_2026-09-12/` — a contained, reversible
+  prototype permitted by protocol §6. It runs the protocol's canonical first causal sequence
+  end to end across the real S.P.A.R.K. surface against a **fake** host: 14 tests pass, fmt
+  and clippy with warnings denied pass, five cross-target checks pass **compile-only**. A
+  fake host is preparatory evidence only, never proof of G.A.M.E. integration.
+- `engineering/phase3/SPARK_GAME_CONTRACT_V1_SELF_CORRECTION_REPORT_2026-09-12.md` — six
+  author-found corrections, including a blocking prototype defect that dropped every intent
+  committed before a pause in a paced request.
+
+Blocked until Gate C2 acceptance: freezing the contract (Gate C3), implementing the
+production device surface, implementing the G.A.M.E. adapter (Gate C4), and building the
+minimal persistent boundary a restart-safe handoff needs.
 
 ## Cross-platform acceptance frontier
 
