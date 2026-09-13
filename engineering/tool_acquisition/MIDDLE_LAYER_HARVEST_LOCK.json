@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "program": "SPARK external tool acquisition",
+  "lane": "agent-tool-middle-layer",
+  "harvested_at": "2026-09-13",
+  "state": "PINNED_SOURCE_ONLY",
+  "activation": "NONE",
+  "auto_checkout": false,
+  "thesis": "Keep the agent-facing doorway small while discovery, teaching, governance, execution, evidence retention, isolation, and observability scale behind it.",
+  "policy": {
+    "submodule_update": "none",
+    "shallow_recommended": true,
+    "runtime_dependency_introduction": false,
+    "hook_activation": false,
+    "gateway_activation": false,
+    "consumer_adoption": false
+  },
+  "sources": [
+    {"id":"ard-spec","priority":"P0","category":"resource_discovery_standard","repo":"ards-project/ard-spec","url":"https://github.com/ards-project/ard-spec.git","branch":"main","commit":"b76f235a8f461876ad4f1e77abd0eb0eb302b48d","path":"external/harvest/middle_layer/ard-spec","purpose":"Open federated discovery standard for agentic resources before invocation"},
+    {"id":"progressive-mcp-guardian","priority":"P0","category":"progressive_tool_disclosure","repo":"S1LV3RJ1NX/mcp-guardian","url":"https://github.com/S1LV3RJ1NX/mcp-guardian.git","branch":"main","commit":"4c6a04537b9bc548744b4146168b8fa9896069cb","path":"external/harvest/middle_layer/progressive-mcp-guardian","purpose":"Three-meta-tool search/schema/execute proxy with tool scoping and audit"},
+    {"id":"mcp-gateway-registry","priority":"P0","category":"governed_registry","repo":"agentic-community/mcp-gateway-registry","url":"https://github.com/agentic-community/mcp-gateway-registry.git","branch":"main","commit":"7c353798fa7d4da6ca1b3f3d2c502505bfbb8f73","path":"external/harvest/middle_layer/mcp-gateway-registry","purpose":"Unified registry/control-plane reference for servers, agents, skills, discovery, access, audit and A2A"},
+    {"id":"context-compress","priority":"P0","category":"evidence_preserving_context_reduction","repo":"Open330/context-compress","url":"https://github.com/Open330/context-compress.git","branch":"main","commit":"59fae35a7b383876a34f84090f6da978e230795a","path":"external/harvest/middle_layer/context-compress","purpose":"Compact agent-visible tool output while preserving indexed searchable original material"},
+    {"id":"agent-skills-spec","priority":"P0","category":"capability_teaching_standard","repo":"agentskills/agentskills","url":"https://github.com/agentskills/agentskills.git","branch":"main","commit":"69ef37e9424c0a7ea9dd2293b559e43ec8176379","path":"external/harvest/middle_layer/agent-skills-spec","purpose":"Open SKILL.md format for on-demand procedural knowledge, scripts, references and assets"},
+    {"id":"agentgateway","priority":"P1","category":"governed_protocol_gateway","repo":"agentgateway/agentgateway","url":"https://github.com/agentgateway/agentgateway.git","branch":"main","commit":"5e5633bffe6dc5fdd29256648987197f366e462a","path":"external/harvest/middle_layer/agentgateway","purpose":"MCP/A2A/LLM routing with budgets, RBAC, security and OpenTelemetry"},
+    {"id":"agenttrace","priority":"P1","category":"trajectory_observability","repo":"Klepsiphron/agenttrace","url":"https://github.com/Klepsiphron/agenttrace.git","branch":"main","commit":"9a10f9aae3bc508ddca83093b2d25aede5ad5bd0","path":"external/harvest/middle_layer/agenttrace","purpose":"Local-first multi-agent trajectory and parent/child flight-recorder reference"},
+    {"id":"openziti-mcp-gateway","priority":"P1","category":"zero_trust_tool_access","repo":"openziti/mcp-gateway","url":"https://github.com/openziti/mcp-gateway.git","branch":"main","commit":"8f99623d95d2f5223d2fa12b9f125688d8c80bf9","path":"external/harvest/middle_layer/openziti-mcp-gateway","purpose":"Cryptographic identity, zero-trust transport and tool-filtering reference"},
+    {"id":"e2b-runtime","priority":"P2","category":"disposable_sandbox_runtime","repo":"e2b-dev/runtime","url":"https://github.com/e2b-dev/runtime.git","branch":"main","commit":"cf6961c4b9c8fb919a5b372f0d8c4cd3216aa497","path":"external/harvest/middle_layer/e2b-runtime","purpose":"Firecracker microVM runtime, snapshots and disposable isolated execution prior art"},
+    {"id":"agent-observability","priority":"P2","category":"tool_call_audit","repo":"KryptosAI/agent-observability","url":"https://github.com/KryptosAI/agent-observability.git","branch":"main","commit":"2658eef467225f376e2e92dc1465839eda2bc113","path":"external/harvest/middle_layer/agent-observability","purpose":"Local tool-call, failure, token, cost and audit instrumentation reference"},
+    {"id":"ctx-zip","priority":"P2_REFERENCE","category":"combined_disclosure_and_context_reduction","repo":"karthikscale3/ctx-zip","url":"https://github.com/karthikscale3/ctx-zip.git","branch":"main","commit":"76580f7ba1555c891928702743ac74412c7fac60","path":"external/harvest/middle_layer/ctx-zip","purpose":"Comparison reference combining on-demand tools with retrievable compacted outputs","disposition_note":"Architecturally relevant but older/staler than current P0/P1 candidates; do not prefer without qualification"}
+  ]
+}

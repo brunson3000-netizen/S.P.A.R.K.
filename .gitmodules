@@ -158,3 +158,61 @@
 	url = https://github.com/slsa-framework/slsa-verifier.git
 	update = none
 	shallow = true
+
+# Agent-tool middle-layer references are pinned as research evidence only.
+# They do not auto-checkout and do not grant runtime or adoption authority.
+[submodule "external/harvest/middle_layer/progressive-mcp-guardian"]
+	path = external/harvest/middle_layer/progressive-mcp-guardian
+	url = https://github.com/S1LV3RJ1NX/mcp-guardian.git
+	update = none
+	shallow = true
+[submodule "external/harvest/middle_layer/context-compress"]
+	path = external/harvest/middle_layer/context-compress
+	url = https://github.com/Open330/context-compress.git
+	update = none
+	shallow = true
+[submodule "external/harvest/middle_layer/ctx-zip"]
+	path = external/harvest/middle_layer/ctx-zip
+	url = https://github.com/karthikscale3/ctx-zip.git
+	update = none
+	shallow = true
+[submodule "external/harvest/middle_layer/mcp-gateway-registry"]
+	path = external/harvest/middle_layer/mcp-gateway-registry
+	url = https://github.com/agentic-community/mcp-gateway-registry.git
+	update = none
+	shallow = true
+[submodule "external/harvest/middle_layer/agentgateway"]
+	path = external/harvest/middle_layer/agentgateway
+	url = https://github.com/agentgateway/agentgateway.git
+	update = none
+	shallow = true
+[submodule "external/harvest/middle_layer/agent-skills-spec"]
+	path = external/harvest/middle_layer/agent-skills-spec
+	url = https://github.com/agentskills/agentskills.git
+	update = none
+	shallow = true
+[submodule "external/harvest/middle_layer/e2b-runtime"]
+	path = external/harvest/middle_layer/e2b-runtime
+	url = https://github.com/e2b-dev/runtime.git
+	update = none
+	shallow = true
+[submodule "external/harvest/middle_layer/agenttrace"]
+	path = external/harvest/middle_layer/agenttrace
+	url = https://github.com/Klepsiphron/agenttrace.git
+	update = none
+	shallow = true
+[submodule "external/harvest/middle_layer/agent-observability"]
+	path = external/harvest/middle_layer/agent-observability
+	url = https://github.com/KryptosAI/agent-observability.git
+	update = none
+	shallow = true
+[submodule "external/harvest/middle_layer/openziti-mcp-gateway"]
+	path = external/harvest/middle_layer/openziti-mcp-gateway
+	url = https://github.com/openziti/mcp-gateway.git
+	update = none
+	shallow = true
+[submodule "external/harvest/middle_layer/ard-spec"]
+	path = external/harvest/middle_layer/ard-spec
+	url = https://github.com/ards-project/ard-spec.git
+	update = none
+	shallow = true
