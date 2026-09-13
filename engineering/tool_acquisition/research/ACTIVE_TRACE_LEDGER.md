@@ -12,15 +12,34 @@ This file is the durable checkpoint for ongoing external-tool reverse engineerin
 ## P0 trace queue
 
 ### T-ARD-01 — Agentic Resource Discovery
-State: QUEUED
+State: IN_PROGRESS
 Goal: trace query → registry/resource match → descriptor retrieval → invocation handoff; identify exact separation between discovery and execution/authority.
 Deliverables: source note, pattern card, failure notes, interface burden estimate, disposition.
 
 ### T-MCPG-01 — Progressive MCP Guardian
-State: IN_PROGRESS
-Goal: trace `search_tools` → `get_schema` → `execute_tool` through actual handlers, scope enforcement, upstream call and audit path; inspect tests protecting blocked tools and schema exposure.
-Known so far: public agent surface is three meta-tools; source pin `4c6a04537b9bc548744b4146168b8fa9896069cb`.
-Open: exact modules/functions and test coverage.
+State: FIRST TRACE COMPLETE
+Source pin: `4c6a04537b9bc548744b4146168b8fa9896069cb`
+Record: `sources/PROGRESSIVE_MCP_GUARDIAN.md`
+Pattern: `patterns/PROGRESSIVE_TOOL_DISCLOSURE.md`
+
+Confirmed path:
+- startup probes upstream `list_tools`
+- deterministic allow/block filtering builds `ToolIndex`
+- agent sees exactly `search_tools`, `get_schema`, `execute_tool`
+- execute checks index membership, audits, forwards via `UpstreamManager.call_tool`, audits result
+
+Confirmed invariants/tests:
+- exactly three exposed tools
+- blocked tools absent from search/schema/execute
+- upstream/auth failures become structured envelopes
+- execution call/result audit logging
+
+Important gaps recorded:
+- discovery index doubles as execution admission; no independent call-time authority layer
+- stored schema is not proxy-locally enforced against params before forwarding
+- static-header/token-passthrough helper is tested but disconnected from the traced active upstream path; proxy client headers currently empty
+
+Primary disposition: EXPERIMENT_NOW for progressive disclosure; authority coupling explicitly not adopted.
 
 ### T-MCPREG-01 — MCP Gateway & Registry
 State: QUEUED
@@ -49,4 +68,4 @@ H5 — Deterministic middleware should absorb catalog filtering, evidence indexi
 
 ## Next durable update
 
-Record actual file/function/test paths for T-MCPG-01, then create the first pattern card for progressive tool disclosure. Do not advance T-MCPG-01 to COMPLETE until implementation path and failure semantics are evidenced.
+Complete T-ARD-01 first execution-path trace and compare ARD’s discovery boundary against MCP Guardian’s three-meta-tool pattern. Do not infer execution authority from ARD discovery semantics.
