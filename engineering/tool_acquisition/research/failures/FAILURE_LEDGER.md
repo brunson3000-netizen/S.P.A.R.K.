@@ -81,3 +81,15 @@ S.P.A.R.K. LESSON: the middle layer needs an explicit deterministic descriptor-r
 TRANSFER CONFIDENCE: HIGH.
 DISPOSITION: BORROW_PATTERN with local completion of the learn/resolve step.
 EVIDENCE: `sources/ARD.md` and ARD spec.
+
+## F-008 — Legacy method/tool fallback blurs authorization namespaces
+
+OBSERVED IN: MCP Gateway & Registry `auth_server/server.py::validate_server_tool_access` @ `7c353798...`.
+CAUSE: for non-HTTP MCP methods not admitted by the `methods` list, compatibility logic also checks the `tools` list. A tools wildcard (`*`/`all`) can therefore admit a non-`tools/call` MCP method through the legacy fallback.
+PROJECT RESPONSE: HTTP verbs were explicitly hardened so they never fall back to tools; MCP compatibility fallback remains.
+DID IT WORK?: preserves legacy scope behavior, but weakens the conceptual separation between protocol-method authority and specific-tool authority.
+BOUNDARY AFFECTED: protocol method ↔ tool capability authorization.
+S.P.A.R.K. LESSON: do not share wildcard/value namespaces between protocol operations and executable capabilities. Model them as structurally separate grant types.
+TRANSFER CONFIDENCE: HIGH for the pinned source path.
+DISPOSITION: ARCHIVE_REFERENCE / negative acceptance criterion.
+EVIDENCE: `sources/MCP_GATEWAY_REGISTRY.md`; upstream `auth_server/server.py`.
