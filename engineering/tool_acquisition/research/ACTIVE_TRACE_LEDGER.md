@@ -20,43 +20,45 @@ Repository records, not conversation history, carry research state. Research met
 | T-SLICE-01 | ast-grep + Tree-sitter | `45b5eb67...` / `1b8407d1...` | `sources/AST_GREP_TREE_SITTER.md` | EXPERIMENT_NOW |
 | T-TESTUTIL-01 | cargo-nextest + cargo-mutants | `8527c325...` / `fe82f183...` | `sources/CARGO_NEXTEST_MUTANTS.md` | EXPERIMENT_NOW |
 | T-FAULT-01 | wiremock-rs + Toxiproxy | `6b193047...` / `40f7fd31...` | `sources/WIREMOCK_TOXIPROXY.md` | EXPERIMENT_NOW |
+| T-RTK-01 | RTK + context-compress comparison | `d0c29851...` / `59fae35a...` | `sources/RTK.md` | EXPERIMENT_NOW |
 
-## Latest completed trace — provider/federation failure replay
+## Latest completed trace — output reduction
 
-Pattern: `patterns/SEMANTIC_PLUS_TRANSPORT_FAULT_REPLAY.md`
-Experiment: `experiments/PROVIDER_FAILURE_REPLAY.md`
+Comparison: `comparison/OUTPUT_REDUCTION_MATRIX.md`
+Experiment: `experiments/OUTPUT_REDUCTION_BENCHMARK.md`
+Failures: `failures/RTK.md`
 
 Confirmed:
-- wiremock-rs supplies isolated HTTP mock servers, request matchers, static/dynamic responses, call-count expectations and received-request recording
-- Toxiproxy inserts a real TCP proxy controlled over HTTP with dynamic upstream/downstream toxic chains
-- semantic provider errors and transport faults should be exercised independently and jointly
-- acceptance fixtures should use fixed toxics (`toxicity=1`, jitter 0, explicit timeout/reset/limit values); randomized chaos is a separate stress lane
-- wiremock records requests by default, so real credentials must not enter qualification evidence
-- Toxiproxy harness failure is infrastructure failure, not proof the application handled the intended fault.
-
-Likely reuse after experiment:
-- wiremock-rs → Rust dev dependency/provider fixture substrate
-- Toxiproxy → isolated pinned fault-injection sidecar.
+- RTK is an executing CLI proxy, not merely a formatter; command modules run the underlying command and preserve its exit code
+- hook/plugin integration can automatically rewrite agent shell commands, but this execution-affecting middleware should not become SPARK canonical authority
+- large deterministic command-specific filter library is the strongest reusable asset
+- current recall layer stores byte-faithful compressed raw bytes for sufficiently large failures and filter-declared successful truncations
+- default recall bounds are 10 MiB/entry, 200 entries, 30 days; ordinary successful compressed output is not universally captured
+- recall uses a 12-hex-character SHA-256 prefix as local primary/display ID, unsuitable for canonical evidence identity
+- filter/recovery integration depends on command modules calling shared recovery helpers
+- context-compress contributes generic source-scoped search but not byte-exact evidence
+- strongest combined shape is `authorized operation → immutable raw full-digest artifact → RTK-like reducer → searchable derived index → compact view`.
 
 ## Active trace
 
-### T-RTK-01 — RTK vs context-compress
+### T-CONTAIN-01 — Goose + Wasmtime + Extism
 State: IN_PROGRESS
-Pin: RTK `d0c2985155568d1d76fca03bc65d5098f136bbcd`
-Comparison source: context-compress `59fae35a7b383876a34f84090f6da978e230795a`
+Pins:
+- Goose `50666ae0b9a51e260b52b7efbab2e4e020346e94`
+- Wasmtime `817c58787f432bcdbbb87679011f72c5bc80dbda`
+- Extism `d5da29759bba88645f886d9e12d3f4e4376df7b3`
 
-Goal: determine what RTK contributes beyond searchable spillover, whether its command-specific compression preserves load-bearing evidence, and whether automatic command rewriting/hooking is suitable for SPARK.
+Goal: determine the strongest reusable containment/security mechanisms for running external or generated capability code beneath SPARK’s host-owned authority.
 
 Priority traces:
-1. command interception/routing path and whether RTK executes commands itself or filters supplied output
-2. command-specific parsers/compressors and fallback behavior
-3. exit code/stderr/error preservation and maximum-output policies
-4. token-reduction accounting and test evidence
-5. hook/auto-rewrite mechanism and trust/authority implications
-6. controlled comparison: raw output vs RTK vs searchable-spillover + raw artifact.
+1. Goose: tool-call security inspectors, permission/repetition/egress/adversary handling; which checks are deterministic versus model-assisted
+2. Wasmtime/WASI: filesystem/network capability grants, preopens, resource limits, fuel/epoch interruption, memory/table/instance bounds and host-function boundary
+3. Extism: manifest/path/host grants, WASI enablement, filesystem permission model, init/call fuel/resource limits and host functions
+4. compare raw Wasmtime versus Extism as a plugin runtime for narrow deterministic adapters
+5. extract explicit failure lessons: sandbox substrate is not authority; host functions widen capability; resource limits are not all equivalent to wall-clock containment; filesystem capability semantics need adversarial tests.
 
-Standing requirement: compression cannot be canonical evidence custody. Any promoted pattern must retain a separate immutable raw artifact or reproducible source operation.
+Standing doctrine: containment can restrict what admitted code can do, but only SPARK’s host broker can decide whether the code should run and with which grants.
 
 ## Next durable update
 
-Complete RTK comparison, then qualify containment/security candidates Goose, Wasmtime and Extism.
+Close Goose first, then Wasmtime and Extism with a containment comparison matrix and a bounded plugin-boundary experiment. After containment, continue remaining harvested middle-layer/observability candidates.
