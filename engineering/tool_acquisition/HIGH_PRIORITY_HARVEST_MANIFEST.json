@@ -1,6 +1,7 @@
 {
   "schema_version": "spark-tool-harvest/v0",
   "created_utc": "2026-09-13T15:04:21Z",
+  "updated_utc": "2026-09-13T16:45:00Z",
   "state": "HARVESTED_AS_PINNED_SUBMODULES",
   "authority_note": "Source acquisition only. No runtime/dependency/adoption authority implied.",
   "candidates": [
@@ -16,7 +17,8 @@
     {"id":"toxiproxy","repository":"https://github.com/Shopify/toxiproxy.git","commit":"40f7fd31bee529d824116bd2a11a9e3425e904ec","purpose":"network fault injection for provider/tool paths","license_status":"COPY_AND_REVIEW_UPSTREAM_LICENSE_FILES_BEFORE_CODE_REUSE"},
     {"id":"wiremock-rs","repository":"https://github.com/LukeMathWalker/wiremock-rs.git","commit":"6b193047bf2c5626da5dc5f3a23b58ab9bd3f130","purpose":"Rust HTTP mocking/provider cassette substrate","license_status":"COPY_AND_REVIEW_UPSTREAM_LICENSE_FILES_BEFORE_CODE_REUSE"},
     {"id":"cargo-nextest","repository":"https://github.com/nextest-rs/nextest.git","commit":"8527c325bf9f0e5dcdcb26fa80e3ed7dc7f3e35e","purpose":"fast structured Rust test execution","license_status":"COPY_AND_REVIEW_UPSTREAM_LICENSE_FILES_BEFORE_CODE_REUSE"},
-    {"id":"cargo-mutants","repository":"https://github.com/sourcefrog/cargo-mutants.git","commit":"fe82f1832778a591ab74248010fb40e699defafe","purpose":"Rust mutation testing/falsification","license_status":"COPY_AND_REVIEW_UPSTREAM_LICENSE_FILES_BEFORE_CODE_REUSE"}
+    {"id":"cargo-mutants","repository":"https://github.com/sourcefrog/cargo-mutants.git","commit":"fe82f1832778a591ab74248010fb40e699defafe","purpose":"Rust mutation testing/falsification","license_status":"COPY_AND_REVIEW_UPSTREAM_LICENSE_FILES_BEFORE_CODE_REUSE"},
+    {"id":"rtk","repository":"https://github.com/rtk-ai/rtk.git","commit":"d0c2985155568d1d76fca03bc65d5098f136bbcd","purpose":"Rust CLI proxy for deterministic compression/filtering of coding-agent shell output; token/context reduction","license_status":"COPY_AND_REVIEW_UPSTREAM_LICENSE_FILES_BEFORE_CODE_REUSE"}
   ],
   "harvest_path": "external/harvest/high_priority",
   "verification": "engineering/tool_acquisition/scripts/verify_high_priority_sources.sh"
