@@ -1,0 +1,10 @@
+{
+  "id": "rtk",
+  "name": "Rust Token Killer",
+  "repository": "https://github.com/rtk-ai/rtk.git",
+  "default_branch": "develop",
+  "commit": "d0c2985155568d1d76fca03bc65d5098f136bbcd",
+  "path": "external/harvest/high_priority/rtk",
+  "state": "PINNED_SOURCE_ONLY",
+  "activation": "NONE"
+}
