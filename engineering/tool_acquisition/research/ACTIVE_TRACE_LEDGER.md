@@ -33,38 +33,50 @@ State: FIRST TRACE COMPLETE
 Source pin: `59fae35a7b383876a34f84090f6da978e230795a`
 Record: `sources/CONTEXT_COMPRESS.md`
 Pattern: `patterns/SEARCHABLE_SPILLOVER.md`
-
-Confirmed path:
-- execution captures stdout/stderr under hard timeout/cap
-- presentation result is compressed/budgeted separately from `indexableStdout`
-- large intent-bearing output is indexed into FTS5 and searched only within the new source ID
-- search returns bounded BM25/trigram/fuzzy snippets and is globally response-budgeted
-
-Critical correction:
-- indexed corpus is not immutable/raw evidence: ANSI is stripped; capture hard cap can stop later bytes; chunking trims/drops some structure and overlaps some plain-text chunks; default search hit is a snippet (up to ~1500 chars), not a full raw-section read; store is ephemeral by default and maxIndexedSources defaults to 500.
-- the upstream phrase “retrieve full content of any section” is stronger than the actual search API guarantee.
-- `round-trip.test.ts` proves identical search hits after persistent reopen, not original-input reconstruction.
-
-Security boundary:
-- “sandboxed subprocess” is not OS containment. Project security docs explicitly trust the LLM and state no OS-level sandbox + unrestricted outbound network.
-
-Disposition: BORROW_PATTERN for searchable spillover, with mandatory SPARK strengthening:
-`immutable raw artifact → derived search index → compact agent view`.
+Disposition: BORROW_PATTERN with mandatory strengthening: `immutable raw artifact → derived search index → compact agent view`.
 
 ### T-SKILL-01 — Agent Skills
+State: FIRST TRACE COMPLETE
+Source pin: `69ef37e9424c0a7ea9dd2293b559e43ec8176379`
+Record: `sources/AGENT_SKILLS.md`
+Pattern: `patterns/SKILLS_TEACH_AUTHORITY_ACTS.md`
+
+Confirmed:
+- portable skill = directory with required `SKILL.md`; optional scripts/references/assets
+- three-tier disclosure: metadata → full instructions → supporting resources
+- catalog can be only name/description/location; reference generator uses that shape
+- dedicated activation can constrain names, list resources and enforce consent/permissions
+- project-level skills conventionally shadow user-level skills
+- project skills may be untrusted; client guide recommends a trust gate
+- `allowed-tools` exists but is explicitly experimental
+- bundled scripts can execute arbitrary ecosystem/package tooling; tool/script authority is outside the spec
+
+SPARK implication:
+- prefer `SKILL.md` compatibility as teaching package prior art
+- add host-owned canonical identity/provenance/version/trust
+- skill activation never grants executable authority
+- resource readability and script/tool execution are separate permissions
+
+Disposition: BORROW_PATTERN.
+
+### T-GROKBUILD-01 — xai-org/grok-build
 State: IN_PROGRESS
-Goal: trace discovery → metadata load → `SKILL.md` load → optional scripts/references/assets; identify minimum interoperable format, progressive loading behavior, and trust/authority gaps.
-Source pin: `69ef37e9424c0a7ea9dd2293b559e43ec8176379`.
+Source pin: `37949780c144e37df692e3d669051a21fec24f20` (main, observed 2026-09-13)
+Repository: `xai-org/grok-build`
+License: Apache-2.0
+Language: Rust
+Initial relevance: coding-agent harness/TUI with durable memory, agent-host daemon, MCP startup, workflow pause/stop, folder-trust startup gate, subagents, telemetry and session/workspace controls visible in current source revision metadata.
+Goal: trace the actual worker/host/session/tool/memory paths, not feature descriptions. Priority questions: what state is authoritative, how tool authority is gated, how subagents/workflows are bounded, how memory is isolated/durable, how MCP/extensions are loaded, and what the model sees.
 
 ## Cross-project hypotheses under test
 
 H1 — Tiny doorway: large capability universes can be exposed through a small discovery/learning/execution surface without materially harming task success.
 
-H2 — Small context, full evidence: agent-visible material can be bounded while canonical original evidence remains reliably retrievable and attributable. Context-compress supports searchable spillover but does NOT satisfy canonical/full-evidence preservation by itself.
+H2 — Small context, full evidence: agent-visible material can be bounded while canonical original evidence remains reliably retrievable and attributable. Context-compress supports searchable spillover but does not satisfy canonical/full-evidence preservation by itself.
 
 H3 — Discovery is advisory: finding or learning a capability never grants execution authority.
 
-H4 — Skills teach; tools act: procedural knowledge/package formats remain distinct from executable authority.
+H4 — Skills teach; tools act: procedural knowledge/package formats remain distinct from executable authority. Agent Skills strongly supports the teaching/package half; host policy must own the authority half.
 
 H5 — Deterministic middleware should absorb catalog filtering, evidence indexing, known routing, state bookkeeping and other tasks that do not require model judgment.
 
@@ -74,7 +86,9 @@ H7 — When authorization crosses a process boundary, downstream components shou
 
 H8 — Search/chunk indexes are derived acceleration state, not canonical evidence; raw evidence requires separate immutable custody.
 
-## Current convergence after four traces
+H9 — Instruction packages need provenance/trust/version identity separate from their local human-readable name and from executable grants.
+
+## Current convergence after five traces
 
 Candidate middle-layer shape:
 
@@ -84,6 +98,12 @@ backed by:
 
 `immutable raw evidence → derived searchable index → bounded retrieval/view`
 
+and a separate teaching plane:
+
+`compact skill metadata → activated instructions → on-demand resources`
+
+where teaching never widens execution authority.
+
 ## Next durable update
 
-Complete T-SKILL-01, then synthesize the P0 worker-facing interface and experiment matrix before starting the deeper RTK/source-compression comparison.
+Trace xai-org/grok-build first, because it is a current Rust coding-agent harness and may provide stronger implementation evidence for session ownership, memory, workflows/subagents, tool/MCP loading and host/model boundaries than the format-oriented sources above.
