@@ -1,0 +1,22 @@
+{
+  "schema_version": "spark-external-source-lock/v1",
+  "recorded_utc": "2026-09-13T15:20:00Z",
+  "state": "HARVESTED_AS_PINNED_SUBMODULES",
+  "activation": "NONE",
+  "authority_note": "Pinned external source for SPARK research/qualification only; no consumer authority or adoption implied.",
+  "sources": [
+    {"id":"cli-anything","path":"external/harvest/high_priority/cli-anything","repository":"https://github.com/HKUDS/CLI-Anything.git","commit":"810c18b0d1ab9b234bc996c9fd999318523a3ef0"},
+    {"id":"rmcp","path":"external/harvest/high_priority/rmcp","repository":"https://github.com/modelcontextprotocol/rust-sdk.git","commit":"3075dc9152d4678775f20634fcb467a7b995dbab"},
+    {"id":"toolhive","path":"external/harvest/high_priority/toolhive","repository":"https://github.com/stacklok/toolhive.git","commit":"e532cf07d45fa99f3e4e63819396a3e9c9fd763f"},
+    {"id":"goose","path":"external/harvest/high_priority/goose","repository":"https://github.com/aaif-goose/goose.git","commit":"50666ae0b9a51e260b52b7efbab2e4e020346e94"},
+    {"id":"mcp-inspector","path":"external/harvest/high_priority/mcp-inspector","repository":"https://github.com/modelcontextprotocol/inspector.git","commit":"795b1bb30ac845b7baa7cb3df8ec0b693882ca1d"},
+    {"id":"wasmtime","path":"external/harvest/high_priority/wasmtime","repository":"https://github.com/bytecodealliance/wasmtime.git","commit":"817c58787f432bcdbbb87679011f72c5bc80dbda"},
+    {"id":"extism","path":"external/harvest/high_priority/extism","repository":"https://github.com/extism/extism.git","commit":"d5da29759bba88645f886d9e12d3f4e4376df7b3"},
+    {"id":"ast-grep","path":"external/harvest/high_priority/ast-grep","repository":"https://github.com/ast-grep/ast-grep.git","commit":"45b5eb6705b4c24e04746137d259874abf1087ad"},
+    {"id":"tree-sitter","path":"external/harvest/high_priority/tree-sitter","repository":"https://github.com/tree-sitter/tree-sitter.git","commit":"1b8407d1e718f2a26e2886c03cc55622d8d1d7bd"},
+    {"id":"toxiproxy","path":"external/harvest/high_priority/toxiproxy","repository":"https://github.com/Shopify/toxiproxy.git","commit":"40f7fd31bee529d824116bd2a11a9e3425e904ec"},
+    {"id":"wiremock-rs","path":"external/harvest/high_priority/wiremock-rs","repository":"https://github.com/LukeMathWalker/wiremock-rs.git","commit":"6b193047bf2c5626da5dc5f3a23b58ab9bd3f130"},
+    {"id":"cargo-nextest","path":"external/harvest/high_priority/cargo-nextest","repository":"https://github.com/nextest-rs/nextest.git","commit":"8527c325bf9f0e5dcdcb26fa80e3ed7dc7f3e35e"},
+    {"id":"cargo-mutants","path":"external/harvest/high_priority/cargo-mutants","repository":"https://github.com/sourcefrog/cargo-mutants.git","commit":"fe82f1832778a591ab74248010fb40e699defafe"}
+  ]
+}

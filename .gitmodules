@@ -1,0 +1,39 @@
+[submodule "external/harvest/high_priority/cli-anything"]
+	path = external/harvest/high_priority/cli-anything
+	url = https://github.com/HKUDS/CLI-Anything.git
+[submodule "external/harvest/high_priority/rmcp"]
+	path = external/harvest/high_priority/rmcp
+	url = https://github.com/modelcontextprotocol/rust-sdk.git
+[submodule "external/harvest/high_priority/toolhive"]
+	path = external/harvest/high_priority/toolhive
+	url = https://github.com/stacklok/toolhive.git
+[submodule "external/harvest/high_priority/goose"]
+	path = external/harvest/high_priority/goose
+	url = https://github.com/aaif-goose/goose.git
+[submodule "external/harvest/high_priority/mcp-inspector"]
+	path = external/harvest/high_priority/mcp-inspector
+	url = https://github.com/modelcontextprotocol/inspector.git
+[submodule "external/harvest/high_priority/wasmtime"]
+	path = external/harvest/high_priority/wasmtime
+	url = https://github.com/bytecodealliance/wasmtime.git
+[submodule "external/harvest/high_priority/extism"]
+	path = external/harvest/high_priority/extism
+	url = https://github.com/extism/extism.git
+[submodule "external/harvest/high_priority/ast-grep"]
+	path = external/harvest/high_priority/ast-grep
+	url = https://github.com/ast-grep/ast-grep.git
+[submodule "external/harvest/high_priority/tree-sitter"]
+	path = external/harvest/high_priority/tree-sitter
+	url = https://github.com/tree-sitter/tree-sitter.git
+[submodule "external/harvest/high_priority/toxiproxy"]
+	path = external/harvest/high_priority/toxiproxy
+	url = https://github.com/Shopify/toxiproxy.git
+[submodule "external/harvest/high_priority/wiremock-rs"]
+	path = external/harvest/high_priority/wiremock-rs
+	url = https://github.com/LukeMathWalker/wiremock-rs.git
+[submodule "external/harvest/high_priority/cargo-nextest"]
+	path = external/harvest/high_priority/cargo-nextest
+	url = https://github.com/nextest-rs/nextest.git
+[submodule "external/harvest/high_priority/cargo-mutants"]
+	path = external/harvest/high_priority/cargo-mutants
+	url = https://github.com/sourcefrog/cargo-mutants.git
