@@ -37,3 +37,121 @@
 [submodule "external/harvest/high_priority/cargo-mutants"]
 	path = external/harvest/high_priority/cargo-mutants
 	url = https://github.com/sourcefrog/cargo-mutants.git
+
+# Secondary harvest sources are pinned for custody/research but intentionally
+# do not auto-checkout during normal recursive submodule synchronization.
+[submodule "external/harvest/secondary/acp-spec"]
+	path = external/harvest/secondary/acp-spec
+	url = https://github.com/agentclientprotocol/agent-client-protocol.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/acp-rust-sdk"]
+	path = external/harvest/secondary/acp-rust-sdk
+	url = https://github.com/agentclientprotocol/rust-sdk.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/wasmcloud"]
+	path = external/harvest/secondary/wasmcloud
+	url = https://github.com/wasmCloud/wasmCloud.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/nushell"]
+	path = external/harvest/secondary/nushell
+	url = https://github.com/nushell/nushell.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/opentelemetry-collector"]
+	path = external/harvest/secondary/opentelemetry-collector
+	url = https://github.com/open-telemetry/opentelemetry-collector.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/temporal"]
+	path = external/harvest/secondary/temporal
+	url = https://github.com/temporalio/temporal.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/openhands-sdk"]
+	path = external/harvest/secondary/openhands-sdk
+	url = https://github.com/OpenHands/software-agent-sdk.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/langgraph"]
+	path = external/harvest/secondary/langgraph
+	url = https://github.com/langchain-ai/langgraph.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/n8n"]
+	path = external/harvest/secondary/n8n
+	url = https://github.com/n8n-io/n8n.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/microsoft-agent-framework"]
+	path = external/harvest/secondary/microsoft-agent-framework
+	url = https://github.com/microsoft/agent-framework.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/autogen"]
+	path = external/harvest/secondary/autogen
+	url = https://github.com/microsoft/autogen.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/cedar"]
+	path = external/harvest/secondary/cedar
+	url = https://github.com/cedar-policy/cedar.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/cloudflare-agents"]
+	path = external/harvest/secondary/cloudflare-agents
+	url = https://github.com/cloudflare/agents.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/opa"]
+	path = external/harvest/secondary/opa
+	url = https://github.com/open-policy-agent/opa.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/claude-code"]
+	path = external/harvest/secondary/claude-code
+	url = https://github.com/anthropics/claude-code.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/gemini-cli"]
+	path = external/harvest/secondary/gemini-cli
+	url = https://github.com/google-gemini/gemini-cli.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/google-adk-python"]
+	path = external/harvest/secondary/google-adk-python
+	url = https://github.com/google/adk-python.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/openai-codex"]
+	path = external/harvest/secondary/openai-codex
+	url = https://github.com/openai/codex.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/openai-agents-python"]
+	path = external/harvest/secondary/openai-agents-python
+	url = https://github.com/openai/openai-agents-python.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/swe-agent"]
+	path = external/harvest/secondary/swe-agent
+	url = https://github.com/SWE-agent/SWE-agent.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/cosign"]
+	path = external/harvest/secondary/cosign
+	url = https://github.com/sigstore/cosign.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/in-toto"]
+	path = external/harvest/secondary/in-toto
+	url = https://github.com/in-toto/in-toto.git
+	update = none
+	shallow = true
+[submodule "external/harvest/secondary/slsa-verifier"]
+	path = external/harvest/secondary/slsa-verifier
+	url = https://github.com/slsa-framework/slsa-verifier.git
+	update = none
+	shallow = true
