@@ -54,46 +54,50 @@ Disposition: BORROW_PATTERN; narrow code reuse remains unqualified.
 State: FIRST TRACE COMPLETE
 Pin: `e532cf07d45fa99f3e4e63819396a3e9c9fd763f`
 Record: `sources/TOOLHIVE.md`
-Patterns:
-- `patterns/DECLARATIVE_WORKLOAD_SECURITY_ENVELOPE.md`
-- `patterns/DECLARED_VS_APPLIED_CONFINEMENT.md`
-- `patterns/PROVENANCE_PIN_BEFORE_ACTIVATION.md`
+Patterns: `DECLARATIVE_WORKLOAD_SECURITY_ENVELOPE`, `DECLARED_VS_APPLIED_CONFINEMENT`, `PROVENANCE_PIN_BEFORE_ACTIVATION`
 Failure record: `failures/TOOLHIVE.md`
 Disposition: BORROW_PATTERN; full product not selected for SPARK core.
 
-Confirmed:
-- versioned RunConfig makes executable, transport, permissions, network, secrets-by-reference and middleware inspectable/restartable
-- creation policy check runs before persistent state or workload start
-- explicit network-isolation/topology contradictions can fail rather than silently pretend confinement exists
-- runtime/applied state remains separate evidence from declared permission profile
-- MCP list/call shaping and Cedar call-time authorization are distinct mechanisms
-- authz denies unknown methods and malformed/non-JSON protected requests by default
-- project package provenance can be constrained by catalog/lock/key and pinned to durable content/provenance state
-- first-use without prior/catalog expectation can still be TOFU
-- executable image provenance defaults to warn, not hard failure
-- tool-call filter itself passes through on request-body read error
-- documented middleware-order gap permits a later mutating webhook to rename a call into a tool excluded by the earlier `--tools` filter; independent call-time authorization is therefore load-bearing.
+### T-RMCP-01 — Official Rust MCP SDK (`rmcp`)
+State: FIRST TRACE COMPLETE
+Pin: `3075dc9152d4678775f20634fcb467a7b995dbab`
+Version/license: rmcp 3.3.0 / Apache-2.0 / Rust 1.88+
+Record: `sources/RMCP.md`
+Patterns: `PROTOCOL_SUBSTRATE_HOST_AUTHORITY`, `CONTINUATION_HANDLES_NOT_GRANTS`
+Failure record: `failures/RMCP.md`
+Disposition: REUSE_CODE for MCP protocol substrate; host authority/durable state explicitly excluded.
 
-SPARK implications:
-- Tool Contract / RunSpec should contain the complete declared execution + confinement envelope
-- activation requires applied-state verification, not just configuration review
-- search/list/visibility filters are never authority
-- required provenance failures must stop activation; warn-only cannot be accepted evidence
-- provenance/content identity must survive mutable names/tags.
+Confirmed:
+- official typed client/server lifecycle, protocol/capability negotiation, request association, cancellation/progress, transports, subscriptions and tool router are strong direct reuse candidates
+- typed tool parameter deserialization happens before handler invocation
+- 2026-07-28 stateless HTTP is automatic; legacy sessions are adapter-local and extensible through SessionManager
+- task extension is capability-gated and tested, but bundled TaskManager state is in-memory rather than crash-durable
+- request/task/session IDs are correlation/lifecycle state, never host grants
+- default client cache can serve stale responses as successful results on re-fetch failure; authority-sensitive consumers must disable that behavior
+- local session request-association marker is non-serialized; cross-process session adapters need an explicit association mechanism
+- `initialized` notification is not a security gate
+- local ToolRouter name keys can replace duplicate routes; canonical SPARK identity must wrap the wire namespace
+- conformance workflow now runs 2025-11-25 + 2026-07-28 client/server suites; old Feb-2026 0.16.0 audit is historical and invalidated for current-pin capability claims.
+
+SPARK implication:
+- use rmcp rather than rebuilding MCP wire semantics
+- wrap it beneath canonical capability identity, trust, call-time authority, cost/governance, containment, durable work/evidence and supervisor health.
 
 ## Active trace
 
-### T-RMCP-01 — Official Rust MCP SDK (`modelcontextprotocol/rust-sdk` / rmcp)
+### T-SLICE-01 — ast-grep + tree-sitter deterministic context slicing
 State: IN_PROGRESS
-Pin: `3075dc9152d4678775f20634fcb467a7b995dbab`
-Goal: determine what SPARK should directly reuse versus wrap/reimplement.
+Pins:
+- ast-grep `45b5eb6705b4c24e04746137d259874abf1087ad`
+- tree-sitter `1b8407d1e718f2a26e2886c03cc55622d8d1d7bd`
+Goal: determine whether syntax-aware deterministic search/slicing can materially reduce worker context while preserving symbol/structure evidence.
 Priority traces:
-1. client/server initialization + capability negotiation + transport lifecycle
-2. tool registration/list/call schemas and request/response typing
-3. task/continuation/cancellation/notification semantics at the pinned MCP revision
-4. transport identity/session assumptions and failure semantics
-5. tests that separate protocol interoperability from host authority.
-Standing constraint: MCP discovery/tasks/continuations are protocol state, not grants. SPARK call-time authority remains host-owned.
+1. parse/query path and structural match identity
+2. language/parser loading and error-tree behavior
+3. machine-readable output/ranges and rewrite semantics
+4. failure behavior on partial/invalid code
+5. benchmark design versus grep + fixed-line windows.
+Planned experiment: same repository questions under grep/window vs ast-grep/tree-sitter; measure bytes/tokens delivered, recall of needed definitions/call sites, false context, latency and deterministic reproducibility.
 
 ## Cross-project hypotheses under test
 
@@ -111,10 +115,10 @@ H11 — Durable work uses deterministic identity, leases/fencing, immutable arti
 H12 — Child agents share bounded host machinery without becoming new authority roots.
 H13 — Declared confinement is not accepted until applied runtime authority is independently observed.
 H14 — External executable activation requires an explicit provenance state; warning-only verification is not acceptance.
+H15 — Protocol correctness/interoperability belongs below, not inside, canonical authority semantics.
+H16 — Continuation/task/session handles are references only and require current authorization on each operation.
 
-## Current convergence after seven traces
-
-Candidate middle-layer shape:
+## Current convergence after eight traces
 
 `trust source → find capability → learn capability → [host reauthorization] → execute capability → compact result`
 
@@ -122,16 +126,16 @@ backed by:
 
 `immutable raw evidence / durable work state → derived searchable index/manifest → bounded retrieval/view`
 
-and a separate teaching plane:
+teaching plane:
 
 `trusted skill identity + compact metadata → activated instructions → on-demand resources`
 
-with a runtime plane:
+runtime plane:
 
 `versioned Tool Contract / RunSpec → host policy → launch → applied-state verification → health/quarantine`
 
-The implementation direction is converging on host-owned Rust components for trust/provenance, stable identity, authority, worker lifecycle, durable evidence/work state, compact views and runtime verification.
+protocol adapters such as rmcp sit **below** canonical identity/authority and **above** transport/wire mechanics.
 
 ## Next durable update
 
-Complete T-RMCP-01, then compare its reusable Rust protocol substrate against SPARK’s host-owned authority/lifecycle requirements. After that, resume deterministic utility candidates (ast-grep/tree-sitter, nextest/mutants, wiremock/Toxiproxy) and containment candidates (Goose, Wasmtime, Extism).
+Complete ast-grep/tree-sitter first trace and record a concrete context-reduction experiment. Then qualify nextest/mutants, wiremock/Toxiproxy, RTK comparison, and containment candidates Goose/Wasmtime/Extism.
