@@ -19,47 +19,44 @@ Repository records, not conversation history, carry research state. Research met
 | T-RMCP-01 | official Rust MCP SDK | `3075dc9152d4678775f20634fcb467a7b995dbab` | `sources/RMCP.md` | REUSE_CODE |
 | T-SLICE-01 | ast-grep + Tree-sitter | `45b5eb67...` / `1b8407d1...` | `sources/AST_GREP_TREE_SITTER.md` | EXPERIMENT_NOW |
 | T-TESTUTIL-01 | cargo-nextest + cargo-mutants | `8527c325...` / `fe82f183...` | `sources/CARGO_NEXTEST_MUTANTS.md` | EXPERIMENT_NOW |
+| T-FAULT-01 | wiremock-rs + Toxiproxy | `6b193047...` / `40f7fd31...` | `sources/WIREMOCK_TOXIPROXY.md` | EXPERIMENT_NOW |
 
-## Latest completed trace — Rust validation/falsification
+## Latest completed trace — provider/federation failure replay
 
-Pattern: `patterns/FAST_TEST_PLUS_BOUNDED_FALSIFICATION.md`
-Failures: `failures/CARGO_NEXTEST_MUTANTS.md`
-Experiment: `experiments/RUST_VALIDATION_FALSIFICATION_LANE.md`
+Pattern: `patterns/SEMANTIC_PLUS_TRANSPORT_FAULT_REPLAY.md`
+Experiment: `experiments/PROVIDER_FAILURE_REPLAY.md`
 
 Confirmed:
-- nextest builds/lists tests, then executes each individual test in a separate process with structured per-attempt status
-- partitioning/archiving/JUnit/record-replay-rerun are useful deterministic evidence surfaces
-- retry defaults can turn fail→pass into overall success; assurance profiles should retain first failure and normally fail flaky results
-- timeout/process-tree handling is explicit on Unix/Windows
-- nextest does not run doctests and cannot silently replace repository canonical test policy
-- cargo-mutants parses production Rust, generates likely-valid wrong AST mutations, copies source tree, proves baseline, then tests mutants in per-worker scratch build dirs
-- outcomes distinguish caught/missed/unviable/timeout; machine evidence includes mutants/outcomes/diffs/logs
-- baseline identity is load-bearing; mutation evidence without a passing current/equivalent baseline is meaningless
-- cargo-mutants supports nextest natively, but inherits nextest omissions
-- source-copy isolation protects canonical files but does not sandbox test side effects
-- mutation work must be explicitly bounded by files/packages/mutants/time/concurrency/shards.
+- wiremock-rs supplies isolated HTTP mock servers, request matchers, static/dynamic responses, call-count expectations and received-request recording
+- Toxiproxy inserts a real TCP proxy controlled over HTTP with dynamic upstream/downstream toxic chains
+- semantic provider errors and transport faults should be exercised independently and jointly
+- acceptance fixtures should use fixed toxics (`toxicity=1`, jitter 0, explicit timeout/reset/limit values); randomized chaos is a separate stress lane
+- wiremock records requests by default, so real credentials must not enter qualification evidence
+- Toxiproxy harness failure is infrastructure failure, not proof the application handled the intended fault.
 
-Likely operational outcome after experiment:
-- nextest → reusable compatible-Rust executor
-- cargo-mutants → periodic/on-demand bounded falsification, not every-edit gate.
+Likely reuse after experiment:
+- wiremock-rs → Rust dev dependency/provider fixture substrate
+- Toxiproxy → isolated pinned fault-injection sidecar.
 
 ## Active trace
 
-### T-FAULT-01 — wiremock-rs + Toxiproxy
+### T-RTK-01 — RTK vs context-compress
 State: IN_PROGRESS
-Pins:
-- wiremock-rs `6b193047bf2c5626da5dc5f3a23b58ab9bd3f130`
-- Toxiproxy `40f7fd31bee529d824116bd2a11a9e3425e904ec`
+Pin: RTK `d0c2985155568d1d76fca03bc65d5098f136bbcd`
+Comparison source: context-compress `59fae35a7b383876a34f84090f6da978e230795a`
 
-Goal: qualify a deterministic provider/federation failure-replay pair that separates application/HTTP semantics from transport/network faults.
+Goal: determine what RTK contributes beyond searchable spillover, whether its command-specific compression preserves load-bearing evidence, and whether automatic command rewriting/hooking is suitable for SPARK.
 
 Priority traces:
-1. wiremock request matching, response templating, verification/counting, server lifecycle and recorded requests
-2. deterministic provider cassette/replay fit and limits versus hand-written fake services
-3. Toxiproxy proxy/toxic lifecycle, latency/bandwidth/timeout/reset/slow-close/limit-data/failure modes
-4. whether faults can be enabled/disabled and composed reproducibly at runtime
-5. experiment contract pairing semantic response fixtures with transport fault schedules and immutable evidence.
+1. command interception/routing path and whether RTK executes commands itself or filters supplied output
+2. command-specific parsers/compressors and fallback behavior
+3. exit code/stderr/error preservation and maximum-output policies
+4. token-reduction accounting and test evidence
+5. hook/auto-rewrite mechanism and trust/authority implications
+6. controlled comparison: raw output vs RTK vs searchable-spillover + raw artifact.
+
+Standing requirement: compression cannot be canonical evidence custody. Any promoted pattern must retain a separate immutable raw artifact or reproducible source operation.
 
 ## Next durable update
 
-Complete wiremock-rs/Toxiproxy trace, then compare RTK against context-compress, followed by containment candidates Goose/Wasmtime/Extism.
+Complete RTK comparison, then qualify containment/security candidates Goose, Wasmtime and Extism.
