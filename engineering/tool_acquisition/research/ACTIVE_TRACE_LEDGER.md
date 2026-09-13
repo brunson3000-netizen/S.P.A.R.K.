@@ -40,33 +40,48 @@ State: FIRST TRACE COMPLETE
 Source pin: `69ef37e9424c0a7ea9dd2293b559e43ec8176379`
 Record: `sources/AGENT_SKILLS.md`
 Pattern: `patterns/SKILLS_TEACH_AUTHORITY_ACTS.md`
+Disposition: BORROW_PATTERN.
 
 Confirmed:
 - portable skill = directory with required `SKILL.md`; optional scripts/references/assets
 - three-tier disclosure: metadata → full instructions → supporting resources
-- catalog can be only name/description/location; reference generator uses that shape
-- dedicated activation can constrain names, list resources and enforce consent/permissions
-- project-level skills conventionally shadow user-level skills
-- project skills may be untrusted; client guide recommends a trust gate
-- `allowed-tools` exists but is explicitly experimental
-- bundled scripts can execute arbitrary ecosystem/package tooling; tool/script authority is outside the spec
-
-SPARK implication:
-- prefer `SKILL.md` compatibility as teaching package prior art
-- add host-owned canonical identity/provenance/version/trust
-- skill activation never grants executable authority
-- resource readability and script/tool execution are separate permissions
-
-Disposition: BORROW_PATTERN.
+- catalog can be only name/description/location
+- project skills may be untrusted and need a trust gate
+- `allowed-tools` is experimental
+- script/tool execution authority remains client/harness-owned.
 
 ### T-GROKBUILD-01 — xai-org/grok-build
-State: IN_PROGRESS
-Source pin: `37949780c144e37df692e3d669051a21fec24f20` (main, observed 2026-09-13)
+State: FIRST TRACE COMPLETE
+Source pin: `37949780c144e37df692e3d669051a21fec24f20`
+Source revision: `c4ea71cfdbcdb21e32e41bc25a0043d7d4836714`
 Repository: `xai-org/grok-build`
 License: Apache-2.0
 Language: Rust
-Initial relevance: coding-agent harness/TUI with durable memory, agent-host daemon, MCP startup, workflow pause/stop, folder-trust startup gate, subagents, telemetry and session/workspace controls visible in current source revision metadata.
-Goal: trace the actual worker/host/session/tool/memory paths, not feature descriptions. Priority questions: what state is authoritative, how tool authority is gated, how subagents/workflows are bounded, how memory is isolated/durable, how MCP/extensions are loaded, and what the model sees.
+Record: `sources/GROK_BUILD.md`
+Patterns:
+- `patterns/ORDERED_CALLTIME_PERMISSION_PIPELINE.md`
+- `patterns/REPOSITORY_TRUST_GATE.md`
+- `patterns/DURABLE_CAPTURE_RECONCILIATION.md`
+- `patterns/SUBAGENTS_SHARED_BACKENDS_CLAMPED_AUTHORITY.md`
+Disposition: BORROW_PATTERN; narrow code reuse remains unqualified.
+
+Confirmed:
+- host-owned permission machinery evaluates concrete tool calls and preserves hard deny above broad automation modes
+- repository-local MCP/LSP/policy/instructions/skills are explicitly treated as behavior-bearing supply-chain input and gated by per-workspace trust before loading
+- “no risky project config currently present” is provisional, not durable trust
+- memory v2 separates global/workspace topics, immutable observation inbox, protected/generated manifest, durable state DB and lexical index
+- existing memory edits require prior read snapshot and reject stale concurrent replacement
+- observation capture uses deterministic job identity, leases/fencing, immutable files, outcome hashes and reconciliation across crash windows
+- child agents share parent/root filesystem/terminal/hooks/process machinery while permission/resource inheritance is host-resolved and bounded
+- Grok Bot schemas expose explicit async continuation/await semantics and prompt-surface budget tests; backend service implementation was not independently present in this checkout, so that server-side behavior is contract evidence only
+- remote tool proxies bind session identity and unify progress/terminal streaming through a common host handle.
+
+SPARK implications:
+- authority, trust, durable work state and subagent lifecycle should be Rust host state machines/actors, not prompt conventions
+- repository content must pass a trust boundary before it can teach or configure executable behavior
+- memory/evidence should use canonical durable state plus derived bounded indexes/views
+- subagents may share machinery but must not mint broader authority than the parent/host grants
+- asynchronous worker turns should use stable continuation handles rather than model polling/re-send behavior.
 
 ## Cross-project hypotheses under test
 
@@ -88,22 +103,36 @@ H8 — Search/chunk indexes are derived acceleration state, not canonical eviden
 
 H9 — Instruction packages need provenance/trust/version identity separate from their local human-readable name and from executable grants.
 
-## Current convergence after five traces
+H10 — Repository/project content is a potentially hostile behavior source until a host trust decision admits that scope; absence of behavior-bearing config is not future authorization.
+
+H11 — Durable agent work should use deterministic job identity, lease/fencing, immutable artifacts and replayable reconciliation instead of conversational recovery.
+
+H12 — Child agents should inherit shared host backends and bounded capability state but never become independent roots of authority by default.
+
+## Current convergence after six traces
 
 Candidate middle-layer shape:
 
-`find_capability → learn_capability → [host reauthorization] → execute_capability → compact result`
+`trust source → find capability → learn capability → [host reauthorization] → execute capability → compact result`
 
 backed by:
 
-`immutable raw evidence → derived searchable index → bounded retrieval/view`
+`immutable raw evidence / durable work state → derived searchable index/manifest → bounded retrieval/view`
 
 and a separate teaching plane:
 
-`compact skill metadata → activated instructions → on-demand resources`
+`trusted skill identity + compact metadata → activated instructions → on-demand resources`
 
 where teaching never widens execution authority.
 
+The implementation direction is converging on host-owned Rust components for:
+- trust and provenance
+- stable capability identity
+- call-time authority
+- worker/subagent admission and lifecycle
+- durable job/evidence state
+- deterministic compact-view generation.
+
 ## Next durable update
 
-Trace xai-org/grok-build first, because it is a current Rust coding-agent harness and may provide stronger implementation evidence for session ownership, memory, workflows/subagents, tool/MCP loading and host/model boundaries than the format-oriented sources above.
+Resume the remaining high-priority architecture candidates. ToolHive is the strongest next gateway/runtime study; official Rust MCP (`rmcp`) remains the strongest direct Rust protocol-reuse candidate. Neither is adopted by this ledger.

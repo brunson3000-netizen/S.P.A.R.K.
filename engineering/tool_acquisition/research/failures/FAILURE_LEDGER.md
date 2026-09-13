@@ -107,3 +107,47 @@ S.P.A.R.K. LESSON: reserve “sandbox/containment” for an actual enforced auth
 TRANSFER CONFIDENCE: HIGH.
 DISPOSITION: ARCHIVE_REFERENCE / naming and acceptance invariant.
 EVIDENCE: `sources/CONTEXT_COMPRESS.md`; upstream `SECURITY.md`, `executor.ts`, `execute.ts`.
+
+## F-011 — Portable skill names and scope shadowing are not provenance identity
+OBSERVED IN: Agent Skills @ `69ef37e...`.
+CAUSE: `name` is a local package name; client guidance uses deterministic project-over-user shadowing and permits multiple discovery roots. A repository-provided skill can therefore replace the human-visible name of a user skill in the active catalog if the host treats name alone as identity.
+PROJECT RESPONSE: client guide recommends deterministic collision handling and separately warns that project skills may be untrusted.
+DID IT WORK?: good interoperability convention, insufficient as governed canonical identity.
+BOUNDARY AFFECTED: skill discovery/source ↔ model-facing teaching identity.
+S.P.A.R.K. LESSON: preserve the interoperable skill name as an alias, but bind active teaching content to host-owned source/provenance/version/digest identity before loading it.
+TRANSFER CONFIDENCE: HIGH.
+DISPOSITION: BORROW_PATTERN with provenance strengthening.
+EVIDENCE: `sources/AGENT_SKILLS.md`; `patterns/SKILLS_TEACH_AUTHORITY_ACTS.md`.
+
+## F-012 — Teaching-package allowlists must not become execution grants
+OBSERVED IN: Agent Skills optional `allowed-tools` plus client guidance to allowlist skill directories for frictionless resource reads.
+CAUSE: instructional metadata and resource readability can be mistaken for host execution authority, especially when skills bundle executable scripts.
+PROJECT RESPONSE: the spec labels `allowed-tools` experimental and leaves permission enforcement to the client/harness.
+DID IT WORK?: portable teaching works; authority semantics are intentionally not standardized.
+BOUNDARY AFFECTED: instructions/resources ↔ executable tools/scripts.
+S.P.A.R.K. LESSON: loading a skill can teach and make its read-only resources addressable; every actual script/tool side effect still passes current host authorization.
+TRANSFER CONFIDENCE: HIGH.
+DISPOSITION: BORROW_PATTERN with hard separation invariant.
+EVIDENCE: `sources/AGENT_SKILLS.md`; Agent Skills specification/client/script guides.
+
+## F-013 — “Nothing risky found” can become a stale trust grant
+OBSERVED IN: grok-build folder-trust design explicitly prevents this failure.
+CAUSE: if a repository scan finds no behavior-bearing config and that allow is cached as durable trust, a later pull/write can add MCP/LSP/policy/instruction/skill configuration that loads without a fresh trust decision.
+PROJECT RESPONSE: grok-build treats the no-config allow as provisional/non-cached and re-scans on a later resolve.
+DID IT WORK?: source contract is explicit and the cache design preserves the distinction.
+BOUNDARY AFFECTED: repository state change ↔ project-behavior loader trust.
+S.P.A.R.K. LESSON: absence of a risky artifact is an observation, not authorization for future artifacts. Cache durable trust decisions, not transient absence.
+TRANSFER CONFIDENCE: HIGH.
+DISPOSITION: BORROW_PATTERN.
+EVIDENCE: `sources/GROK_BUILD.md`; `patterns/REPOSITORY_TRUST_GATE.md`.
+
+## F-014 — Durable memory writes can silently clobber newer truth
+OBSERVED IN: grok-build memory v2 explicitly defends against this failure.
+CAUSE: an agent can read a durable note, spend time reasoning, then overwrite a file that another worker/user changed meanwhile.
+PROJECT RESPONSE: existing-file replacement requires a recorded read snapshot; immediately before atomic replacement the current bytes are hashed and compared. Mismatch returns stale and preserves the newer file.
+DID IT WORK?: dedicated tests mutate a file after the recorded read and assert the later agent write is rejected without changing the external update.
+BOUNDARY AFFECTED: historical/model-visible memory ↔ durable mutable state.
+S.P.A.R.K. LESSON: editable durable state needs optimistic concurrency semantics; “I read it earlier” is not enough.
+TRANSFER CONFIDENCE: HIGH.
+DISPOSITION: BORROW_PATTERN.
+EVIDENCE: `sources/GROK_BUILD.md`; `patterns/DURABLE_CAPTURE_RECONCILIATION.md`.
