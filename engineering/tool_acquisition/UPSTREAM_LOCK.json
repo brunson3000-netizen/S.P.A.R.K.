@@ -1,6 +1,6 @@
 {
   "schema_version": "spark-external-source-lock/v1",
-  "recorded_utc": "2026-09-13T15:20:00Z",
+  "recorded_utc": "2026-09-13T16:45:00Z",
   "state": "HARVESTED_AS_PINNED_SUBMODULES",
   "activation": "NONE",
   "authority_note": "Pinned external source for SPARK research/qualification only; no consumer authority or adoption implied.",
@@ -17,6 +17,7 @@
     {"id":"toxiproxy","path":"external/harvest/high_priority/toxiproxy","repository":"https://github.com/Shopify/toxiproxy.git","commit":"40f7fd31bee529d824116bd2a11a9e3425e904ec"},
     {"id":"wiremock-rs","path":"external/harvest/high_priority/wiremock-rs","repository":"https://github.com/LukeMathWalker/wiremock-rs.git","commit":"6b193047bf2c5626da5dc5f3a23b58ab9bd3f130"},
     {"id":"cargo-nextest","path":"external/harvest/high_priority/cargo-nextest","repository":"https://github.com/nextest-rs/nextest.git","commit":"8527c325bf9f0e5dcdcb26fa80e3ed7dc7f3e35e"},
-    {"id":"cargo-mutants","path":"external/harvest/high_priority/cargo-mutants","repository":"https://github.com/sourcefrog/cargo-mutants.git","commit":"fe82f1832778a591ab74248010fb40e699defafe"}
+    {"id":"cargo-mutants","path":"external/harvest/high_priority/cargo-mutants","repository":"https://github.com/sourcefrog/cargo-mutants.git","commit":"fe82f1832778a591ab74248010fb40e699defafe"},
+    {"id":"rtk","path":"external/harvest/high_priority/rtk","repository":"https://github.com/rtk-ai/rtk.git","commit":"d0c2985155568d1d76fca03bc65d5098f136bbcd"}
   ]
 }
