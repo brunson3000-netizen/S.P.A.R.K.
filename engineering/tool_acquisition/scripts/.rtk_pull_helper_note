@@ -1,0 +1,1 @@
+RTK source is pinned as a high-priority research dependency. Use pull_rtk.sh only for source custody; do not activate hooks.
