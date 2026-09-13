@@ -37,6 +37,9 @@
 [submodule "external/harvest/high_priority/cargo-mutants"]
 	path = external/harvest/high_priority/cargo-mutants
 	url = https://github.com/sourcefrog/cargo-mutants.git
+[submodule "external/harvest/high_priority/rtk"]
+	path = external/harvest/high_priority/rtk
+	url = https://github.com/rtk-ai/rtk.git
 
 # Secondary harvest sources are pinned for custody/research but intentionally
 # do not auto-checkout during normal recursive submodule synchronization.
