@@ -1,0 +1,30 @@
+{
+  "checks": {
+    "caller_messages_mutated": true,
+    "first_payload_overwritten_by_second": true,
+    "repeated_tool_calls_share_reference": true,
+    "supplied_serializer_not_called": true
+  },
+  "node": "v24.19.0",
+  "result": "Four adverse behaviors reproduced; this is not a qualification PASS.",
+  "scope": "Exact upstream strategy and actual LocalFileAdapter, native type stripping; no models, network or package installs.",
+  "sourceRecords": [
+    {
+      "file": "/workspace/scratch/68b97bd9e6be/mci-review/ctx-zip-strategies.mts",
+      "git_blob_sha1": "946ede569a747961c430575d72d9169b152366b0",
+      "sha256": "bd05f4b48edda2280ea5ae1c7954febd486b4d622e2d4b4c6bc87e67aa15e293",
+      "upstream_path": "src/tool-results-compactor/strategies/index.ts"
+    },
+    {
+      "file": "/workspace/scratch/68b97bd9e6be/mci-review/ctx-zip-file-adapter.mts",
+      "git_blob_sha1": "ae56ebbc77b75f472dfac53c6ce645d0925459f6",
+      "sha256": "d35e8f78122061befc7e9e9fa2b0351c83707c511f69ea5d48565d0caf665d62",
+      "upstream_path": "src/sandbox-code-generator/file-adapter.ts"
+    }
+  ],
+  "upstream_pin": "76580f7ba1555c891928702743ac74412c7fac60",
+  "command": "node ctx_zip_repro.mjs ctx-zip-strategies.mts ctx-zip-file-adapter.mts",
+  "exit_code": 0,
+  "source_pin_assertion_before_import": true,
+  "observed_date": "2026-09-14"
+}
