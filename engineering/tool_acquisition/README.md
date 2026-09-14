@@ -1,6 +1,10 @@
 # S.P.A.R.K. External Tool Acquisition Program
 
-Status: `HIGH_PRIORITY_HARVESTED__SECONDARY_WAVE1_PINNED__QUALIFICATION_NEXT`
+Status: `FABLE_SOURCE_REVIEW_READY__QUALIFICATION_NEXT`
+
+## Fable source review
+
+Start with [FABLE_SOURCE_REVIEW.md](FABLE_SOURCE_REVIEW.md) for the complete primary, secondary, middle-layer and community inventory, measured sizes, checkout evidence and one-command preparation. Canonical upstream revisions remain pinned; source review does not authorize runtime adoption.
 
 ## Mission
 
@@ -27,7 +31,7 @@ S.P.A.R.K. is also the consolidation destination for useful NIM Engineering Tool
 
 ### High-priority set
 
-The 13 high-priority upstreams are pinned under `external/harvest/high_priority/` and locked by `UPSTREAM_LOCK.json`. These are intended for immediate local source custody and qualification.
+The 14 high-priority upstreams (including RTK) are pinned under `external/harvest/high_priority/` and locked by `UPSTREAM_LOCK.json`. These are intended for immediate local source custody and qualification.
 
 ### Secondary Wave 1
 

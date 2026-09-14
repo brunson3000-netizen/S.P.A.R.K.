@@ -216,3 +216,39 @@
 	url = https://github.com/ards-project/ard-spec.git
 	update = none
 	shallow = true
+
+[submodule "external/harvest/community/paperclip"]
+	path = external/harvest/community/paperclip
+	url = https://github.com/paperclipai/paperclip.git
+	update = none
+	shallow = true
+
+[submodule "external/harvest/community/openclaw"]
+	path = external/harvest/community/openclaw
+	url = https://github.com/openclaw/openclaw.git
+	update = none
+	shallow = true
+
+[submodule "external/harvest/community/hermes-agent"]
+	path = external/harvest/community/hermes-agent
+	url = https://github.com/NousResearch/hermes-agent.git
+	update = none
+	shallow = true
+
+[submodule "external/harvest/community/gastown"]
+	path = external/harvest/community/gastown
+	url = https://github.com/gastownhall/gastown.git
+	update = none
+	shallow = true
+
+[submodule "external/harvest/community/openshell"]
+	path = external/harvest/community/openshell
+	url = https://github.com/NVIDIA/OpenShell.git
+	update = none
+	shallow = true
+
+[submodule "external/harvest/community/nemoclaw"]
+	path = external/harvest/community/nemoclaw
+	url = https://github.com/NVIDIA/NemoClaw.git
+	update = none
+	shallow = true

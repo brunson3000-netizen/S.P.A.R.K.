@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "harvested_at": "2026-09-14",
+  "state": "PINNED_SOURCE_ONLY",
+  "activation": "NONE",
+  "auto_checkout": false,
+  "sources": [
+    {
+      "id": "paperclip",
+      "repo": "paperclipai/paperclip",
+      "url": "https://github.com/paperclipai/paperclip.git",
+      "commit": "13368c518303e886a5c9445fbc69afcbdf0a9228",
+      "path": "external/harvest/community/paperclip"
+    },
+    {
+      "id": "openclaw",
+      "repo": "openclaw/openclaw",
+      "url": "https://github.com/openclaw/openclaw.git",
+      "commit": "b0638604941dda7eb80095481576898f875caf08",
+      "path": "external/harvest/community/openclaw"
+    },
+    {
+      "id": "hermes-agent",
+      "repo": "NousResearch/hermes-agent",
+      "url": "https://github.com/NousResearch/hermes-agent.git",
+      "commit": "ee4452991d17534aa561f31ee55596d082aa94e7",
+      "path": "external/harvest/community/hermes-agent"
+    },
+    {
+      "id": "gastown",
+      "repo": "gastownhall/gastown",
+      "url": "https://github.com/gastownhall/gastown.git",
+      "commit": "649b832b7672bc7a2dbef26f5983aba6198b819b",
+      "path": "external/harvest/community/gastown"
+    },
+    {
+      "id": "openshell",
+      "repo": "NVIDIA/OpenShell",
+      "url": "https://github.com/NVIDIA/OpenShell.git",
+      "commit": "5b9daab9351b1e053f9a5e0ce4c899f5d3f674b0",
+      "path": "external/harvest/community/openshell"
+    },
+    {
+      "id": "nemoclaw",
+      "repo": "NVIDIA/NemoClaw",
+      "url": "https://github.com/NVIDIA/NemoClaw.git",
+      "commit": "3ea2d5f9a515d4176e0745214743a48ff4868f4c",
+      "path": "external/harvest/community/nemoclaw"
+    }
+  ]
+}

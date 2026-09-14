@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "measured_utc": "2026-09-14",
+  "sources": [
+    {
+      "commit": "0dc0343c9876267d99a7577ed4fc2289406a7869",
+      "parent": "wasmtime",
+      "path": "tests/spec_testsuite",
+      "repo": "WebAssembly/testsuite",
+      "parent_path": "external/harvest/high_priority/wasmtime",
+      "tracked_blob_bytes": 12255079,
+      "tree_complete": true
+    },
+    {
+      "commit": "6345da2237c562d9a94e281332c653b5528fdd52",
+      "parent": "wasmtime",
+      "path": "tests/wasi-testsuite",
+      "repo": "WebAssembly/wasi-testsuite",
+      "parent_path": "external/harvest/high_priority/wasmtime",
+      "tracked_blob_bytes": 221101089,
+      "tree_complete": true
+    },
+    {
+      "commit": "7c676115e93cd7d54c1732d95c54c6a3de7c5ae0",
+      "parent": "wasmtime",
+      "path": "tests/component-model",
+      "repo": "WebAssembly/component-model",
+      "parent_path": "external/harvest/high_priority/wasmtime",
+      "tracked_blob_bytes": 2304916,
+      "tree_complete": true
+    },
+    {
+      "commit": "590cbf37af8cef99387b2a1f88c163728b003ea4",
+      "parent": "temporal",
+      "path": "develop/docker-compose/grafana/provisioning/temporalio-dashboards",
+      "repo": "temporalio/dashboards",
+      "parent_path": "external/harvest/secondary/temporal",
+      "tracked_blob_bytes": 590080,
+      "tree_complete": true
+    },
+    {
+      "commit": "2bd8dfaa751efb60aa4e7e49b270490dfbc0a68a",
+      "parent": "nemoclaw",
+      "path": "nemoclaw-blueprint/router/llm-router",
+      "repo": "NVIDIA-AI-Blueprints/llm-router",
+      "parent_path": "external/harvest/community/nemoclaw",
+      "tracked_blob_bytes": 530354,
+      "tree_complete": true
+    }
+  ]
+}
