@@ -4,6 +4,10 @@ Status: ACTIVE
 
 This directory is the durable research notebook for external tool architecture.
 
+## Function-based study
+
+Start with [MCI research map](../MCI_RESEARCH_MAP.md), [Fable's brief](../FABLE_MCI_RESEARCH_BRIEF.md), and [governance packet](categories/GOV.md). Eight category indexes cross-reference the existing source/pattern/failure records. They do not change upstream custody or mark pending research complete.
+
 ## Structure
 
 - `sources/` — what each project actually does at the pinned commit
@@ -21,10 +25,15 @@ Source pins remain authoritative in:
 - `../UPSTREAM_LOCK.json`
 - `../SECONDARY_HARVEST_LOCK.json`
 - `../MIDDLE_LAYER_HARVEST_LOCK.json`
+- `../COMMUNITY_HARVEST_LOCK.json`
 
 Pinned external source is quarantined under `external/harvest/`.
 
-## Current priority
+## Original discovery priority (historical ordering; see active ledger)
+
+Governance-first comprehensive organization now follows the Operator's 2026-09-14 direction. Consult `ACTIVE_TRACE_LEDGER.md` for live trace ownership; its E2B trace remains active.
+
+### Earlier sequence
 
 P0 middle-layer qualification:
 1. ARD specification — discovery contract

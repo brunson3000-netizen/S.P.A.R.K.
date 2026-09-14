@@ -38,6 +38,10 @@ Size measurements exclude Git history, filesystem allocation overhead and extern
 
 See [checkout evidence](research/FABLE_SOURCE_CHECKOUT_EVIDENCE_2026-09-14.json) for actual download/verification outcomes from the preparation workspace. A successful preparation run verifies exact commits, clean worktrees and tracked tree sizes. It refuses to overwrite an existing dirty or differently pinned checkout. Run the command on Fable's machine to establish local availability there; a preparation-workspace result does not prove another machine is populated.
 
+## Categorized research assignment
+
+Use [FABLE_MCI_RESEARCH_BRIEF.md](FABLE_MCI_RESEARCH_BRIEF.md) for the comprehensive review, [MCI_RESEARCH_MAP.md](MCI_RESEARCH_MAP.md) for all-source coverage and [governance](research/categories/GOV.md) for the immediate priority. Source preparation below is complete in the recorded workspace; the wider study is not.
+
 ## Review orientation
 
 - Governance and primary coordination: Paperclip; Cedar/OPA as policy mechanism comparisons.

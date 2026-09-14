@@ -2,6 +2,10 @@
 
 Status: `FABLE_SOURCE_REVIEW_READY__QUALIFICATION_NEXT`
 
+## Categorized MCI research
+
+[Fable's research brief](FABLE_MCI_RESEARCH_BRIEF.md) and [complete source map](MCI_RESEARCH_MAP.md) organize the collection into eight MCI functions, with a separate [governance packet](research/categories/GOV.md). Organization is complete; source qualification remains open. The active E2B trace is preserved.
+
 ## Fable source review
 
 Start with [FABLE_SOURCE_REVIEW.md](FABLE_SOURCE_REVIEW.md) for the complete primary, secondary, middle-layer and community inventory, measured sizes, checkout evidence and one-command preparation. Canonical upstream revisions remain pinned; source review does not authorize runtime adoption.
