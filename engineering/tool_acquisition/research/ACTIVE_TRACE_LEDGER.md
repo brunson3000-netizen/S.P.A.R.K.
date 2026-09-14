@@ -62,3 +62,9 @@ Standing doctrine: containment can restrict what admitted code can do, but only 
 ## Next durable update
 
 Close Goose first, then Wasmtime and Extism with a containment comparison matrix and a bounded plugin-boundary experiment. After containment, continue remaining harvested middle-layer/observability candidates.
+
+## Recovery checkpoint — 2026-09-14
+
+Resumed through the GitHub connector from commit `795be8f2887911e91678e5a8760a991401e647fe` on `phase1-refoundation-v2`. Operator reiterated repository logging as work proceeds. The earlier exported handoff is superseded for current state: harvesting and multiple source traces are already recorded in this repository. Its obsolete harvest script finding is not a finding against the current repository scripts.
+
+`GOOSE_SECURITY.md` and `WASMTIME_WASI.md` both record FIRST TRACE COMPLETE. The active-trace prose above lags those source records. Exact next unfinished work: Extism pinned-source trace, containment comparison, and bounded plugin-boundary experiment specification. No new implementation or runtime adoption follows from resuming this research. Runtime experiments remain unexecuted in this session.
