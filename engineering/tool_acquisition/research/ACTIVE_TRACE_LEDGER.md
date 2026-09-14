@@ -23,87 +23,73 @@ Repository records, not conversation history, carry research state. Research met
 | T-RTK-01 | RTK + context-compress | `d0c29851...` / `59fae35a...` | `sources/RTK.md` | EXPERIMENT_NOW |
 | T-CONTAIN-01 | Goose + Wasmtime + Extism | `50666ae0...` / `817c5878...` / `d5da2975...` | `sources/GOOSE_SECURITY.md`, `sources/WASMTIME_WASI.md`, `sources/EXTISM.md` | EXPERIMENT_NOW |
 
-## Latest completed trace — containment / plugin boundary
+## Active trace — T-OBS-01
 
-Comparison: `comparison/CONTAINMENT_MATRIX.md`
-Experiment: `experiments/WASM_PLUGIN_BOUNDARY_EXPERIMENT.md`
-Failures: `failures/GOOSE_SECURITY.md`, `failures/EXTISM.md`
-
-Confirmed:
-- Goose is an inspection/safety layer, not containment: strongest transfers are monotonic tightening of permission outcomes and deterministic intended-effect/egress extraction; model reviewers remain defense-in-depth and can fail open.
-- raw Wasmtime/WASI supplies the clearest Rust capability boundary: no filesystem/network by default, explicit preopens/socket policy/host functions, explicit resource limits, deterministic fuel and independent epoch/wall-clock interruption.
-- Extism is a higher-level Wasmtime plugin runtime with convenient manifest/PDK controls, read-only/read-write WASI preopens, HTTP host filtering, timeout/cancel, memory/output limits, and distinct initialization/per-call fuel budgets.
-- Extism host-side module acquisition (`Wasm::File` / `Wasm::Url`) happens before guest containment and is enabled by default crate features; source acquisition authority must remain separate from guest runtime authority.
-- an Extism manifest host allowlist is hostname-oriented and is not by itself a complete egress contract; redirect/DNS/private-address semantics require adversarial qualification.
-- both Wasmtime and Extism allow arbitrary native host functions; every linked host function is an authority-bearing API generated from host-owned grants.
-- strongest target shape:
-  `proposal → effect inspection → host authorization → verified artifact → generated runtime capabilities → contained execution → applied-authority evidence → result/evidence`.
-
-Current recommendation: use raw Wasmtime/WASI as the first experiment baseline. Promote Extism only if it materially reduces integration/maintenance cost while passing the same authority and evidence invariants.
-
-No containment runtime was installed, activated or adopted by completing this research. The experiment remains NOT RUN.
-
-## Prior completed trace — output reduction
-
-Comparison: `comparison/OUTPUT_REDUCTION_MATRIX.md`
-Experiment: `experiments/OUTPUT_REDUCTION_BENCHMARK.md`
-Failures: `failures/RTK.md`
-
-Strongest combined shape:
-`authorized operation → immutable raw full-digest artifact → RTK-like deterministic reducer → searchable derived index → compact agent view`.
-
-## Active trace
-
-### T-OBS-01 — AgentTrace + agent-observability + OpenTelemetry Collector
-State: IN_PROGRESS
-Pins:
+Sources:
 - AgentTrace `9a10f9aae3bc508ddca83093b2d25aede5ad5bd0`
 - agent-observability `2658eef467225f376e2e92dc1465839eda2bc113`
 - OpenTelemetry Collector `a35b7a8db49df923c5add3dc34872b6e0b3af683`
 
 Goal: determine the smallest trustworthy flight-recorder/observability contract for SPARK workers, tools and multi-agent trees without turning telemetry into canonical semantic truth.
 
-#### AgentTrace — FIRST TRACE COMPLETE
+### AgentTrace — FIRST TRACE COMPLETE
+
 Record: `sources/AGENTTRACE.md`
 Failures: `failures/AGENTTRACE.md`
 Disposition: BORROW_PATTERN.
 
 Confirmed:
-- local SQLite/WAL schema provides run → trace → tool-call hierarchy, parent IDs, related-trace links, token/cost/latency/error fields and higher-level agent-usage events
-- trace row + tool calls + run aggregate update are one SQLite transaction
-- observability is explicitly secondary: trace-rate limiting executes the operation but drops the trace; cleanup/alert/webhook failure is prevented from breaking the traced operation
-- cost is locally derived from caller-supplied token/model data and approximate pricing; it is not billing truth
-- raw prompt/output/tool payloads are stored without automatic PII/secret redaction
-- OTLP export is a lossy projection at this pin: parent IDs, tool-call rows and arbitrary trace links are not preserved as OTel causality
-- SDK tool-call attribution uses one mutable `activeTraceContext` field rather than async-task-local state; overlapping async traces on one instance can misattribute tool calls.
+- useful run → trace → tool-call vocabulary, parent links and local SQLite/WAL storage
+- trace + tool calls + run aggregates are transactionally persisted
+- observability is intentionally secondary: rate limiting may drop a trace while the operation executes; alert/webhook failures do not change operation outcome
+- cost is caller/price-table derived, not billing truth
+- raw input/output/tool payloads are stored without automatic redaction
+- OTLP export is a lossy projection at this pin: local parent/tool/link semantics are not preserved
+- one mutable `activeTraceContext` is unsafe for overlapping async traces; causal context must be explicit/task-local/actor-owned.
 
-SPARK implications:
-- canonical execution evidence must exist below any sample/drop-capable telemetry
-- causal context must be explicit/task-local/actor-owned
-- telemetry payloads should prefer artifact digest/reference + bounded sanitized preview
-- estimated cost needs pricing/source provenance and cannot own economic authority
-- exporters are projections, never the canonical event model.
+### agent-observability — FIRST TRACE COMPLETE
 
-#### Next source
+Record: `sources/AGENT_OBSERVABILITY.md`
+Failures: `failures/AGENT_OBSERVABILITY.md`
+Disposition: ARCHIVE_REFERENCE / BORROW_IDEA.
 
-agent-observability is next. Trace its MCP interception/audit path, persistence model, tool/LLM cost/error coverage, payload/privacy handling and failure behavior before comparing it to AgentTrace.
+Confirmed:
+- primary mode is model self-reporting through an MCP observability server; it is annotation, not independent evidence
+- each reported tool call automatically creates a synthetic “decision” whose rationale is the output summary/tool name; this is not observed reasoning
+- proxy fallback has no JSON-RPC request-ID correlation map: `_obs_*` metadata is attached to request but read from response, so ordinary tool responses lose tool/input/start attribution
+- proxy end-to-end test only checks `tools/list`, not `tools/call` correlation
+- database stores full JSON input/output without the README’s claimed 64KB output cap; only summary is truncated
+- grade is only an error-rate heuristic and cost is a fixed rough token estimate at this pin
+- dashboard has no authentication middleware and no explicit loopback bind despite exposing raw session/tool data
+- npm postinstall mutates global agent MCP configs and installs an `@latest` runtime command; acquisition/install/activation are improperly conflated.
 
-Priority after that:
-- OpenTelemetry Collector receiver → processor → exporter semantics
-- stable event identity, causality and backpressure/drop behavior
-- flight-recorder schema + experiment/convergence matrix.
+SPARK implication:
+- distinguish `SELF_REPORTED`, `INTERCEPTED`, `HOST_CANONICAL`, and `DERIVED` event provenance
+- independent recorder must assign stable event/call IDs and correlate request/response before forwarding
+- never synthesize rationale/correctness/billing truth from an observed action without labeling it derived
+- enforce payload bounds/redaction/artifact-reference conversion in code
+- observability installation must not silently widen or modify another agent’s runtime behavior.
 
-Standing doctrine:
+### OpenTelemetry Collector — IN PROGRESS
+
+Next trace:
+- receiver → consumer → processor → exporter pipeline
+- queue/batch/retry/backpressure/drop semantics
+- context/correlation propagation
+- error handling and shutdown
+- what can be lost or reordered under exporter failure
+- why OTel remains a derived projection beneath SPARK canonical state/evidence.
+
+## Standing observability doctrine
+
 - canonical authority/evidence/state remain SPARK-owned
 - telemetry is derived observation, never a grant or semantic-health authority
+- required canonical event/evidence capture occurs before any sample/drop-capable telemetry path
 - exporter/collector failure must not alter execution authority or canonical results
-- parent/child and tool-call correlation IDs are for causality/evidence navigation, not authorization
-- high-volume payloads should be artifact references/digests rather than repeated raw context whenever possible.
-
-## Recovery history
-
-Commit `1aaac8a8e1670f5bf3e659c01dc6f7b8a213dffe` recorded recovery from repository state and identified Extism + containment convergence as unfinished. Subsequent records closed containment and moved the active queue to observability. The recovery record remains in git history.
+- correlation IDs prove causality/navigation only, not authorization
+- large/sensitive payloads should be canonical artifact references/digests plus bounded sanitized previews
+- token/cost/grade fields carry source/method/version and are estimates unless backed by an authoritative provider record.
 
 ## Next durable update
 
-Complete agent-observability first trace, then OTel Collector; finish T-OBS-01 with an observability matrix and flight-recorder experiment/schema proposal.
+Complete OpenTelemetry Collector source trace; then finish T-OBS-01 with `comparison/OBSERVABILITY_MATRIX.md` and a host-owned flight-recorder contract/experiment proposal.
