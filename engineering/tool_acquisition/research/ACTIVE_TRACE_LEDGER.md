@@ -20,51 +20,67 @@ Repository records, not conversation history, carry research state. Research met
 | T-SLICE-01 | ast-grep + Tree-sitter | `45b5eb67...` / `1b8407d1...` | `sources/AST_GREP_TREE_SITTER.md` | EXPERIMENT_NOW |
 | T-TESTUTIL-01 | cargo-nextest + cargo-mutants | `8527c325...` / `fe82f183...` | `sources/CARGO_NEXTEST_MUTANTS.md` | EXPERIMENT_NOW |
 | T-FAULT-01 | wiremock-rs + Toxiproxy | `6b193047...` / `40f7fd31...` | `sources/WIREMOCK_TOXIPROXY.md` | EXPERIMENT_NOW |
-| T-RTK-01 | RTK + context-compress comparison | `d0c29851...` / `59fae35a...` | `sources/RTK.md` | EXPERIMENT_NOW |
+| T-RTK-01 | RTK + context-compress | `d0c29851...` / `59fae35a...` | `sources/RTK.md` | EXPERIMENT_NOW |
+| T-CONTAIN-01 | Goose + Wasmtime + Extism | `50666ae0...` / `817c5878...` / `d5da2975...` | `sources/GOOSE_SECURITY.md`, `sources/WASMTIME_WASI.md`, `sources/EXTISM.md` | EXPERIMENT_NOW |
 
-## Latest completed trace — output reduction
+## Latest completed trace — containment / plugin boundary
+
+Comparison: `comparison/CONTAINMENT_MATRIX.md`
+Experiment: `experiments/WASM_PLUGIN_BOUNDARY_EXPERIMENT.md`
+Failures: `failures/GOOSE_SECURITY.md`, `failures/EXTISM.md`
+
+Confirmed:
+- Goose is an inspection/safety layer, not containment: strongest transfers are monotonic tightening of permission outcomes and deterministic intended-effect/egress extraction; model reviewers remain defense-in-depth and can fail open.
+- raw Wasmtime/WASI supplies the clearest Rust capability boundary: no filesystem/network by default, explicit preopens/socket policy/host functions, explicit resource limits, deterministic fuel and independent epoch/wall-clock interruption.
+- Extism is a higher-level Wasmtime plugin runtime with convenient manifest/PDK controls, read-only/read-write WASI preopens, HTTP host filtering, timeout/cancel, memory/output limits, and distinct initialization/per-call fuel budgets.
+- Extism host-side module acquisition (`Wasm::File` / `Wasm::Url`) happens before guest containment and is enabled by default crate features; source acquisition authority must remain separate from guest runtime authority.
+- an Extism manifest host allowlist is hostname-oriented and is not by itself a complete egress contract; redirect/DNS/private-address semantics require adversarial qualification.
+- both Wasmtime and Extism allow arbitrary native host functions; every linked host function is an authority-bearing API generated from host-owned grants.
+- strongest target shape:
+  `proposal → effect inspection → host authorization → verified artifact → generated runtime capabilities → contained execution → applied-authority evidence → result/evidence`.
+
+Current recommendation: use raw Wasmtime/WASI as the first experiment baseline. Promote Extism only if it materially reduces integration/maintenance cost while passing the same authority and evidence invariants.
+
+No containment runtime was installed, activated or adopted by completing this research. The experiment remains NOT RUN.
+
+## Prior completed trace — output reduction
 
 Comparison: `comparison/OUTPUT_REDUCTION_MATRIX.md`
 Experiment: `experiments/OUTPUT_REDUCTION_BENCHMARK.md`
 Failures: `failures/RTK.md`
 
-Confirmed:
-- RTK is an executing CLI proxy, not merely a formatter; command modules run the underlying command and preserve its exit code
-- hook/plugin integration can automatically rewrite agent shell commands, but this execution-affecting middleware should not become SPARK canonical authority
-- large deterministic command-specific filter library is the strongest reusable asset
-- current recall layer stores byte-faithful compressed raw bytes for sufficiently large failures and filter-declared successful truncations
-- default recall bounds are 10 MiB/entry, 200 entries, 30 days; ordinary successful compressed output is not universally captured
-- recall uses a 12-hex-character SHA-256 prefix as local primary/display ID, unsuitable for canonical evidence identity
-- filter/recovery integration depends on command modules calling shared recovery helpers
-- context-compress contributes generic source-scoped search but not byte-exact evidence
-- strongest combined shape is `authorized operation → immutable raw full-digest artifact → RTK-like reducer → searchable derived index → compact view`.
+Strongest combined shape:
+`authorized operation → immutable raw full-digest artifact → RTK-like deterministic reducer → searchable derived index → compact agent view`.
 
 ## Active trace
 
-### T-CONTAIN-01 — Goose + Wasmtime + Extism
+### T-OBS-01 — AgentTrace + agent-observability + OpenTelemetry Collector
 State: IN_PROGRESS
 Pins:
-- Goose `50666ae0b9a51e260b52b7efbab2e4e020346e94`
-- Wasmtime `817c58787f432bcdbbb87679011f72c5bc80dbda`
-- Extism `d5da29759bba88645f886d9e12d3f4e4376df7b3`
+- AgentTrace `9a10f9aae3bc508ddca83093b2d25aede5ad5bd0`
+- agent-observability `2658eef467225f376e2e92dc1465839eda2bc113`
+- OpenTelemetry Collector `a35b7a8db49df923c5add3dc34872b6e0b3af683`
 
-Goal: determine the strongest reusable containment/security mechanisms for running external or generated capability code beneath SPARK’s host-owned authority.
+Goal: determine the smallest trustworthy flight-recorder/observability contract for SPARK workers, tools and multi-agent trees without turning telemetry into canonical semantic truth.
 
 Priority traces:
-1. Goose: tool-call security inspectors, permission/repetition/egress/adversary handling; which checks are deterministic versus model-assisted
-2. Wasmtime/WASI: filesystem/network capability grants, preopens, resource limits, fuel/epoch interruption, memory/table/instance bounds and host-function boundary
-3. Extism: manifest/path/host grants, WASI enablement, filesystem permission model, init/call fuel/resource limits and host functions
-4. compare raw Wasmtime versus Extism as a plugin runtime for narrow deterministic adapters
-5. extract explicit failure lessons: sandbox substrate is not authority; host functions widen capability; resource limits are not all equivalent to wall-clock containment; filesystem capability semantics need adversarial tests.
+1. AgentTrace — event/trajectory model; parent/child correlation; tokens, cost, latency, tools; local storage/export; instrumentation burden and failure behavior
+2. agent-observability — MCP/tool-call audit model; failures, costs, local persistence and inspection; what it records versus reconstructs
+3. OpenTelemetry Collector — receiver → processor → exporter pipeline, batching/retry/backpressure/drop semantics, context propagation and what belongs outside canonical core state
+4. compare stable event identity, causality, timestamps, cost/token attribution, tool input/output references, error/result semantics and privacy/redaction boundaries
+5. extract a host-owned flight-recorder schema that can point to full evidence artifacts without duplicating them into telemetry.
 
-Standing doctrine: containment can restrict what admitted code can do, but only SPARK’s host broker can decide whether the code should run and with which grants.
+Standing doctrine:
+- canonical authority/evidence/state remain SPARK-owned
+- telemetry is derived observation, never a grant or semantic-health authority
+- exporter/collector failure must not alter execution authority or canonical results
+- parent/child and tool-call correlation IDs are for causality/evidence navigation, not authorization
+- high-volume payloads should be artifact references/digests rather than repeated raw context whenever possible.
+
+## Recovery history
+
+Commit `1aaac8a8e1670f5bf3e659c01dc6f7b8a213dffe` recorded recovery from repository state and identified Extism + containment convergence as the unfinished work. This ledger supersedes that active-state description by closing the containment source trace and moving the active queue to observability. The recovery record remains in git history.
 
 ## Next durable update
 
-Close Goose first, then Wasmtime and Extism with a containment comparison matrix and a bounded plugin-boundary experiment. After containment, continue remaining harvested middle-layer/observability candidates.
-
-## Recovery checkpoint — 2026-09-14
-
-Resumed through the GitHub connector from commit `795be8f2887911e91678e5a8760a991401e647fe` on `phase1-refoundation-v2`. Operator reiterated repository logging as work proceeds. The earlier exported handoff is superseded for current state: harvesting and multiple source traces are already recorded in this repository. Its obsolete harvest script finding is not a finding against the current repository scripts.
-
-`GOOSE_SECURITY.md` and `WASMTIME_WASI.md` both record FIRST TRACE COMPLETE. The active-trace prose above lags those source records. Exact next unfinished work: Extism pinned-source trace, containment comparison, and bounded plugin-boundary experiment specification. No new implementation or runtime adoption follows from resuming this research. Runtime experiments remain unexecuted in this session.
+Trace AgentTrace end-to-end first, then agent-observability, then OTel Collector; finish with an observability matrix and flight-recorder experiment/schema proposal.
