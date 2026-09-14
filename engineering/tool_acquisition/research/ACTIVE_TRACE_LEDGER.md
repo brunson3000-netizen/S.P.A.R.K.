@@ -63,12 +63,35 @@ Pins:
 
 Goal: determine the smallest trustworthy flight-recorder/observability contract for SPARK workers, tools and multi-agent trees without turning telemetry into canonical semantic truth.
 
-Priority traces:
-1. AgentTrace — event/trajectory model; parent/child correlation; tokens, cost, latency, tools; local storage/export; instrumentation burden and failure behavior
-2. agent-observability — MCP/tool-call audit model; failures, costs, local persistence and inspection; what it records versus reconstructs
-3. OpenTelemetry Collector — receiver → processor → exporter pipeline, batching/retry/backpressure/drop semantics, context propagation and what belongs outside canonical core state
-4. compare stable event identity, causality, timestamps, cost/token attribution, tool input/output references, error/result semantics and privacy/redaction boundaries
-5. extract a host-owned flight-recorder schema that can point to full evidence artifacts without duplicating them into telemetry.
+#### AgentTrace — FIRST TRACE COMPLETE
+Record: `sources/AGENTTRACE.md`
+Failures: `failures/AGENTTRACE.md`
+Disposition: BORROW_PATTERN.
+
+Confirmed:
+- local SQLite/WAL schema provides run → trace → tool-call hierarchy, parent IDs, related-trace links, token/cost/latency/error fields and higher-level agent-usage events
+- trace row + tool calls + run aggregate update are one SQLite transaction
+- observability is explicitly secondary: trace-rate limiting executes the operation but drops the trace; cleanup/alert/webhook failure is prevented from breaking the traced operation
+- cost is locally derived from caller-supplied token/model data and approximate pricing; it is not billing truth
+- raw prompt/output/tool payloads are stored without automatic PII/secret redaction
+- OTLP export is a lossy projection at this pin: parent IDs, tool-call rows and arbitrary trace links are not preserved as OTel causality
+- SDK tool-call attribution uses one mutable `activeTraceContext` field rather than async-task-local state; overlapping async traces on one instance can misattribute tool calls.
+
+SPARK implications:
+- canonical execution evidence must exist below any sample/drop-capable telemetry
+- causal context must be explicit/task-local/actor-owned
+- telemetry payloads should prefer artifact digest/reference + bounded sanitized preview
+- estimated cost needs pricing/source provenance and cannot own economic authority
+- exporters are projections, never the canonical event model.
+
+#### Next source
+
+agent-observability is next. Trace its MCP interception/audit path, persistence model, tool/LLM cost/error coverage, payload/privacy handling and failure behavior before comparing it to AgentTrace.
+
+Priority after that:
+- OpenTelemetry Collector receiver → processor → exporter semantics
+- stable event identity, causality and backpressure/drop behavior
+- flight-recorder schema + experiment/convergence matrix.
 
 Standing doctrine:
 - canonical authority/evidence/state remain SPARK-owned
@@ -79,8 +102,8 @@ Standing doctrine:
 
 ## Recovery history
 
-Commit `1aaac8a8e1670f5bf3e659c01dc6f7b8a213dffe` recorded recovery from repository state and identified Extism + containment convergence as the unfinished work. This ledger supersedes that active-state description by closing the containment source trace and moving the active queue to observability. The recovery record remains in git history.
+Commit `1aaac8a8e1670f5bf3e659c01dc6f7b8a213dffe` recorded recovery from repository state and identified Extism + containment convergence as unfinished. Subsequent records closed containment and moved the active queue to observability. The recovery record remains in git history.
 
 ## Next durable update
 
-Trace AgentTrace end-to-end first, then agent-observability, then OTel Collector; finish with an observability matrix and flight-recorder experiment/schema proposal.
+Complete agent-observability first trace, then OTel Collector; finish T-OBS-01 with an observability matrix and flight-recorder experiment/schema proposal.
