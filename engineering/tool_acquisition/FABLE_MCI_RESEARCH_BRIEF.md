@@ -1,6 +1,6 @@
 # Fable — comprehensive MCI source research
 
-Status: READY TO HAND OFF. Research assignment; no claim that Fable has started or completed it.
+Status: STATIC ASSESSMENT READY FOR FABLE; DEEPER QUALIFICATION OPEN. Codex completed the catalog-wide screen; no claim that Fable has started or completed independent review.
 
 ## Assignment
 
@@ -48,3 +48,11 @@ List which upstream tests protect these cases and whether you actually ran them.
 Organization complete, first trace complete, qualification complete, test executed and consumer accepted are separate claims. Full study closeout requires each source screened and each retained candidate sufficiently traced; unresolved qualification remains visible even if the screening sweep is complete.
 
 Log source/category progress in the repository at coherent checkpoints. Preserve other researchers' changes and active ownership. Formal independent review must follow the governing resource/review channels; a researcher cannot independently review their own work. Commit/publish only within existing authorization. Report repository, branch, commit, evidence paths, completed versus unfinished work and next authorized action.
+
+## Completed screening update — 2026-09-14
+
+Read [the assessment](research/comparison/MCI_COMPREHENSIVE_ASSESSMENT_2026-09-14.md) and [current coverage](research/MCI_REVIEW_COVERAGE_2026-09-14.json) before repeating work. The starting-state counts above are historical baseline information: all 54 now have dispositions, with 20 prior traces reused, six new scoped code studies, 25 narrow code screens and three documentation screens. Eight category packets contain findings and comparisons, with governance material separated and cross-linked.
+
+The six scoped studies were committed at d9200cad; the remaining screens and focused ctx-zip adverse reproduction at 16b315b. Do not treat these as full integration qualification. E2B's deeper active trace remains preserved. Root license screens and source-tree availability are distinct from file-level reuse clearance and a populated local checkout.
+
+Next work is [the bounded qualification queue](research/comparison/MCI_REVIEW_GAPS_2026-09-14.md), particularly exact approval/version binding, evaluator errors, concurrent budget reservation, effect/crash ordering and physical enforcement. Reuse existing evidence; reference-only items do not need deeper study without a changed consumer need. No agent identity, research citation or historical note grants authority to alter policy or remove software.

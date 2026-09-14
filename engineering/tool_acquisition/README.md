@@ -1,10 +1,10 @@
 # S.P.A.R.K. External Tool Acquisition Program
 
-Status: `FABLE_SOURCE_REVIEW_READY__QUALIFICATION_NEXT`
+Status: `MCI_STATIC_ASSESSMENT_COMPLETE__QUALIFICATION_OPEN`
 
 ## Categorized MCI research
 
-[Fable's research brief](FABLE_MCI_RESEARCH_BRIEF.md) and [complete source map](MCI_RESEARCH_MAP.md) organize the collection into eight MCI functions, with a separate [governance packet](research/categories/GOV.md). Organization is complete; source qualification remains open. The active E2B trace is preserved.
+[Fable's research brief](FABLE_MCI_RESEARCH_BRIEF.md) and [complete source map](MCI_RESEARCH_MAP.md) organize the collection into eight MCI functions, with a separate [governance packet](research/categories/GOV.md). All 54 sources now have screening dispositions. Read the [comprehensive assessment](research/comparison/MCI_COMPREHENSIVE_ASSESSMENT_2026-09-14.md) and [qualification gaps](research/comparison/MCI_REVIEW_GAPS_2026-09-14.md). Eight category packets contain findings, with governance separated. Runtime/source integration qualification remains open; E2B's deeper active trace is preserved.
 
 ## Fable source review
 

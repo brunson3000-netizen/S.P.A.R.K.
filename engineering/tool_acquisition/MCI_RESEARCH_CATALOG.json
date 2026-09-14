@@ -1,8 +1,5 @@
 {
-  "schema_version": 1,
-  "prepared_date": "2026-09-14",
   "baseline_commit": "7ee1f7f17dc1df1765e73d870a23ba4d5f90df89",
-  "purpose": "Research routing and coverage, not adoption or code qualification",
   "categories": [
     {
       "id": "GOV",
@@ -45,6 +42,9 @@
       "scope": "Contract tests, fault injection, replay, mutation and comparison experiments."
     }
   ],
+  "prepared_date": "2026-09-14",
+  "purpose": "Research routing and coverage, not adoption or code qualification",
+  "schema_version": 1,
   "sources": [
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -54,13 +54,18 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/high_priority/cli-anything",
       "question": "Adapter generation, typed command contracts and protecting tests",
-      "record": null,
+      "record": "research/sources/CLI_ANYTHING_MCI_SCREEN_2026-09-14.md",
       "repo": "HKUDS/CLI-Anything",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "PROTO",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -77,7 +82,12 @@
         "GOV",
         "TOOLS",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/RMCP.md",
+      "primary_disposition": "REUSE_CODE",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -94,7 +104,12 @@
         "GOV",
         "PROTO",
         "AUDIT"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/TOOLHIVE.md",
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "LARGE_EXPLICIT_SELECTION",
@@ -111,7 +126,12 @@
         "GOV",
         "COORD",
         "TOOLS"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/GOOSE_SECURITY.md",
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -121,13 +141,18 @@
       "license_status": "SPECIAL_REVIEW_REQUIRED",
       "path": "external/harvest/high_priority/mcp-inspector",
       "question": "Protocol diagnostics, unsafe inputs and reproducible contract probes",
-      "record": null,
+      "record": "research/sources/MCP_INSPECTOR_MCI_SCREEN_2026-09-14.md",
       "repo": "modelcontextprotocol/inspector",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "PROTO",
         "SEC"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "EXPERIMENT_NOW",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -143,7 +168,12 @@
       "tags": [
         "GOV",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/WASMTIME_WASI.md",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -160,7 +190,12 @@
         "GOV",
         "TOOLS",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/EXTISM.md",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -176,7 +211,12 @@
       "tags": [
         "TOOLS",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/AST_GREP_TREE_SITTER.md",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -192,7 +232,12 @@
       "tags": [
         "TOOLS",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/AST_GREP_TREE_SITTER.md",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -207,7 +252,12 @@
       "review_state": "FIRST_TRACE_RECORDED",
       "tags": [
         "SEC"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/WIREMOCK_TOXIPROXY.md",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -222,7 +272,12 @@
       "review_state": "FIRST_TRACE_RECORDED",
       "tags": [
         "TOOLS"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/WIREMOCK_TOXIPROXY.md",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -237,7 +292,12 @@
       "review_state": "FIRST_TRACE_RECORDED",
       "tags": [
         "TOOLS"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/CARGO_NEXTEST_MUTANTS.md",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -252,7 +312,12 @@
       "review_state": "FIRST_TRACE_RECORDED",
       "tags": [
         "TOOLS"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/CARGO_NEXTEST_MUTANTS.md",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -269,7 +334,12 @@
         "CONTEXT",
         "AUDIT",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/RTK.md",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -279,13 +349,18 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/acp-spec",
       "question": "Client-agent permissions, sessions and cancellation contract",
-      "record": null,
+      "record": "research/sources/ACP_SPEC_MCI_SCREEN_2026-09-14.md",
       "repo": "agentclientprotocol/agent-client-protocol",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "DOCUMENTATION_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "COORD"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "DOCUMENTATION_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -295,14 +370,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/acp-rust-sdk",
       "question": "Rust ACP transport and permission/cancel boundary behavior",
-      "record": null,
+      "record": "research/sources/ACP_RUST_SDK_MCI_SCREEN_2026-09-14.md",
       "repo": "agentclientprotocol/rust-sdk",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "COORD",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -312,13 +392,18 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/wasmcloud",
       "question": "Capability-provider isolation and host/control-plane dependency cost",
-      "record": null,
+      "record": "research/sources/WASMCLOUD_MCI_SCREEN_2026-09-14.md",
       "repo": "wasmCloud/wasmCloud",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "COORD",
         "PROTO"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -328,13 +413,18 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/nushell",
       "question": "Structured command/plugin inputs, outputs and OS authority",
-      "record": null,
+      "record": "research/sources/NUSHELL_MCI_SCREEN_2026-09-14.md",
       "repo": "nushell/nushell",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "PROTO",
         "SEC"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -350,7 +440,12 @@
       "tags": [
         "COORD",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/OTEL_COLLECTOR.md",
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -360,13 +455,18 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/temporal",
       "question": "Durable workflow replay, duplicate effects, deadlines and recovery",
-      "record": null,
+      "record": "research/sources/TEMPORAL_MCI_SCREEN_2026-09-14.md",
       "repo": "temporalio/temporal",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "AUDIT",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -376,14 +476,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/openhands-sdk",
       "question": "Agent execution, approval gates and runtime isolation",
-      "record": null,
+      "record": "research/sources/OPENHANDS_SDK_MCI_SCREEN_2026-09-14.md",
       "repo": "OpenHands/software-agent-sdk",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "SEC",
         "TOOLS"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -393,14 +498,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/langgraph",
       "question": "Checkpoint/resume, human interrupts and stale approval semantics",
-      "record": null,
+      "record": "research/sources/LANGGRAPH_MCI_SCREEN_2026-09-14.md",
       "repo": "langchain-ai/langgraph",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "CONTEXT",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -410,14 +520,19 @@
       "license_status": "SPECIAL_REVIEW_REQUIRED",
       "path": "external/harvest/secondary/n8n",
       "question": "Workflow permissions, credentials and retry effects; constrained reuse terms",
-      "record": null,
+      "record": "research/sources/N8N_MCI_SCREEN_2026-09-14.md",
       "repo": "n8n-io/n8n",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "TOOLS",
         "AUDIT"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -427,14 +542,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/microsoft-agent-framework",
       "question": "Supervisor/worker handoffs, authority inheritance and recovery",
-      "record": null,
+      "record": "research/sources/MICROSOFT_AGENT_FRAMEWORK_MCI_SCREEN_2026-09-14.md",
       "repo": "microsoft/agent-framework",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "PROTO",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -444,13 +564,18 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/autogen",
       "question": "Multi-agent termination and coordination failure lessons; reference lane",
-      "record": null,
+      "record": "research/sources/AUTOGEN_MCI_SCREEN_2026-09-14.md",
       "repo": "microsoft/autogen",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -460,13 +585,18 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/cedar",
       "question": "Typed policy evaluation, deny/error semantics and caller enforcement seam",
-      "record": null,
+      "record": "research/sources/CEDAR_MCI_REVIEW_2026-09-14.md",
       "repo": "cedar-policy/cedar",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "SCOPED_CODE_STUDY_COMPLETE",
       "tags": [
         "SEC",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "SCOPED_CODE_STUDY",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -476,14 +606,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/cloudflare-agents",
       "question": "Durable actor identity, state and platform-dependent authority",
-      "record": null,
+      "record": "research/sources/CLOUDFLARE_AGENTS_MCI_SCREEN_2026-09-14.md",
       "repo": "cloudflare/agents",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "CONTEXT",
         "PROTO"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -493,14 +628,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/opa",
       "question": "Policy evaluation, bundle/version lifecycle and enforcement integration",
-      "record": null,
+      "record": "research/sources/OPA_MCI_REVIEW_2026-09-14.md",
       "repo": "open-policy-agent/opa",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "SCOPED_CODE_STUDY_COMPLETE",
       "tags": [
         "SEC",
         "AUDIT",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "evidence_level": "SCOPED_CODE_STUDY",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -510,13 +650,18 @@
       "license_status": "SPECIAL_REVIEW_REQUIRED",
       "path": "external/harvest/secondary/claude-code",
       "question": "Public product/hook reference only; not full open-source implementation",
-      "record": null,
+      "record": "research/sources/CLAUDE_CODE_MCI_SCREEN_2026-09-14.md",
       "repo": "anthropics/claude-code",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "DOCUMENTATION_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "TOOLS"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "evidence_level": "DOCUMENTATION_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -526,14 +671,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/gemini-cli",
       "question": "Policy/trust gates, shell execution and child-agent controls",
-      "record": null,
+      "record": "research/sources/GEMINI_CLI_MCI_SCREEN_2026-09-14.md",
       "repo": "google-gemini/gemini-cli",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "SEC",
         "TOOLS"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -543,14 +693,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/google-adk-python",
       "question": "Agent/tool callbacks, delegation, runtime limits and evidence",
-      "record": null,
+      "record": "research/sources/GOOGLE_ADK_PYTHON_MCI_SCREEN_2026-09-14.md",
       "repo": "google/adk-python",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "TOOLS",
         "AUDIT"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -560,14 +715,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/openai-codex",
       "question": "Host approval, sandbox, session and process lifecycle boundaries",
-      "record": null,
+      "record": "research/sources/OPENAI_CODEX_MCI_SCREEN_2026-09-14.md",
       "repo": "openai/codex",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "SEC",
         "PROTO"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -577,14 +737,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/openai-agents-python",
       "question": "Handoffs, guardrails, approval semantics and tracing provenance",
-      "record": null,
+      "record": "research/sources/OPENAI_AGENTS_PYTHON_MCI_SCREEN_2026-09-14.md",
       "repo": "openai/openai-agents-python",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "TOOLS",
         "AUDIT"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_IDEA",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -594,14 +759,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/swe-agent",
       "question": "Agent action parser, environment boundaries and benchmark failure behavior",
-      "record": null,
+      "record": "research/sources/SWE_AGENT_MCI_SCREEN_2026-09-14.md",
       "repo": "SWE-agent/SWE-agent",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "SEC",
         "TOOLS",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -611,13 +781,18 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/cosign",
       "question": "Artifact identity and trust verification; not behavioral safety approval",
-      "record": null,
+      "record": "research/sources/COSIGN_MCI_SCREEN_2026-09-14.md",
       "repo": "sigstore/cosign",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "SEC"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "DEFER",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -627,13 +802,18 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/in-toto",
       "question": "Attested step inputs/outputs and evidence-chain validation",
-      "record": null,
+      "record": "research/sources/IN_TOTO_MCI_SCREEN_2026-09-14.md",
       "repo": "in-toto/in-toto",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "LARGE_EXPLICIT_SELECTION",
@@ -643,14 +823,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/secondary/slsa-verifier",
       "question": "Source/build provenance verification; maintenance/reference lane",
-      "record": null,
+      "record": "research/sources/SLSA_VERIFIER_MCI_SCREEN_2026-09-14.md",
       "repo": "slsa-framework/slsa-verifier",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "SEC",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -665,7 +850,12 @@
       "review_state": "FIRST_TRACE_RECORDED",
       "tags": [
         "GOV"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/ARD.md",
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -681,7 +871,12 @@
       "tags": [
         "GOV",
         "CONTEXT"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/PROGRESSIVE_MCP_GUARDIAN.md",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -698,7 +893,12 @@
         "GOV",
         "SEC",
         "AUDIT"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/MCP_GATEWAY_REGISTRY.md",
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -715,7 +915,12 @@
         "TOOLS",
         "AUDIT",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/CONTEXT_COMPRESS.md",
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -731,7 +936,12 @@
       "tags": [
         "GOV",
         "CONTEXT"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/AGENT_SKILLS.md",
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -741,14 +951,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/middle_layer/agentgateway",
       "question": "Gateway authentication, target binding and current-policy enforcement",
-      "record": null,
+      "record": "research/sources/AGENTGATEWAY_MCI_SCREEN_2026-09-14.md",
       "repo": "agentgateway/agentgateway",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "SEC",
         "AUDIT"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -764,7 +979,12 @@
       "tags": [
         "GOV",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/AGENTTRACE.md",
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -774,13 +994,18 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/middle_layer/openziti-mcp-gateway",
       "question": "Network identity/authorization versus tool-level operation authority",
-      "record": null,
+      "record": "research/sources/OPENZITI_MCP_GATEWAY_MCI_SCREEN_2026-09-14.md",
       "repo": "openziti/mcp-gateway",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "PROTO"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -790,14 +1015,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/middle_layer/e2b-runtime",
       "question": "MicroVM lifecycle, snapshot freshness, cleanup and resource enforcement",
-      "record": null,
+      "record": "research/sources/E2B_RUNTIME_MCI_SCREEN_2026-09-14.md",
       "repo": "e2b-dev/runtime",
       "review_state": "IN_PROGRESS",
       "tags": [
         "GOV",
         "COORD",
         "AUDIT"
-      ]
+      ],
+      "previous_review_state": "IN_PROGRESS",
+      "previous_record": null,
+      "primary_disposition": "DEFER",
+      "evidence_level": "DOCUMENTATION_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -813,7 +1043,12 @@
       "tags": [
         "GOV",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "FIRST_TRACE_RECORDED",
+      "previous_record": "research/sources/AGENT_OBSERVABILITY.md",
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -823,14 +1058,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/middle_layer/ctx-zip",
       "question": "Compression fidelity, evidence recovery and workload comparison",
-      "record": null,
+      "record": "research/sources/CTX_ZIP_MCI_SCREEN_2026-09-14.md",
       "repo": "karthikscale3/ctx-zip",
-      "review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "TOOLS",
         "AUDIT",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER",
+      "previous_record": null,
+      "primary_disposition": "BORROW_IDEA",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -840,13 +1080,18 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/community/paperclip",
       "question": "Approval version binding, concurrent budgets, leases and operator stop",
-      "record": "research/candidates/PAPERCLIP_COMMUNITY_INTAKE_2026-09-14.md",
+      "record": "research/sources/PAPERCLIP_MCI_REVIEW_2026-09-14.md",
       "repo": "paperclipai/paperclip",
-      "review_state": "INTAKE_ONLY",
+      "review_state": "SCOPED_CODE_STUDY_COMPLETE",
       "tags": [
         "COORD",
         "AUDIT"
-      ]
+      ],
+      "previous_review_state": "INTAKE_ONLY",
+      "previous_record": "research/candidates/PAPERCLIP_COMMUNITY_INTAKE_2026-09-14.md",
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "SCOPED_CODE_STUDY",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "LARGE_EXPLICIT_SELECTION",
@@ -856,14 +1101,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/community/openclaw",
       "question": "Persistent agent roles, tool permissions and supervisor limits",
-      "record": "research/candidates/OPENCLAW_HERMES_COMMUNITY_INTAKE_2026-09-14.md",
+      "record": "research/sources/OPENCLAW_MCI_SCREEN_2026-09-14.md",
       "repo": "openclaw/openclaw",
-      "review_state": "INTAKE_ONLY",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "SEC",
         "CONTEXT"
-      ]
+      ],
+      "previous_review_state": "INTAKE_ONLY",
+      "previous_record": "research/candidates/OPENCLAW_HERMES_COMMUNITY_INTAKE_2026-09-14.md",
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -873,14 +1123,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/community/hermes-agent",
       "question": "Persistent memory, tool gates and worker lifecycle",
-      "record": "research/candidates/OPENCLAW_HERMES_COMMUNITY_INTAKE_2026-09-14.md",
+      "record": "research/sources/HERMES_AGENT_MCI_SCREEN_2026-09-14.md",
       "repo": "NousResearch/hermes-agent",
-      "review_state": "INTAKE_ONLY",
+      "review_state": "NARROW_CODE_SCREEN_COMPLETE",
       "tags": [
         "GOV",
         "SEC",
         "CONTEXT"
-      ]
+      ],
+      "previous_review_state": "INTAKE_ONLY",
+      "previous_record": "research/candidates/OPENCLAW_HERMES_COMMUNITY_INTAKE_2026-09-14.md",
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -890,14 +1145,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/community/gastown",
       "question": "Coordinator/supervisor roles, recovery, merge and ownership races",
-      "record": "research/candidates/GASTOWN_COMMUNITY_INTAKE_2026-09-14.md",
+      "record": "research/sources/GASTOWN_MCI_REVIEW_2026-09-14.md",
       "repo": "gastownhall/gastown",
-      "review_state": "INTAKE_ONLY",
+      "review_state": "SCOPED_CODE_STUDY_COMPLETE",
       "tags": [
         "GOV",
         "AUDIT",
         "TEST"
-      ]
+      ],
+      "previous_review_state": "INTAKE_ONLY",
+      "previous_record": "research/candidates/GASTOWN_COMMUNITY_INTAKE_2026-09-14.md",
+      "primary_disposition": "BORROW_IDEA",
+      "evidence_level": "SCOPED_CODE_STUDY",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -907,14 +1167,19 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/community/openshell",
       "question": "Runtime enforcement of process/filesystem/network policy and revocation",
-      "record": "research/candidates/NVIDIA_OPENSHELL_NEMOCLAW_COMMUNITY_INTAKE_2026-09-14.md",
+      "record": "research/sources/OPENSHELL_MCI_REVIEW_2026-09-14.md",
       "repo": "NVIDIA/OpenShell",
-      "review_state": "INTAKE_ONLY",
+      "review_state": "SCOPED_CODE_STUDY_COMPLETE",
       "tags": [
         "GOV",
         "COORD",
         "AUDIT"
-      ]
+      ],
+      "previous_review_state": "INTAKE_ONLY",
+      "previous_record": "research/candidates/NVIDIA_OPENSHELL_NEMOCLAW_COMMUNITY_INTAKE_2026-09-14.md",
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "SCOPED_CODE_STUDY",
+      "qualification_state": "OPEN"
     },
     {
       "availability": "PRIOR_PREPARATION_VERIFIED",
@@ -924,40 +1189,53 @@
       "license_status": "FILE_LEVEL_REUSE_REVIEW_PENDING",
       "path": "external/harvest/community/nemoclaw",
       "question": "OpenShell integration, configuration-to-enforcement and router boundaries",
-      "record": "research/candidates/NVIDIA_OPENSHELL_NEMOCLAW_COMMUNITY_INTAKE_2026-09-14.md",
+      "record": "research/sources/NEMOCLAW_MCI_REVIEW_2026-09-14.md",
       "repo": "NVIDIA/NemoClaw",
-      "review_state": "INTAKE_ONLY",
+      "review_state": "SCOPED_CODE_STUDY_COMPLETE",
       "tags": [
         "GOV",
         "COORD",
         "PROTO"
-      ]
+      ],
+      "previous_review_state": "INTAKE_ONLY",
+      "previous_record": "research/candidates/NVIDIA_OPENSHELL_NEMOCLAW_COMMUNITY_INTAKE_2026-09-14.md",
+      "primary_disposition": "BORROW_PATTERN",
+      "evidence_level": "SCOPED_CODE_STUDY",
+      "qualification_state": "OPEN"
     }
   ],
   "supplemental": [
     {
-      "id": "grok-build",
+      "custody": "NOT_IN_54_SOURCE_LOCKS_OR_GITLINKS",
       "home": "GOV",
+      "id": "grok-build",
+      "record": "research/sources/GROK_BUILD.md",
+      "review_state": "FIRST_TRACE_RECORDED",
+      "study_commit": "37949780c144e37df692e3d669051a21fec24f20",
       "tags": [
         "COORD",
         "CONTEXT",
         "PROTO",
         "AUDIT"
       ],
-      "record": "research/sources/GROK_BUILD.md",
-      "study_commit": "37949780c144e37df692e3d669051a21fec24f20",
-      "review_state": "FIRST_TRACE_RECORDED",
-      "custody": "NOT_IN_54_SOURCE_LOCKS_OR_GITLINKS"
+      "remote_tree_verified": true,
+      "tracked_blob_bytes": 73042597,
+      "license_evidence": "Apache-2.0 at pinned LICENSE",
+      "primary_disposition": "BORROW_PATTERN"
     },
     {
-      "id": "cloudways-managed-ai-agents",
       "home": "COORD",
+      "id": "cloudways-managed-ai-agents",
+      "record": "research/candidates/CLOUDWAYS_MANAGED_AI_AGENTS.md",
+      "review_state": "HOSTED_REFERENCE_ONLY",
       "tags": [
         "GOV",
         "SEC"
       ],
-      "record": "research/candidates/CLOUDWAYS_MANAGED_AI_AGENTS.md",
-      "review_state": "HOSTED_REFERENCE_ONLY"
+      "primary_disposition": "ARCHIVE_REFERENCE"
     }
-  ]
+  ],
+  "screening_baseline": "16b315b14192f6948c9169f0bd6c04e8620289bf",
+  "screening_date": "2026-09-14",
+  "screening_state": "ALL_54_SCREENED; QUALIFICATION_OPEN"
 }

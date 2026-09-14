@@ -1,0 +1,1150 @@
+{
+  "date": "2026-09-14",
+  "scope": "All 54 locked sources plus separately identified supplements; static screening is complete, comprehensive integration qualification is not.",
+  "consumer_repo": "brunson3000-netizen/SWARM",
+  "consumer_revision": "673b705d34ec173f6c359d9fca81d7c539219ada",
+  "counts": {
+    "sources": 54,
+    "prior_first_trace_reused": 20,
+    "new_scoped_code_studies": 6,
+    "new_narrow_code_screens": 25,
+    "new_documentation_screens": 3,
+    "focused_adverse_reproductions": 1
+  },
+  "sources": [
+    {
+      "id": "cli-anything",
+      "repo": "HKUDS/CLI-Anything",
+      "commit": "810c18b0d1ab9b234bc996c9fd999318523a3ef0",
+      "home": "TOOLS",
+      "tags": [
+        "PROTO",
+        "TEST"
+      ],
+      "study_record": "research/sources/CLI_ANYTHING_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Use bounded JSON command/result contracts and reversible editor-state operations in TOOLS. Build the planned Blender shadow adapter separately; require real application fixtures and crash-safe evidence writes. Native Python/runtime/application dependencies are external to Rust Core. Do not import the save helper as canonical persistence.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "rmcp",
+      "repo": "modelcontextprotocol/rust-sdk",
+      "commit": "3075dc9152d4678775f20634fcb467a7b995dbab",
+      "home": "PROTO",
+      "tags": [
+        "GOV",
+        "TOOLS",
+        "TEST"
+      ],
+      "study_record": "research/sources/RMCP.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "REUSE_CODE",
+      "reason": "Official Rust wire/lifecycle substrate; host identity, authority, durable tasks and canonical evidence remain external.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/RMCP.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "toolhive",
+      "repo": "stacklok/toolhive",
+      "commit": "e532cf07d45fa99f3e4e63819396a3e9c9fd763f",
+      "home": "SEC",
+      "tags": [
+        "GOV",
+        "PROTO",
+        "AUDIT"
+      ],
+      "study_record": "research/sources/TOOLHIVE.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Versioned run contract, creation policy and declared/applied checks; defaults and warning modes need tightening.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/TOOLHIVE.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "goose",
+      "repo": "aaif-goose/goose",
+      "commit": "50666ae0b9a51e260b52b7efbab2e4e020346e94",
+      "home": "SEC",
+      "tags": [
+        "GOV",
+        "COORD",
+        "TOOLS"
+      ],
+      "study_record": "research/sources/GOOSE_SECURITY.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Composable inspectors and approval mechanisms; full agent runtime is not a selected governance layer.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "LARGE_EXPLICIT_SELECTION",
+      "prior_record": "research/sources/GOOSE_SECURITY.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "mcp-inspector",
+      "repo": "modelcontextprotocol/inspector",
+      "commit": "795b1bb30ac845b7baa7cb3df8ec0b693882ca1d",
+      "home": "TEST",
+      "tags": [
+        "PROTO",
+        "SEC"
+      ],
+      "study_record": "research/sources/MCP_INSPECTOR_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "reason": "Retain as a qualification tool against disposable mock servers. Record every RPC, including automatic probes, and separate protocol conformance from host policy acceptance. Node and UI dependencies stay in the test lane; no production dependency selected.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "wasmtime",
+      "repo": "bytecodealliance/wasmtime",
+      "commit": "817c58787f432bcdbbb87679011f72c5bc80dbda",
+      "home": "SEC",
+      "tags": [
+        "GOV",
+        "TEST"
+      ],
+      "study_record": "research/sources/WASMTIME_WASI.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "reason": "Explicit host-granted capabilities and resource controls make a good containment baseline; runtime experiment pending.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/WASMTIME_WASI.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "extism",
+      "repo": "extism/extism",
+      "commit": "d5da29759bba88645f886d9e12d3f4e4376df7b3",
+      "home": "SEC",
+      "tags": [
+        "GOV",
+        "TOOLS",
+        "TEST"
+      ],
+      "study_record": "research/sources/EXTISM.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "reason": "Plugin convenience merits comparison against raw Wasmtime; host-side manifest loading expands pre-sandbox boundary.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/EXTISM.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "ast-grep",
+      "repo": "ast-grep/ast-grep",
+      "commit": "45b5eb6705b4c24e04746137d259874abf1087ad",
+      "home": "CONTEXT",
+      "tags": [
+        "TOOLS",
+        "TEST"
+      ],
+      "study_record": "research/sources/AST_GREP_TREE_SITTER.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "reason": "Deterministic structural context slices; verify target recall and parse-error handling against ripgrep baseline.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/AST_GREP_TREE_SITTER.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "tree-sitter",
+      "repo": "tree-sitter/tree-sitter",
+      "commit": "1b8407d1e718f2a26e2886c03cc55622d8d1d7bd",
+      "home": "CONTEXT",
+      "tags": [
+        "TOOLS",
+        "TEST"
+      ],
+      "study_record": "research/sources/AST_GREP_TREE_SITTER.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "reason": "Parser substrate for structural slices; parse success does not establish semantic correctness.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/AST_GREP_TREE_SITTER.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "toxiproxy",
+      "repo": "Shopify/toxiproxy",
+      "commit": "40f7fd31bee529d824116bd2a11a9e3425e904ec",
+      "home": "TEST",
+      "tags": [
+        "SEC"
+      ],
+      "study_record": "research/sources/WIREMOCK_TOXIPROXY.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "reason": "Network fault fixtures for adapter qualification; isolated sidecar, not production routing authority.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/WIREMOCK_TOXIPROXY.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "wiremock-rs",
+      "repo": "LukeMathWalker/wiremock-rs",
+      "commit": "6b193047bf2c5626da5dc5f3a23b58ab9bd3f130",
+      "home": "TEST",
+      "tags": [
+        "TOOLS"
+      ],
+      "study_record": "research/sources/WIREMOCK_TOXIPROXY.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "reason": "Rust mock service fixtures for exact request/result assertions and fault scenarios.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/WIREMOCK_TOXIPROXY.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "cargo-nextest",
+      "repo": "nextest-rs/nextest",
+      "commit": "8527c325bf9f0e5dcdcb26fa80e3ed7dc7f3e35e",
+      "home": "TEST",
+      "tags": [
+        "TOOLS"
+      ],
+      "study_record": "research/sources/CARGO_NEXTEST_MUTANTS.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "reason": "Test process isolation and structured results; retain canonical gates and explicit flaky/retry semantics.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/CARGO_NEXTEST_MUTANTS.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "cargo-mutants",
+      "repo": "sourcefrog/cargo-mutants",
+      "commit": "fe82f1832778a591ab74248010fb40e699defafe",
+      "home": "TEST",
+      "tags": [
+        "TOOLS"
+      ],
+      "study_record": "research/sources/CARGO_NEXTEST_MUTANTS.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "reason": "Bounded falsification of meaningful invariants; not a default replacement for ordinary tests.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/CARGO_NEXTEST_MUTANTS.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "rtk",
+      "repo": "rtk-ai/rtk",
+      "commit": "d0c2985155568d1d76fca03bc65d5098f136bbcd",
+      "home": "TOOLS",
+      "tags": [
+        "CONTEXT",
+        "AUDIT",
+        "TEST"
+      ],
+      "study_record": "research/sources/RTK.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "reason": "Compact deterministic output views; preserve raw evidence and avoid automatic hook rewriting.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/RTK.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "acp-spec",
+      "repo": "agentclientprotocol/agent-client-protocol",
+      "commit": "ada6b108389a63a2625298f2be3eacde33a1d8c5",
+      "home": "PROTO",
+      "tags": [
+        "GOV",
+        "COORD"
+      ],
+      "study_record": "research/sources/ACP_SPEC_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "DOCUMENTATION_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow typed lifecycle vocabulary and explicit cancellation outcomes for the MCI adapter boundary. Require an independent stop/cleanup receipt before reporting work terminated. Preserve version negotiation and avoid mixing v1 requirements with draft v2.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "acp-rust-sdk",
+      "repo": "agentclientprotocol/rust-sdk",
+      "commit": "3a6d0ae88dbaa09fcb74e26761e3643a75b2015e",
+      "home": "PROTO",
+      "tags": [
+        "GOV",
+        "COORD",
+        "TEST"
+      ],
+      "study_record": "research/sources/ACP_RUST_SDK_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Rust fit is good for a future ACP adapter, but demand and negotiated protocol version should precede dependency selection. Borrow adapter boundaries now; compare current API compatibility and add host authorization, durable session mapping and stop receipts before considering code reuse.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "wasmcloud",
+      "repo": "wasmCloud/wasmCloud",
+      "commit": "1f82c28e638372fbf5a924c96214a4c3629e99f8",
+      "home": "SEC",
+      "tags": [
+        "COORD",
+        "PROTO"
+      ],
+      "study_record": "research/sources/WASMCLOUD_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow the small deterministic address-classification pattern below the MCI execution contract. Default private-network access is not an MCI choice. Actual connect-time address pinning, DNS changes, proxies and host callbacks require tests. Avoid importing the wider hosting platform without a consumer need.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "nushell",
+      "repo": "nushell/nushell",
+      "commit": "b6e6562a9a385df439ae864714c609c60314fde9",
+      "home": "TOOLS",
+      "tags": [
+        "PROTO",
+        "SEC"
+      ],
+      "study_record": "research/sources/NUSHELL_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow structured-value and negotiated-feature design for TOOLS/PROTO. Note the deliberate prerelease relaxation if exact revision compatibility matters. Keep native executable activation behind the same host policy as any other tool.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "opentelemetry-collector",
+      "repo": "open-telemetry/opentelemetry-collector",
+      "commit": "a35b7a8db49df923c5add3dc34872b6e0b3af683",
+      "home": "AUDIT",
+      "tags": [
+        "COORD",
+        "TEST"
+      ],
+      "study_record": "research/sources/OTEL_COLLECTOR.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Optional downstream telemetry queue/export machinery; enqueue success and persistent queue are not canonical evidence.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/OTEL_COLLECTOR.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "temporal",
+      "repo": "temporalio/temporal",
+      "commit": "9ab3a9f770da20df7d94bcc0030f28eec7b0b947",
+      "home": "COORD",
+      "tags": [
+        "AUDIT",
+        "TEST"
+      ],
+      "study_record": "research/sources/TEMPORAL_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow durable intent/event and run-identity checks in COORD; do not embed the distributed Temporal service merely to supervise local agents. Rust consumer should preserve its own authoritative work IDs and epochs. Test late worker completion and duplicate external effects before using retries.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "openhands-sdk",
+      "repo": "OpenHands/software-agent-sdk",
+      "commit": "c37007429be8b4465a83487dc1fd0914df0ea734",
+      "home": "COORD",
+      "tags": [
+        "GOV",
+        "SEC",
+        "TOOLS"
+      ],
+      "study_record": "research/sources/OPENHANDS_SDK_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow the explicit confirmation-policy interface and conservative unknown-risk handling. Keep current permission checks independent of an LLM risk score and of UI confirmation mode. Python agent framework can remain an adapter/reference rather than owning MCI authority.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "langgraph",
+      "repo": "langchain-ai/langgraph",
+      "commit": "e539ac122f4126f6dd850581c1494948cf620e31",
+      "home": "COORD",
+      "tags": [
+        "GOV",
+        "CONTEXT",
+        "TEST"
+      ],
+      "study_record": "research/sources/LANGGRAPH_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow explicit resume/replay semantics for COORD and display interruption as a state transition in MCI. Make pre-interrupt effects idempotent or place them behind durable host admission. A suppressed late graph write does not prove a subprocess or network effect stopped.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "n8n",
+      "repo": "n8n-io/n8n",
+      "commit": "4169b55bf3b3e6c255d7361642bc5243bd04345a",
+      "home": "COORD",
+      "tags": [
+        "GOV",
+        "TOOLS",
+        "AUDIT"
+      ],
+      "study_record": "research/sources/N8N_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "reason": "Archive as integration and operator-interface reference. Root license has Sustainable Use terms and enterprise exclusions, so public code availability must not be labeled unrestricted open-source reuse. Prefer an independently specified small adapter interface over importing the workflow platform.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "microsoft-agent-framework",
+      "repo": "microsoft/agent-framework",
+      "commit": "1cd06c5a2058a172eebadf5d9d7c3fa45c519520",
+      "home": "COORD",
+      "tags": [
+        "GOV",
+        "PROTO",
+        "TEST"
+      ],
+      "study_record": "research/sources/MICROSOFT_AGENT_FRAMEWORK_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow approval queue/result and server+argument binding patterns. MCI should additionally bind capability version/digest, active policy epoch and exact resource; invalidate pending approvals on those changes. Do not adopt same-name replacement semantics for high-impact grants.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "autogen",
+      "repo": "microsoft/autogen",
+      "commit": "027ecf0a379bcc1d09956d46d12d44a3ad9cee14",
+      "home": "COORD",
+      "tags": [
+        "GOV",
+        "TEST"
+      ],
+      "study_record": "research/sources/AUTOGEN_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "reason": "Retain historical coordination and termination vocabulary. Maintenance status and duplicated framework scope make this a weaker new foundation. Use host-owned deadlines and independently confirmed stop state instead of equating loop termination with confinement.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "cedar",
+      "repo": "cedar-policy/cedar",
+      "commit": "2f4019fd645cc8d4a4c0c1f8bd0280c77d754e28",
+      "home": "GOV",
+      "tags": [
+        "SEC",
+        "TEST"
+      ],
+      "study_record": "research/sources/CEDAR_MCI_REVIEW_2026-09-14.md",
+      "evidence_level": "SCOPED_CODE_STUDY",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Candidate: use the public cedar-policy evaluator behind a Rust-owned adapter that checks diagnostics as well as decision, current policy revision and current identity. Do not copy internal authorizer code or adopt Cedar precedence as MCI law. A consumer policy that requires error-free admission needs an explicit diagnostics gate.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "cloudflare-agents",
+      "repo": "cloudflare/agents",
+      "commit": "46760e635ce9599add0abbfe6c1a34af0d5d44f1",
+      "home": "COORD",
+      "tags": [
+        "GOV",
+        "CONTEXT",
+        "PROTO"
+      ],
+      "study_record": "research/sources/CLOUDFLARE_AGENTS_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "reason": "Archive the durable waiting interface for MCI operator-state design. Cloudflare runtime/service dependencies make direct local Rust reuse a poor fit. Any independent implementation needs exact action binding, expiry, replay protection and host authorization of approval submission.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "opa",
+      "repo": "open-policy-agent/opa",
+      "commit": "961849b565d2457b80c168f254325b7d5b91461e",
+      "home": "GOV",
+      "tags": [
+        "SEC",
+        "AUDIT",
+        "TEST"
+      ],
+      "study_record": "research/sources/OPA_MCI_REVIEW_2026-09-14.md",
+      "evidence_level": "SCOPED_CODE_STUDY",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "reason": "Retain as a policy-semantics and versioned-bundle comparison against Cedar. Go service/library or a separately qualified Wasm route adds a boundary to the Rust core. Do not introduce that runtime just to obtain boolean decisions.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "claude-code",
+      "repo": "anthropics/claude-code",
+      "commit": "b5932767f3acbd07da25367064827e5cb81f43de",
+      "home": "COORD",
+      "tags": [
+        "GOV",
+        "TOOLS"
+      ],
+      "study_record": "research/sources/CLAUDE_CODE_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "DOCUMENTATION_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "reason": "Keep as UX/hook reference only. Governance code extraction should prioritize visible implementations with traceable call paths. Do not describe this item as an open-source implementation or count unavailable product code as harvested.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "gemini-cli",
+      "repo": "google-gemini/gemini-cli",
+      "commit": "9c1b0a610534d6f8120964cf2672c07807d8fc90",
+      "home": "COORD",
+      "tags": [
+        "GOV",
+        "SEC",
+        "TOOLS"
+      ],
+      "study_record": "research/sources/GEMINI_CLI_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow policy explanation and compound-command test corpus in GOV/TOOLS. Never authorize a shell string from its first token alone. Rust integration would require a compatible parser and explicit policy contract; no TypeScript policy engine adoption selected.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "google-adk-python",
+      "repo": "google/adk-python",
+      "commit": "460715b6c62c8e9ab00931c502381ee0364e39b6",
+      "home": "COORD",
+      "tags": [
+        "GOV",
+        "TOOLS",
+        "AUDIT"
+      ],
+      "study_record": "research/sources/GOOGLE_ADK_PYTHON_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow exact call/name/argument matching and consumed-confirmation invariants. Add authenticated submitter, immutable tool version, policy epoch and resource revision to the MCI host envelope; current history matching does not establish those stronger bindings.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "openai-codex",
+      "repo": "openai/codex",
+      "commit": "516f2780fd227a80cd9fe89488f5039245090b71",
+      "home": "COORD",
+      "tags": [
+        "GOV",
+        "SEC",
+        "PROTO"
+      ],
+      "study_record": "research/sources/OPENAI_CODEX_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow a single host call pipeline with typed ToolRuntime/approval/sandbox seams. Strong Rust reference but coupled to core session/config/execution crates; extraction is not a drop-in dependency. Retry only after current policy evaluation and bind resulting evidence to the actual attempt.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "openai-agents-python",
+      "repo": "openai/openai-agents-python",
+      "commit": "fbd2dbcaaf74a2c447c6d3fa9d5645d83fd7e292",
+      "home": "COORD",
+      "tags": [
+        "GOV",
+        "TOOLS",
+        "AUDIT"
+      ],
+      "study_record": "research/sources/OPENAI_AGENTS_PYTHON_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_IDEA",
+      "reason": "Borrow the separation of guardrail feedback from tool approval UX. For hard governance admission, use deterministic host checks before dispatch, independently of a parallel classifier. Full framework adoption would add Python/model SDK dependencies without resolving canonical authority.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "swe-agent",
+      "repo": "SWE-agent/SWE-agent",
+      "commit": "3ea751c087f32b16e039a2233dd6eefecef325d5",
+      "home": "COORD",
+      "tags": [
+        "SEC",
+        "TOOLS",
+        "TEST"
+      ],
+      "study_record": "research/sources/SWE_AGENT_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "reason": "Retain interface and evaluation lessons, but avoid importing the older harness as MCI coordination infrastructure. Schema parsing, environment confinement, permission checks and correctness verification remain separate.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "cosign",
+      "repo": "sigstore/cosign",
+      "commit": "633e8f4303b7db64c369bdfa315374a8bd511ac6",
+      "home": "AUDIT",
+      "tags": [
+        "GOV",
+        "SEC"
+      ],
+      "study_record": "research/sources/COSIGN_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "DEFER",
+      "reason": "Defer operational use until signed package distribution is a concrete MCI need. Retain a verification-before-activation contract and record identity, digest and verification mode. Avoid making mutable tags or a successful signature synonymous with runtime permission.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "in-toto",
+      "repo": "in-toto/in-toto",
+      "commit": "e352b43ad7cb8915d84c36d791aa61346152a0a3",
+      "home": "AUDIT",
+      "tags": [
+        "GOV",
+        "TEST"
+      ],
+      "study_record": "research/sources/IN_TOTO_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow attested input/output chains and explicit verification stages for AUDIT. Keep executable inspections behind independent host admission and sandboxing. Defer the full verifier until supply-chain demand; do not feed untrusted layouts into a supposedly passive research/verifier path.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "slsa-verifier",
+      "repo": "slsa-framework/slsa-verifier",
+      "commit": "30d0be3bbab553fc51557377baba2f7572dfc212",
+      "home": "AUDIT",
+      "tags": [
+        "GOV",
+        "SEC",
+        "TEST"
+      ],
+      "study_record": "research/sources/SLSA_VERIFIER_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "reason": "Keep verifier failure cases and provenance vocabulary as reference. Maintenance status and alternative signing ecosystem make it unsuitable as the preferred new MCI foundation without renewed evaluation.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "LARGE_EXPLICIT_SELECTION",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "ard-spec",
+      "repo": "ards-project/ard-spec",
+      "commit": "b76f235a8f461876ad4f1e77abd0eb0eb302b48d",
+      "home": "PROTO",
+      "tags": [
+        "GOV"
+      ],
+      "study_record": "research/sources/ARD.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Stable discovery identifiers and separation semantics; proposed wire standard and full-entry retrieval need an adapter contract.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/ARD.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "progressive-mcp-guardian",
+      "repo": "S1LV3RJ1NX/mcp-guardian",
+      "commit": "4c6a04537b9bc548744b4146168b8fa9896069cb",
+      "home": "PROTO",
+      "tags": [
+        "GOV",
+        "CONTEXT"
+      ],
+      "study_record": "research/sources/PROGRESSIVE_MCP_GUARDIAN.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "EXPERIMENT_NOW",
+      "reason": "Progressive disclosure merits controlled measurement; discovered/indexed membership is insufficient execution authority.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/PROGRESSIVE_MCP_GUARDIAN.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "mcp-gateway-registry",
+      "repo": "agentic-community/mcp-gateway-registry",
+      "commit": "7c353798fa7d4da6ca1b3f3d2c502505bfbb8f73",
+      "home": "PROTO",
+      "tags": [
+        "GOV",
+        "SEC",
+        "AUDIT"
+      ],
+      "study_record": "research/sources/MCP_GATEWAY_REGISTRY.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Discovery filtering, call-time authorization and signed hop identity; whole product is infrastructure-heavy.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/MCP_GATEWAY_REGISTRY.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "context-compress",
+      "repo": "Open330/context-compress",
+      "commit": "59fae35a7b383876a34f84090f6da978e230795a",
+      "home": "CONTEXT",
+      "tags": [
+        "TOOLS",
+        "AUDIT",
+        "TEST"
+      ],
+      "study_record": "research/sources/CONTEXT_COMPRESS.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Searchable spillover and bounded views; preserve a separate immutable byte-exact original.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/CONTEXT_COMPRESS.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "agent-skills-spec",
+      "repo": "agentskills/agentskills",
+      "commit": "69ef37e9424c0a7ea9dd2293b559e43ec8176379",
+      "home": "PROTO",
+      "tags": [
+        "GOV",
+        "CONTEXT"
+      ],
+      "study_record": "research/sources/AGENT_SKILLS.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Portable teaching/package format; loaded instructions and metadata never grant execution authority.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/AGENT_SKILLS.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "agentgateway",
+      "repo": "agentgateway/agentgateway",
+      "commit": "5e5633bffe6dc5fdd29256648987197f366e462a",
+      "home": "PROTO",
+      "tags": [
+        "GOV",
+        "SEC",
+        "AUDIT"
+      ],
+      "study_record": "research/sources/AGENTGATEWAY_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow deterministic policy composition and method/resource binding. MCI needs an explicit configured admission policy, identity provenance and call-time epoch checks. Rust is a useful reference; controller/network framework dependencies should not become Core dependencies accidentally.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "agenttrace",
+      "repo": "Klepsiphron/agenttrace",
+      "commit": "9a10f9aae3bc508ddca83093b2d25aede5ad5bd0",
+      "home": "AUDIT",
+      "tags": [
+        "GOV",
+        "TEST"
+      ],
+      "study_record": "research/sources/AGENTTRACE.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Flight-record vocabulary and transactional aggregation; mutable async context and lossy export limit direct reuse.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/AGENTTRACE.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "openziti-mcp-gateway",
+      "repo": "openziti/mcp-gateway",
+      "commit": "8f99623d95d2f5223d2fa12b9f125688d8c80bf9",
+      "home": "SEC",
+      "tags": [
+        "GOV",
+        "PROTO"
+      ],
+      "study_record": "research/sources/OPENZITI_MCP_GATEWAY_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow settled-argument identity and pre-dispatch path checks. Add handle-based filesystem enforcement or equivalent to close check/use races; do not interpret an earlier path check as a sandbox. Whole-network deployment is much heavier than a local Rust adapter.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "e2b-runtime",
+      "repo": "e2b-dev/runtime",
+      "commit": "cf6961c4b9c8fb919a5b372f0d8c4cd3216aa497",
+      "home": "SEC",
+      "tags": [
+        "GOV",
+        "COORD",
+        "AUDIT"
+      ],
+      "study_record": "research/sources/E2B_RUNTIME_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "DOCUMENTATION_SCREEN",
+      "assessment_status": "SCREENED_ACTIVE_TRACE_PRESERVED",
+      "primary_disposition": "DEFER",
+      "reason": "Retain sandbox lifecycle prior art while deferring disposition on implementation reuse to the active trace. Linux/KVM and service-stack needs make direct local portability uncertain. Require fresh authority on resume, kill/cleanup receipts and evidence export before teardown.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "IN_PROGRESS"
+    },
+    {
+      "id": "agent-observability",
+      "repo": "KryptosAI/agent-observability",
+      "commit": "2658eef467225f376e2e92dc1465839eda2bc113",
+      "home": "AUDIT",
+      "tags": [
+        "GOV",
+        "TEST"
+      ],
+      "study_record": "research/sources/AGENT_OBSERVABILITY.md",
+      "evidence_level": "PRIOR_FIRST_TRACE_REUSED",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "ARCHIVE_REFERENCE",
+      "reason": "Self-reporting and defective proxy correlation cannot form canonical evidence; retain negative lessons.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/sources/AGENT_OBSERVABILITY.md",
+      "prior_review_state": "FIRST_TRACE_RECORDED"
+    },
+    {
+      "id": "ctx-zip",
+      "repo": "karthikscale3/ctx-zip",
+      "commit": "76580f7ba1555c891928702743ac74412c7fac60",
+      "home": "CONTEXT",
+      "tags": [
+        "TOOLS",
+        "AUDIT",
+        "TEST"
+      ],
+      "study_record": "research/sources/CTX_ZIP_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_IDEA",
+      "reason": "Retain the compact-reference idea only. Rule out direct use for canonical evidence at this pin; use immutable per-call digest-addressed artifacts, pure projections and byte-exact retrieval. See the committed experiment and failure record.",
+      "upstream_test_execution": "FOCUSED_ADVERSE_REPRODUCTION_ONLY; UPSTREAM_SUITE_NOT_RUN",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": null,
+      "prior_review_state": "NOT_TRACED_IN_ACTIVE_LEDGER"
+    },
+    {
+      "id": "paperclip",
+      "repo": "paperclipai/paperclip",
+      "commit": "13368c518303e886a5c9445fbc69afcbdf0a9228",
+      "home": "GOV",
+      "tags": [
+        "COORD",
+        "AUDIT"
+      ],
+      "study_record": "research/sources/PAPERCLIP_MCI_REVIEW_2026-09-14.md",
+      "evidence_level": "SCOPED_CODE_STUDY",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow conditional transition/idempotency and explicit pause/admission/cancel wiring. Do not label observed-spend accounting a strict prospective mission cap: these traced paths do not establish atomic worst-case reservations before parallel calls. Borrow a mechanism, not the company/board hierarchy or full database-backed product.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/candidates/PAPERCLIP_COMMUNITY_INTAKE_2026-09-14.md",
+      "prior_review_state": "INTAKE_ONLY"
+    },
+    {
+      "id": "openclaw",
+      "repo": "openclaw/openclaw",
+      "commit": "b0638604941dda7eb80095481576898f875caf08",
+      "home": "COORD",
+      "tags": [
+        "GOV",
+        "SEC",
+        "CONTEXT"
+      ],
+      "study_record": "research/sources/OPENCLAW_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow policy-source explanations for MCI displays. Do not import override semantics as hierarchical authority: a child must be constrained by host-owned parent limits, regardless of list replacement or allow-all configuration. Full platform adds substantial integration scope.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "LARGE_EXPLICIT_SELECTION",
+      "prior_record": "research/candidates/OPENCLAW_HERMES_COMMUNITY_INTAKE_2026-09-14.md",
+      "prior_review_state": "INTAKE_ONLY"
+    },
+    {
+      "id": "hermes-agent",
+      "repo": "NousResearch/hermes-agent",
+      "commit": "ee4452991d17534aa561f31ee55596d082aa94e7",
+      "home": "COORD",
+      "tags": [
+        "GOV",
+        "SEC",
+        "CONTEXT"
+      ],
+      "study_record": "research/sources/HERMES_AGENT_MCI_SCREEN_2026-09-14.md",
+      "evidence_level": "NARROW_CODE_SCREEN",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow the ordering of non-bypassable floors before convenience modes, with stricter explicit error semantics. MCI must not silently interpret an unreadable denial policy as no denial. Python runtime and execution backends remain outside the Rust authoritative core.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/candidates/OPENCLAW_HERMES_COMMUNITY_INTAKE_2026-09-14.md",
+      "prior_review_state": "INTAKE_ONLY"
+    },
+    {
+      "id": "gastown",
+      "repo": "gastownhall/gastown",
+      "commit": "649b832b7672bc7a2dbef26f5983aba6198b819b",
+      "home": "COORD",
+      "tags": [
+        "GOV",
+        "AUDIT",
+        "TEST"
+      ],
+      "study_record": "research/sources/GASTOWN_MCI_REVIEW_2026-09-14.md",
+      "evidence_level": "SCOPED_CODE_STUDY",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_IDEA",
+      "reason": "Keep role vocabulary and recovery cases as ideas for MCI's replaceable agents. Borrow neither file timestamps as authority nor a whole multi-agent hierarchy. Rust-owned durable task/attempt state remains the relevant consumer boundary.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/candidates/GASTOWN_COMMUNITY_INTAKE_2026-09-14.md",
+      "prior_review_state": "INTAKE_ONLY"
+    },
+    {
+      "id": "openshell",
+      "repo": "NVIDIA/OpenShell",
+      "commit": "5b9daab9351b1e053f9a5e0ce4c899f5d3f674b0",
+      "home": "SEC",
+      "tags": [
+        "GOV",
+        "COORD",
+        "AUDIT"
+      ],
+      "study_record": "research/sources/OPENSHELL_MCI_REVIEW_2026-09-14.md",
+      "evidence_level": "SCOPED_CODE_STUDY",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow explicit prepare/enforce split and machine-visible enforcement outcome. Any MCI use requiring Landlock must select and verify the required enforcement behavior. Linux Landlock/seccomp cannot establish native Windows parity.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/candidates/NVIDIA_OPENSHELL_NEMOCLAW_COMMUNITY_INTAKE_2026-09-14.md",
+      "prior_review_state": "INTAKE_ONLY"
+    },
+    {
+      "id": "nemoclaw",
+      "repo": "NVIDIA/NemoClaw",
+      "commit": "3ea2d5f9a515d4176e0745214743a48ff4868f4c",
+      "home": "SEC",
+      "tags": [
+        "GOV",
+        "COORD",
+        "PROTO"
+      ],
+      "study_record": "research/sources/NEMOCLAW_MCI_REVIEW_2026-09-14.md",
+      "evidence_level": "SCOPED_CODE_STUDY",
+      "assessment_status": "SCREENED",
+      "primary_disposition": "BORROW_PATTERN",
+      "reason": "Borrow three-way mutation outcomes and explicit applied revision. Requirement inclusion checks are useful for minimum requirements; they do not prove least privilege or that an effective policy has no extra authority. MCI needs a separate upper-bound/excess-capability check where required.",
+      "upstream_test_execution": "NOT_RUN_IN_THIS_PASS",
+      "integration_qualification": "OPEN",
+      "source_availability": "PRIOR_PREPARATION_VERIFIED",
+      "prior_record": "research/candidates/NVIDIA_OPENSHELL_NEMOCLAW_COMMUNITY_INTAKE_2026-09-14.md",
+      "prior_review_state": "INTAKE_ONLY"
+    }
+  ],
+  "supplemental": [
+    {
+      "custody": "NOT_IN_54_SOURCE_LOCKS_OR_GITLINKS",
+      "home": "GOV",
+      "id": "grok-build",
+      "record": "research/sources/GROK_BUILD.md",
+      "review_state": "FIRST_TRACE_RECORDED",
+      "study_commit": "37949780c144e37df692e3d669051a21fec24f20",
+      "tags": [
+        "COORD",
+        "CONTEXT",
+        "PROTO",
+        "AUDIT"
+      ],
+      "remote_tree_verified": true,
+      "tracked_blob_bytes": 73042597,
+      "license_evidence": "Apache-2.0 at pinned LICENSE",
+      "primary_disposition": "BORROW_PATTERN"
+    },
+    {
+      "home": "COORD",
+      "id": "cloudways-managed-ai-agents",
+      "record": "research/candidates/CLOUDWAYS_MANAGED_AI_AGENTS.md",
+      "review_state": "HOSTED_REFERENCE_ONLY",
+      "tags": [
+        "GOV",
+        "SEC"
+      ],
+      "primary_disposition": "ARCHIVE_REFERENCE"
+    }
+  ]
+}

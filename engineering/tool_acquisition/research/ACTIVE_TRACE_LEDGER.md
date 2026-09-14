@@ -1,7 +1,7 @@
 # Active Trace Ledger
 
 Status: ACTIVE
-Updated: 2026-09-13
+Updated: 2026-09-14
 
 Repository records, not conversation history, carry research state. Research method: `../RESEARCH_PROTOCOL.md`.
 
@@ -24,7 +24,7 @@ Repository records, not conversation history, carry research state. Research met
 | T-CONTAIN-01 | Goose + Wasmtime + Extism | `50666ae0...` / `817c5878...` / `d5da2975...` | `sources/GOOSE_SECURITY.md`, `sources/WASMTIME_WASI.md`, `sources/EXTISM.md` | EXPERIMENT_NOW |
 | T-OBS-01 | AgentTrace + agent-observability + OpenTelemetry Collector | `9a10f9aa...` / `2658eef4...` / `a35b7a8d...` | `sources/AGENTTRACE.md`, `sources/AGENT_OBSERVABILITY.md`, `sources/OTEL_COLLECTOR.md` | REIMPLEMENT_IN_RUST canonical recorder; OTel downstream |
 
-## Latest completed trace — observability / flight recorder
+## Previous completed trace — observability / flight recorder
 
 Comparison: `comparison/OBSERVABILITY_MATRIX.md`
 Pattern: `patterns/CANONICAL_EVENT_TELEMETRY_PROJECTION.md`
@@ -124,4 +124,20 @@ Standing sandbox doctrine:
 
 ## Next durable update
 
-Trace E2B creation/execution/lifecycle path end-to-end; record source study + failure lessons before considering OpenZiti/agentgateway zero-trust gateway lane.
+The existing E2B owner continues its creation/execution/lifecycle trace. The separate catalog-wide screen below includes narrow OpenZiti/agentgateway evidence; their full authenticated execution/revocation paths remain unqualified.
+
+## T-MCI-SCREEN-01 — catalog-wide MCI assessment
+
+State: STATIC SCREENING COMPLETE; INTEGRATION QUALIFICATION OPEN.
+
+Progress commits: d35b106f (start), d9200cad (six scoped governance/community studies), 16b315b (remaining screens and ctx-zip reproduction). [Assessment](comparison/MCI_COMPREHENSIVE_ASSESSMENT_2026-09-14.md), [coverage](MCI_REVIEW_COVERAGE_2026-09-14.json), [governance packet](categories/GOV.md), [gaps](comparison/MCI_REVIEW_GAPS_2026-09-14.md).
+
+- All 54 locked sources have a primary disposition.
+- 20 prior first-traced sources reused at matching exact pins.
+- Six new scoped studies: Cedar, OPA, Paperclip, OpenShell, Gas Town, NemoClaw.
+- 25 new narrow code screens and three documentation screens; deeper E2B ownership/state unchanged.
+- Executed one exact-source ctx-zip reproduction with four adverse assertions. Upstream test suites and other qualification experiments remain unrun in this pass.
+- Consumer comparison uses SWARM 673b705d records; no doctrine gate, consumer change or adoption claimed.
+- Grok's supplemental remote tree/license verified; no local custody claim or 55th locked source.
+
+The completed first-trace table above is historical and is not inflated with narrow screens. Full retained-candidate qualification still requires complete relevant operation traces and negative tests per the research protocol.

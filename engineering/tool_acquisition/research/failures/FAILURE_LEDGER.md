@@ -17,7 +17,7 @@ EVIDENCE: `sources/PROGRESSIVE_MCP_GUARDIAN.md`.
 OBSERVED IN: RTK/context-compression research lane.
 CAUSE: reducing visible output can destroy evidence needed later.
 PROJECT RESPONSE: preserve richer material outside prompt and expose references/search/retrieval.
-DID IT WORK?: context-compress improves recoverability but does not preserve an immutable byte-exact raw artifact; RTK source trace remains pending.
+DID IT WORK?: context-compress improves recoverability but does not preserve an immutable byte-exact raw artifact; RTK's subsequent source trace is recorded in sources/RTK.md; qualification remains pending.
 BOUNDARY AFFECTED: deterministic execution ↔ agent-visible evidence.
 S.P.A.R.K. LESSON: small context, full evidence requires a canonical raw evidence object separate from derived compression/search state.
 TRANSFER CONFIDENCE: HIGH as requirement.
@@ -151,3 +151,19 @@ S.P.A.R.K. LESSON: editable durable state needs optimistic concurrency semantics
 TRANSFER CONFIDENCE: HIGH.
 DISPOSITION: BORROW_PATTERN.
 EVIDENCE: `sources/GROK_BUILD.md`; `patterns/DURABLE_CAPTURE_RECONCILIATION.md`.
+
+## MCI screening additions — 2026-09-14
+
+The following records extend the failure vocabulary without renumbering the historical ledger. Static observations are not reported as executed failures.
+
+| ID | Failure/limitation | Cause and upstream response | MCI lesson / disposition | Evidence strength |
+|---|---|---|---|---|
+| MCI-F01 | Earlier compacted result overwritten | ctx-zip keys storage by tool name; actual adapter overwrites, memory fixture does not model it | Immutable per-call original; BORROW_IDEA only | Four adverse assertions executed; [record](CTX_ZIP_EVIDENCE_OVERWRITE_2026-09-14.md) |
+| MCI-F02 | Allow with evaluator errors | Cedar Skip treats errored policy as unsatisfied; permit may remain | Explicit consumer diagnostics contract; BORROW_PATTERN | Source + inline test read; [study](../sources/CEDAR_MCI_REVIEW_2026-09-14.md) |
+| MCI-F03 | Approval survives same-name tool replacement | Microsoft intentionally tests replacement execution | Bind executable/version as well as name; BORROW_PATTERN | Test body read, not run; [screen](../sources/MICROSOFT_AGENT_FRAMEWORK_MCI_SCREEN_2026-09-14.md) |
+| MCI-F04 | Declared confinement absent at runtime | OpenShell BestEffort may log and continue without Landlock | Required/applied/unknown states explicit; BORROW_PATTERN | Source read; [study](../sources/OPENSHELL_MCI_REVIEW_2026-09-14.md) |
+| MCI-F05 | Atomic-save claim exceeds implementation | CLI-Anything Blender helper truncates in place and tolerates lock failures | Qualified crash-safe persistence; BORROW_PATTERN | Source read, crash not injected; [screen](../sources/CLI_ANYTHING_MCI_SCREEN_2026-09-14.md) |
+| MCI-F06 | Verification can execute layout commands | in-toto runs inspections after signature/layout checks | Independent admission for inspection execution; BORROW_PATTERN | Source call ordering read; [screen](../sources/IN_TOTO_MCI_SCREEN_2026-09-14.md) |
+| MCI-F07 | Configuration failure erases deny match | Hermes deny matcher catches configuration exceptions | Policy-read failure needs explicit host outcome; BORROW_PATTERN | Source read, config failure not injected; [screen](../sources/HERMES_AGENT_MCI_SCREEN_2026-09-14.md) |
+
+[Cross-source proposed admission pattern](../patterns/BOUND_VERSIONED_ACTION_BEFORE_DISPATCH.md) and [qualification gaps](../comparison/MCI_REVIEW_GAPS_2026-09-14.md) carry these into consumer comparisons. Confidence is pin-bound; no claim that upstream behavior violates its own documented product contract is implied merely by an MCI mismatch.

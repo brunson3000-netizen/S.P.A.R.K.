@@ -1,0 +1,39 @@
+{
+  "base_commit": "16b315b14192f6948c9169f0bd6c04e8620289bf",
+  "checked_date": "2026-09-14",
+  "concurrent_path_changes": "NONE",
+  "coverage_counts": {
+    "priorPinMatch": true,
+    "sources": 54,
+    "unique": 54,
+    "validPins": true,
+    "validRecords": true
+  },
+  "e2b_active_state_preserved": true,
+  "modified_paths": [
+    "engineering/tool_acquisition/FABLE_MCI_RESEARCH_BRIEF.md",
+    "engineering/tool_acquisition/MCI_RESEARCH_CATALOG.json",
+    "engineering/tool_acquisition/MCI_RESEARCH_MAP.md",
+    "engineering/tool_acquisition/README.md",
+    "engineering/tool_acquisition/research/ACTIVE_TRACE_LEDGER.md",
+    "engineering/tool_acquisition/research/COMPREHENSIVE_REVIEW_PROGRESS_2026-09-14.md",
+    "engineering/tool_acquisition/research/MCI_REVIEW_COVERAGE_2026-09-14.json",
+    "engineering/tool_acquisition/research/categories/AUDIT.md",
+    "engineering/tool_acquisition/research/categories/CONTEXT.md",
+    "engineering/tool_acquisition/research/categories/COORD.md",
+    "engineering/tool_acquisition/research/categories/GOV.md",
+    "engineering/tool_acquisition/research/categories/PROTO.md",
+    "engineering/tool_acquisition/research/categories/SEC.md",
+    "engineering/tool_acquisition/research/categories/TEST.md",
+    "engineering/tool_acquisition/research/categories/TOOLS.md",
+    "engineering/tool_acquisition/research/comparison/MCI_COMPREHENSIVE_ASSESSMENT_2026-09-14.md",
+    "engineering/tool_acquisition/research/comparison/MCI_REVIEW_GAPS_2026-09-14.md",
+    "engineering/tool_acquisition/research/failures/FAILURE_LEDGER.md",
+    "engineering/tool_acquisition/research/patterns/BOUND_VERSIONED_ACTION_BEFORE_DISPATCH.md"
+  ],
+  "qualification_claim": "OPEN",
+  "relative_links": "PASS",
+  "gitlink_pin_match": "PASS: all 54",
+  "e2b_active_block_comparison": "BYTE_IDENTICAL",
+  "source_records_scope": "New scoped studies and narrow/documentation screens; prior source studies reused at matching pins"
+}
