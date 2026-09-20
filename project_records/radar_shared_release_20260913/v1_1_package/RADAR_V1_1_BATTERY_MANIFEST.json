@@ -1,0 +1,214 @@
+{
+  "assignments": [
+    {
+      "availability_observed": "status=0; uptime_1d=99.9588",
+      "completion_price": 1.875e-06,
+      "harness_eligibility": "catalog-route supports tools and structured_outputs; runtime identity/readiness still must be revalidated",
+      "lane": "A",
+      "model_id": "google/gemini-3.8-flash",
+      "prompt_price": 3.75e-07,
+      "provider": "Google AI Studio",
+      "route": "google-ai-studio/flex",
+      "slot": "01"
+    },
+    {
+      "availability_observed": "status=0; uptime_1d=99.9463",
+      "completion_price": 2e-06,
+      "harness_eligibility": "catalog-route supports tools and structured_outputs; runtime identity/readiness still must be revalidated",
+      "lane": "A",
+      "model_id": "mistralai/devstral-2512",
+      "prompt_price": 4e-07,
+      "provider": "Mistral",
+      "route": "mistral/eu",
+      "slot": "02"
+    },
+    {
+      "availability_observed": "status=0; uptime_1d=99.9583",
+      "completion_price": 1.056e-07,
+      "harness_eligibility": "catalog-route supports tools and structured_outputs; runtime identity/readiness still must be revalidated",
+      "lane": "A",
+      "model_id": "deepseek/deepseek-v4-flash-0731",
+      "prompt_price": 3.52e-08,
+      "provider": "Baidu",
+      "route": "baidu/fp8",
+      "slot": "03"
+    },
+    {
+      "availability_observed": "status=0; uptime_1d=98.9019",
+      "completion_price": 0,
+      "harness_eligibility": "catalog-route supports tools and structured_outputs; runtime identity/readiness still must be revalidated",
+      "lane": "A",
+      "model_id": "nex-agi/nex-n2.5-pro:free",
+      "prompt_price": 0,
+      "provider": "Nex AGI",
+      "route": "nex-agi/fp8",
+      "slot": "04"
+    },
+    {
+      "availability_observed": "status=0; uptime_1d=99.9337",
+      "completion_price": 0,
+      "harness_eligibility": "catalog-route supports tools and structured_outputs; runtime identity/readiness still must be revalidated",
+      "lane": "A",
+      "model_id": "nex-agi/nex-n2.5-mini:free",
+      "prompt_price": 0,
+      "provider": "Nex AGI",
+      "route": "nex-agi/bf16",
+      "slot": "05"
+    },
+    {
+      "availability_observed": "status=0; uptime_1d=99.7655",
+      "completion_price": 2.25e-06,
+      "harness_eligibility": "catalog-route supports tools and structured_outputs; runtime identity/readiness still must be revalidated",
+      "lane": "B",
+      "model_id": "moonshotai/kimi-k2.5",
+      "prompt_price": 4.5e-07,
+      "provider": "SiliconFlow",
+      "route": "siliconflow/int4",
+      "slot": "06"
+    },
+    {
+      "availability_observed": "status=0; uptime_1d=99.9061",
+      "completion_price": 1.5e-06,
+      "harness_eligibility": "catalog-route supports tools and structured_outputs; runtime identity/readiness still must be revalidated",
+      "lane": "B",
+      "model_id": "mistralai/mistral-large-2512",
+      "prompt_price": 5e-07,
+      "provider": "Mistral",
+      "route": "mistral/zdr",
+      "slot": "07"
+    },
+    {
+      "availability_observed": "status=0; uptime_1d=99.6530",
+      "completion_price": 2e-06,
+      "harness_eligibility": "catalog-route supports tools and structured_outputs; runtime identity/readiness still must be revalidated",
+      "lane": "B",
+      "model_id": "qwen/qwen3.8-27b",
+      "prompt_price": 1.5e-07,
+      "provider": "Darkbloom",
+      "route": "darkbloom/fp4",
+      "slot": "08"
+    },
+    {
+      "availability_observed": "status=0; uptime_1d=98.9270",
+      "completion_price": 2.5e-07,
+      "harness_eligibility": "catalog-route supports tools and structured_outputs; runtime identity/readiness still must be revalidated",
+      "lane": "B",
+      "model_id": "z-ai/glm-5.3-flash",
+      "prompt_price": 7.5e-08,
+      "provider": "DeepInfra",
+      "route": "deepinfra/fp4",
+      "slot": "09"
+    },
+    {
+      "availability_observed": "status=0; uptime_1d=99.6813",
+      "completion_price": 4.7e-07,
+      "harness_eligibility": "catalog-route supports tools and structured_outputs; runtime identity/readiness still must be revalidated",
+      "lane": "B",
+      "model_id": "qwen/qwen3.8-flash",
+      "prompt_price": 1.5e-07,
+      "provider": "Makora",
+      "route": "makora/fp4",
+      "slot": "10"
+    },
+    {
+      "availability_observed": "status=0; uptime_1d=99.9244",
+      "completion_price": 1.73448e-06,
+      "harness_eligibility": "catalog-route supports tools and structured_outputs; runtime identity/readiness still must be revalidated",
+      "lane": "C",
+      "model_id": "deepseek/deepseek-v4-pro-0813",
+      "prompt_price": 5.7816e-07,
+      "provider": "Baidu",
+      "route": "baidu/fp8",
+      "slot": "11"
+    },
+    {
+      "availability_observed": "catalog model observed; exact route status must be revalidated at dispatch",
+      "completion_price": 1.2e-06,
+      "harness_eligibility": "catalog model supports tools and structured_outputs; runtime identity/readiness still must be revalidated",
+      "lane": "C",
+      "model_id": "openai/gpt-5.6-luna-pro",
+      "prompt_price": 2e-07,
+      "provider": "OpenAI",
+      "route": "openai/flex",
+      "slot": "12"
+    },
+    {
+      "availability_observed": "status=0; uptime_1d=97.8470",
+      "completion_price": 1.25e-06,
+      "harness_eligibility": "catalog-route supports tools and structured_outputs; runtime identity/readiness still must be revalidated",
+      "lane": "C",
+      "model_id": "google/gemini-3.5-flash-lite",
+      "prompt_price": 1.5e-07,
+      "provider": "Google",
+      "route": "google-vertex/global/flex",
+      "slot": "13"
+    },
+    {
+      "availability_observed": "preflight evidence: route supports tools but not structured_outputs",
+      "completion_price": 6e-07,
+      "harness_eligibility": "EXECUTABLE; STRUCTURED_OUTPUT cases are recorded UNSUPPORTED",
+      "lane": "C",
+      "model_id": "deepseek/deepseek-v4.1-flash",
+      "prompt_price": 1.5e-07,
+      "provider": "DeepSeek",
+      "route": "deepseek",
+      "slot": "14",
+      "unsupported_dimensions": [
+        "STRUCTURED_OUTPUT"
+      ]
+    },
+    {
+      "availability_observed": "status=0; uptime_1d=96.7852; preflight route lacks tools",
+      "completion_price": 1.8e-07,
+      "harness_eligibility": "EXECUTABLE; TOOL_USE cases are recorded UNSUPPORTED",
+      "lane": "C",
+      "model_id": "nvidia/nemotron-3.5-lightning",
+      "prompt_price": 6.5e-08,
+      "provider": "Darkbloom",
+      "route": "darkbloom/int4",
+      "slot": "15",
+      "unsupported_dimensions": [
+        "TOOL_USE"
+      ]
+    }
+  ],
+  "battery_version": "RADAR-V1.1.0",
+  "cheap_fixture_slots": [
+    0,
+    1
+  ],
+  "dimensions": [
+    "CODE_REPAIR",
+    "CODE_REVIEW",
+    "STRUCTURED_OUTPUT",
+    "TOOL_USE",
+    "INSTRUCTION_ADHERENCE",
+    "REASONING_PLANNING",
+    "EXTRACTION_TRANSFORMATION",
+    "LONG_CONTEXT_RETRIEVAL"
+  ],
+  "execution_contract": {
+    "cases": 40,
+    "dimensions": 8,
+    "fallbacks": false,
+    "lane_executions": 600,
+    "logical_executions_per_model": 120,
+    "max_completion_tokens_billed_per_execution_including_tool_calls": 1024,
+    "max_prompt_tokens_billed_per_execution_including_tool_loop": 3500,
+    "max_retries": 1,
+    "max_tool_turns": 3,
+    "reasoning_budget": "provider default; hidden chain-of-thought never requested or logged",
+    "repetitions_per_case": 3,
+    "retry_preservation": "append-only; first attempt retained; retry is a new attempt identity",
+    "timeout_seconds": 120,
+    "transport_or_truncation_status": "UNKNOWN, never capability zero",
+    "wire_timeout_seconds": 60
+  },
+  "fixture_count": 40,
+  "fixture_pack_sha256": "15abc2f4ffc2f876cb77213c2191e6cf1ccbdfd59e338c977536bd37c32e54cc",
+  "manifest_payload_sha256": "ef93e686ffe71f6b07fa1c7dbb310023c9ddd0da644530f1c6b645e903a812d9",
+  "oracle_exposure": "PRIVATE_SCORER_ONLY",
+  "scorer_contract_sha256": "bcb46213e774af7f8417941f23f8d4956971db5ae7512883719dfec2265c5483",
+  "scorer_version": "RADAR-V1.1-MECHANICAL-1",
+  "subject_pack_sha256": "cff246ab5a20e18f2d8b2d1f612ee41f6ef9ce687f60acb011c0acb5717ca9ad"
+}

@@ -1,0 +1,557 @@
+{
+  "battery_version": "RADAR-V1.1.0",
+  "fixtures": [
+    {
+      "dimension": "CODE_REPAIR",
+      "fixture_id": "code_repair-01-v11",
+      "oracle": {
+        "patch_id": "repair-clamp-bounds"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 0,
+      "subject_prompt": "Repair this function for the stated invariant.\nNAME=rhea\nCODE:\ndef clamp(x):\n    return max(0, min(x, 10))\nINVARIANT: clamp(-2) == 0 and clamp(14) == 10\nReturn only JSON {patch_id}. Use a stable descriptive identifier for the minimal behavioral fix."
+    },
+    {
+      "dimension": "CODE_REPAIR",
+      "fixture_id": "code_repair-02-v11",
+      "oracle": {
+        "patch_id": "repair-stable-unique"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 1,
+      "subject_prompt": "Repair this function for the stated invariant.\nNAME=sable\nCODE:\ndef first_unique(xs):\n    return list(set(xs))[0]\nINVARIANT: preserve input order and return every first occurrence\nReturn only JSON {patch_id}. Use a stable descriptive identifier for the minimal behavioral fix."
+    },
+    {
+      "dimension": "CODE_REPAIR",
+      "fixture_id": "code_repair-03-v11",
+      "oracle": {
+        "patch_id": "repair-port-validation"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 2,
+      "subject_prompt": "Repair this function for the stated invariant.\nNAME=tamar\nCODE:\ndef parse_port(text):\n    return int(text.split(':')[-1])\nINVARIANT: reject ports outside 1..65535 and malformed suffixes\nReturn only JSON {patch_id}. Use a stable descriptive identifier for the minimal behavioral fix."
+    },
+    {
+      "dimension": "CODE_REPAIR",
+      "fixture_id": "code_repair-04-v11",
+      "oracle": {
+        "patch_id": "repair-left-biased-merge"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 3,
+      "subject_prompt": "Repair this function for the stated invariant.\nNAME=umber\nCODE:\ndef merge(a,b):\n    return {**a, **b}\nINVARIANT: the left value wins on conflicting keys\nReturn only JSON {patch_id}. Use a stable descriptive identifier for the minimal behavioral fix."
+    },
+    {
+      "dimension": "CODE_REPAIR",
+      "fixture_id": "code_repair-05-v11",
+      "oracle": {
+        "patch_id": "repair-retry-set"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 4,
+      "subject_prompt": "Repair this function for the stated invariant.\nNAME=vesper\nCODE:\ndef retryable(code):\n    return code >= 400\nINVARIANT: only 408, 429, and 503 are retryable\nReturn only JSON {patch_id}. Use a stable descriptive identifier for the minimal behavioral fix."
+    },
+    {
+      "dimension": "CODE_REVIEW",
+      "fixture_id": "code_review-01-v11",
+      "oracle": {
+        "defects": [
+          "R1-missing-invalidation"
+        ]
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 0,
+      "subject_prompt": "Review this diff and identify only real defects.\nFILE cache.py\n- if key in cache: return cache[key]\n+ cache[key] = value\nClean distractor: add type annotation to helper().\nReturn only JSON {defects: [defect_id]}."
+    },
+    {
+      "dimension": "CODE_REVIEW",
+      "fixture_id": "code_review-02-v11",
+      "oracle": {
+        "defects": [
+          "R2-token-presence-escalates"
+        ]
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 1,
+      "subject_prompt": "Review this diff and identify only real defects.\nFILE auth.py\n- if token: grant_admin()\n+ audit.log(user, token)\nClean distractor: add type annotation to helper().\nReturn only JSON {defects: [defect_id]}."
+    },
+    {
+      "dimension": "CODE_REVIEW",
+      "fixture_id": "code_review-03-v11",
+      "oracle": {
+        "defects": [
+          "R3-mutates-shared-order"
+        ]
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 2,
+      "subject_prompt": "Review this diff and identify only real defects.\nFILE queue.py\n- items.sort()\n+ return items.pop(0)\nClean distractor: add type annotation to helper().\nReturn only JSON {defects: [defect_id]}."
+    },
+    {
+      "dimension": "CODE_REVIEW",
+      "fixture_id": "code_review-04-v11",
+      "oracle": {
+        "defects": [
+          "R4-invalid-input-collapses"
+        ]
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 3,
+      "subject_prompt": "Review this diff and identify only real defects.\nFILE parser.py\n- value = int(raw)\n+ except ValueError: value = 0\nClean distractor: add type annotation to helper().\nReturn only JSON {defects: [defect_id]}."
+    },
+    {
+      "dimension": "CODE_REVIEW",
+      "fixture_id": "code_review-05-v11",
+      "oracle": {
+        "defects": [
+          "R5-nonatomic-overwrite"
+        ]
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 4,
+      "subject_prompt": "Review this diff and identify only real defects.\nFILE writer.py\n- open(path, 'w')\n+ write(payload)\nClean distractor: add type annotation to helper().\nReturn only JSON {defects: [defect_id]}."
+    },
+    {
+      "dimension": "STRUCTURED_OUTPUT",
+      "fixture_id": "structured_output-01-v11",
+      "oracle": {
+        "severity": "high",
+        "ticket": "T-ALPHA"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 0,
+      "subject_prompt": "Transform the source record (ticket=\"T-ALPHA\"; severity=\"high\") into one JSON object satisfying this schema exactly: {\"properties\": {\"severity\": {\"enum\": [\"low\", \"high\"]}, \"ticket\": {\"type\": \"string\"}}, \"required\": [\"ticket\", \"severity\"], \"type\": \"object\"}. Do not add keys."
+    },
+    {
+      "dimension": "STRUCTURED_OUTPUT",
+      "fixture_id": "structured_output-02-v11",
+      "oracle": {
+        "enabled": false,
+        "owner": "team-cobalt"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 1,
+      "subject_prompt": "Transform the source record (owner=\"team-cobalt\"; enabled=false) into one JSON object satisfying this schema exactly: {\"properties\": {\"enabled\": {\"type\": \"boolean\"}, \"owner\": {\"type\": \"string\"}}, \"required\": [\"owner\", \"enabled\"], \"type\": \"object\"}. Do not add keys."
+    },
+    {
+      "dimension": "STRUCTURED_OUTPUT",
+      "fixture_id": "structured_output-03-v11",
+      "oracle": {
+        "region": "eu-west",
+        "replicas": 3
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 2,
+      "subject_prompt": "Transform the source record (region=\"eu-west\"; replicas=3) into one JSON object satisfying this schema exactly: {\"properties\": {\"region\": {\"type\": \"string\"}, \"replicas\": {\"type\": \"integer\"}}, \"required\": [\"region\", \"replicas\"], \"type\": \"object\"}. Do not add keys."
+    },
+    {
+      "dimension": "STRUCTURED_OUTPUT",
+      "fixture_id": "structured_output-04-v11",
+      "oracle": {
+        "mode": "safe",
+        "threshold": 0.75
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 3,
+      "subject_prompt": "Transform the source record (mode=\"safe\"; threshold=0.75) into one JSON object satisfying this schema exactly: {\"properties\": {\"mode\": {\"enum\": [\"safe\", \"fast\"]}, \"threshold\": {\"type\": \"number\"}}, \"required\": [\"mode\", \"threshold\"], \"type\": \"object\"}. Do not add keys."
+    },
+    {
+      "dimension": "STRUCTURED_OUTPUT",
+      "fixture_id": "structured_output-05-v11",
+      "oracle": {
+        "labels": [
+          "mci",
+          "radar"
+        ],
+        "name": "spark-worker"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 4,
+      "subject_prompt": "Transform the source record (name=\"spark-worker\"; labels=[\"mci\", \"radar\"]) into one JSON object satisfying this schema exactly: {\"properties\": {\"labels\": {\"type\": \"array\"}, \"name\": {\"type\": \"string\"}}, \"required\": [\"name\", \"labels\"], \"type\": \"object\"}. Do not add keys."
+    },
+    {
+      "dimension": "TOOL_USE",
+      "fixture_id": "tool_use-01-v11",
+      "oracle": {
+        "calls": [
+          {
+            "args": {
+              "key": "amber-17"
+            },
+            "tool": "lookup"
+          },
+          {
+            "args": {
+              "style": "short"
+            },
+            "tool": "summarize"
+          }
+        ]
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 0,
+      "subject_prompt": "Use only these fake sandbox tools. Definitions: [{\"args\": {\"key\": \"amber-17\"}, \"name\": \"lookup\"}, {\"args\": {\"style\": \"short\"}, \"name\": \"summarize\"}]. Inspect the request context and produce the minimal ordered calls needed to complete it. Return only JSON {calls}."
+    },
+    {
+      "dimension": "TOOL_USE",
+      "fixture_id": "tool_use-02-v11",
+      "oracle": {
+        "calls": [
+          {
+            "args": {
+              "path": "/sandbox/input.csv"
+            },
+            "tool": "read"
+          },
+          {
+            "args": {
+              "field": "id"
+            },
+            "tool": "count"
+          }
+        ]
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 1,
+      "subject_prompt": "Use only these fake sandbox tools. Definitions: [{\"args\": {\"path\": \"/sandbox/input.csv\"}, \"name\": \"read\"}, {\"args\": {\"field\": \"id\"}, \"name\": \"count\"}]. Inspect the request context and produce the minimal ordered calls needed to complete it. Return only JSON {calls}."
+    },
+    {
+      "dimension": "TOOL_USE",
+      "fixture_id": "tool_use-03-v11",
+      "oracle": {
+        "calls": [
+          {
+            "args": {
+              "id": "job-204"
+            },
+            "tool": "get"
+          },
+          {
+            "args": {
+              "id": "job-204"
+            },
+            "tool": "approve"
+          }
+        ]
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 2,
+      "subject_prompt": "Use only these fake sandbox tools. Definitions: [{\"args\": {\"id\": \"job-204\"}, \"name\": \"get\"}, {\"args\": {\"id\": \"job-204\"}, \"name\": \"approve\"}]. Inspect the request context and produce the minimal ordered calls needed to complete it. Return only JSON {calls}."
+    },
+    {
+      "dimension": "TOOL_USE",
+      "fixture_id": "tool_use-04-v11",
+      "oracle": {
+        "calls": [
+          {
+            "args": {
+              "prefix": "mci/"
+            },
+            "tool": "list"
+          },
+          {
+            "args": {
+              "by": "name"
+            },
+            "tool": "sort"
+          }
+        ]
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 3,
+      "subject_prompt": "Use only these fake sandbox tools. Definitions: [{\"args\": {\"prefix\": \"mci/\"}, \"name\": \"list\"}, {\"args\": {\"by\": \"name\"}, \"name\": \"sort\"}]. Inspect the request context and produce the minimal ordered calls needed to complete it. Return only JSON {calls}."
+    },
+    {
+      "dimension": "TOOL_USE",
+      "fixture_id": "tool_use-05-v11",
+      "oracle": {
+        "calls": [
+          {
+            "args": {
+              "url": "https://sandbox.invalid/a"
+            },
+            "tool": "fetch"
+          },
+          {
+            "args": {
+              "algorithm": "sha256"
+            },
+            "tool": "hash"
+          }
+        ]
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 4,
+      "subject_prompt": "Use only these fake sandbox tools. Definitions: [{\"args\": {\"url\": \"https://sandbox.invalid/a\"}, \"name\": \"fetch\"}, {\"args\": {\"algorithm\": \"sha256\"}, \"name\": \"hash\"}]. Inspect the request context and produce the minimal ordered calls needed to complete it. Return only JSON {calls}."
+    },
+    {
+      "dimension": "INSTRUCTION_ADHERENCE",
+      "fixture_id": "instruction_adherence-01-v11",
+      "oracle": {
+        "count": 1,
+        "items": [
+          {
+            "id": "a7",
+            "value": 4
+          }
+        ],
+        "mode": "strict"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 0,
+      "subject_prompt": "Apply every rule: ['keep order', 'allow keys: id,value', 'forbid: debug']. Return only JSON with items and the exact metadata fields count/mode."
+    },
+    {
+      "dimension": "INSTRUCTION_ADHERENCE",
+      "fixture_id": "instruction_adherence-02-v11",
+      "oracle": {
+        "count": 2,
+        "items": [
+          {
+            "name": "north"
+          },
+          {
+            "name": "south"
+          }
+        ],
+        "mode": "strict"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 1,
+      "subject_prompt": "Apply every rule: ['reverse order', 'allow keys: name', 'forbid: null']. Return only JSON with items and the exact metadata fields count/mode."
+    },
+    {
+      "dimension": "INSTRUCTION_ADHERENCE",
+      "fixture_id": "instruction_adherence-03-v11",
+      "oracle": {
+        "count": 2,
+        "items": [
+          {
+            "code": "A1"
+          },
+          {
+            "code": "B2"
+          }
+        ],
+        "mode": "strict"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 2,
+      "subject_prompt": "Apply every rule: ['sort ascending', 'allow keys: code', 'forbid: explanation']. Return only JSON with items and the exact metadata fields count/mode."
+    },
+    {
+      "dimension": "INSTRUCTION_ADHERENCE",
+      "fixture_id": "instruction_adherence-04-v11",
+      "oracle": {
+        "count": 2,
+        "items": [
+          {
+            "tag": "core"
+          },
+          {
+            "tag": "edge"
+          }
+        ],
+        "mode": "strict"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 3,
+      "subject_prompt": "Apply every rule: ['deduplicate', 'allow keys: tag', 'forbid: metadata']. Return only JSON with items and the exact metadata fields count/mode."
+    },
+    {
+      "dimension": "INSTRUCTION_ADHERENCE",
+      "fixture_id": "instruction_adherence-05-v11",
+      "oracle": {
+        "count": 1,
+        "items": [
+          {
+            "state": "ready"
+          }
+        ],
+        "mode": "strict"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 4,
+      "subject_prompt": "Apply every rule: ['emit one item', 'allow keys: state', 'forbid: extra']. Return only JSON with items and the exact metadata fields count/mode."
+    },
+    {
+      "dimension": "REASONING_PLANNING",
+      "fixture_id": "reasoning_planning-01-v11",
+      "oracle": {
+        "schedule": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ]
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 0,
+      "subject_prompt": "Find a valid schedule satisfying all precedence constraints ['A before C', 'B before D']. Return only JSON {schedule}."
+    },
+    {
+      "dimension": "REASONING_PLANNING",
+      "fixture_id": "reasoning_planning-02-v11",
+      "oracle": {
+        "schedule": [
+          "inspect",
+          "patch",
+          "test"
+        ]
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 1,
+      "subject_prompt": "Find a valid schedule satisfying all precedence constraints ['inspect before patch', 'patch before test']. Return only JSON {schedule}."
+    },
+    {
+      "dimension": "REASONING_PLANNING",
+      "fixture_id": "reasoning_planning-03-v11",
+      "oracle": {
+        "schedule": [
+          "load",
+          "parse",
+          "emit"
+        ]
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 2,
+      "subject_prompt": "Find a valid schedule satisfying all precedence constraints ['load before parse', 'parse before emit']. Return only JSON {schedule}."
+    },
+    {
+      "dimension": "REASONING_PLANNING",
+      "fixture_id": "reasoning_planning-04-v11",
+      "oracle": {
+        "schedule": [
+          "backup",
+          "migrate",
+          "verify"
+        ]
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 3,
+      "subject_prompt": "Find a valid schedule satisfying all precedence constraints ['backup before migrate', 'migrate before verify']. Return only JSON {schedule}."
+    },
+    {
+      "dimension": "REASONING_PLANNING",
+      "fixture_id": "reasoning_planning-05-v11",
+      "oracle": {
+        "schedule": [
+          "design",
+          "build",
+          "deploy"
+        ]
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 4,
+      "subject_prompt": "Find a valid schedule satisfying all precedence constraints ['design before build', 'build before deploy']. Return only JSON {schedule}."
+    },
+    {
+      "dimension": "EXTRACTION_TRANSFORMATION",
+      "fixture_id": "extraction_transformation-01-v11",
+      "oracle": {
+        "active": false,
+        "name": "quartz",
+        "version": "4.2"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 0,
+      "subject_prompt": "Extract the current fields from this record and ignore explicitly stale fields: name=quartz; version=4.2; active=no; stale_version=1.0. Return only the target JSON shape."
+    },
+    {
+      "dimension": "EXTRACTION_TRANSFORMATION",
+      "fixture_id": "extraction_transformation-02-v11",
+      "oracle": {
+        "owner": "blue",
+        "revision": 17
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 1,
+      "subject_prompt": "Extract the current fields from this record and ignore explicitly stale fields: owner=blue; revision=17; owner_old=red. Return only the target JSON shape."
+    },
+    {
+      "dimension": "EXTRACTION_TRANSFORMATION",
+      "fixture_id": "extraction_transformation-03-v11",
+      "oracle": {
+        "service": "relay",
+        "tier": "gold"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 2,
+      "subject_prompt": "Extract the current fields from this record and ignore explicitly stale fields: service=relay; tier=gold; tier_old=silver. Return only the target JSON shape."
+    },
+    {
+      "dimension": "EXTRACTION_TRANSFORMATION",
+      "fixture_id": "extraction_transformation-04-v11",
+      "oracle": {
+        "enabled": true,
+        "id": "K9"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 3,
+      "subject_prompt": "Extract the current fields from this record and ignore explicitly stale fields: id=K9; enabled=true; enabled_old=false. Return only the target JSON shape."
+    },
+    {
+      "dimension": "EXTRACTION_TRANSFORMATION",
+      "fixture_id": "extraction_transformation-05-v11",
+      "oracle": {
+        "project": "atlas",
+        "region": "us-central"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 4,
+      "subject_prompt": "Extract the current fields from this record and ignore explicitly stale fields: project=atlas; region=us-central; region_old=eu. Return only the target JSON shape."
+    },
+    {
+      "dimension": "LONG_CONTEXT_RETRIEVAL",
+      "fixture_id": "long_context_retrieval-01-v11",
+      "oracle": {
+        "current_owner": "team-iris",
+        "current_revision": 8
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 0,
+      "subject_prompt": "Retrieve only the current fact from this context; superseded values are distractors: owner=team-iris revision=8; superseded owner=team-ash revision=7. Return only JSON."
+    },
+    {
+      "dimension": "LONG_CONTEXT_RETRIEVAL",
+      "fixture_id": "long_context_retrieval-02-v11",
+      "oracle": {
+        "current_date": "2026-09-10",
+        "current_status": "green"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 1,
+      "subject_prompt": "Retrieve only the current fact from this context; superseded values are distractors: status=green at 2026-09-10; superseded status=yellow at 2026-09-01. Return only JSON."
+    },
+    {
+      "dimension": "LONG_CONTEXT_RETRIEVAL",
+      "fixture_id": "long_context_retrieval-03-v11",
+      "oracle": {
+        "current_quota": 120
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 2,
+      "subject_prompt": "Retrieve only the current fact from this context; superseded values are distractors: quota=120; old_quota=80. Return only JSON."
+    },
+    {
+      "dimension": "LONG_CONTEXT_RETRIEVAL",
+      "fixture_id": "long_context_retrieval-04-v11",
+      "oracle": {
+        "current_schema": "v3"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 3,
+      "subject_prompt": "Retrieve only the current fact from this context; superseded values are distractors: schema=v3; prior_schema=v2. Return only JSON."
+    },
+    {
+      "dimension": "LONG_CONTEXT_RETRIEVAL",
+      "fixture_id": "long_context_retrieval-05-v11",
+      "oracle": {
+        "current_region": "ap-south"
+      },
+      "scorer_kind": "MECHANICAL",
+      "slot": 4,
+      "subject_prompt": "Retrieve only the current fact from this context; superseded values are distractors: region=ap-south; prior_region=eu-north. Return only JSON."
+    }
+  ]
+}

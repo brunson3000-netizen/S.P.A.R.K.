@@ -1,0 +1,30 @@
+{
+  "actual": {
+    "A": 0.0,
+    "ASSESSMENT": 0.0,
+    "B": 0.0,
+    "C": 0.0
+  },
+  "allocations": {
+    "A": 4.0,
+    "ASSESSMENT": 3.0,
+    "B": 4.0,
+    "C": 4.0
+  },
+  "events": [
+    {
+      "at": 1789324151.9802787,
+      "attempt": 1,
+      "bound_usd": 0.7758,
+      "key": "A|google/gemini-3.8-flash|google-ai-studio/flex|code_repair-01-v11|1",
+      "kind": "reserve",
+      "lane": "A"
+    }
+  ],
+  "reserved": {
+    "A": 0.7758,
+    "ASSESSMENT": 0.0,
+    "B": 0.0,
+    "C": 0.0
+  }
+}

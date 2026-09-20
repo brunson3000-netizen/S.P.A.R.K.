@@ -1,0 +1,14 @@
+{
+  "normalized_range": [
+    0,
+    5
+  ],
+  "raw_range": [
+    0,
+    1
+  ],
+  "scorer_version": "RADAR-V1.1-MECHANICAL-1",
+  "tool_turns": 3,
+  "transport_failures": "UNKNOWN",
+  "unknown_is_not_zero": true
+}
